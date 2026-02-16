@@ -1,78 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Notre Playlist 💘</title>
 <style>
-  /* Reset et style global */
   body {
     margin: 0;
     font-family: 'Arial', sans-serif;
-    background: #121212;
-    color: white;
+    background-color: #121212;
+    color: #fff;
   }
 
   header {
-    background: #1db954;
-    padding: 20px;
+    background-color: #1DB954;
     text-align: center;
+    padding: 20px;
     font-size: 24px;
     font-weight: bold;
     letter-spacing: 1px;
   }
 
-  h2 {
-    margin: 20px 15px 10px;
-    font-size: 20px;
+  .category {
+    margin: 20px 15px;
+  }
+
+  .category h2 {
     color: #b3b3b3;
+    font-size: 18px;
     text-transform: uppercase;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 5px;
   }
 
-  .playlist {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 0 10px 20px;
-  }
-
-  .card {
-    background: #181818;
-    margin: 10px;
-    width: 160px;
+  .song {
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    background-color: #181818;
     border-radius: 8px;
     cursor: pointer;
-    overflow: hidden;
-    transition: transform 0.2s;
-    text-align: center;
+    transition: background 0.2s;
   }
 
-  .card:hover {
-    transform: scale(1.05);
+  .song:hover {
+    background-color: #1DB954;
+    color: #121212;
   }
 
-  .card img {
-    width: 100%;
-    height: 160px;
-    object-fit: cover;
-  }
-
-  .card .title {
-    font-size: 16px;
-    margin: 8px 5px 4px;
+  .song .title {
     font-weight: bold;
+    font-size: 16px;
   }
 
-  .card .artist {
+  .song .artist {
     font-size: 14px;
-    margin-bottom: 8px;
     color: #b3b3b3;
-  }
-
-  @media (max-width: 500px) {
-    .card {
-      width: 45%;
-    }
   }
 </style>
 </head>
@@ -80,36 +63,39 @@
 
 <header>Notre Playlist 💘</header>
 
-<h2>Love</h2>
-<div class="playlist" id="Love"></div>
+<div class="category">
+  <h2>Love</h2>
+  <div id="Love"></div>
+</div>
 
-<h2>Chill</h2>
-<div class="playlist" id="Chill"></div>
+<div class="category">
+  <h2>Chill</h2>
+  <div id="Chill"></div>
+</div>
 
 <script>
-  const songs = [
-    {id:1, title:"Perfect", artist:"Ed Sheeran", category:"Love", youtube:"https://www.youtube.com/watch?v=2Vv-BfVoq4g", img:"https://i.imgur.com/3C9bYMa.jpg"},
-    {id:2, title:"Until I Found You", artist:"Stephen Sanchez", category:"Love", youtube:"https://www.youtube.com/watch?v=GxldQ9eX2wo", img:"https://i.imgur.com/V2kXy3v.jpg"},
-    {id:3, title:"Blinding Lights", artist:"The Weeknd", category:"Chill", youtube:"https://www.youtube.com/watch?v=4NRXx6U8ABQ", img:"https://i.imgur.com/WtXJn8O.jpg"},
-    {id:4, title:"Lose Yourself", artist:"Eminem", category:"Chill", youtube:"https://www.youtube.com/watch?v=_Yhyp-_hX2s", img:"https://i.imgur.com/7KjErU0.jpg"}
-  ];
+const songs = [
+  {title:"Perfect", artist:"Ed Sheeran", category:"Love", youtube:"https://www.youtube.com/watch?v=2Vv-BfVoq4g"},
+  {title:"Until I Found You", artist:"Stephen Sanchez", category:"Love", youtube:"https://www.youtube.com/watch?v=GxldQ9eX2wo"},
+  {title:"Blinding Lights", artist:"The Weeknd", category:"Chill", youtube:"https://www.youtube.com/watch?v=4NRXx6U8ABQ"},
+  {title:"Lose Yourself", artist:"Eminem", category:"Chill", youtube:"https://www.youtube.com/watch?v=_Yhyp-_hX2s"}
+];
 
-  function renderPlaylist() {
-    songs.forEach(song => {
-      const container = document.getElementById(song.category);
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `
-        <img src="${song.img}" alt="${song.title}">
-        <div class="title">${song.title}</div>
-        <div class="artist">${song.artist}</div>
-      `;
-      card.onclick = () => window.open(song.youtube, "_blank");
-      container.appendChild(card);
-    });
-  }
+function renderPlaylist() {
+  songs.forEach(song => {
+    const container = document.getElementById(song.category);
+    const div = document.createElement('div');
+    div.className = 'song';
+    div.innerHTML = `
+      <div class="title">${song.title}</div>
+      <div class="artist">${song.artist}</div>
+    `;
+    div.onclick = () => window.open(song.youtube, "_blank");
+    container.appendChild(div);
+  });
+}
 
-  renderPlaylist();
+renderPlaylist();
 </script>
 
 </body>
