@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notre Playlist 💘</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+      padding: 15px;
+      margin: 0;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      margin-top: 25px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 5px;
+    }
+
+    .card {
+      background: #1e1e1e;
+      padding: 15px;
+      margin-bottom: 12px;
+      border-radius: 12px;
+    }
+
+    .card strong {
+      cursor: pointer;
+    }
+
+    button {
+      margin-top: 8px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background-color: #ff3366;
+      color: white;
+      font-weight: bold;
+      transition: transform 0.1s;
+    }
+
+    button:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+
+<h1>Notre Playlist 💘</h1>
+<div id="categories"></div>
+
+<script>
+  const songs = [
+    {id:1, title:"Perfect", artist:"Ed Sheeran", category:"Love", youtube:"https://www.youtube.com/watch?v=2Vv-BfVoq4g", likes:0, plays:0},
+    {id:2, title:"Until I Found You", artist:"Stephen Sanchez", category:"Love", youtube:"https://www.youtube.com/watch?v=GxldQ9eX2wo", likes:0, plays:0},
+    {id:3, title:"Blinding Lights", artist:"The Weeknd", category:"Chill", youtube:"https://www.youtube.com/watch?v=4NRXx6U8ABQ", likes:0, plays:0}
+  ];
+
+  function renderSongs() {
+    const container = document.getElementById("categories");
+    container.innerHTML = "";
+
+    const categories = {};
+
+    songs.forEach(song => {
+      if (!categories[song.category]) categories[song.category] = [];
+      categories[song.category].push(song);
+    });
+
+    for (let category in categories) {
+      container.innerHTML += `<h2>${category}</h2>`;
+      categories[category].forEach(song => {
+        container.innerHTML += `
+          <div class="card">
+            <strong onclick="playSong(${song.id})">${song.title} - ${song.artist}</strong>
+            <p>❤️ <span id="like-${song.id}">${song.likes}</span> | ▶ <span id="play-${song.id}">${song.plays}</span></p>
+            <button onclick="likeSong(${song.id})">Like</button>
+          </div>
+        `;
+      });
+    }
+  }
+
+  function likeSong(id) {
+    const song = songs.find(s => s.id === id);
+    song.likes++;
+    document.getElementById(`like-${id}`).textContent = song.likes;
+  }
+
+  function playSong(id) {
+    const song = songs.find(s => s.id === id);
+    song.plays++;
+    document.getElementById(`play-${id}`).textContent = song.plays;
+    window.open(song.youtube, "_blank");
+  }
+
+  renderSongs();
+</script>
+</body>
+</html>
