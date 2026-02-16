@@ -39,11 +39,10 @@
     margin-bottom: 8px;
     background-color: #181818;
     border-radius: 8px;
-    cursor: default;
-    transition: background 0.2s;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    transition: background 0.2s;
   }
 
   .song:hover {
@@ -51,19 +50,24 @@
     color: #121212;
   }
 
-  .song .info {
+  .info {
     display: flex;
     flex-direction: column;
   }
 
-  .song .title {
+  .title {
     font-weight: bold;
     font-size: 16px;
   }
 
-  .song .artist {
+  .artist {
     font-size: 14px;
     color: #b3b3b3;
+  }
+
+  .buttons {
+    display: flex;
+    gap: 8px;
   }
 
   button {
@@ -74,6 +78,7 @@
     padding: 6px 12px;
     cursor: pointer;
     transition: all 0.2s;
+    font-weight: bold;
   }
 
   button:hover {
@@ -82,8 +87,6 @@
   }
 
   audio {
-    width: 100%;
-    margin-top: 5px;
     display: none;
   }
 </style>
@@ -104,10 +107,10 @@
 
 <script>
 const songs = [
-  {title:"Perfect", artist:"Ed Sheeran", category:"Love", file:"audio/perfect.mp3"},
-  {title:"Until I Found You", artist:"Stephen Sanchez", category:"Love", file:"audio/until_i_found_you.mp3"},
-  {title:"Blinding Lights", artist:"The Weeknd", category:"Chill", file:"audio/blinding_lights.mp3"},
-  {title:"Lose Yourself", artist:"Eminem", category:"Chill", file:"audio/lose_yourself.mp3"}
+  {title:"Perfect", artist:"Ed Sheeran", category:"Love", file:"audio/perfect.mp3", youtube:"https://www.youtube.com/watch?v=2Vv-BfVoq4g"},
+  {title:"Until I Found You", artist:"Stephen Sanchez", category:"Love", file:"audio/until_i_found_you.mp3", youtube:"https://www.youtube.com/watch?v=GxldQ9eX2wo"},
+  {title:"Blinding Lights", artist:"The Weeknd", category:"Chill", file:"audio/blinding_lights.mp3", youtube:"https://www.youtube.com/watch?v=4NRXx6U8ABQ"},
+  {title:"Lose Yourself", artist:"Eminem", category:"Chill", file:"audio/lose_yourself.mp3", youtube:"https://www.youtube.com/watch?v=_Yhyp-_hX2s"}
 ];
 
 function renderPlaylist() {
@@ -120,8 +123,9 @@ function renderPlaylist() {
         <div class="title">${song.title}</div>
         <div class="artist">${song.artist}</div>
       </div>
-      <div>
+      <div class="buttons">
         <button onclick="playAudio(this, '${song.file}')">▶ Play</button>
+        <button onclick="window.open('${song.youtube}', '_blank')">YouTube</button>
         <audio src="${song.file}"></audio>
       </div>
     `;
@@ -130,12 +134,10 @@ function renderPlaylist() {
 }
 
 function playAudio(btn, src) {
-  // stop all other audios
-  document.querySelectorAll('audio').forEach(a => a.pause());
-  document.querySelectorAll('audio').forEach(a => a.currentTime = 0);
+  // Stoppe tous les autres audios
+  document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime = 0; });
 
   const audio = btn.nextElementSibling;
-  audio.style.display = 'block';
   audio.play();
 }
 
