@@ -45,6 +45,9 @@ const songs = [
   {title:"Lose Yourself", artist:"Eminem", category:"Chill", file:"lose_yourself.mp3", youtube:"https://www.youtube.com/watch?v=_Yhyp-_hX2s"}
 ];
 
+let currentAudio = null;
+let currentBtn = null;
+
 function renderPlaylist() {
   songs.forEach(song => {
     const container = document.getElementById(song.category);
@@ -63,13 +66,41 @@ function renderPlaylist() {
     `;
     container.appendChild(div);
 
-    // Ajouter l'event Play
     const playBtn = div.querySelector('.play-btn');
     const audio = div.querySelector('audio');
+
     playBtn.addEventListener('click', () => {
-      // Stoppe tous les autres audios
-      document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime = 0; });
-      audio.play();
+      // Si on reclique sur le même audio
+      if (currentAudio === audio) {
+        if (!audio.paused) {
+          audio.pause();
+          playBtn.textContent = '▶ Play';
+        } else {
+          audio.play();
+          playBtn.textContent = '⏸ Pause';
+        }
+      } else {
+        // Arrêter l'audio précédent
+        if (currentAudio) {
+          currentAudio.pause();
+          currentAudio.currentTime = 0;
+          if (currentBtn) currentBtn.textContent = '▶ Play';
+        }
+        // Jouer le nouvel audio
+        audio.play();
+        playBtn.textContent = '⏸ Pause';
+        currentAudio = audio;
+        currentBtn = playBtn;
+      }
+    });
+
+    // Remet le bouton sur Play quand la chanson se termine
+    audio.addEventListener('ended', () => {
+      playBtn.textContent = '▶ Play';
+      if (currentAudio === audio) {
+        currentAudio = null;
+        currentBtn = null;
+      }
     });
   });
 }
