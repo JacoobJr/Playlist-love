@@ -39,8 +39,20 @@
 
 <script>
 const songs = [
+  // Love
   {title:"Perfect", artist:"Ed Sheeran", category:"Love", file:"perfect.mp3", youtube:"https://www.youtube.com/watch?v=2Vv-BfVoq4g"},
-  {title:"Until I Found You", artist:"Stephen Sanchez", category:"Love", file:"until_i_found_you.mp3", youtube:"https://www.youtube.com/watch?v=GxldQ9eX2wo"},
+  {title:"Imagine", artist:"Carbonne - Gazo", category:"Love", file:"imagine_carbonne_gazo.mp3", youtube:"https://www.youtube.com/watch?v=..."},
+  {title:"Nanani", artist:"Hatik", category:"Love", file:"nanani_hatik.mp3", youtube:"https://www.youtube.com/watch?v=..."},
+  {title:"Angela", artist:"Bebe de Bogoda", category:"Love", file:"angela_bebe_de_bogoda.mp3", youtube:"https://www.youtube.com/watch?v=..."},
+  {title:"Ma Belle", artist:"Moha La Squale", category:"Love", file:"ma_belle_moha_la_squale.mp3", youtube:"https://www.youtube.com/watch?v=..."},
+  {title:"Luna", artist:"Moha La Squale", category:"Love", file:"luna_moha_la_squale.mp3", youtube:"https://www.youtube.com/watch?v=..."},
+  {title:"Dadju Jaloux", artist:"Lettre à une femme - Ninho", category:"Love", file:"dadju_jaloux_ninho.mp3", youtube:"https://www.youtube.com/watch?v=..."},
+  {title:"Jolie Bebe", artist:"Naza", category:"Love", file:"jolie_bebe_naza.mp3", youtube:"https://www.youtube.com/watch?v=..."},
+  {title:"Mon Bébé", artist:"RnBoi", category:"Love", file:"mon_bebe_rnboi.mp3", youtube:"https://www.youtube.com/watch?v=..."},
+  {title:"Solide", artist:"Ronisia", category:"Love", file:"solide_ronisia.mp3", youtube:"https://www.youtube.com/watch?v=..."},
+  {title:"Soleil Bleu", artist:"Luiza", category:"Love", file:"soleil_bleu_luiza.mp3", youtube:"https://www.youtube.com/watch?v=..."},
+  
+  // Chill
   {title:"Blinding Lights", artist:"The Weeknd", category:"Chill", file:"blinding_lights.mp3", youtube:"https://www.youtube.com/watch?v=4NRXx6U8ABQ"},
   {title:"Lose Yourself", artist:"Eminem", category:"Chill", file:"lose_yourself.mp3", youtube:"https://www.youtube.com/watch?v=_Yhyp-_hX2s"}
 ];
@@ -70,7 +82,6 @@ function renderPlaylist() {
     const audio = div.querySelector('audio');
 
     playBtn.addEventListener('click', () => {
-      // Si on reclique sur le même audio
       if (currentAudio === audio) {
         if (!audio.paused) {
           audio.pause();
@@ -80,13 +91,11 @@ function renderPlaylist() {
           playBtn.textContent = '⏸ Pause';
         }
       } else {
-        // Arrêter l'audio précédent
         if (currentAudio) {
           currentAudio.pause();
           currentAudio.currentTime = 0;
           if (currentBtn) currentBtn.textContent = '▶ Play';
         }
-        // Jouer le nouvel audio
         audio.play();
         playBtn.textContent = '⏸ Pause';
         currentAudio = audio;
@@ -94,7 +103,6 @@ function renderPlaylist() {
       }
     });
 
-    // Remet le bouton sur Play quand la chanson se termine
     audio.addEventListener('ended', () => {
       playBtn.textContent = '▶ Play';
       if (currentAudio === audio) {
