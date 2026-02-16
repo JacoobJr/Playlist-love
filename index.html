@@ -6,7 +6,7 @@
 <title>Notre Playlist 💘</title>
 <style>
   body { margin:0; font-family:'Arial',sans-serif; background-color:#121212; color:#fff; }
-  header { background-color:#1DB954; text-align:center; padding:20px; font-size:24px; font-weight:bold; letter-spacing:1px; }
+  header { background-color:#1DB954; text-align:center; padding:20px; font-size:24px; font-weight:bold; }
   .category { margin:20px 15px; }
   .category h2 { color:#b3b3b3; font-size:18px; text-transform:uppercase; margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px; }
   .song { padding:12px 15px; margin-bottom:8px; background-color:#181818; border-radius:8px; display:flex; justify-content:space-between; align-items:center; transition: background 0.2s; }
@@ -39,20 +39,20 @@
 
 <script>
 const songs = [
-  // Love
+  // LOVE
   {title:"Perfect", artist:"Ed Sheeran", category:"Love", file:"perfect.mp3", youtube:"https://www.youtube.com/watch?v=2Vv-BfVoq4g"},
-  {title:"Imagine", artist:"Carbonne - Gazo", category:"Love", file:"imagine_carbonne_gazo.mp3", youtube:"https://www.youtube.com/watch?v=..."},
-  {title:"Nanani", artist:"Hatik", category:"Love", file:"nanani_hatik.mp3", youtube:"https://www.youtube.com/watch?v=..."},
-  {title:"Angela", artist:"Bebe de Bogoda", category:"Love", file:"angela_bebe_de_bogoda.mp3", youtube:"https://www.youtube.com/watch?v=..."},
-  {title:"Ma Belle", artist:"Moha La Squale", category:"Love", file:"ma_belle_moha_la_squale.mp3", youtube:"https://www.youtube.com/watch?v=..."},
-  {title:"Luna", artist:"Moha La Squale", category:"Love", file:"luna_moha_la_squale.mp3", youtube:"https://www.youtube.com/watch?v=..."},
-  {title:"Dadju Jaloux", artist:"Lettre à une femme - Ninho", category:"Love", file:"dadju_jaloux_ninho.mp3", youtube:"https://www.youtube.com/watch?v=..."},
-  {title:"Jolie Bebe", artist:"Naza", category:"Love", file:"jolie_bebe_naza.mp3", youtube:"https://www.youtube.com/watch?v=..."},
-  {title:"Mon Bébé", artist:"RnBoi", category:"Love", file:"mon_bebe_rnboi.mp3", youtube:"https://www.youtube.com/watch?v=..."},
-  {title:"Solide", artist:"Ronisia", category:"Love", file:"solide_ronisia.mp3", youtube:"https://www.youtube.com/watch?v=..."},
-  {title:"Soleil Bleu", artist:"Luiza", category:"Love", file:"soleil_bleu_luiza.mp3", youtube:"https://www.youtube.com/watch?v=..."},
-  
-  // Chill
+  {title:"Imagine Carbone", artist:"Gazo", category:"Love", file:"imagine_carbone_gazo.mp3", youtube:"https://www.youtube.com/watch?v=XVNuLd3owis"}, /* Gazo – Nanani Nanana clip officiel */ :contentReference[oaicite:0]{index=0}
+  {title:"Angela", artist:"Hatik", category:"Love", file:"angela_hatik.mp3", youtube:"https://www.youtube.com/watch?v=uqsGUAM9WDk"}, /* Hatik – Angela */ :contentReference[oaicite:1]{index=1}
+  {title:"Bébé de Bogota", artist:"Moha La Squale", category:"Love", file:"bebe_de_bogota_moha_la_squale.mp3", youtube:"https://www.youtube.com/results?search_query=Moha+La+Squale+B%C3%A9b%C3%A9+de+Bogota"}, /* pas de clip officiel clair */ :contentReference[oaicite:2]{index=2}
+  {title:"Ma Belle", artist:"Moha La Squale", category:"Love", file:"ma_belle_moha_la_squale.mp3", youtube:"https://www.youtube.com/watch?v=NsxdxA_j8nk"}, /* Moha La Squale – Ma belle */ :contentReference[oaicite:3]{index=3}
+  {title:"Luna", artist:"Moha La Squale", category:"Love", file:"luna_moha_la_squale.mp3", youtube:"https://www.youtube.com/results?search_query=Moha+La+Squale+Luna"}, /* clip non identifié */ :contentReference[oaicite:4]{index=4}
+  {title:"Lettre à une femme", artist:"Ninho", category:"Love", file:"lettre_a_une_femme_ninho.mp3", youtube:"https://www.youtube.com/watch?v=q_WVvnOJmhs"}, /* Ninho – Lettre à une femme */ :contentReference[oaicite:5]{index=5}
+  {title:"Joli Bébé", artist:"Naza", category:"Love", file:"joli_bebe_naza.mp3", youtube:"https://www.youtube.com/watch?v=ZycMJWv2vtY"}, /* Naza ft Niska – Joli Bébé */ :contentReference[oaicite:6]{index=6}
+  {title:"Mon Bébé", artist:"RnBoi", category:"Love", file:"mon_bebe_rnboi.mp3", youtube:"https://www.youtube.com/watch?v=U2t5Y89I2tE"}, /* RnBoi – Mon Bébé (clip officiel) */ :contentReference[oaicite:7]{index=7}
+  {title:"Solide", artist:"Ronisia", category:"Love", file:"solide_ronisia.mp3", youtube:"https://www.youtube.com/results?search_query=Ronisia+Solide"}, /* pas de clip officiel clair */ 
+  {title:"Soleil Bleu", artist:"Bleu Soleil & Luiza", category:"Love", file:"soleil_bleu_luiza.mp3", youtube:"https://www.youtube.com/watch?v=uz6sARD5XCU"}, /* Bleu Soleil x Luiza – Soleil bleu clip */ :contentReference[oaicite:8]{index=8}
+
+  // CHILL
   {title:"Blinding Lights", artist:"The Weeknd", category:"Chill", file:"blinding_lights.mp3", youtube:"https://www.youtube.com/watch?v=4NRXx6U8ABQ"},
   {title:"Lose Yourself", artist:"Eminem", category:"Chill", file:"lose_yourself.mp3", youtube:"https://www.youtube.com/watch?v=_Yhyp-_hX2s"}
 ];
