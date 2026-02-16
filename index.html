@@ -5,107 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Notre Playlist 💘</title>
 <style>
-  body {
-    margin: 0;
-    font-family: 'Arial', sans-serif;
-    background-color: #121212;
-    color: #fff;
-  }
-
-  header {
-    background-color: #1DB954;
-    text-align: center;
-    padding: 20px;
-    font-size: 24px;
-    font-weight: bold;
-    letter-spacing: 1px;
-  }
-
-  .category {
-    margin: 20px 15px;
-  }
-
-  .category h2 {
-    color: #b3b3b3;
-    font-size: 18px;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #333;
-    padding-bottom: 5px;
-  }
-
-  .song {
-    padding: 12px 15px;
-    margin-bottom: 8px;
-    background-color: #181818;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: background 0.2s;
-  }
-
-  .song:hover {
-    background-color: #1DB954;
-    color: #121212;
-  }
-
-  .info {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .title {
-    font-weight: bold;
-    font-size: 16px;
-  }
-
-  .artist {
-    font-size: 14px;
-    color: #b3b3b3;
-  }
-
-  .buttons {
-    display: flex;
-    gap: 8px;
-  }
-
-  button {
-    border-radius: 6px;
-    padding: 6px 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-weight: bold;
-    border: 1px solid;
-  }
-
-  /* Play button vert */
-  .play-btn {
-    background-color: #121212;
-    color: #1DB954;
-    border-color: #1DB954;
-  }
-
-  .play-btn:hover {
-    background-color: #1DB954;
-    color: #121212;
-  }
-
-  /* YouTube button rouge avec texte noir */
-  .yt-btn {
-    background-color: #FF0000;
-    color: #000000;
-    border-color: #FF0000;
-  }
-
-  .yt-btn:hover {
-    background-color: #CC0000;
-    color: #000000;
-  }
-
-  audio {
-    display: none;
-  }
+  body { margin:0; font-family:'Arial',sans-serif; background-color:#121212; color:#fff; }
+  header { background-color:#1DB954; text-align:center; padding:20px; font-size:24px; font-weight:bold; letter-spacing:1px; }
+  .category { margin:20px 15px; }
+  .category h2 { color:#b3b3b3; font-size:18px; text-transform:uppercase; margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px; }
+  .song { padding:12px 15px; margin-bottom:8px; background-color:#181818; border-radius:8px; display:flex; justify-content:space-between; align-items:center; transition: background 0.2s; }
+  .song:hover { background-color:#1DB954; color:#121212; }
+  .info { display:flex; flex-direction:column; }
+  .title { font-weight:bold; font-size:16px; }
+  .artist { font-size:14px; color:#b3b3b3; }
+  .buttons { display:flex; gap:8px; }
+  button { border-radius:6px; padding:6px 12px; cursor:pointer; transition:all 0.2s; font-weight:bold; border:1px solid; }
+  .play-btn { background-color:#121212; color:#1DB954; border-color:#1DB954; }
+  .play-btn:hover { background-color:#1DB954; color:#121212; }
+  .yt-btn { background-color:#FF0000; color:#000; border-color:#FF0000; }
+  .yt-btn:hover { background-color:#CC0000; color:#000; }
+  audio { display:none; }
 </style>
 </head>
 <body>
@@ -141,21 +56,22 @@ function renderPlaylist() {
         <div class="artist">${song.artist}</div>
       </div>
       <div class="buttons">
-        <button class="play-btn" onclick="playAudio(this, '${song.file}')">▶ Play</button>
+        <button class="play-btn">▶ Play</button>
         <button class="yt-btn" onclick="window.open('${song.youtube}', '_blank')">YouTube</button>
         <audio src="${song.file}"></audio>
       </div>
     `;
     container.appendChild(div);
+
+    // Ajouter l'event Play
+    const playBtn = div.querySelector('.play-btn');
+    const audio = div.querySelector('audio');
+    playBtn.addEventListener('click', () => {
+      // Stoppe tous les autres audios
+      document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime = 0; });
+      audio.play();
+    });
   });
-}
-
-function playAudio(btn, src) {
-  // Stoppe tous les autres audios
-  document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime = 0; });
-
-  const audio = btn.nextElementSibling;
-  audio.play();
 }
 
 renderPlaylist();
