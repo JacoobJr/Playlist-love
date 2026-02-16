@@ -71,18 +71,35 @@
   }
 
   button {
-    background-color: #121212;
-    color: #1DB954;
-    border: 1px solid #1DB954;
     border-radius: 6px;
     padding: 6px 12px;
     cursor: pointer;
     transition: all 0.2s;
     font-weight: bold;
+    border: 1px solid;
   }
 
-  button:hover {
+  /* Play button vert */
+  .play-btn {
+    background-color: #121212;
+    color: #1DB954;
+    border-color: #1DB954;
+  }
+
+  .play-btn:hover {
     background-color: #1DB954;
+    color: #121212;
+  }
+
+  /* YouTube button rouge */
+  .yt-btn {
+    background-color: #121212;
+    color: #FF0000;
+    border-color: #FF0000;
+  }
+
+  .yt-btn:hover {
+    background-color: #FF0000;
     color: #121212;
   }
 
@@ -124,8 +141,8 @@ function renderPlaylist() {
         <div class="artist">${song.artist}</div>
       </div>
       <div class="buttons">
-        <button onclick="playAudio(this, '${song.file}')">▶ Play</button>
-        <button onclick="window.open('${song.youtube}', '_blank')">YouTube</button>
+        <button class="play-btn" onclick="playAudio(this, '${song.file}')">▶ Play</button>
+        <button class="yt-btn" onclick="window.open('${song.youtube}', '_blank')">YouTube</button>
         <audio src="${song.file}"></audio>
       </div>
     `;
