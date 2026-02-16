@@ -1,109 +1,116 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Notre Playlist 💘</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: white;
-      padding: 15px;
-      margin: 0;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notre Playlist 💘</title>
+<style>
+  /* Reset et style global */
+  body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: #121212;
+    color: white;
+  }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+  header {
+    background: #1db954;
+    padding: 20px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
 
-    h2 {
-      margin-top: 25px;
-      margin-bottom: 10px;
-      border-bottom: 1px solid #333;
-      padding-bottom: 5px;
-    }
+  h2 {
+    margin: 20px 15px 10px;
+    font-size: 20px;
+    color: #b3b3b3;
+    text-transform: uppercase;
+  }
 
+  .playlist {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 0 10px 20px;
+  }
+
+  .card {
+    background: #181818;
+    margin: 10px;
+    width: 160px;
+    border-radius: 8px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.2s;
+    text-align: center;
+  }
+
+  .card:hover {
+    transform: scale(1.05);
+  }
+
+  .card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+  }
+
+  .card .title {
+    font-size: 16px;
+    margin: 8px 5px 4px;
+    font-weight: bold;
+  }
+
+  .card .artist {
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #b3b3b3;
+  }
+
+  @media (max-width: 500px) {
     .card {
-      background: #1e1e1e;
-      padding: 15px;
-      margin-bottom: 12px;
-      border-radius: 12px;
+      width: 45%;
     }
-
-    .card strong {
-      cursor: pointer;
-    }
-
-    button {
-      margin-top: 8px;
-      padding: 6px 12px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      background-color: #ff3366;
-      color: white;
-      font-weight: bold;
-      transition: transform 0.1s;
-    }
-
-    button:hover {
-      transform: scale(1.1);
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
 
-<h1>Notre Playlist 💘</h1>
-<div id="categories"></div>
+<header>Notre Playlist 💘</header>
+
+<h2>Love</h2>
+<div class="playlist" id="Love"></div>
+
+<h2>Chill</h2>
+<div class="playlist" id="Chill"></div>
 
 <script>
   const songs = [
-    {id:1, title:"Perfect", artist:"Ed Sheeran", category:"Love", youtube:"https://www.youtube.com/watch?v=2Vv-BfVoq4g", likes:0, plays:0},
-    {id:2, title:"Until I Found You", artist:"Stephen Sanchez", category:"Love", youtube:"https://www.youtube.com/watch?v=GxldQ9eX2wo", likes:0, plays:0},
-    {id:3, title:"Blinding Lights", artist:"The Weeknd", category:"Chill", youtube:"https://www.youtube.com/watch?v=4NRXx6U8ABQ", likes:0, plays:0}
+    {id:1, title:"Perfect", artist:"Ed Sheeran", category:"Love", youtube:"https://www.youtube.com/watch?v=2Vv-BfVoq4g", img:"https://i.imgur.com/3C9bYMa.jpg"},
+    {id:2, title:"Until I Found You", artist:"Stephen Sanchez", category:"Love", youtube:"https://www.youtube.com/watch?v=GxldQ9eX2wo", img:"https://i.imgur.com/V2kXy3v.jpg"},
+    {id:3, title:"Blinding Lights", artist:"The Weeknd", category:"Chill", youtube:"https://www.youtube.com/watch?v=4NRXx6U8ABQ", img:"https://i.imgur.com/WtXJn8O.jpg"},
+    {id:4, title:"Lose Yourself", artist:"Eminem", category:"Chill", youtube:"https://www.youtube.com/watch?v=_Yhyp-_hX2s", img:"https://i.imgur.com/7KjErU0.jpg"}
   ];
 
-  function renderSongs() {
-    const container = document.getElementById("categories");
-    container.innerHTML = "";
-
-    const categories = {};
-
+  function renderPlaylist() {
     songs.forEach(song => {
-      if (!categories[song.category]) categories[song.category] = [];
-      categories[song.category].push(song);
+      const container = document.getElementById(song.category);
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <img src="${song.img}" alt="${song.title}">
+        <div class="title">${song.title}</div>
+        <div class="artist">${song.artist}</div>
+      `;
+      card.onclick = () => window.open(song.youtube, "_blank");
+      container.appendChild(card);
     });
-
-    for (let category in categories) {
-      container.innerHTML += `<h2>${category}</h2>`;
-      categories[category].forEach(song => {
-        container.innerHTML += `
-          <div class="card">
-            <strong onclick="playSong(${song.id})">${song.title} - ${song.artist}</strong>
-            <p>❤️ <span id="like-${song.id}">${song.likes}</span> | ▶ <span id="play-${song.id}">${song.plays}</span></p>
-            <button onclick="likeSong(${song.id})">Like</button>
-          </div>
-        `;
-      });
-    }
   }
 
-  function likeSong(id) {
-    const song = songs.find(s => s.id === id);
-    song.likes++;
-    document.getElementById(`like-${id}`).textContent = song.likes;
-  }
-
-  function playSong(id) {
-    const song = songs.find(s => s.id === id);
-    song.plays++;
-    document.getElementById(`play-${id}`).textContent = song.plays;
-    window.open(song.youtube, "_blank");
-  }
-
-  renderSongs();
+  renderPlaylist();
 </script>
+
 </body>
 </html>
