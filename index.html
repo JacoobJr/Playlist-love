@@ -17,7 +17,7 @@
   .album-card{ min-width:160px; flex:0 0 auto; scroll-snap-align:start; }
   .album-image{ position:relative; width:160px; height:160px; border-radius:12px; overflow:hidden; }
   .album-image img{ width:100%; height:100%; object-fit:cover; }
-  .album-heart{ position:absolute; top:8px; left:8px; font-size:20px; }
+  .album-heart{ position:absolute; top:8px; left:8px; font-size:20px; color:white; } /* SOBRE */
   .album-banner{ position:absolute; bottom:0; left:0; width:100%; padding:6px; font-size:13px; font-weight:bold; color:#fff; }
   .album-desc{ margin-top:6px; font-size:13px; color:#b3b3b3; }
 
@@ -75,11 +75,11 @@
 <div class="category">
 <h2>Amour</h2>
 <div class="slider">
-<div class="album-card"><div class="album-image"><span class="album-heart">❤️</span><img src="image-1.jpg"><div class="album-banner" style="background:#E91E63;">Notre Début</div></div><div class="album-desc">Le premier regard 💫</div></div>
-<div class="album-card"><div class="album-image"><span class="album-heart">❤️</span><img src="image-2.jpg"><div class="album-banner" style="background:#9C27B0;">Nos Moments</div></div><div class="album-desc">Les souvenirs précieux 💕</div></div>
-<div class="album-card"><div class="album-image"><span class="album-heart">❤️</span><img src="image-3.jpg"><div class="album-banner" style="background:#3F51B5;">Toujours Nous</div></div><div class="album-desc">Pour la vie 💍</div></div>
-<div class="album-card"><div class="album-image"><span class="album-heart">❤️</span><img src="image-4.jpg"><div class="album-banner" style="background:#FF5722;">Nos Rires</div></div><div class="album-desc">Les moments fous 😆</div></div>
-<div class="album-card"><div class="album-image"><span class="album-heart">❤️</span><img src="image-5.jpg"><div class="album-banner" style="background:#009688;">Notre Avenir</div></div><div class="album-desc">Main dans la main 🤝</div></div>
+<div class="album-card"><div class="album-image"><span class="album-heart">🤍</span><img src="image-1.jpg"><div class="album-banner" style="background:#E91E63;">Notre Début</div></div><div class="album-desc">Le premier regard 💫</div></div>
+<div class="album-card"><div class="album-image"><span class="album-heart">🤍</span><img src="image-2.jpg"><div class="album-banner" style="background:#9C27B0;">Nos Moments</div></div><div class="album-desc">Les souvenirs précieux 💕</div></div>
+<div class="album-card"><div class="album-image"><span class="album-heart">🤍</span><img src="image-3.jpg"><div class="album-banner" style="background:#3F51B5;">Toujours Nous</div></div><div class="album-desc">Pour la vie 💍</div></div>
+<div class="album-card"><div class="album-image"><span class="album-heart">🤍</span><img src="image-4.jpg"><div class="album-banner" style="background:#FF5722;">Nos Rires</div></div><div class="album-desc">Les moments fous 😆</div></div>
+<div class="album-card"><div class="album-image"><span class="album-heart">🤍</span><img src="image-5.jpg"><div class="album-banner" style="background:#009688;">Notre Avenir</div></div><div class="album-desc">Main dans la main 🤝</div></div>
 </div>
 </div>
 
@@ -109,7 +109,7 @@
     </div>
     Accueil
   </div>
-  <div class="nav-item" onclick="openSearch()">
+  <div class="nav-item">
     <div class="nav-icon">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM10 14a4 4 0 110-8 4 4 0 010 8z"/></svg>
     </div>
@@ -205,10 +205,13 @@ renderPlaylist();
 
 // --- NAV FUNCTIONS ---
 function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
-function openSearch(){document.getElementById('searchOverlay').style.display='block';}
 function toggleLibrary(){const p=document.getElementById('libraryPopup');p.style.display=(p.style.display==='block')?'none':'block';}
 function goToCategory(cat){document.getElementById(cat).scrollIntoView({behavior:"smooth"});document.getElementById("libraryPopup").style.display="none";}
 function spawnHeart(){const h=document.createElement("div");h.className="like-heart";h.innerHTML="🤍";document.body.appendChild(h);setTimeout(()=>{h.remove();},600);}
+
+// --- SEARCH DISABLED ---
+document.querySelector('.nav-item:nth-child(2)').onclick = ()=>{ /* rien */ };
+
 </script>
 
 </body>
