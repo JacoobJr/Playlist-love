@@ -11,7 +11,7 @@
   .category { margin:20px 15px; position:relative; z-index:2; }
   .category h2 { color:#b3b3b3; font-size:18px; text-transform:uppercase; margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px; }
 
-  /* Album slider Amour */
+  /* Album slider Amour / Livres */
   .slider { display:flex; gap:15px; overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:10px; }
   .slider::-webkit-scrollbar { display:none; }
   .album-card{ min-width:160px; flex:0 0 auto; scroll-snap-align:start; }
@@ -89,6 +89,18 @@
   <div id="Love"></div>
 </div>
 
+<!-- Nouvelle catégorie Livres -->
+<div class="category">
+<h2>Idées Livre</h2>
+<div class="slider" id="Books">
+  <div class="album-card"><div class="album-image"><a href="https://www.amazon.fr/dp/1234567890" target="_blank"><img src="book1.jpg"></a><div class="album-banner" style="background:#FF9800;">Roman</div></div><div class="album-desc">Une aventure magique ✨</div></div>
+  <div class="album-card"><div class="album-image"><a href="https://www.amazon.fr/dp/0987654321" target="_blank"><img src="book2.jpg"></a><div class="album-banner" style="background:#8BC34A;">Science</div></div><div class="album-desc">Exploration fascinante 🔬</div></div>
+  <div class="album-card"><div class="album-image"><a href="https://www.amazon.fr/dp/1122334455" target="_blank"><img src="book3.jpg"></a><div class="album-banner" style="background:#03A9F4;">Fantastique</div></div><div class="album-desc">Héros courageux 🛡️</div></div>
+  <div class="album-card"><div class="album-image"><a href="https://www.amazon.fr/dp/5566778899" target="_blank"><img src="book4.jpg"></a><div class="album-banner" style="background:#E91E63;">Romance</div></div><div class="album-desc">Histoires d'amour 💖</div></div>
+  <div class="album-card"><div class="album-image"><a href="https://www.amazon.fr/dp/6677889900" target="_blank"><img src="book5.jpg"></a><div class="album-banner" style="background:#9C27B0;">Aventure</div></div><div class="album-desc">Voyage épique 🌍</div></div>
+</div>
+</div>
+
 <!-- Playlist Autre -->
 <div class="category">
   <h2>Autre</h2>
@@ -136,6 +148,7 @@
 
 <div id="libraryPopup">
   <div class="lib-item" onclick="goToCategory('Love')">Love</div>
+  <div class="lib-item" onclick="goToCategory('Books')">Idées Livre</div>
   <div class="lib-item" onclick="goToCategory('Chill')">Autre</div>
 </div>
 
@@ -211,7 +224,6 @@ function spawnHeart(){const h=document.createElement("div");h.className="like-he
 
 // --- SEARCH DISABLED ---
 document.querySelector('.nav-item:nth-child(2)').onclick = ()=>{ /* rien */ };
-
 </script>
 
 </body>
