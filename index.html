@@ -199,10 +199,11 @@ themeBtn.addEventListener('click', ()=>{
 const betisesBtn = document.getElementById('betisesBtn');
 const clownMsg = document.getElementById('clownMsg');
 betisesBtn.addEventListener('click', ()=>{
-    const clone = clownMsg.cloneNode(true);  // on clone le message
-    clone.className = "clown-pop";          // on applique le style pop
-    document.body.appendChild(clone);
-    setTimeout(()=>{ clone.remove(); }, 600);
+    const clone = document.createElement('div');   // on crée un nouveau div
+    clone.textContent = "Noob 👉🤡";               // texte
+    clone.className = "clown-pop";                 // style pop fixed centré
+    document.body.appendChild(clone);             // ajout au body
+    setTimeout(()=>{ clone.remove(); }, 600);     // suppression après animation
 });
 
 // =============================
