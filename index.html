@@ -18,8 +18,16 @@
   .album-image{ position:relative; width:160px; height:160px; border-radius:12px; overflow:hidden; }
   .album-image img{ width:100%; height:100%; object-fit:cover; }
   .album-heart{ position:absolute; top:8px; left:8px; font-size:20px; color:white; } /* SOBRE */
-  .album-banner{ position:absolute; bottom:0; left:0; width:100%; padding:6px; font-size:13px; font-weight:bold; color:#fff; }
-  .album-desc{ margin-top:6px; font-size:13px; color:#b3b3b3; }
+  .album-banner{ position:absolute; bottom:0; left:0; width:100%; padding:6px; font-size:13px; font-weight:bold; color:#fff; text-align:center; }
+  .album-desc{
+    margin-top:6px; 
+    font-size:13px; 
+    color:#b3b3b3; 
+    max-width:160px;       /* largeur max identique à l'image */
+    word-wrap: break-word; /* retour à la ligne si texte trop long */
+    word-break: break-word;
+    text-align:center;     /* centrer le texte sous la pochette */
+  }
 
   /* SONGS */
   .song { padding:12px 15px; margin-bottom:8px; background-color:#181818; border-radius:8px; display:flex; justify-content:space-between; align-items:center; transition: background 0.2s; }
@@ -93,11 +101,11 @@
 <div class="category">
 <h2>Idées Livre</h2>
 <div class="slider" id="Books">
-  <div class="album-card"><div class="album-image"><a href="https://booknode.com/la_saga_des_impossibles_tome_1_adam_03666756" target="_blank"><img src="image-6.jpg"></a><div class="album-banner" style="background:#FF9800;">Adam</div></div><div class="album-desc">>Une romance bouleversante qui touche l'âme ✨</div></div>
+  <div class="album-card"><div class="album-image"><a href="https://booknode.com/la_saga_des_impossibles_tome_1_adam_03666756" target="_blank"><img src="image-6.jpg"></a><div class="album-banner" style="background:#FF9800;">Adam</div></div><div class="album-desc">Une romance bouleversante qui touche l'âme ✨</div></div>
   <div class="album-card"><div class="album-image"><a href="https://www.fnac.com/a18261401/Emma-Green-Ce-qui-nous-rend-vivants" target="_blank"><img src="image-7.jpg"></a><div class="album-banner" style="background:#8BC34A;">Ce qui nous rend vivants</div></div><div class="album-desc">Quand l'amour révèle nos plus grands secrets 💖</div></div>
-  <div class="album-card"><div class="album-image"><a href="https://www.fnac.com/a17088484/Captive-Tome-1-Captive-Sarah-Rivens" target="_blank"><img src="image-8.jpg"></a><div class="album-banner" style="background:#03A9F4;">captive</div></div><div class="album-desc">Passion et suspense dans une histoire intense 🔥</div></div>
+  <div class="album-card"><div class="album-image"><a href="https://www.fnac.com/a17088484/Captive-Tome-1-Captive-Sarah-Rivens" target="_blank"><img src="image-8.jpg"></a><div class="album-banner" style="background:#03A9F4;">Captive</div></div><div class="album-desc">Passion et suspense dans une histoire intense 🔥</div></div>
   <div class="album-card"><div class="album-image"><a href="https://booknode.com/avant_toi_0690393" target="_blank"><img src="image-9.jpg"></a><div class="album-banner" style="background:#E91E63;">Avant toi</div></div><div class="album-desc">Un amour impossible qui bouleverse le cœur 💔</div></div>
-  <div class="album-card"><div class="album-image"><a href="https://www.fnac.com/a7792857/Katarina-Bivald-La-Bibliotheque-des-coeurs-cabosses" target="_blank"><img src="image-10.jpg"></a><div class="album-banner" style="background:#9C27B0;">La bibliothèque des coeurs cabossés</div></div><div class="album-desc">Rencontres inattendues et émotions à chaque page 📚</div></div>
+  <div class="album-card"><div class="album-image"><a href="https://www.fnac.com/a7792857/Katarina-Bivald-La-Bibliotheque-des-coeurs-cabosses" target="_blank"><img src="image-10.jpg"></a><div class="album-banner" style="background:#9C27B0;">La bibliothèque des cœurs cabossés</div></div><div class="album-desc">Rencontres inattendues et émotions à chaque page 📚</div></div>
 </div>
 </div>
 
