@@ -38,7 +38,7 @@
     text-align:center;
     margin:40px 0;
     font-size:24px;
-    font-weight:bold; /* <-- Texte maintenant en gras */
+    font-weight:bold; /* Texte en gras */
     color:#FF69B4;
     cursor:pointer;
     user-select:none;
@@ -49,17 +49,17 @@
 
   /* Zone danse en bas */
   #danceZone{
-    position:fixed;
-    bottom:20px;
-    left:50%;
-    transform:translateX(-50%);
-    display:flex;
-    gap:30px;
-    font-size:60px;
-    opacity:0;
-    transition:opacity 0.3s ease;
-    z-index:3;
-    pointer-events:none;
+    position: fixed;       /* <-- corrigé : fixe en bas */
+    bottom: 20px;          /* distance du bas */
+    left: 50%;             /* centré horizontal */
+    transform: translateX(-50%);
+    display: flex;
+    gap: 30px;
+    font-size: 60px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 3;            /* reste au-dessus du contenu normal */
+    pointer-events: none;  /* ne bloque rien */
   }
 
   @keyframes danceGirl{
@@ -164,7 +164,7 @@ function showDance(){ danceZone.style.opacity=1; dancerGirl.classList.add("anima
 function hideDance(){ danceZone.style.opacity=0; dancerGirl.classList.remove("animate"); dancerBoy.classList.remove("animate"); }
 
 // --- TEXTE INTERACTIF ---
-const loveWords = ["Je t'aime Anaelle 💘","Mon cœur ❤️","Mon amour 💕","Mon ange ☀️","Ma madame ✨","Ma chérie 💓","Mon petit bonheur 🥰","Love you biloute 🤡💖"];
+const loveWords = ["Je t'aime Anaelle 💘","Mon cœur ❤️","Mon amour 💕","Mon ange ☀️","Tu es magique ✨","Ma chérie 💓","Mon petit bonheur 🥰","Love you biloute 🤡💖"];
 const loveBox = document.createElement('div');
 loveBox.id = 'loveBox';
 loveBox.textContent = '💖 Tapote-moi 💖';
@@ -252,10 +252,7 @@ songs.filter(s=>s.category==="Chill").forEach(song=>{
     }
   });
 
-  audio.addEventListener('ended',()=>{
-    playBtn.textContent='▶ Play'; particleActive=false; hideDance();
-    if(currentAudio===audio){ currentAudio=null; currentBtn=null; }
-  });
+  audio.addEventListener('ended',()=>{ playBtn.textContent='▶ Play'; particleActive=false; hideDance(); if(currentAudio===audio){ currentAudio=null; currentBtn=null; } });
 });
 </script>
 
