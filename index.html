@@ -22,7 +22,7 @@
   .yt-btn:hover { background-color:#CC0000; color:#000; }
   audio { display:none; }
 
-  /* Canvas pour particules */
+  /* Canvas pour cœurs */
   #particleCanvas {
     position: fixed;
     top:0;
@@ -88,37 +88,50 @@ window.addEventListener('resize', () => {
   canvas.height = window.innerHeight;
 });
 
-class Particle {
+// fonction pour dessiner un cœur
+function drawHeart(ctx, x, y, size, color) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.beginPath();
+  const topCurveHeight = size * 0.3;
+  ctx.moveTo(0, topCurveHeight);
+  ctx.bezierCurveTo(0, 0, -size / 2, 0, -size / 2, topCurveHeight);
+  ctx.bezierCurveTo(-size / 2, size / 2, 0, size * 0.75, 0, size);
+  ctx.bezierCurveTo(0, size * 0.75, size / 2, size / 2, size / 2, topCurveHeight);
+  ctx.bezierCurveTo(size / 2, 0, 0, 0, 0, topCurveHeight);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.restore();
+}
+
+class HeartParticle {
   constructor() {
     this.reset();
   }
   reset() {
     this.x = Math.random() * canvas.width;
     this.y = canvas.height + Math.random() * 50;
-    this.size = Math.random() * 4 + 1;
+    this.size = Math.random() * 10 + 5;
     this.speedY = Math.random() * 1 + 0.5;
     this.speedX = (Math.random() - 0.5) * 0.5;
-    this.alpha = Math.random() * 0.5 + 0.3;
-    this.color = `rgba(29, 185, 84, ${this.alpha})`;
+    this.alpha = Math.random() * 0.5 + 0.5;
+    this.color = `rgba(255, 0, 128, ${this.alpha})`;
   }
   update() {
     this.y -= this.speedY;
     this.x += this.speedX;
-    this.alpha -= 0.001;
+    this.alpha -= 0.002;
     if (this.y < -10 || this.alpha <= 0) this.reset();
   }
   draw() {
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
-    ctx.fillStyle = this.color;
-    ctx.fill();
+    drawHeart(ctx, this.x, this.y, this.size, this.color);
   }
 }
 
 function animateParticles() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (particleActive) {
-    if (particles.length < 100) particles.push(new Particle());
+    if (particles.length < 100) particles.push(new HeartParticle());
     particles.forEach(p => { p.update(); p.draw(); });
   }
   requestAnimationFrame(animateParticles);
