@@ -140,7 +140,107 @@ animateParticles();
 
 // ---------- PLAYLIST ----------
 function renderPlaylist() {
+  const containerLove = document.getElementById('Love');
+
+  songs.forEach((song) => {
+    if (song.category !== "Love") return;
+
+    const div = document.createElement('div');
+    div.className = 'song';
+    div.innerHTML = `
+      <div class="info">
+        <div class="title">${song.title}</div>
+        <div class="artist">${song.artist}</div>
+      </div>
+      <div class="buttons">
+        <button class="play-btn">▶ Play</button>
+        <button class="yt-btn" onclick="window.open('${song.youtube}', '_blank')">YouTube</button>
+        <audio src="${song.file}"></audio>
+      </div>
+    `;
+    containerLove.appendChild(div);
+
+    // ---------- Bloc interactif entre "Ma Belle" et "Luna" ----------
+    if (song.title === "Ma Belle") {
+      const loveDiv = document.createElement('div');
+      loveDiv.id = 'loveBox';
+      loveDiv.style.cssText = `
+        text-align:center;
+        margin:20px 0 40px 0;
+        font-size:24px;
+        color:#FF69B4;
+        cursor:pointer;
+        user-select:none;
+        transition: transform 0.3s;
+      `;
+      loveDiv.textContent = "💖 Tapote-moi 💖";
+      containerLove.appendChild(loveDiv);
+
+      const loveWords = [
+        "Je t'aime 💘",
+        "Mon cœur ❤️",
+        "Amour éternel 💕",
+        "T'es mon rayon de soleil ☀️",
+        "Tu es magique ✨",
+        "Coeur à toi 💓",
+        "Mon petit bonheur 🥰",
+        "Love you 💖"
+      ];
+      loveDiv.addEventListener('click', () => {
+        const word = loveWords[Math.floor(Math.random() * loveWords.length)];
+        loveDiv.textContent = word;
+        loveDiv.style.transform = "scale(1.2)";
+        setTimeout(() => { loveDiv.style.transform = "scale(1)"; }, 300);
+      });
+      loveDiv.addEventListener('touchstart', () => {
+        const word = loveWords[Math.floor(Math.random() * loveWords.length)];
+        loveDiv.textContent = word;
+        loveDiv.style.transform = "scale(1.2)";
+        setTimeout(() => { loveDiv.style.transform = "scale(1)"; }, 300);
+      });
+    }
+
+    const playBtn = div.querySelector('.play-btn');
+    const audio = div.querySelector('audio');
+
+    playBtn.addEventListener('click', () => {
+      if (currentAudio === audio) {
+        if (!audio.paused) {
+          audio.pause();
+          playBtn.textContent = '▶ Play';
+          particleActive = false;
+        } else {
+          audio.play();
+          playBtn.textContent = '⏸ Pause';
+          particleActive = true;
+        }
+      } else {
+        if (currentAudio) {
+          currentAudio.pause();
+          currentAudio.currentTime = 0;
+          if (currentBtn) currentBtn.textContent = '▶ Play';
+        }
+        audio.play();
+        playBtn.textContent = '⏸ Pause';
+        currentAudio = audio;
+        currentBtn = playBtn;
+        particleActive = true;
+      }
+    });
+
+    audio.addEventListener('ended', () => {
+      playBtn.textContent = '▶ Play';
+      particleActive = false;
+      if (currentAudio === audio) {
+        currentAudio = null;
+        currentBtn = null;
+      }
+    });
+  });
+
+  // AUTRES catégories
   songs.forEach(song => {
+    if (song.category === "Love") return;
     const container = document.getElementById(song.category);
     const div = document.createElement('div');
     div.className = 'song';
@@ -165,11 +265,11 @@ function renderPlaylist() {
         if (!audio.paused) {
           audio.pause();
           playBtn.textContent = '▶ Play';
-          particleActive = false; // stop particles
+          particleActive = false;
         } else {
           audio.play();
           playBtn.textContent = '⏸ Pause';
-          particleActive = true; // start particles
+          particleActive = true;
         }
       } else {
         if (currentAudio) {
@@ -181,7 +281,7 @@ function renderPlaylist() {
         playBtn.textContent = '⏸ Pause';
         currentAudio = audio;
         currentBtn = playBtn;
-        particleActive = true; // start particles
+        particleActive = true;
       }
     });
 
@@ -197,44 +297,6 @@ function renderPlaylist() {
 }
 
 renderPlaylist();
-</script>
-
-<!-- =======================
-     Bloc interactif mots d'amour
-======================= -->
-<div id="loveBox" style="
-  text-align:center;
-  margin:40px 0;
-  font-size:24px;
-  color:#FF69B4;
-  cursor:pointer;
-  user-select:none;
-  transition: transform 0.3s;
-">💖 Tapote-moi 💖</div>
-
-<script>
-const loveWords = [
-  "Je t'aime 💘",
-  "Mon cœur ❤️",
-  "Amour éternel 💕",
-  "T'es mon rayon de soleil ☀️",
-  "Tu es magique ✨",
-  "Coeur à toi 💓",
-  "Mon petit bonheur 🥰",
-  "Love you 💖"
-];
-
-const loveBox = document.getElementById('loveBox');
-
-function showRandomLove() {
-  const word = loveWords[Math.floor(Math.random() * loveWords.length)];
-  loveBox.textContent = word;
-  loveBox.style.transform = "scale(1.2)";
-  setTimeout(() => { loveBox.style.transform = "scale(1)"; }, 300);
-}
-
-loveBox.addEventListener('click', showRandomLove);
-loveBox.addEventListener('touchstart', showRandomLove);
 </script>
 
 </body>
