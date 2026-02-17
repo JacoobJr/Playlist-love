@@ -119,9 +119,10 @@ const songs = [
 {title:"Soleil Bleu", artist:"Luiza", category:"Love", file:"soleil_bleu_luiza.mp3", youtube:"https://www.youtube.com/watch?v=nd8RD3tjNQE"},
 ];
 
+// --- VARIABLES AUDIO ---
 let currentAudio=null,currentBtn=null;
 
-// RENDER PLAYLIST
+// --- RENDER PLAYLIST ---
 function renderPlaylist(){
 const container=document.getElementById('Love');
 songs.forEach(song=>{
@@ -145,34 +146,36 @@ audio.addEventListener('ended',()=>{playBtn.textContent='▶ Play';particleActiv
 }
 renderPlaylist();
 
-// LOVE BOX
+// --- LOVE BOX ---
 const loveWords=["Je t'aime Anaelle 💘","Mon cœur ❤️","Mon amour 💕","Mon ange ☀️","Tu es magique ✨","Ma chérie 💓","Mon petit bonheur 🥰","Love you biloute 🤡💖"];
 const loveBox=document.createElement('div');
 loveBox.id='loveBox';
 loveBox.textContent='💖 Tapote-moi 💖';
+document.body.appendChild(loveBox);
 function showRandomLove(){const word=loveWords[Math.floor(Math.random()*loveWords.length)];loveBox.textContent=word;loveBox.style.transform="scale(1.2)";setTimeout(()=>{loveBox.style.transform="scale(1)";},300);}
 loveBox.addEventListener('click',showRandomLove);
 loveBox.addEventListener('touchstart',showRandomLove);
 
-// PARTICULES
+// --- PARTICULES ---
 const canvas=document.getElementById('particleCanvas');
 const ctx=canvas.getContext('2d');
 canvas.width=window.innerWidth;canvas.height=window.innerHeight;
-let particles=[];let particleActive=false;
+let particles=[];
+let particleActive=false;
 window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
 function drawHeart(ctx,x,y,size,color){ctx.save();ctx.translate(x,y);ctx.beginPath();const t=size*0.3;ctx.moveTo(0,t);ctx.bezierCurveTo(0,0,-size/2,0,-size/2,t);ctx.bezierCurveTo(-size/2,size/2,0,size*0.75,0,size);ctx.bezierCurveTo(0,size*0.75,size/2,size/2,size/2,t);ctx.bezierCurveTo(size/2,0,0,0,0,t);ctx.fillStyle=color;ctx.fill();ctx.restore();}
 class HeartParticle{constructor(){this.reset();}reset(){this.x=Math.random()*canvas.width;this.y=canvas.height+Math.random()*50;this.size=Math.random()*10+5;this.speedY=Math.random()*1+0.5;this.speedX=(Math.random()-0.5)*0.5;this.alpha=Math.random()*0.5+0.5;this.color=`rgba(255,0,128,${this.alpha})`;}update(){this.y-=this.speedY;this.x+=this.speedX;this.alpha-=0.002;if(this.y<-10||this.alpha<=0)this.reset();}draw(){drawHeart(ctx,this.x,this.y,this.size,this.color);}}
 function animateParticles(){ctx.clearRect(0,0,canvas.width,canvas.height);if(particleActive){if(particles.length<100)particles.push(new HeartParticle());particles.forEach(p=>{p.update();p.draw();});}requestAnimationFrame(animateParticles);}
 animateParticles();
 
-// DANCE
+// --- DANCE ---
 const danceZone=document.getElementById('danceZone');
 const dancerGirl=document.getElementById('dancerGirl');
 const dancerBoy=document.getElementById('dancerBoy');
 function showDance(){danceZone.style.opacity=1;dancerGirl.classList.add("animate");dancerBoy.classList.add("animate");}
 function hideDance(){danceZone.style.opacity=0;dancerGirl.classList.remove("animate");dancerBoy.classList.remove("animate");}
 
-// NAV
+// --- NAV ---
 function scrollToTop(){window.scrollTo({top:0,behavior:"smooth"});}
 function openSearch(){document.getElementById("searchOverlay").style.display="block";document.getElementById("searchInput").focus();}
 document.getElementById("searchInput").addEventListener("input",function(){const v=this.value.toLowerCase();document.querySelectorAll(".song").forEach(s=>{s.style.display=s.innerText.toLowerCase().includes(v)?"flex":"none";});});
