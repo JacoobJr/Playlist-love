@@ -4,11 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Notre Playlist 💖</title>
-
 <style>
 body { margin:0; font-family:'Arial',sans-serif; background-color:#121212; color:#fff; overflow-x:hidden; padding-bottom:90px; }
 header { background-color:#1DB954; text-align:center; padding:20px; font-size:24px; font-weight:bold; z-index:2; position:relative; }
-
 .category { margin:30px 15px; position:relative; z-index:2; }
 .category h2 { color:#fff; font-size:20px; margin-bottom:15px; font-weight:bold; }
 
@@ -67,7 +65,6 @@ audio { display:none; }
 </head>
 
 <body>
-
 <canvas id="particleCanvas"></canvas>
 <header>Playlist AnaJay 💖</header>
 
@@ -75,13 +72,11 @@ audio { display:none; }
 <div class="category">
 <h2>Amour</h2>
 <div class="slider">
-
 <div class="album-card"><div class="album-image"><span class="album-heart">❤️</span><img src="image-1.jpg"><div class="album-banner" style="background:#E91E63;">Notre Début</div></div><div class="album-desc">Le premier regard 💫</div></div>
 <div class="album-card"><div class="album-image"><span class="album-heart">❤️</span><img src="image-2.jpg"><div class="album-banner" style="background:#9C27B0;">Nos Moments</div></div><div class="album-desc">Les souvenirs précieux 💕</div></div>
 <div class="album-card"><div class="album-image"><span class="album-heart">❤️</span><img src="image-3.jpg"><div class="album-banner" style="background:#3F51B5;">Toujours Nous</div></div><div class="album-desc">Pour la vie 💍</div></div>
 <div class="album-card"><div class="album-image"><span class="album-heart">❤️</span><img src="image-4.jpg"><div class="album-banner" style="background:#FF5722;">Nos Rires</div></div><div class="album-desc">Les moments fous 😆</div></div>
 <div class="album-card"><div class="album-image"><span class="album-heart">❤️</span><img src="image-5.jpg"><div class="album-banner" style="background:#009688;">Notre Avenir</div></div><div class="album-desc">Main dans la main 🤝</div></div>
-
 </div>
 </div>
 
@@ -107,8 +102,7 @@ audio { display:none; }
 </div>
 
 <script>
-
-/* MUSIQUES */
+// MUSIQUES
 const songs = [
 {title:"Perfect", artist:"Ed Sheeran", category:"Love", file:"perfect.mp3", youtube:"https://www.youtube.com/watch?v=2Vv-BfVoq4g"},
 {title:"Imagine", artist:"Carbone", category:"Love", file:"imagine_carbone.mp3", youtube:"https://www.youtube.com/watch?v=iuSUZyTWi6o"},
@@ -127,7 +121,7 @@ const songs = [
 
 let currentAudio=null,currentBtn=null;
 
-/* PLAYLIST RENDER */
+// RENDER PLAYLIST
 function renderPlaylist(){
 const container=document.getElementById('Love');
 songs.forEach(song=>{
@@ -151,7 +145,7 @@ audio.addEventListener('ended',()=>{playBtn.textContent='▶ Play';particleActiv
 }
 renderPlaylist();
 
-/* LOVE BOX */
+// LOVE BOX
 const loveWords=["Je t'aime Anaelle 💘","Mon cœur ❤️","Mon amour 💕","Mon ange ☀️","Tu es magique ✨","Ma chérie 💓","Mon petit bonheur 🥰","Love you biloute 🤡💖"];
 const loveBox=document.createElement('div');
 loveBox.id='loveBox';
@@ -160,7 +154,7 @@ function showRandomLove(){const word=loveWords[Math.floor(Math.random()*loveWord
 loveBox.addEventListener('click',showRandomLove);
 loveBox.addEventListener('touchstart',showRandomLove);
 
-/* PARTICULES */
+// PARTICULES
 const canvas=document.getElementById('particleCanvas');
 const ctx=canvas.getContext('2d');
 canvas.width=window.innerWidth;canvas.height=window.innerHeight;
@@ -171,14 +165,14 @@ class HeartParticle{constructor(){this.reset();}reset(){this.x=Math.random()*can
 function animateParticles(){ctx.clearRect(0,0,canvas.width,canvas.height);if(particleActive){if(particles.length<100)particles.push(new HeartParticle());particles.forEach(p=>{p.update();p.draw();});}requestAnimationFrame(animateParticles);}
 animateParticles();
 
-/* DANCE */
+// DANCE
 const danceZone=document.getElementById('danceZone');
 const dancerGirl=document.getElementById('dancerGirl');
 const dancerBoy=document.getElementById('dancerBoy');
 function showDance(){danceZone.style.opacity=1;dancerGirl.classList.add("animate");dancerBoy.classList.add("animate");}
 function hideDance(){danceZone.style.opacity=0;dancerGirl.classList.remove("animate");dancerBoy.classList.remove("animate");}
 
-/* NAV FUNCTIONS */
+// NAV
 function scrollToTop(){window.scrollTo({top:0,behavior:"smooth"});}
 function openSearch(){document.getElementById("searchOverlay").style.display="block";document.getElementById("searchInput").focus();}
 document.getElementById("searchInput").addEventListener("input",function(){const v=this.value.toLowerCase();document.querySelectorAll(".song").forEach(s=>{s.style.display=s.innerText.toLowerCase().includes(v)?"flex":"none";});});
@@ -186,6 +180,5 @@ function toggleLibrary(){const p=document.getElementById("libraryPopup");p.style
 function goToCategory(id){document.getElementById(id).scrollIntoView({behavior:"smooth"});document.getElementById("libraryPopup").style.display="none";}
 function spawnHeart(){const h=document.createElement("div");h.className="like-heart";h.innerHTML="🤍";document.body.appendChild(h);setTimeout(()=>{h.remove();},600);}
 </script>
-
 </body>
 </html>
