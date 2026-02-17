@@ -101,12 +101,35 @@
   <span id="dancerBoy">🕺</span>
 </div>
 
-<!-- Bottom nav -->
+<!-- Bottom nav avec icônes sobres -->
 <div class="bottom-nav">
-  <div class="nav-item" onclick="scrollToTop()"><div class="nav-icon">🏠</div>Accueil</div>
-  <div class="nav-item" onclick="openSearch()"><div class="nav-icon">🔍</div>Recherche</div>
-  <div class="nav-item" onclick="toggleLibrary()"><div class="nav-icon">📚</div>Bibliothèque</div>
-  <div class="nav-item" onclick="spawnHeart()"><div class="nav-icon">🤍</div>Like</div>
+  <div class="nav-item" onclick="scrollToTop()">
+    <div class="nav-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    </div>
+    Accueil
+  </div>
+  <div class="nav-item" onclick="openSearch()">
+    <div class="nav-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM10 14a4 4 0 110-8 4 4 0 010 8z"/></svg>
+    </div>
+    Recherche
+  </div>
+  <div class="nav-item" onclick="toggleLibrary()">
+    <div class="nav-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M4 6h16v2H4zm0 6h16v2H4zm0 6h16v2H4z"/></svg>
+    </div>
+    Bibliothèque
+  </div>
+  <div class="nav-item" onclick="spawnHeart()">
+    <div class="nav-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 
+                 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 
+                 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 
+                 6.86-8.55 11.54L12 21.35z"/></svg>
+    </div>
+    Like
+  </div>
 </div>
 
 <div id="searchOverlay"><input type="text" id="searchInput" placeholder="Rechercher une musique..."></div>
@@ -169,25 +192,24 @@ songs.forEach(song=>{
   div.innerHTML=`<div class="info"><div class="title">${song.title}</div><div class="artist">${song.artist}</div></div><div class="buttons"><button class="play-btn">▶ Play</button><button class="yt-btn" onclick="window.open('${song.youtube}','_blank')">YouTube</button><audio src="${song.file}"></audio></div>`;
   container.appendChild(div);
   if(song.title==="Ma Belle"){ container.appendChild(loveBox); }
-  const playBtn=div.querySelector('.play-btn');const audio=div.querySelector('audio');
+  const playBtn=div.querySelector('.play-btn');
+  const audio=div.querySelector('audio');
   playBtn.addEventListener('click',()=>{
-    if(currentAudio===audio){if(!audio.paused){audio.pause();playBtn.textContent='▶ Play';particleActive=false;hideDance();}
-    else{audio.play();playBtn.textContent='⏸ Pause';particleActive=true;showDance();}}
-    else{if(currentAudio){currentAudio.pause();currentAudio.currentTime=0;if(currentBtn)currentBtn.textContent='▶ Play';}
-      audio.play();playBtn.textContent='⏸ Pause';currentAudio=audio;currentBtn=playBtn;particleActive=true;showDance();}
+    if(currentAudio===audio){ if(!audio.paused){ audio.pause(); playBtn.textContent='▶ Play'; particleActive=false; hideDance(); } else{ audio.play(); playBtn.textContent='⏸ Pause'; particleActive=true; showDance(); } }
+    else{ if(currentAudio){ currentAudio.pause(); currentAudio.currentTime=0;if(currentBtn)currentBtn.textContent='▶ Play'; } audio.play(); playBtn.textContent='⏸ Pause'; currentAudio=audio; currentBtn=playBtn; particleActive=true; showDance();}
   });
-  audio.addEventListener('ended',()=>{playBtn.textContent='▶ Play';particleActive=false;hideDance();if(currentAudio===audio){currentAudio=null;currentBtn=null;}});
+  audio.addEventListener('ended',()=>{playBtn.textContent='▶ Play'; particleActive=false; hideDance(); if(currentAudio===audio){currentAudio=null;currentBtn=null;}});
 });
 }
 renderPlaylist();
 
-// --- NAV ---
-function scrollToTop(){window.scrollTo({top:0,behavior:"smooth"});}
-function openSearch(){document.getElementById("searchOverlay").style.display="block";document.getElementById("searchInput").focus();}
-document.getElementById("searchInput").addEventListener("input",function(){const v=this.value.toLowerCase();document.querySelectorAll(".song").forEach(s=>{s.style.display=s.innerText.toLowerCase().includes(v)?"flex":"none";});});
-function toggleLibrary(){const p=document.getElementById("libraryPopup");p.style.display=p.style.display==="block"?"none":"block";}
+// --- NAV FUNCTIONS ---
+function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
+function openSearch(){document.getElementById('searchOverlay').style.display='block';}
+function toggleLibrary(){const p=document.getElementById('libraryPopup');p.style.display=(p.style.display==='block')?'none':'block';}
 function goToCategory(cat){document.getElementById(cat).scrollIntoView({behavior:"smooth"});document.getElementById("libraryPopup").style.display="none";}
 function spawnHeart(){const h=document.createElement("div");h.className="like-heart";h.innerHTML="🤍";document.body.appendChild(h);setTimeout(()=>{h.remove();},600);}
 </script>
+
 </body>
 </html>
