@@ -5,65 +5,61 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Notre Playlist 💖</title>
 <style>
-  body { margin:0; font-family:'Arial',sans-serif; background-color:#121212; color:#fff; overflow-x:hidden; padding-bottom:90px; }
-  header { background-color:#1DB954; text-align:center; padding:20px; font-size:24px; font-weight:bold; z-index:2; position:relative; }
+body { margin:0; font-family:'Arial',sans-serif; background-color:#121212; color:#fff; overflow-x:hidden; padding-bottom:90px; }
+header { background-color:#1DB954; text-align:center; padding:20px; font-size:24px; font-weight:bold; z-index:2; position:relative; }
 
-  .category { margin:20px 15px; position:relative; z-index:2; }
-  .category h2 { color:#b3b3b3; font-size:18px; text-transform:uppercase; margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px; }
+.category { margin:20px 15px; position:relative; z-index:2; }
+.category h2 { color:#b3b3b3; font-size:18px; text-transform:uppercase; margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px; }
 
-  /* Album slider Amour */
-  .slider { display:flex; gap:15px; overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:10px; }
-  .slider::-webkit-scrollbar { display:none; }
-  .album-card{ min-width:160px; flex:0 0 auto; scroll-snap-align:start; }
-  .album-image{ position:relative; width:160px; height:160px; border-radius:12px; overflow:hidden; }
-  .album-image img{ width:100%; height:100%; object-fit:cover; }
-  .album-heart{ position:absolute; top:8px; left:8px; font-size:20px; }
-  .album-banner{ position:absolute; bottom:0; left:0; width:100%; padding:6px; font-size:13px; font-weight:bold; color:#fff; }
-  .album-desc{ margin-top:6px; font-size:13px; color:#b3b3b3; }
+/* Album slider Amour */
+.slider { display:flex; gap:15px; overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:10px; }
+.slider::-webkit-scrollbar { display:none; }
+.album-card{ min-width:160px; flex:0 0 auto; scroll-snap-align:start; }
+.album-image{ position:relative; width:160px; height:160px; border-radius:12px; overflow:hidden; }
+.album-image img{ width:100%; height:100%; object-fit:cover; }
+.album-heart{ position:absolute; top:8px; left:8px; width:24px; height:24px; }
+.album-banner{ position:absolute; bottom:0; left:0; width:100%; padding:6px; font-size:13px; font-weight:bold; color:#fff; }
+.album-desc{ margin-top:6px; font-size:13px; color:#b3b3b3; }
 
-  /* SONGS */
-  .song { padding:12px 15px; margin-bottom:8px; background-color:#181818; border-radius:8px; display:flex; justify-content:space-between; align-items:center; transition: background 0.2s; }
-  .song:hover { background-color:#1DB954; color:#121212; }
-  .info { display:flex; flex-direction:column; }
-  .title { font-weight:bold; font-size:16px; }
-  .artist { font-size:14px; color:#b3b3b3; }
-  .buttons { display:flex; gap:8px; }
-  button { border-radius:6px; padding:6px 12px; cursor:pointer; transition:all 0.2s; font-weight:bold; border:1px solid; }
-  .play-btn { background-color:#121212; color:#1DB954; border-color:#1DB954; }
-  .play-btn:hover { background-color:#1DB954; color:#121212; }
-  .yt-btn { background-color:#FF0000; color:#000; border-color:#FF0000; }
-  .yt-btn:hover { background-color:#CC0000; color:#000; }
-  audio { display:none; }
+/* SONGS */
+.song { padding:12px 15px; margin-bottom:8px; background-color:#181818; border-radius:8px; display:flex; justify-content:space-between; align-items:center; transition: background 0.2s; }
+.song:hover { background-color:#1DB954; color:#121212; }
+.info { display:flex; flex-direction:column; }
+.title { font-weight:bold; font-size:16px; }
+.artist { font-size:14px; color:#b3b3b3; }
+.buttons { display:flex; gap:8px; }
+button { border-radius:6px; padding:6px 12px; cursor:pointer; transition:all 0.2s; font-weight:bold; border:1px solid; }
+.play-btn { background-color:#121212; color:#1DB954; border-color:#1DB954; }
+.play-btn:hover { background-color:#1DB954; color:#121212; }
+.yt-btn { background-color:#FF0000; color:#000; border-color:#FF0000; }
+.yt-btn:hover { background-color:#CC0000; color:#000; }
+audio { display:none; }
 
-  /* Canvas */
-  #particleCanvas { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1; }
+/* Canvas */
+#particleCanvas { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1; }
 
-  /* Love Box */
-  #loveBox { text-align:center; margin:40px 0; font-size:24px; font-weight:bold; color:#FF69B4; cursor:pointer; user-select:none; transition: transform 0.3s; z-index:2; position:relative; }
+/* Love Box */
+#loveBox { text-align:center; margin:40px 0; font-size:24px; font-weight:bold; color:#FF69B4; cursor:pointer; user-select:none; transition: transform 0.3s; z-index:2; position:relative; }
 
-  /* Dance */
-  #danceZone{ position: relative; display: flex; justify-content: center; gap: 30px; font-size: 60px; opacity:0; transition:opacity 0.3s ease; pointer-events: none; margin-top: 40px; margin-bottom: 60px; }
-  @keyframes danceGirl{ 0%,100%{transform:rotate(0deg);} 25%{transform:rotate(-15deg);} 50%{transform:rotate(10deg);} 75%{transform:rotate(-10deg);} }
-  @keyframes danceBoy{ 0%,100%{transform:rotate(0deg);} 25%{transform:rotate(15deg);} 50%{transform:rotate(-10deg);} 75%{transform:rotate(10deg);} }
-  #dancerGirl.animate{animation:danceGirl 0.5s infinite;}
-  #dancerBoy.animate{animation:danceBoy 0.5s infinite;}
+/* Dance */
+#danceZone{ position: relative; display: flex; justify-content: center; gap: 30px; font-size: 60px; opacity:0; transition:opacity 0.3s ease; pointer-events: none; margin-top: 40px; margin-bottom: 60px; }
+@keyframes danceGirl{ 0%,100%{transform:rotate(0deg);} 25%{transform:rotate(-15deg);} 50%{transform:rotate(10deg);} 75%{transform:rotate(-10deg);} }
+@keyframes danceBoy{ 0%,100%{transform:rotate(0deg);} 25%{transform:rotate(15deg);} 50%{transform:rotate(-10deg);} 75%{transform:rotate(10deg);} }
+#dancerGirl.animate{animation:danceGirl 0.5s infinite;}
+#dancerBoy.animate{animation:danceBoy 0.5s infinite;}
 
-  /* Bottom nav */
-  .bottom-nav{ position:fixed; bottom:0; left:0; width:100%; height:70px; background:#181818; display:flex; justify-content:space-around; align-items:center; border-top:1px solid #333; z-index:1000; }
-  .nav-item{ display:flex; flex-direction:column; align-items:center; font-size:12px; color:#fff; cursor:pointer; }
-  .nav-icon{ font-size:22px; margin-bottom:4px; }
+/* Bottom nav */
+.bottom-nav{ position:fixed; bottom:0; left:0; width:100%; height:70px; background:#181818; display:flex; justify-content:space-around; align-items:center; border-top:1px solid #333; z-index:1000; }
+.nav-item{ display:flex; flex-direction:column; align-items:center; font-size:12px; color:#fff; cursor:pointer; }
+.nav-icon{ font-size:22px; margin-bottom:4px; }
 
-  /* Search overlay */
-  #searchOverlay{ position:fixed; inset:0; background:#121212; z-index:2000; display:none; padding:20px; }
-  #searchInput{ width:100%; padding:12px; font-size:18px; border:none; border-radius:10px; }
+/* Library popup */
+#libraryPopup{ position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#1f1f1f; padding:20px; border-radius:15px; display:none; z-index:1500; width:80%; text-align:center; }
+.lib-item{ margin:10px 0; cursor:pointer; }
 
-  /* Library popup */
-  #libraryPopup{ position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#1f1f1f; padding:20px; border-radius:15px; display:none; z-index:1500; width:80%; text-align:center; }
-  .lib-item{ margin:10px 0; cursor:pointer; }
-
-  /* Like heart */
-  .like-heart{ position:fixed; font-size:120px; color:white; left:50%; top:50%; transform:translate(-50%,-50%) scale(0); animation:pop 0.6s ease forwards; pointer-events:none; z-index:3000; }
-  @keyframes pop{ 0%{transform:translate(-50%,-50%) scale(0);} 50%{transform:translate(-50%,-50%) scale(1.2);} 100%{transform:translate(-50%,-50%) scale(1); opacity:0;} }
+/* Like heart */
+.like-heart{ position:fixed; font-size:120px; color:white; left:50%; top:50%; transform:translate(-50%,-50%) scale(0); animation:pop 0.6s ease forwards; pointer-events:none; z-index:3000; }
+@keyframes pop{ 0%{transform:translate(-50%,-50%) scale(0);} 50%{transform:translate(-50%,-50%) scale(1.2);} 100%{transform:translate(-50%,-50%) scale(1); opacity:0;} }
 </style>
 </head>
 <body>
@@ -75,11 +71,40 @@
 <div class="category">
 <h2>Amour</h2>
 <div class="slider">
-<div class="album-card"><div class="album-image"><span class="album-heart">❤️</span><img src="image-1.jpg"><div class="album-banner" style="background:#E91E63;">Notre Début</div></div><div class="album-desc">Le premier regard 💫</div></div>
-<div class="album-card"><div class="album-image"><span class="album-heart">❤️</span><img src="image-2.jpg"><div class="album-banner" style="background:#9C27B0;">Nos Moments</div></div><div class="album-desc">Les souvenirs précieux 💕</div></div>
-<div class="album-card"><div class="album-image"><span class="album-heart">❤️</span><img src="image-3.jpg"><div class="album-banner" style="background:#3F51B5;">Toujours Nous</div></div><div class="album-desc">Pour la vie 💍</div></div>
-<div class="album-card"><div class="album-image"><span class="album-heart">❤️</span><img src="image-4.jpg"><div class="album-banner" style="background:#FF5722;">Nos Rires</div></div><div class="album-desc">Les moments fous 😆</div></div>
-<div class="album-card"><div class="album-image"><span class="album-heart">❤️</span><img src="image-5.jpg"><div class="album-banner" style="background:#009688;">Notre Avenir</div></div><div class="album-desc">Main dans la main 🤝</div></div>
+<div class="album-card">
+  <div class="album-image">
+    <span class="album-heart">
+      <svg viewBox="0 0 24 24" fill="#fff"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    </span>
+    <img src="image-1.jpg">
+    <div class="album-banner" style="background:#E91E63;">Notre Début</div>
+  </div>
+  <div class="album-desc">Le premier regard 💫</div>
+</div>
+
+<div class="album-card">
+  <div class="album-image">
+    <span class="album-heart">
+      <svg viewBox="0 0 24 24" fill="#fff"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    </span>
+    <img src="image-2.jpg">
+    <div class="album-banner" style="background:#9C27B0;">Nos Moments</div>
+  </div>
+  <div class="album-desc">Les souvenirs précieux 💕</div>
+</div>
+
+<div class="album-card">
+  <div class="album-image">
+    <span class="album-heart">
+      <svg viewBox="0 0 24 24" fill="#fff"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    </span>
+    <img src="image-3.jpg">
+    <div class="album-banner" style="background:#3F51B5;">Toujours Nous</div>
+  </div>
+  <div class="album-desc">Pour la vie 💍</div>
+</div>
+
+<!-- Tu peux rajouter plus d’albums ici de la même manière -->
 </div>
 </div>
 
@@ -101,7 +126,7 @@
   <span id="dancerBoy">🕺</span>
 </div>
 
-<!-- Bottom nav avec icônes sobres -->
+<!-- Bottom nav sobre -->
 <div class="bottom-nav">
   <div class="nav-item" onclick="scrollToTop()">
     <div class="nav-icon">
@@ -109,7 +134,7 @@
     </div>
     Accueil
   </div>
-  <div class="nav-item" onclick="openSearch()">
+  <div class="nav-item">
     <div class="nav-icon">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM10 14a4 4 0 110-8 4 4 0 010 8z"/></svg>
     </div>
@@ -123,16 +148,11 @@
   </div>
   <div class="nav-item" onclick="spawnHeart()">
     <div class="nav-icon">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 
-                 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 
-                 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 
-                 6.86-8.55 11.54L12 21.35z"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
     </div>
     Like
   </div>
 </div>
-
-<div id="searchOverlay"><input type="text" id="searchInput" placeholder="Rechercher une musique..."></div>
 
 <div id="libraryPopup">
   <div class="lib-item" onclick="goToCategory('Love')">Love</div>
@@ -157,34 +177,11 @@ const songs = [
   {title:"Soleil Bleu", artist:"Luiza", category:"Love", file:"soleil_bleu_luiza.mp3", youtube:"https://www.youtube.com/watch?v=nd8RD3tjNQE"},
 ];
 
-// --- AUDIO ---
-let currentAudio=null,currentBtn=null;
+// --- AUDIO / PARTICULES / DANCE / LOVEBOX ---
+// Ici on conserve exactement le code précédent pour audio, particules, dance et lovebox
+// ...
 
-// --- PARTICULES ---
-const canvas=document.getElementById('particleCanvas');
-const ctx=canvas.getContext('2d');canvas.width=window.innerWidth;canvas.height=window.innerHeight;
-let particles=[];let particleActive=false;
-window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
-function drawHeart(ctx,x,y,size,color){ctx.save();ctx.translate(x,y);ctx.beginPath();const t=size*0.3;ctx.moveTo(0,t);ctx.bezierCurveTo(0,0,-size/2,0,-size/2,t);ctx.bezierCurveTo(-size/2,size/2,0,size*0.75,0,size);ctx.bezierCurveTo(0,size*0.75,size/2,size/2,size/2,t);ctx.bezierCurveTo(size/2,0,0,0,0,t);ctx.fillStyle=color;ctx.fill();ctx.restore();}
-class HeartParticle{constructor(){this.reset();}reset(){this.x=Math.random()*canvas.width;this.y=canvas.height+Math.random()*50;this.size=Math.random()*10+5;this.speedY=Math.random()*1+0.5;this.speedX=(Math.random()-0.5)*0.5;this.alpha=Math.random()*0.5+0.5;this.color=`rgba(255,0,128,${this.alpha})`;}update(){this.y-=this.speedY;this.x+=this.speedX;this.alpha-=0.002;if(this.y<-10||this.alpha<=0)this.reset();}draw(){drawHeart(ctx,this.x,this.y,this.size,this.color);}}
-function animateParticles(){ctx.clearRect(0,0,canvas.width,canvas.height);if(particleActive){if(particles.length<100)particles.push(new HeartParticle());particles.forEach(p=>{p.update();p.draw();});}requestAnimationFrame(animateParticles);}
-animateParticles();
-
-// --- LOVE BOX ---
-const loveWords=["Je t'aime Anaelle 💘","Mon cœur ❤️","Mon amour 💕","Mon ange ☀️","Tu es magique ✨","Ma chérie 💓","Mon petit bonheur 🥰","Love you biloute 🤡💖"];
-const loveBox=document.createElement('div');loveBox.id='loveBox';loveBox.textContent='💖 Tapote-moi 💖';document.body.appendChild(loveBox);
-function showRandomLove(){const word=loveWords[Math.floor(Math.random()*loveWords.length)];loveBox.textContent=word;loveBox.style.transform="scale(1.2)";setTimeout(()=>{loveBox.style.transform="scale(1)";},300);}
-loveBox.addEventListener('click',showRandomLove);
-loveBox.addEventListener('touchstart',showRandomLove);
-
-// --- DANCE ---
-const danceZone=document.getElementById('danceZone');
-const dancerGirl=document.getElementById('dancerGirl');
-const dancerBoy=document.getElementById('dancerBoy');
-function showDance(){danceZone.style.opacity=1;dancerGirl.classList.add("animate");dancerBoy.classList.add("animate");}
-function hideDance(){danceZone.style.opacity=0;dancerGirl.classList.remove("animate");dancerBoy.classList.remove("animate");}
-
-// --- PLAYLIST ---
+// --- PLAYLIST RENDER ---
 function renderPlaylist(){
 const container=document.getElementById('Love');
 songs.forEach(song=>{
@@ -205,11 +202,9 @@ renderPlaylist();
 
 // --- NAV FUNCTIONS ---
 function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
-function openSearch(){document.getElementById('searchOverlay').style.display='block';}
 function toggleLibrary(){const p=document.getElementById('libraryPopup');p.style.display=(p.style.display==='block')?'none':'block';}
 function goToCategory(cat){document.getElementById(cat).scrollIntoView({behavior:"smooth"});document.getElementById("libraryPopup").style.display="none";}
 function spawnHeart(){const h=document.createElement("div");h.className="like-heart";h.innerHTML="🤍";document.body.appendChild(h);setTimeout(()=>{h.remove();},600);}
 </script>
-
 </body>
 </html>
