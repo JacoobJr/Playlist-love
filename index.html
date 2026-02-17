@@ -10,17 +10,6 @@ header { background-color:#1DB954; text-align:center; padding:20px; font-size:24
 .category { margin:20px 15px; position:relative; z-index:2; }
 .category h2 { color:#b3b3b3; font-size:18px; text-transform:uppercase; margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px; }
 
-/* Slider Amour */
-.slider { display:flex; gap:15px; overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:10px; }
-.slider::-webkit-scrollbar { display:none; }
-.album-card{ min-width:160px; flex:0 0 auto; scroll-snap-align:start; }
-.album-image{ position:relative; width:160px; height:160px; border-radius:12px; overflow:hidden; cursor:pointer; }
-.album-image img{ width:100%; height:100%; object-fit:cover; }
-.album-heart{ position:absolute; top:8px; left:8px; width:24px; height:24px; }
-.album-banner{ position:absolute; bottom:0; left:0; width:100%; padding:6px; font-size:13px; font-weight:bold; color:#fff; }
-.album-desc{ margin-top:6px; font-size:13px; color:#b3b3b3; }
-.album-like-heart{ position:absolute; font-size:50px; color:white; top:50%; left:50%; transform:translate(-50%,-50%) scale(0); pointer-events:none; }
-
 /* Playlist */
 .song { padding:12px 15px; margin-bottom:8px; background-color:#181818; border-radius:8px; display:flex; justify-content:space-between; align-items:center; transition: background 0.2s; }
 .song:hover { background-color:#1DB954; color:#121212; }
@@ -67,23 +56,14 @@ audio { display:none; }
 <canvas id="particleCanvas"></canvas>
 <header>Playlist AnaJay 💖</header>
 
-<!-- Amour slider -->
-<div class="category">
-<h2>Amour</h2>
-<div class="slider" id="AmourSlider"></div>
-</div>
-
-<!-- Playlist -->
 <div class="category"><h2>Love</h2><div id="Love"></div></div>
 <div class="category"><h2>Autre</h2><div id="Chill"></div></div>
 
-<!-- Dance -->
 <div id="danceZone">
   <span id="dancerGirl">💃</span>
   <span id="dancerBoy">🕺</span>
 </div>
 
-<!-- Bottom nav -->
 <div class="bottom-nav">
   <div class="nav-item" onclick="scrollToTop()"><div class="nav-icon">🏠</div>Accueil</div>
   <div class="nav-item"><div class="nav-icon">🔍</div>Recherche</div>
@@ -129,6 +109,7 @@ const songs=[
 {title:"Solide", artist:"Ronisia", category:"Love", file:"solide_ronisia.mp3", youtube:"https://www.youtube.com/watch?v=RHOhrdsGOc0"},
 {title:"Soleil Bleu", artist:"Luiza", category:"Love", file:"soleil_bleu_luiza.mp3", youtube:"https://www.youtube.com/watch?v=nd8RD3tjNQE"},
 ];
+
 let currentAudio=null,currentBtn=null;
 function renderPlaylist(){const container=document.getElementById('Love');songs.forEach((song)=>{
 const div=document.createElement('div');div.className='song';
