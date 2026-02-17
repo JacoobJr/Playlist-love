@@ -199,5 +199,43 @@ function renderPlaylist() {
 renderPlaylist();
 </script>
 
+<!-- =======================
+     Bloc interactif mots d'amour
+======================= -->
+<div id="loveBox" style="
+  text-align:center;
+  margin:40px 0;
+  font-size:24px;
+  color:#FF69B4;
+  cursor:pointer;
+  user-select:none;
+  transition: transform 0.3s;
+">💖 Tapote-moi 💖</div>
+
+<script>
+const loveWords = [
+  "Je t'aime 💘",
+  "Mon cœur ❤️",
+  "Amour éternel 💕",
+  "T'es mon rayon de soleil ☀️",
+  "Tu es magique ✨",
+  "Coeur à toi 💓",
+  "Mon petit bonheur 🥰",
+  "Love you 💖"
+];
+
+const loveBox = document.getElementById('loveBox');
+
+function showRandomLove() {
+  const word = loveWords[Math.floor(Math.random() * loveWords.length)];
+  loveBox.textContent = word;
+  loveBox.style.transform = "scale(1.2)";
+  setTimeout(() => { loveBox.style.transform = "scale(1)"; }, 300);
+}
+
+loveBox.addEventListener('click', showRandomLove);
+loveBox.addEventListener('touchstart', showRandomLove);
+</script>
+
 </body>
 </html>
