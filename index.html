@@ -32,6 +32,24 @@
     pointer-events:none;
     z-index:1;
   }
+
+  /* Animations danse */
+  @keyframes danceGirl {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-15deg); }
+    50% { transform: rotate(10deg); }
+    75% { transform: rotate(-10deg); }
+  }
+
+  @keyframes danceBoy {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(15deg); }
+    50% { transform: rotate(-10deg); }
+    75% { transform: rotate(10deg); }
+  }
+
+  #dancerGirl.animate { animation: danceGirl 0.5s infinite; }
+  #dancerBoy.animate { animation: danceBoy 0.5s infinite; }
 </style>
 </head>
 <body>
@@ -88,7 +106,6 @@ window.addEventListener('resize', () => {
   canvas.height = window.innerHeight;
 });
 
-// fonction pour dessiner un cœur
 function drawHeart(ctx, x, y, size, color) {
   ctx.save();
   ctx.translate(x, y);
@@ -105,9 +122,7 @@ function drawHeart(ctx, x, y, size, color) {
 }
 
 class HeartParticle {
-  constructor() {
-    this.reset();
-  }
+  constructor() { this.reset(); }
   reset() {
     this.x = Math.random() * canvas.width;
     this.y = canvas.height + Math.random() * 50;
@@ -123,9 +138,7 @@ class HeartParticle {
     this.alpha -= 0.002;
     if (this.y < -10 || this.alpha <= 0) this.reset();
   }
-  draw() {
-    drawHeart(ctx, this.x, this.y, this.size, this.color);
-  }
+  draw() { drawHeart(ctx, this.x, this.y, this.size, this.color); }
 }
 
 function animateParticles() {
@@ -177,14 +190,14 @@ function renderPlaylist() {
       containerLove.appendChild(loveDiv);
 
       const loveWords = [
-        "Je t'aime Anaelle 💘",
+        "Je t'aime 💘",
         "Mon cœur ❤️",
-        "Mon ange 💕",
-        "Ma chérie ☀️",
-        "Tu es mon bonheur ✨",
+        "Amour éternel 💕",
+        "T'es mon rayon de soleil ☀️",
+        "Tu es magique ✨",
         "Coeur à toi 💓",
         "Mon petit bonheur 🥰",
-        "Love you biloute 💖"
+        "Love you 💖"
       ];
       loveDiv.addEventListener('click', () => {
         const word = loveWords[Math.floor(Math.random() * loveWords.length)];
@@ -203,16 +216,27 @@ function renderPlaylist() {
     const playBtn = div.querySelector('.play-btn');
     const audio = div.querySelector('audio');
 
+    // ---------- Danse tout en bas ----------
+    const danceZone = document.getElementById('danceZone');
+    const dancerGirl = document.getElementById('dancerGirl');
+    const dancerBoy = document.getElementById('dancerBoy');
+
     playBtn.addEventListener('click', () => {
       if (currentAudio === audio) {
         if (!audio.paused) {
           audio.pause();
           playBtn.textContent = '▶ Play';
           particleActive = false;
+          danceZone.style.opacity = 0;
+          dancerGirl.classList.remove('animate');
+          dancerBoy.classList.remove('animate');
         } else {
           audio.play();
           playBtn.textContent = '⏸ Pause';
           particleActive = true;
+          danceZone.style.opacity = 1;
+          dancerGirl.classList.add('animate');
+          dancerBoy.classList.add('animate');
         }
       } else {
         if (currentAudio) {
@@ -225,12 +249,18 @@ function renderPlaylist() {
         currentAudio = audio;
         currentBtn = playBtn;
         particleActive = true;
+        danceZone.style.opacity = 1;
+        dancerGirl.classList.add('animate');
+        dancerBoy.classList.add('animate');
       }
     });
 
     audio.addEventListener('ended', () => {
       playBtn.textContent = '▶ Play';
       particleActive = false;
+      danceZone.style.opacity = 0;
+      dancerGirl.classList.remove('animate');
+      dancerBoy.classList.remove('animate');
       if (currentAudio === audio) {
         currentAudio = null;
         currentBtn = null;
@@ -266,10 +296,16 @@ function renderPlaylist() {
           audio.pause();
           playBtn.textContent = '▶ Play';
           particleActive = false;
+          danceZone.style.opacity = 0;
+          dancerGirl.classList.remove('animate');
+          dancerBoy.classList.remove('animate');
         } else {
           audio.play();
           playBtn.textContent = '⏸ Pause';
           particleActive = true;
+          danceZone.style.opacity = 1;
+          dancerGirl.classList.add('animate');
+          dancerBoy.classList.add('animate');
         }
       } else {
         if (currentAudio) {
@@ -282,12 +318,18 @@ function renderPlaylist() {
         currentAudio = audio;
         currentBtn = playBtn;
         particleActive = true;
+        danceZone.style.opacity = 1;
+        dancerGirl.classList.add('animate');
+        dancerBoy.classList.add('animate');
       }
     });
 
     audio.addEventListener('ended', () => {
       playBtn.textContent = '▶ Play';
       particleActive = false;
+      danceZone.style.opacity = 0;
+      dancerGirl.classList.remove('animate');
+      dancerBoy.classList.remove('animate');
       if (currentAudio === audio) {
         currentAudio = null;
         currentBtn = null;
@@ -298,6 +340,14 @@ function renderPlaylist() {
 
 renderPlaylist();
 </script>
+
+<!-- =======================
+     Bloc danse tout en bas
+======================= -->
+<div id="danceZone">
+  <span id="dancerGirl">💃</span>
+  <span id="dancerBoy">🕺</span>
+</div>
 
 </body>
 </html>
