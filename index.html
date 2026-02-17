@@ -222,7 +222,7 @@ animateParticles();
 // =============================
 // LOVE BOX
 // =============================
-const loveWords=["Je t'aime Anaelle 💘","Mon cœur ❤️","Mon amour 💕","Mon ange ☀️","Tu es magique ✨","Ma chérie 💓","Mon petit bonheur 🥰","Love you biloute 🤡💖"];
+const loveWords=["Je t'aime Anaelle 💘","Mon cœur ❤️","Mon amour 💕","Mon ange ☀️","Ma madame ✨","Ma chérie 💓","Mon petit bonheur 🥰","Love you biloute 🤡💖"];
 const loveBox=document.createElement('div');loveBox.id='loveBox';loveBox.textContent='💖 Tapote-moi 💖';document.body.appendChild(loveBox);
 function showRandomLove(){const word=loveWords[Math.floor(Math.random()*loveWords.length)];loveBox.textContent=word;loveBox.style.transform="scale(1.2)";setTimeout(()=>{loveBox.style.transform="scale(1)";},300);}
 loveBox.addEventListener('click',showRandomLove);
