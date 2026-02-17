@@ -38,6 +38,7 @@
     text-align:center;
     margin:40px 0;
     font-size:24px;
+    font-weight:bold; /* <-- Texte maintenant en gras */
     color:#FF69B4;
     cursor:pointer;
     user-select:none;
@@ -48,10 +49,11 @@
 
   /* Zone danse en bas */
   #danceZone{
-    position:relative;      /* <-- changé fixed -> relative */
-    margin:40px auto 20px;  /* espace en haut et bas, centré horizontalement */
+    position:fixed;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
     display:flex;
-    justify-content:center;
     gap:30px;
     font-size:60px;
     opacity:0;
@@ -114,7 +116,7 @@ const songs = [
   {title:"Jolie Bébé", artist:"Naza", category:"Love", file:"jolie_bebe_naza.mp3", youtube:"https://www.youtube.com/watch?v=sTp7C41iY6M"},
   {title:"Mon Bébé", artist:"RnBoi", category:"Love", file:"mon_bebe_rnboi.mp3", youtube:"https://www.youtube.com/watch?v=U2t5Y89I2tE"},
   {title:"Solide", artist:"Ronisia", category:"Love", file:"solide_ronisia.mp3", youtube:"https://www.youtube.com/watch?v=RHOhrdsGOc0"},
-  {title:"Soleil Bleu", artist:"Luiza", category:"Love", file:"soleil_bleu_luiza.mp3", youtube:"https://www.youtube.com/watch?v=nd8RD3tjNQE"}
+  {title:"Soleil Bleu", artist:"Luiza", category:"Love", file:"soleil_bleu_luiza.mp3", youtube:"https://www.youtube.com/watch?v=nd8RD3tjNQE"},
 ];
 
 let currentAudio = null;
