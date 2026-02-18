@@ -812,12 +812,12 @@ body.light #lockNavBtn { color: #7c3aed; }
   <div class="memo-sub-label">Notes</div>
   <div class="memo-notes-slider-wrap">
     <div class="memo-notes-slider" id="memoNotesSlider">
-      <div class="memo-notes-empty">Connecte Supabase pour voir les notes.</div>
+      <div class="memo-notes-empty">Chargement...</div>
     </div>
   </div>
   <div class="memo-sub-label" style="margin-top:18px">To-do</div>
   <div class="memo-todo-card">
-    <div id="memoTodoList"><div class="todo-empty">Connecte Supabase pour voir la to-do.</div></div>
+    <div id="memoTodoList"><div class="todo-empty">Chargement...</div></div>
     <div class="todo-add-row" id="memoTodoAddRow" style="display:none">
       <input type="text" class="todo-add-input" id="memoTodoInput" placeholder="Ajouter un item..." maxlength="120">
       <button class="todo-add-btn" onclick="memoAddTodoItem()">+</button>
@@ -1175,13 +1175,15 @@ var songsLove = [
   {title:"Soleil Bleu",        artist:"Luiza",          file:"soleil_bleu_luiza.mp3",      yt:"https://www.youtube.com/watch?v=nd8RD3tjNQE"}
 ];
 
-try { var s=JSON.parse(localStorage.getItem('love_plays')||'{}'); songsLove.forEach(function(x){x.plays=s[x.file]||0;}); }
-catch(e){ songsLove.forEach(function(x){x.plays=0;}); }
-function savePlays(file,count){
-  // sera surchargé par le bloc Supabase ci-dessous
+// Initialise plays à 0, sera mis à jour par Supabase
+songsLove.forEach(function(x){ x.plays = 0; });
+
+function fmtPlays(n){if(n>=1e6)return(n/1e6).toFixed(1).replace('.0','')+'M';if(n>=1e3)return(n/1e3).toFixed(1).replace('.0','')+'k';return n?String(n):'—';}
+
+// savePlays sera surchargé par le bloc Supabase
+function savePlays(file, count) {
   try{var o=JSON.parse(localStorage.getItem('love_plays')||'{}');o[file]=count;localStorage.setItem('love_plays',JSON.stringify(o));}catch(e){}
 }
-function fmtPlays(n){if(n>=1e6)return(n/1e6).toFixed(1).replace('.0','')+'M';if(n>=1e3)return(n/1e3).toFixed(1).replace('.0','')+'k';return n?String(n):'—';}
 
 var allSongs = songsLove;
 var currentAudio = null, currentBtn = null, currentRow = null;
@@ -1531,27 +1533,26 @@ function sbUpsert(table,body,onConflict){
 
 // ════════════════════════════════════════════
 // COMPTEUR D'ÉCOUTES — Supabase song_plays
-// table: song_plays (file TEXT primary key, plays INT default 0)
+// CORRECTION : utilise song_key et play_count (noms réels des colonnes)
 // ════════════════════════════════════════════
 (function(){
   // Charge tous les compteurs depuis Supabase au démarrage
-  sbGet('song_plays','').then(function(rows){
-    if(!Array.isArray(rows))return;
-    var map={};rows.forEach(function(r){map[r.file]=r.plays||0;});
-    songsLove.forEach(function(s){s.plays=map[s.file]||0;});
+  sbGet('song_plays', '').then(function(rows){
+    if(!Array.isArray(rows)) return;
+    // CORRECTION : map sur song_key et play_count
+    var map = {};
+    rows.forEach(function(r){ map[r.song_key] = r.play_count || 0; });
+    songsLove.forEach(function(s){ s.plays = map[s.file] || 0; });
     renderTop50(); // re-render avec les vraies valeurs
   }).catch(function(){});
 
   // Override savePlays pour écrire dans Supabase
-  savePlays=function(file,count){
-    sbUpsert('song_plays',{file:file,plays:count},'file').catch(function(){});
-    // fallback local aussi
+  // CORRECTION : upsert sur song_key avec play_count, on_conflict=song_key
+  savePlays = function(file, count){
+    sbUpsert('song_plays', { song_key: file, play_count: count }, 'song_key').catch(function(){});
+    // fallback local
     try{var o=JSON.parse(localStorage.getItem('love_plays')||'{}');o[file]=count;localStorage.setItem('love_plays',JSON.stringify(o));}catch(e){}
   };
-
-  // On patch renderTop50 pour passer file+count à savePlays
-  var _origSavePlays=savePlays;
-  window._sbSavePlay=function(file,count){_origSavePlays(file,count);};
 })();
 
 // ── MEMO COUPLE — Supabase ──
@@ -1623,6 +1624,7 @@ function sbUpsert(table,body,onConflict){
           '<div class="memo-note-img" style="background:'+col+'">' +
           '<div class="memo-note-bg">'+icon+'</div>' +
           '<div class="memo-note-date-badge">'+escHtml(ds)+'</div>' +
+          // CORRECTION : affiche note.title s'il existe, sinon 'Note'
           '<div class="memo-note-banner">'+escHtml(note.title||'Note')+'</div></div>' +
           '<div class="memo-note-preview">'+escHtml(prev)+'</div>';
         (function(n){card.addEventListener('click',function(){openMemoModal(n,false);});})(note);
@@ -1644,6 +1646,7 @@ function sbUpsert(table,body,onConflict){
     }else{
       document.getElementById('memoModalView').style.display='block';
       document.getElementById('memoModalEdit').style.display='none';
+      // CORRECTION : affiche le titre dans le label de la modale
       document.querySelector('.memo-modal-label').textContent=note&&note.title?note.title:'Note';
       document.getElementById('memoModalContent').textContent=note?(note.text||'(vide)'):'';
       var d=new Date(note?note.created_at:Date.now());
@@ -1663,8 +1666,10 @@ function sbUpsert(table,body,onConflict){
     var btn=document.querySelector('.memo-modal-save');btn.textContent='⏳';btn.disabled=true;
     var done=function(){btn.textContent='Sauvegarder 💾';btn.disabled=false;window.closeMemoModal();renderNotes();};
     if(memoCurrentNote&&memoCurrentNote.id){
+      // CORRECTION : inclut title dans le PATCH
       sbPatch('memo_notes',memoCurrentNote.id,{text:txt,title:ttl}).then(done).catch(done);
     }else{
+      // CORRECTION : inclut title dans le POST
       sbPost('memo_notes',{text:txt,title:ttl}).then(done).catch(done);
     }
   };
