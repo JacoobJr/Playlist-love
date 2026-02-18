@@ -1226,9 +1226,24 @@ function createSongEl(song, num) {
 }
 
 // Stocke le classement précédent pour détecter les montées/descentes
-var prevRanks = {};
+// Charge prevRanks depuis localStorage pour persister entre sessions
+var prevRanks = (function(){
+  try { return JSON.parse(localStorage.getItem('sp_prev_ranks') || '{}'); }
+  catch(e){ return {}; }
+})();
 
 function renderTop50() {
+  // Mémorise la chanson en cours avant de recréer le DOM
+  var playingFile = null;
+  var playingTime = 0;
+  if(currentAudio && !currentAudio.paused) {
+    playingFile = currentAudio.getAttribute('src');
+    playingTime = currentAudio.currentTime;
+    // Suspend proprement sans stopper la logique
+    currentAudio.pause();
+  }
+  currentAudio = null; currentBtn = null; currentRow = null;
+
   var sorted = songsLove.slice().sort(function(a,b){return b.plays-a.plays;});
   // Calcule les tendances avant de re-render
   var newRanks = {};
@@ -1262,15 +1277,32 @@ function renderTop50() {
     function toggle(e){if(e)e.stopPropagation();if(currentAudio===audio){audio.paused?pl():ps();}else{stopCurrent();currentAudio=audio;currentBtn=btn;currentRow=div;pl();}}
     btn.addEventListener('click',toggle);
     div.addEventListener('click',toggle);
-    audio.addEventListener('timeupdate',function(){if(!audio._counted&&audio.currentTime>=3){audio._counted=true;song.plays++;savePlays(song.file);var pe=div.querySelector('.sp-plays');if(pe)pe.textContent=fmtPlays(song.plays);}});
+    audio.addEventListener('timeupdate',function(){if(!audio._counted&&audio.currentTime>=3){audio._counted=true;song.plays++;savePlays(song.file);renderTop50();}});
     audio.addEventListener('ended',function(){
       audio._counted=false;ps();currentAudio=null;currentBtn=null;currentRow=null;
       playNext(div);
     });
     container.appendChild(div);
   });
-  // Met à jour le classement précédent pour le prochain render
+  // Restaure la lecture si une chanson était en cours
+  if(playingFile) {
+    var allRows = container.querySelectorAll('.sp-song');
+    allRows.forEach(function(row){
+      var a = row.querySelector('audio');
+      if(a && a.getAttribute('src') === playingFile) {
+        a.currentTime = playingTime;
+        var b = row.querySelector('.sp-btn-play');
+        currentAudio = a; currentBtn = b; currentRow = row;
+        a.play().catch(function(){});
+        b.textContent = '⏸'; b.classList.add('active');
+        row.classList.add('playing');
+        particleActive = true; showDance();
+      }
+    });
+  }
+  // Met à jour et persiste le classement précédent
   prevRanks = newRanks;
+  try { localStorage.setItem('sp_prev_ranks', JSON.stringify(prevRanks)); } catch(e){}
   var eb=document.getElementById('top50Expand');
   eb.style.display = sorted.length<=TOP_VISIBLE?'none':'flex';
   var remaining = sorted.length - TOP_VISIBLE;
@@ -1640,8 +1672,6 @@ function sbUpsert(table,body,onConflict){
   }).catch(function(){ renderTop50(); });
 
   // Override savePlays : appelle la fonction SQL increment_play
-  // qui fait INSERT ... ON CONFLICT DO UPDATE play_count + 1
-  // => fiable depuis n'importe quel téléphone, pas de valeur locale
   savePlays = function(file){
     fetch(SB_URL + '/rest/v1/rpc/increment_play', {
       method: 'POST',
@@ -1649,6 +1679,26 @@ function sbUpsert(table,body,onConflict){
       body: JSON.stringify({ p_song_key: file })
     }).catch(function(){});
   };
+
+  // ── Rafraîchissement automatique toutes les 30 secondes ──
+  // Met à jour les compteurs depuis Supabase sans recharger la page
+  // Si le classement change (écoutes de l'autre téléphone), renderTop50 se relance
+  function refreshPlays() {
+    sbGet('song_plays', 'select=song_key,play_count').then(function(rows){
+      if(!Array.isArray(rows)) return;
+      var changed = false;
+      var map = {};
+      rows.forEach(function(r){ map[r.song_key] = r.play_count || 0; });
+      songsLove.forEach(function(s){
+        var remote = map[s.file] || 0;
+        // On prend toujours la valeur la plus haute (local ou remote)
+        // pour ne pas écraser un incrément local non encore syncé
+        if(remote > s.plays) { s.plays = remote; changed = true; }
+      });
+      if(changed) renderTop50();
+    }).catch(function(){});
+  }
+  setInterval(refreshPlays, 30000);
 })();
 
 // ── MEMO COUPLE — Supabase ──
