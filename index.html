@@ -411,6 +411,11 @@ body.light .sp-song:hover { background:rgba(0,0,0,0.04); }
 .sp-song.playing { background:rgba(29,185,84,0.09); border-color:rgba(29,185,84,0.18); }
 body.light .sp-song.playing { background:rgba(224,57,122,0.07); border-color:rgba(224,57,122,0.2); }
 .sp-rank { width:28px; flex-shrink:0; text-align:center; position:relative; height:20px; display:flex; align-items:center; justify-content:center; }
+.sp-trend { position:absolute; bottom:-6px; left:50%; transform:translateX(-50%); font-size:0; line-height:1; }
+.sp-trend::before { font-size:7px; font-weight:700; letter-spacing:0; }
+.sp-trend.up::before   { content:'▲'; color:#4fc3f7; }
+.sp-trend.down::before { content:'▼'; color:#ef5350; }
+.sp-trend.new::before  { content:'NEW'; font-size:5.5px; color:#a78bfa; letter-spacing:0.3px; }
 .sp-rank-num { font-size:13px; font-weight:700; color:var(--muted); font-variant-numeric:tabular-nums; }
 .sp-song.playing .sp-rank-num { display:none; }
 .sp-rank-wave { display:none; align-items:flex-end; gap:2px; height:16px; }
@@ -1220,18 +1225,30 @@ function createSongEl(song, num) {
   return div;
 }
 
+// Stocke le classement précédent pour détecter les montées/descentes
+var prevRanks = {};
+
 function renderTop50() {
   var sorted = songsLove.slice().sort(function(a,b){return b.plays-a.plays;});
+  // Calcule les tendances avant de re-render
+  var newRanks = {};
+  sorted.forEach(function(s,i){ newRanks[s.file] = i+1; });
   var container = document.getElementById('Love');
   container.innerHTML = '';
   document.getElementById('top50Count').textContent = sorted.length;
   sorted.forEach(function(song, i) {
     var rank = i+1;
     var hidden = rank > TOP_VISIBLE && !top50Expanded;
+    // Calcule la tendance
+    var trendClass = '';
+    if(prevRanks[song.file] === undefined) { trendClass = 'new'; }
+    else if(prevRanks[song.file] > rank)   { trendClass = 'up'; }
+    else if(prevRanks[song.file] < rank)   { trendClass = 'down'; }
+    var trendHtml = trendClass ? '<span class="sp-trend '+trendClass+'"></span>' : '';
     var div = document.createElement('div');
     div.className = 'sp-song' + (hidden?' hidden-row':'');
     div.innerHTML =
-      '<div class="sp-rank"><span class="sp-rank-num">'+rank+'</span>'+
+      '<div class="sp-rank"><span class="sp-rank-num">'+rank+'</span>'+trendHtml+
       '<div class="sp-rank-wave"><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div></div></div>'+
       '<div class="sp-info"><div class="sp-title">'+song.title+'</div><div class="sp-artist">'+song.artist+'</div></div>'+
       '<div class="sp-plays">'+fmtPlays(song.plays)+'</div>'+
@@ -1252,6 +1269,8 @@ function renderTop50() {
     });
     container.appendChild(div);
   });
+  // Met à jour le classement précédent pour le prochain render
+  prevRanks = newRanks;
   var eb=document.getElementById('top50Expand');
   eb.style.display = sorted.length<=TOP_VISIBLE?'none':'flex';
   var remaining = sorted.length - TOP_VISIBLE;
