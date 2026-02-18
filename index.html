@@ -1202,7 +1202,7 @@ function fmtPlays(n){if(n>=1e6)return(n/1e6).toFixed(1).replace('.0','')+'M';if(
 
 // savePlays sera surchargé par le bloc Supabase
 function savePlays(file, count) {
-  try{var o=JSON.parse(localStorage.getItem('love_plays')||'{}');o[file]=count;localStorage.setItem('love_plays',JSON.stringify(o));}catch(e){}
+  // localStorage supprimé, tout passe par Supabase
 }
 
 var allSongs = songsLove;
@@ -1287,6 +1287,8 @@ function renderTop50() {
         savePlays(song.file);
         var pe = div.querySelector('.sp-plays');
         if(pe) pe.textContent = fmtPlays(song.plays);
+        // Supprime toute trace localStorage
+        try { localStorage.removeItem('love_plays'); } catch(e) {}
       }
     });
 
