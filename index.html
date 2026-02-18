@@ -1070,6 +1070,35 @@ body.light #lockNavBtn { color: #7c3aed; }
 </div>
 
 <script>
+// ════════════════════════════════════════════
+// SUPABASE CONFIG — doit être EN PREMIER pour que tout le code y ait accès
+// ════════════════════════════════════════════
+var SB_URL = 'https://zjmbyjpxqrojnuymnpcf.supabase.co';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqbWJ5anB4cXJvam51eW1ucGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0MzEzNjcsImV4cCI6MjA4NzAwNzM2N30.vNRgLgCNqZ9g351YmodZoXYDqars-thVDFmri2Z3oxE';
+
+function sbHeaders(extra){
+  return Object.assign({'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},extra||{});
+}
+function sbGet(table,params){
+  var url=SB_URL+'/rest/v1/'+table+'?'+(params||'order=created_at.desc');
+  return fetch(url,{headers:sbHeaders()}).then(function(r){return r.json();});
+}
+function sbPost(table,body){
+  return fetch(SB_URL+'/rest/v1/'+table,{
+    method:'POST',headers:sbHeaders({'Prefer':'return=representation'}),body:JSON.stringify(body)
+  }).then(function(r){return r.json();});
+}
+function sbPatch(table,id,body){
+  return fetch(SB_URL+'/rest/v1/'+table+'?id=eq.'+id,{
+    method:'PATCH',headers:sbHeaders({'Prefer':'return=representation'}),body:JSON.stringify(body)
+  }).then(function(r){return r.json();});
+}
+function sbDelete(table,id){
+  return fetch(SB_URL+'/rest/v1/'+table+'?id=eq.'+id,{
+    method:'DELETE',headers:sbHeaders()
+  });
+}
+
 // ── COMPTEUR ──
 var startDate = new Date('2024-10-29T00:00:00');
 function updateCounter() {
@@ -1180,29 +1209,46 @@ buildStack();
 
 // ── SONGS ──
 var songsLove = [
-  {title:"Perfect",            artist:"Ed Sheeran",     file:"perfect.mp3",               yt:"https://www.youtube.com/watch?v=2Vv-BfVoq4g"},
-  {title:"Imagine",            artist:"Carbone",        file:"imagine_carbone.mp3",        yt:"https://www.youtube.com/watch?v=iuSUZyTWi6o"},
-  {title:"Nanani",             artist:"Gazo",           file:"nanani.mp3",                 yt:"https://www.youtube.com/watch?v=8Bkgi6yB6P8"},
-  {title:"Angela",             artist:"Hatik",          file:"angela.mp3",                 yt:"https://www.youtube.com/watch?v=uqsGUAM9WDk"},
-  {title:"Bebe de Bogoda",     artist:"Moha la Squale", file:"bebe_de_bogoda.mp3",         yt:"https://www.youtube.com/watch?v=oW-xRDJhoqo"},
-  {title:"Ma Belle",           artist:"Moha La Squale", file:"ma_belle_moha_la_squale.mp3",yt:"https://www.youtube.com/watch?v=NsxdxA_j8nk"},
-  {title:"Luna",               artist:"Moha La Squale", file:"luna_moha_la_squale.mp3",    yt:"https://www.youtube.com/watch?v=qJZy8zy0Uy0"},
-  {title:"Jaloux",             artist:"Dadju",          file:"dadju_jaloux.mp3",           yt:"https://www.youtube.com/watch?v=254EHfv9RvM"},
+  {title:"Perfect",            artist:"Ed Sheeran",     file:"perfect.mp3",                yt:"https://www.youtube.com/watch?v=2Vv-BfVoq4g"},
+  {title:"Imagine",            artist:"Carbone",        file:"imagine_carbone.mp3",         yt:"https://www.youtube.com/watch?v=iuSUZyTWi6o"},
+  {title:"Nanani",             artist:"Gazo",           file:"nanani.mp3",                  yt:"https://www.youtube.com/watch?v=8Bkgi6yB6P8"},
+  {title:"Angela",             artist:"Hatik",          file:"angela.mp3",                  yt:"https://www.youtube.com/watch?v=uqsGUAM9WDk"},
+  {title:"Bebe de Bogoda",     artist:"Moha la Squale", file:"bebe_de_bogoda.mp3",          yt:"https://www.youtube.com/watch?v=oW-xRDJhoqo"},
+  {title:"Ma Belle",           artist:"Moha La Squale", file:"ma_belle_moha_la_squale.mp3", yt:"https://www.youtube.com/watch?v=NsxdxA_j8nk"},
+  {title:"Luna",               artist:"Moha La Squale", file:"luna_moha_la_squale.mp3",     yt:"https://www.youtube.com/watch?v=qJZy8zy0Uy0"},
+  {title:"Jaloux",             artist:"Dadju",          file:"dadju_jaloux.mp3",            yt:"https://www.youtube.com/watch?v=254EHfv9RvM"},
   {title:"Lettre à une femme", artist:"Ninho",          file:"lettre_a_une_femme_ninho.mp3",yt:"https://www.youtube.com/watch?v=ifNfpzkoY9s"},
-  {title:"Jolie Bébé",         artist:"Naza",           file:"jolie_bebe_naza.mp3",        yt:"https://www.youtube.com/watch?v=sTp7C41iY6M"},
-  {title:"Mon Bébé",           artist:"RnBoi",          file:"mon_bebe_rnboi.mp3",         yt:"https://www.youtube.com/watch?v=U2t5Y89I2tE"},
-  {title:"Solide",             artist:"Ronisia",        file:"solide_ronisia.mp3",         yt:"https://www.youtube.com/watch?v=RHOhrdsGOc0"},
-  {title:"Soleil Bleu",        artist:"Luiza",          file:"soleil_bleu_luiza.mp3",      yt:"https://www.youtube.com/watch?v=nd8RD3tjNQE"}
+  {title:"Jolie Bébé",         artist:"Naza",           file:"jolie_bebe_naza.mp3",         yt:"https://www.youtube.com/watch?v=sTp7C41iY6M"},
+  {title:"Mon Bébé",           artist:"RnBoi",          file:"mon_bebe_rnboi.mp3",          yt:"https://www.youtube.com/watch?v=U2t5Y89I2tE"},
+  {title:"Solide",             artist:"Ronisia",        file:"solide_ronisia.mp3",          yt:"https://www.youtube.com/watch?v=RHOhrdsGOc0"},
+  {title:"Soleil Bleu",        artist:"Luiza",          file:"soleil_bleu_luiza.mp3",       yt:"https://www.youtube.com/watch?v=nd8RD3tjNQE"}
 ];
 
-// Initialise plays à 0, sera mis à jour par Supabase
 songsLove.forEach(function(x){ x.plays = 0; });
 
 function fmtPlays(n){if(n>=1e6)return(n/1e6).toFixed(1).replace('.0','')+'M';if(n>=1e3)return(n/1e3).toFixed(1).replace('.0','')+'k';return n?String(n):'—';}
 
-// savePlays sera surchargé par le bloc Supabase
-function savePlays(file, count) {
-  // localStorage supprimé, tout passe par Supabase
+// savePlays — appelé depuis timeupdate, SB_URL déjà défini car mis en premier
+function savePlays(file){
+  fetch(SB_URL + '/rest/v1/rpc/increment_play', {
+    method: 'POST',
+    headers: sbHeaders(),
+    body: JSON.stringify({ p_song_key: file })
+  }).then(function(){
+    return fetch(SB_URL + '/rest/v1/song_plays?song_key=eq.' + encodeURIComponent(file) + '&select=play_count', {
+      headers: sbHeaders()
+    }).then(function(r){ return r.json(); });
+  }).then(function(rows){
+    if(rows && rows[0]){
+      var s = songsLove.find(function(x){ return x.file === file; });
+      if(s) s.plays = rows[0].play_count;
+      var row = songRows[file];
+      if(row){
+        var pe = row.div.querySelector('.sp-plays');
+        if(pe) pe.textContent = fmtPlays(rows[0].play_count);
+      }
+    }
+  }).catch(function(){});
 }
 
 var allSongs = songsLove;
@@ -1225,14 +1271,11 @@ function createSongEl(song, num) {
   return div;
 }
 
-// Stocke le classement précédent pour détecter les montées/descentes
-// Charge prevRanks depuis localStorage pour persister entre sessions
 var prevRanks = (function(){
   try { return JSON.parse(localStorage.getItem('sp_prev_ranks') || '{}'); }
   catch(e){ return {}; }
 })();
 
-// Stocke les éléments DOM par file pour pouvoir les mettre à jour sans recréer le DOM
 var songRows = {};
 
 function renderTop50() {
@@ -1268,7 +1311,6 @@ function renderTop50() {
     var ytb = div.querySelector('.sp-btn-yt');
     var audio = div.querySelector('audio');
     audio._counted = false;
-    audio._songFile = song.file;
     songRows[song.file] = { div:div, btn:btn, audio:audio };
 
     ytb.addEventListener('click', function(e){ e.stopPropagation(); window.open(song.yt,'_blank'); });
@@ -1278,31 +1320,19 @@ function renderTop50() {
     btn.addEventListener('click', toggle);
     div.addEventListener('click', toggle);
 
-    // timeupdate : UNIQUEMENT incrément local + affichage compteur
-    // Ne jamais appeler renderTop50/updateTop50 ici → évite toute boucle
-
-
+    // ── COMPTEUR D'ÉCOUTES ──
+    // Incrément local immédiat pour l'affichage, puis sync Supabase via savePlays
+    // SB_URL est défini en tout début de script — plus aucun problème d'ordre
     audio.addEventListener('timeupdate', function(){
       if(!audio._counted && audio.currentTime >= 3){
         audio._counted = true;
-        fetch(SB_URL + '/rest/v1/rpc/increment_play', {
-          method: 'POST',
-          headers: sbHeaders(),
-          body: JSON.stringify({ p_song_key: song.file })
-        }).then(function(){
-          return fetch(SB_URL + '/rest/v1/song_plays?song_key=eq.' + song.file + '&select=play_count', {
-            headers: sbHeaders()
-          }).then(function(r){ return r.json(); });
-        }).then(function(rows){
-          if(rows && rows[0]){
-            song.plays = rows[0].play_count;
-            var pe = div.querySelector('.sp-plays');
-            if(pe) pe.textContent = fmtPlays(song.plays);
-          }
-        }).catch(function(){});
+        song.plays++;
+        var pe = div.querySelector('.sp-plays');
+        if(pe) pe.textContent = fmtPlays(song.plays);
+        savePlays(song.file); // envoie à Supabase + relit la vraie valeur
       }
-    });  
-    
+    });
+
     audio.addEventListener('ended', function(){
       audio._counted = false; ps(); currentAudio=null; currentBtn=null; currentRow=null;
       playNext(div);
@@ -1320,8 +1350,6 @@ function renderTop50() {
   eb.classList.toggle('open', top50Expanded);
 }
 
-// updateTop50 : réordonne les lignes existantes SANS recréer le DOM ni toucher aux audio
-// Appelé par refreshPlays (sync distante) uniquement
 function updateTop50() {
   var container = document.getElementById('Love');
   if(!container || Object.keys(songRows).length === 0) { renderTop50(); return; }
@@ -1333,10 +1361,8 @@ function updateTop50() {
     var rank = i+1;
     var row = songRows[song.file];
     if(!row) return;
-
     var rankNum = row.div.querySelector('.sp-rank-num');
     if(rankNum) rankNum.textContent = rank;
-
     var trendClass = '';
     if(prevRanks[song.file] === undefined)  { trendClass = 'new'; }
     else if(prevRanks[song.file] > rank)    { trendClass = 'up'; }
@@ -1350,15 +1376,12 @@ function updateTop50() {
         if(rankEl) rankEl.insertBefore(t, rankEl.querySelector('.sp-rank-wave'));
       }
     } else if(existingTrend) { existingTrend.remove(); }
-
     var pe = row.div.querySelector('.sp-plays');
     if(pe) pe.textContent = fmtPlays(song.plays);
-
     var hidden = rank > TOP_VISIBLE && !top50Expanded;
     row.div.classList.toggle('hidden-row', hidden);
     if(top50Expanded) row.div.classList.add('revealed');
-
-    container.appendChild(row.div); // réordonne sans recréer
+    container.appendChild(row.div);
   });
 
   prevRanks = newRanks;
@@ -1376,68 +1399,64 @@ document.getElementById('top50Expand').addEventListener('click',function(){
 });
 
 // ── PLAY MODE ──
-// modes: 'order' | 'shuffle' | 'repeat'
 var playMode = 'order';
-
 var modeIcons = {
   order:   document.getElementById('modeIconOrder'),
   shuffle: document.getElementById('modeIconShuffle'),
   repeat:  document.getElementById('modeIconRepeat')
 };
-
 function setPlayMode(mode) {
   playMode = mode;
-  Object.keys(modeIcons).forEach(function(k){
-    modeIcons[k].style.display = k === mode ? '' : 'none';
-  });
+  Object.keys(modeIcons).forEach(function(k){ modeIcons[k].style.display = k === mode ? '' : 'none'; });
   var btn = document.getElementById('top50ModeBtn');
   btn.classList.toggle('active', mode !== 'order');
   btn.title = mode === "order" ? "Lecture dans l'ordre" : mode === "shuffle" ? "Lecture aléatoire" : "Répéter ce titre";
 }
 setPlayMode('order');
-
 document.getElementById('top50ModeBtn').addEventListener('click', function(){
-  if(playMode === 'order')   setPlayMode('shuffle');
+  if(playMode === 'order') setPlayMode('shuffle');
   else if(playMode === 'shuffle') setPlayMode('repeat');
-  else                       setPlayMode('order');
+  else setPlayMode('order');
 });
-
 function playNext(currentDiv) {
   var songs = Array.from(document.querySelectorAll('#Love .sp-song'));
   if(!songs.length) return;
-  if(playMode === 'repeat') {
-    // relance le même
-    var btn = currentDiv.querySelector('.sp-btn-play');
-    if(btn) setTimeout(function(){ btn.click(); }, 80);
-    return;
-  }
-  if(playMode === 'shuffle') {
-    var idx = Math.floor(Math.random() * songs.length);
-    var btn = songs[idx].querySelector('.sp-btn-play');
-    if(btn) setTimeout(function(){ btn.click(); }, 80);
-    return;
-  }
-  // order : cherche le suivant visible
-  var idx = songs.indexOf(currentDiv);
-  var next = songs[idx + 1];
-  if(next) {
-    var btn = next.querySelector('.sp-btn-play');
-    if(btn) setTimeout(function(){ btn.click(); }, 80);
-  }
+  if(playMode === 'repeat') { var btn=currentDiv.querySelector('.sp-btn-play'); if(btn) setTimeout(function(){btn.click();},80); return; }
+  if(playMode === 'shuffle') { var idx=Math.floor(Math.random()*songs.length); var btn=songs[idx].querySelector('.sp-btn-play'); if(btn) setTimeout(function(){btn.click();},80); return; }
+  var idx=songs.indexOf(currentDiv), next=songs[idx+1];
+  if(next) { var btn=next.querySelector('.sp-btn-play'); if(btn) setTimeout(function(){btn.click();},80); }
 }
-
 document.getElementById('top50PlayAll').addEventListener('click', function(){
-  if(currentRow) {
-    // reprend depuis la chanson en cours
-    var btn = currentRow.querySelector('.sp-btn-play');
-    if(btn) { btn.click(); return; }
-  }
-  // sinon démarre depuis le début
-  var first = document.querySelector('#Love .sp-song');
+  if(currentRow) { var btn=currentRow.querySelector('.sp-btn-play'); if(btn){btn.click();return;} }
+  var first=document.querySelector('#Love .sp-song');
   if(first) first.querySelector('.sp-btn-play').click();
 });
 
-// renderTop50() sera appelé par le bloc Supabase après le chargement des compteurs
+// ── CHARGEMENT INITIAL depuis Supabase + rafraîchissement toutes les 30s ──
+(function(){
+  sbGet('song_plays', 'select=song_key,play_count').then(function(rows){
+    if(!Array.isArray(rows)) { renderTop50(); return; }
+    var map = {};
+    rows.forEach(function(r){ map[r.song_key] = r.play_count || 0; });
+    songsLove.forEach(function(s){ s.plays = map[s.file] || 0; });
+    renderTop50();
+  }).catch(function(){ renderTop50(); });
+
+  function refreshPlays() {
+    sbGet('song_plays', 'select=song_key,play_count').then(function(rows){
+      if(!Array.isArray(rows)) return;
+      var changed = false;
+      var map = {};
+      rows.forEach(function(r){ map[r.song_key] = r.play_count || 0; });
+      songsLove.forEach(function(s){
+        var remote = map[s.file] || 0;
+        if(remote > s.plays) { s.plays = remote; changed = true; }
+      });
+      if(changed) updateTop50();
+    }).catch(function(){});
+  }
+  setInterval(refreshPlays, 30000);
+})();
 
 // ── PARTICLES ──
 var canvas=document.getElementById('particleCanvas'),ctx=canvas.getContext('2d');
@@ -1678,84 +1697,6 @@ function filterSongs(q){
   f.forEach(function(s,i){res.appendChild(createSongEl(s,i+1));});
 }
 
-// ════════════════════════════════════════════
-// SUPABASE CONFIG
-// ════════════════════════════════════════════
-var SB_URL  = 'https://zjmbyjpxqrojnuymnpcf.supabase.co';
-var SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqbWJ5anB4cXJvam51eW1ucGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0MzEzNjcsImV4cCI6MjA4NzAwNzM2N30.vNRgLgCNqZ9g351YmodZoXYDqars-thVDFmri2Z3oxE';
-
-function sbHeaders(extra){
-  return Object.assign({'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},extra||{});
-}
-function sbGet(table,params){
-  var url=SB_URL+'/rest/v1/'+table+'?'+(params||'order=created_at.desc');
-  return fetch(url,{headers:sbHeaders()}).then(function(r){return r.json();});
-}
-function sbPost(table,body){
-  return fetch(SB_URL+'/rest/v1/'+table,{
-    method:'POST',headers:sbHeaders({'Prefer':'return=representation'}),body:JSON.stringify(body)
-  }).then(function(r){return r.json();});
-}
-function sbPatch(table,id,body){
-  return fetch(SB_URL+'/rest/v1/'+table+'?id=eq.'+id,{
-    method:'PATCH',headers:sbHeaders({'Prefer':'return=representation'}),body:JSON.stringify(body)
-  }).then(function(r){return r.json();});
-}
-function sbDelete(table,id){
-  return fetch(SB_URL+'/rest/v1/'+table+'?id=eq.'+id,{
-    method:'DELETE',headers:sbHeaders()
-  });
-}
-function sbUpsert(table,body,onConflict){
-  return fetch(SB_URL+'/rest/v1/'+table+'?on_conflict='+onConflict,{
-    method:'POST',headers:sbHeaders({'Prefer':'return=representation,resolution=merge-duplicates'}),body:JSON.stringify(body)
-  }).then(function(r){return r.json();});
-}
-
-// ════════════════════════════════════════════
-// COMPTEUR D'ÉCOUTES — Supabase song_plays
-// Utilise RPC increment_play pour incrémenter côté serveur
-// ════════════════════════════════════════════
-(function(){
-  // Charge tous les compteurs depuis Supabase au démarrage
-  sbGet('song_plays', 'select=song_key,play_count').then(function(rows){
-    if(!Array.isArray(rows)) { renderTop50(); return; }
-    var map = {};
-    rows.forEach(function(r){ map[r.song_key] = r.play_count || 0; });
-    songsLove.forEach(function(s){ s.plays = map[s.file] || 0; });
-    renderTop50();
-  }).catch(function(){ renderTop50(); });
-
-  // Override savePlays : appelle la fonction SQL increment_play
-  savePlays = function(file){
-    fetch(SB_URL + '/rest/v1/rpc/increment_play', {
-      method: 'POST',
-      headers: sbHeaders(),
-      body: JSON.stringify({ p_song_key: file })
-    }).catch(function(){});
-  };
-
-  // ── Rafraîchissement automatique toutes les 30 secondes ──
-  // Met à jour les compteurs depuis Supabase sans recharger la page
-  // Si le classement change (écoutes de l'autre téléphone), renderTop50 se relance
-  function refreshPlays() {
-    sbGet('song_plays', 'select=song_key,play_count').then(function(rows){
-      if(!Array.isArray(rows)) return;
-      var changed = false;
-      var map = {};
-      rows.forEach(function(r){ map[r.song_key] = r.play_count || 0; });
-      songsLove.forEach(function(s){
-        var remote = map[s.file] || 0;
-        // On prend toujours la valeur la plus haute (local ou remote)
-        // pour ne pas écraser un incrément local non encore syncé
-        if(remote > s.plays) { s.plays = remote; changed = true; }
-      });
-      if(changed) updateTop50();
-    }).catch(function(){});
-  }
-  setInterval(refreshPlays, 30000);
-})();
-
 // ── MEMO COUPLE — Supabase ──
 (function(){
   var MEMO_CODE='BILOUTE', memoUnlocked=false, memoCurrentNote=null;
@@ -1764,7 +1705,6 @@ function sbUpsert(table,body,onConflict){
 
   function escHtml(str){return(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-  // ── AUTH ──
   var _authCb=null;
   function openMemoAuth(cb){
     _authCb=cb;
@@ -1799,7 +1739,6 @@ function sbUpsert(table,body,onConflict){
     renderNotes();renderTodos();
   }
 
-  // ── NOTES ──
   function renderNotes(){
     var slider=document.getElementById('memoNotesSlider');
     slider.innerHTML='<div class="memo-loading"><span class="spinner"></span>Chargement...</div>';
@@ -1825,7 +1764,6 @@ function sbUpsert(table,body,onConflict){
           '<div class="memo-note-img" style="background:'+col+'">' +
           '<div class="memo-note-bg">'+icon+'</div>' +
           '<div class="memo-note-date-badge">'+escHtml(ds)+'</div>' +
-          // CORRECTION : affiche note.title s'il existe, sinon 'Note'
           '<div class="memo-note-banner">'+escHtml(note.title||'Note')+'</div></div>' +
           '<div class="memo-note-preview">'+escHtml(prev)+'</div>';
         (function(n){card.addEventListener('click',function(){openMemoModal(n,false);});})(note);
@@ -1847,7 +1785,6 @@ function sbUpsert(table,body,onConflict){
     }else{
       document.getElementById('memoModalView').style.display='block';
       document.getElementById('memoModalEdit').style.display='none';
-      // CORRECTION : affiche le titre dans le label de la modale
       document.querySelector('.memo-modal-label').textContent=note&&note.title?note.title:'Note';
       document.getElementById('memoModalContent').textContent=note?(note.text||'(vide)'):'';
       var d=new Date(note?note.created_at:Date.now());
@@ -1867,10 +1804,8 @@ function sbUpsert(table,body,onConflict){
     var btn=document.querySelector('.memo-modal-save');btn.textContent='⏳';btn.disabled=true;
     var done=function(){btn.textContent='Sauvegarder 💾';btn.disabled=false;window.closeMemoModal();renderNotes();};
     if(memoCurrentNote&&memoCurrentNote.id){
-      // CORRECTION : inclut title dans le PATCH
       sbPatch('memo_notes',memoCurrentNote.id,{text:txt,title:ttl}).then(done).catch(done);
     }else{
-      // CORRECTION : inclut title dans le POST
       sbPost('memo_notes',{text:txt,title:ttl}).then(done).catch(done);
     }
   };
@@ -1879,7 +1814,6 @@ function sbUpsert(table,body,onConflict){
     sbDelete('memo_notes',memoCurrentNote.id).then(function(){window.closeMemoModal();renderNotes();});
   };
 
-  // ── TO-DO ──
   function renderTodos(){
     var container=document.getElementById('memoTodoList');
     container.innerHTML='<div class="memo-loading"><span class="spinner"></span>Chargement...</div>';
