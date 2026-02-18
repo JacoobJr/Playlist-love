@@ -1280,18 +1280,29 @@ function renderTop50() {
 
     // timeupdate : UNIQUEMENT incrément local + affichage compteur
     // Ne jamais appeler renderTop50/updateTop50 ici → évite toute boucle
+
+
     audio.addEventListener('timeupdate', function(){
       if(!audio._counted && audio.currentTime >= 3){
         audio._counted = true;
-        song.plays++;
-        savePlays(song.file);
-        var pe = div.querySelector('.sp-plays');
-        if(pe) pe.textContent = fmtPlays(song.plays);
-        // Supprime toute trace localStorage
-        try { localStorage.removeItem('love_plays'); } catch(e) {}
+        fetch(SB_URL + '/rest/v1/rpc/increment_play', {
+          method: 'POST',
+          headers: sbHeaders(),
+          body: JSON.stringify({ p_song_key: song.file })
+        }).then(function(){
+          return fetch(SB_URL + '/rest/v1/song_plays?song_key=eq.' + song.file + '&select=play_count', {
+            headers: sbHeaders()
+          }).then(function(r){ return r.json(); });
+        }).then(function(rows){
+          if(rows && rows[0]){
+            song.plays = rows[0].play_count;
+            var pe = div.querySelector('.sp-plays');
+            if(pe) pe.textContent = fmtPlays(song.plays);
+          }
+        }).catch(function(){});
       }
-    });
-
+    });  
+    
     audio.addEventListener('ended', function(){
       audio._counted = false; ps(); currentAudio=null; currentBtn=null; currentRow=null;
       playNext(div);
