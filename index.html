@@ -1238,8 +1238,10 @@ function savePlays(file){
   })
   .then(function(r){ return r.json(); })
   .then(function(result){
+    console.log('RPC increment_play result:', JSON.stringify(result));
     // La RPC retourne directement le nouveau play_count (INTEGER)
     var newCount = Array.isArray(result) ? result[0] : result;
+    console.log('newCount:', newCount, 'type:', typeof newCount);
     if(typeof newCount === 'number'){
       var s = songsLove.find(function(x){ return x.file === file; });
       if(s) s.plays = newCount;
@@ -1250,7 +1252,7 @@ function savePlays(file){
       }
     }
   })
-  .catch(function(){});
+  .catch(function(err){ console.error('savePlays error:', err); });
 }
 
 var allSongs = songsLove;
