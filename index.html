@@ -1237,7 +1237,7 @@ function renderTop50() {
   var playingFile = null;
   var playingTime = 0;
   if(currentAudio && !currentAudio.paused) {
-    playingFile = currentAudio.getAttribute('src');
+    playingFile = currentAudio._songFile || null;
     playingTime = currentAudio.currentTime;
     // Suspend proprement sans stopper la logique
     currentAudio.pause();
@@ -1271,6 +1271,7 @@ function renderTop50() {
       '<audio src="'+song.file+'"></audio></div>';
     var btn=div.querySelector('.sp-btn-play'), ytb=div.querySelector('.sp-btn-yt'), audio=div.querySelector('audio');
     audio._counted=false;
+    audio._songFile=song.file;
     ytb.addEventListener('click',function(e){e.stopPropagation();window.open(song.yt,'_blank');});
     function ps(){audio.pause();btn.innerHTML='&#9654;';btn.classList.remove('active');div.classList.remove('playing');particleActive=false;hideDance();}
     function pl(){audio.play();btn.textContent='⏸';btn.classList.add('active');div.classList.add('playing');particleActive=true;showDance();}
@@ -1289,7 +1290,7 @@ function renderTop50() {
     var allRows = container.querySelectorAll('.sp-song');
     allRows.forEach(function(row){
       var a = row.querySelector('audio');
-      if(a && a.getAttribute('src') === playingFile) {
+      if(a && a._songFile === playingFile) {
         a.currentTime = playingTime;
         var b = row.querySelector('.sp-btn-play');
         currentAudio = a; currentBtn = b; currentRow = row;
