@@ -1228,27 +1228,29 @@ songsLove.forEach(function(x){ x.plays = 0; });
 
 function fmtPlays(n){if(n>=1e6)return(n/1e6).toFixed(1).replace('.0','')+'M';if(n>=1e3)return(n/1e3).toFixed(1).replace('.0','')+'k';return n?String(n):'—';}
 
-// savePlays — appelé depuis timeupdate, SB_URL déjà défini car mis en premier
+// savePlays — appelle la RPC qui retourne directement le nouveau play_count
+// Plus de double fetch, plus de flash : un seul aller-retour
 function savePlays(file){
   fetch(SB_URL + '/rest/v1/rpc/increment_play', {
     method: 'POST',
-    headers: sbHeaders(),
+    headers: sbHeaders({'Prefer': 'return=representation'}),
     body: JSON.stringify({ p_song_key: file })
-  }).then(function(){
-    return fetch(SB_URL + '/rest/v1/song_plays?song_key=eq.' + encodeURIComponent(file) + '&select=play_count', {
-      headers: sbHeaders()
-    }).then(function(r){ return r.json(); });
-  }).then(function(rows){
-    if(rows && rows[0]){
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(result){
+    // La RPC retourne directement le nouveau play_count (INTEGER)
+    var newCount = Array.isArray(result) ? result[0] : result;
+    if(typeof newCount === 'number'){
       var s = songsLove.find(function(x){ return x.file === file; });
-      if(s) s.plays = rows[0].play_count;
+      if(s) s.plays = newCount;
       var row = songRows[file];
       if(row){
         var pe = row.div.querySelector('.sp-plays');
-        if(pe) pe.textContent = fmtPlays(rows[0].play_count);
+        if(pe) pe.textContent = fmtPlays(newCount);
       }
     }
-  }).catch(function(){});
+  })
+  .catch(function(){});
 }
 
 var allSongs = songsLove;
@@ -1321,15 +1323,12 @@ function renderTop50() {
     div.addEventListener('click', toggle);
 
     // ── COMPTEUR D'ÉCOUTES ──
-    // Incrément local immédiat pour l'affichage, puis sync Supabase via savePlays
-    // SB_URL est défini en tout début de script — plus aucun problème d'ordre
+    // Pas d'incrément local — la RPC retourne directement la vraie valeur
+    // Donc zéro flash, zéro retour en arrière
     audio.addEventListener('timeupdate', function(){
       if(!audio._counted && audio.currentTime >= 3){
         audio._counted = true;
-        song.plays++;
-        var pe = div.querySelector('.sp-plays');
-        if(pe) pe.textContent = fmtPlays(song.plays);
-        savePlays(song.file); // envoie à Supabase + relit la vraie valeur
+        savePlays(song.file);
       }
     });
 
