@@ -1245,7 +1245,11 @@ function savePlays(file){
     if(typeof newCount === 'number'){
       var s = songsLove.find(function(x){ return x.file === file; });
       if(s) s.plays = newCount;
-      updateTop50();
+      var row = songRows[file];
+      if(row){
+        var pe = row.div.querySelector('.sp-plays');
+        if(pe) pe.textContent = fmtPlays(newCount);
+      }
     }
   })
   .catch(function(err){ console.error('savePlays error:', err); });
