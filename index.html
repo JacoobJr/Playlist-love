@@ -2354,8 +2354,8 @@ function scrollToTop(){closeAllViews();window.scrollTo({top:0,behavior:'smooth'}
 function toggleLibrary(){var p=document.getElementById('libraryPopup');p.style.display=p.style.display==='block'?'none':'block';}
 function goTo(id){closeAllViews();document.getElementById('libraryPopup').style.display='none';setTimeout(function(){var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth'});},150);}
 function spawnHeart(){var h=document.createElement('div');h.className='like-heart';h.textContent='🤍';document.body.appendChild(h);setTimeout(function(){h.remove();},600);}
-function openSearch(){if(isQuizOpen)return;document.getElementById('searchOverlay').style.display='block';document.getElementById('searchInput').focus();}
-function closeSearch(){document.getElementById('searchOverlay').style.display='none';document.getElementById('searchResults').innerHTML='';}
+function openSearch(){if(isQuizOpen)return;document.getElementById('searchOverlay').style.display='block';document.getElementById('searchInput').value='';document.getElementById('searchResults').innerHTML='';document.getElementById('searchInput').focus();}
+function closeSearch(){document.getElementById('searchOverlay').style.display='none';}
 function filterSongs(q){
   var res=document.getElementById('searchResults');res.innerHTML='';
   if(!q.trim())return;
