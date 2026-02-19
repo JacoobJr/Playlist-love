@@ -43,6 +43,8 @@ body {
   padding-bottom: 80px;
   transition: background 0.3s, color 0.3s;
 }
+/* Empêche le zoom automatique iOS sur les inputs (déclenché si font-size < 16px) */
+input, textarea, select { font-size: 16px !important; }
 
 .fade-in {
   opacity: 0;
@@ -2076,7 +2078,7 @@ document.getElementById('spinBtn').addEventListener('click',function(){
 
 // ── LOCK ──
 var lockPopup=document.getElementById('lockPopup'),lockInput=document.getElementById('lockInput'),lockError=document.getElementById('lockError');
-function toggleLockPopup(){var isOpen=lockPopup.style.display==='block';document.getElementById('libraryPopup').style.display='none';lockPopup.style.display=isOpen?'none':'block';if(!isOpen){lockError.style.display='none';lockInput.value='';}}
+function toggleLockPopup(){resetZoom();var isOpen=lockPopup.style.display==='block';document.getElementById('libraryPopup').style.display='none';lockPopup.style.display=isOpen?'none':'block';if(!isOpen){lockError.style.display='none';lockInput.value='';}}
 function checkCode(){
   var val=lockInput.value.trim().toUpperCase();lockError.style.display='none';
   if(val==='NEMO'){lockPopup.style.display='none';document.getElementById('prankOverlay').classList.add('show');return;}
@@ -2295,7 +2297,7 @@ var ALL_QUIZ_QUESTIONS=[
 var QUIZ_TOTAL=10,qzCurrent=0,qzScore=0,qzAnswered=false,qzSession=[];
 document.getElementById('quizBtn').addEventListener('click',function(){openQuiz();});
 document.getElementById('gamesBtn').addEventListener('click',function(){openGames();});
-function openQuiz(){isQuizOpen=true;document.getElementById('quizView').classList.add('active');particleActive=false;hideDance();document.getElementById('navSearch').style.display='none';startQuiz();window.scrollTo(0,0);}
+function openQuiz(){resetZoom();isQuizOpen=true;document.getElementById('quizView').classList.add('active');particleActive=false;hideDance();document.getElementById('navSearch').style.display='none';startQuiz();window.scrollTo(0,0);}
 function closeQuiz(){isQuizOpen=false;document.getElementById('quizView').classList.remove('active');document.getElementById('navSearch').style.display='';}
 function getHints(){try{return JSON.parse(localStorage.getItem('qz_hints')||'{}');}catch(e){return{};}}
 function saveHint(id,hint){var h=getHints();h[id]=hint;try{localStorage.setItem('qz_hints',JSON.stringify(h));}catch(e){}}
@@ -2339,7 +2341,15 @@ function showResult(){
 }
 
 // ── NAV ──
+function resetZoom(){
+  if(window.visualViewport && window.visualViewport.scale !== 1){
+    var m = document.querySelector('meta[name="viewport"]');
+    m.setAttribute('content','width=device-width,initial-scale=1');
+    setTimeout(function(){ m.setAttribute('content','width=device-width,initial-scale=1'); }, 50);
+  }
+}
 function openGames(){
+  resetZoom();
   document.getElementById('gamesView').classList.add('active');
   particleActive=false;hideDance();window.scrollTo(0,0);
 }
@@ -2347,6 +2357,7 @@ function closeGames(){
   document.getElementById('gamesView').classList.remove('active');
 }
 function openMemoryGame(){
+  resetZoom();
   document.getElementById('memoryView').classList.add('active');
   window.scrollTo(0,0);
   lbLoad();
@@ -2368,12 +2379,13 @@ function closeAllViews(){
   if(document.getElementById('gamesView').classList.contains('active')) closeGames();
   if(document.getElementById('hiddenPage').classList.contains('active')) closeHiddenPage();
 }
-function scrollToTop(){closeAllViews();window.scrollTo({top:0,behavior:'smooth'});}
+function scrollToTop(){resetZoom();closeAllViews();window.scrollTo({top:0,behavior:'smooth'});}
 function toggleLibrary(){var p=document.getElementById('libraryPopup');p.style.display=p.style.display==='block'?'none':'block';}
-function goTo(id){closeAllViews();document.getElementById('libraryPopup').style.display='none';setTimeout(function(){var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth'});},150);}
+function goTo(id){resetZoom();closeAllViews();document.getElementById('libraryPopup').style.display='none';setTimeout(function(){var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth'});},150);}
 function spawnHeart(){var h=document.createElement('div');h.className='like-heart';h.textContent='🤍';document.body.appendChild(h);setTimeout(function(){h.remove();},600);}
 function openSearch(){
   if(isQuizOpen)return;
+  resetZoom();
   var o=document.getElementById('searchOverlay');
   o.classList.add('open');
   document.getElementById('searchInput').value='';
@@ -2381,6 +2393,7 @@ function openSearch(){
   setTimeout(function(){document.getElementById('searchInput').focus();},80);
 }
 function closeSearch(){
+  resetZoom();
   document.getElementById('searchOverlay').classList.remove('open');
 }
 function filterSongs(q){
