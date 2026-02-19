@@ -4601,7 +4601,7 @@ function filterSongs(q){
       notes.forEach(function(note,i){
         var col=NOTE_COLORS[i%NOTE_COLORS.length],icon=NOTE_ICONS[i%NOTE_ICONS.length];
         var prev=(note.text||'').substring(0,40)+((note.text||'').length>40?'…':'');
-        var d=new Date(note.created_at);
+        var d=new Date(note.updated_at||note.created_at);
         var ds=d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
         var card=document.createElement('div');card.className='memo-note-card';
         card.innerHTML=
@@ -4648,7 +4648,7 @@ function filterSongs(q){
     var btn=document.querySelector('.memo-modal-save');btn.textContent='⏳';btn.disabled=true;
     var done=function(){btn.textContent='Sauvegarder 💾';btn.disabled=false;window.closeMemoModal();renderNotes();};
     if(memoCurrentNote&&memoCurrentNote.id){
-      sbPatch('memo_notes',memoCurrentNote.id,{text:txt,title:ttl}).then(done).catch(done);
+      sbPatch('memo_notes',memoCurrentNote.id,{text:txt,title:ttl,updated_at:new Date().toISOString()}).then(done).catch(done);
     }else{
       sbPost('memo_notes',{text:txt,title:ttl}).then(done).catch(done);
     }
@@ -5248,7 +5248,7 @@ loadFavorites();
 </div>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.01.04</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.01.02</span>
 </div>
 
 </body>
