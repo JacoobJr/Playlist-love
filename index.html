@@ -4034,6 +4034,72 @@ function filterSongs(q){
   }, 500);
 })();
 
+
+// ── History API — bouton retour navigateur ─────────────────────────────────
+(function(){
+  var _navigating = false; // flag anti-double déclenchement
+
+  // Niveaux de navigation (du plus profond au plus haut)
+  // niveau 1 = quiz ou menu jeux
+  // niveau 2 = jeu individuel (depuis menu jeux)
+  var VIEWS = {
+    quiz:   { el: 'quizView',   close: 'closeQuiz',        depth: 1 },
+    games:  { el: 'gamesView',  close: 'closeGames',        depth: 1 },
+    memory: { el: 'memoryView', close: 'closeMemoryGame',   depth: 2 },
+    pendu:  { el: 'penduView',  close: 'closePenduGame',    depth: 2 },
+    puzzle: { el: 'puzzleView', close: 'closePuzzleGame',   depth: 2 },
+    snake:  { el: 'snakeView',  close: 'closeSnakeGame',    depth: 2 },
+  };
+
+  // Quel view est actuellement actif ?
+  function getActiveView() {
+    // Priorité aux vues les plus profondes
+    var order = ['memory','pendu','puzzle','snake','quiz','games'];
+    for (var i = 0; i < order.length; i++) {
+      var v = VIEWS[order[i]];
+      var el = document.getElementById(v.el);
+      if (el && el.classList.contains('active')) return order[i];
+    }
+    return null;
+  }
+
+  // Patch des fonctions open* pour pousser un état
+  var origOpen = {};
+  ['openQuiz','openGames','openMemoryGame','openPenduGame','openPuzzleGame','openSnakeGame'].forEach(function(fn){
+    origOpen[fn] = window[fn];
+    window[fn] = function(){
+      origOpen[fn].apply(this, arguments);
+      // Pousser un état seulement si pas déjà en train de naviguer
+      if (!_navigating) {
+        history.pushState({ jayana: fn }, '');
+      }
+    };
+  });
+
+  // Écouter le bouton retour
+  window.addEventListener('popstate', function(e){
+    var active = getActiveView();
+    if (!active) return; // aucun menu ouvert → comportement natif
+
+    // Empêcher double déclenchement
+    if (_navigating) return;
+    _navigating = true;
+
+    var closeFn = VIEWS[active].close;
+    if (window[closeFn]) window[closeFn]();
+
+    // Si on ferme un jeu individuel, on repousse un état pour le menu jeux
+    if (['memory','pendu','puzzle','snake'].indexOf(active) !== -1) {
+      setTimeout(function(){
+        history.pushState({ jayana: 'openGames' }, '');
+        _navigating = false;
+      }, 50);
+    } else {
+      setTimeout(function(){ _navigating = false; }, 50);
+    }
+  });
+})();
+
 // Patch openGames / closeGames / open*Game / close*Game to call mpCheckGameState
 (function(){
   var patchOpen = ['openGames','openMemoryGame','openPenduGame','openPuzzleGame','openSnakeGame','openQuiz'];
