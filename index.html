@@ -1386,12 +1386,24 @@ body.light .sg-song:hover { background: rgba(0,0,0,0.04); }
     <span class="sg-modal-close" onclick="closeSgModal()">✕</span>
     <div class="sg-modal-tag">Nouvelle suggestion</div>
     <div class="sg-modal-title">Proposer un son 🎵</div>
+    <div class="sg-field-label">C’est qui qui propose ?</div>
+    <div class="sg-gender-row">
+      <button class="sg-gender-btn" id="sgBtnGirl" onclick="sgSelectGender('girl')">
+        <span class="sg-gender-icon girl-icon">♀</span>
+        Elle
+      </button>
+      <button class="sg-gender-btn" id="sgBtnBoy" onclick="sgSelectGender('boy')">
+        <span class="sg-gender-icon boy-icon">♂</span>
+        Lui
+      </button>
+    </div>
     <div class="sg-field-label">Titre de la musique *</div>
     <input type="text" class="sg-input" id="sgTitleInput" placeholder="ex: Savage Love" maxlength="80">
     <div class="sg-field-label">Artiste *</div>
     <input type="text" class="sg-input" id="sgArtistInput" placeholder="ex: Jawsh 685" maxlength="80">
     <div class="sg-field-label">Note (optionnel)</div>
     <input type="text" class="sg-input" id="sgNoteInput" placeholder="ex: trop bonne pour toi 😏" maxlength="100">
+    <div id="sgErrMsg" style="display:none;font-size:11px;color:#e05555;margin-bottom:8px;padding:8px 10px;background:rgba(220,50,50,0.07);border-radius:6px;border:1px solid rgba(220,50,50,0.2);word-break:break-all;"></div>
     <button class="sg-modal-save" onclick="sgSave()">Proposer 💚</button>
   </div>
 </div>
@@ -2235,19 +2247,20 @@ function filterSongs(q){
     sgGender = g;
     var btnG = document.getElementById('sgBtnGirl');
     var btnB = document.getElementById('sgBtnBoy');
-    btnG.className = 'sg-gender-btn' + (g === 'girl' ? ' selected-girl' : '');
-    btnB.className = 'sg-gender-btn' + (g === 'boy'  ? ' selected-boy'  : '');
+    if(btnG) btnG.className = 'sg-gender-btn' + (g === 'girl' ? ' selected-girl' : '');
+    if(btnB) btnB.className = 'sg-gender-btn' + (g === 'boy'  ? ' selected-boy'  : '');
   };
 
   window.openSgModal = function(){
     sgGender = null;
-    document.getElementById('sgBtnGirl').className = 'sg-gender-btn';
-    document.getElementById('sgBtnBoy').className  = 'sg-gender-btn';
-    document.getElementById('sgTitleInput').value = '';
-    document.getElementById('sgArtistInput').value = '';
-    document.getElementById('sgNoteInput').value = '';
+    var bg = document.getElementById('sgBtnGirl'); if(bg) bg.className = 'sg-gender-btn';
+    var bb = document.getElementById('sgBtnBoy');  if(bb) bb.className = 'sg-gender-btn';
+    var ti = document.getElementById('sgTitleInput');   if(ti) ti.value = '';
+    var ai = document.getElementById('sgArtistInput');  if(ai) ai.value = '';
+    var ni = document.getElementById('sgNoteInput');    if(ni) ni.value = '';
+    var em = document.getElementById('sgErrMsg'); if(em){ em.style.display='none'; em.textContent=''; }
     document.getElementById('sgModal').classList.add('open');
-    setTimeout(function(){ document.getElementById('sgTitleInput').focus(); }, 80);
+    setTimeout(function(){ var t=document.getElementById('sgTitleInput'); if(t) t.focus(); }, 80);
   };
   window.closeSgModal = function(){
     document.getElementById('sgModal').classList.remove('open');
@@ -2265,16 +2278,51 @@ function filterSongs(q){
     }
     var btn = document.querySelector('.sg-modal-save');
     btn.textContent = '⏳'; btn.disabled = true;
-    sbPost('suggestion_songs', { title: title, artist: artist, note: note || null, gender: sgGender || 'neutral' })
-      .then(function(){
-        btn.textContent = 'Proposer 💚'; btn.disabled = false;
+
+    var payload = { title: title, artist: artist };
+    if(note) payload.note = note;
+    if(sgGender) payload.gender = sgGender;
+
+    var url = SB_URL + '/rest/v1/suggestion_songs';
+    fetch(url, {
+      method: 'POST',
+      headers: sbHeaders({'Prefer': 'return=representation'}),
+      body: JSON.stringify(payload)
+    })
+    .then(function(r){
+      return r.text().then(function(txt){
+        return { ok: r.ok, status: r.status, body: txt };
+      });
+    })
+    .then(function(res){
+      btn.textContent = 'Proposer 💚'; btn.disabled = false;
+      if(res.ok){
         window.closeSgModal();
         renderSuggestions();
-      })
-      .catch(function(){
-        btn.textContent = 'Proposer 💚'; btn.disabled = false;
-        window.closeSgModal();
-      });
+      } else {
+        // Essai sans gender si erreur de colonne inconnue
+        if(res.body && res.body.indexOf('gender') !== -1){
+          var p2 = { title: title, artist: artist };
+          if(note) p2.note = note;
+          fetch(url, {
+            method: 'POST',
+            headers: sbHeaders({'Prefer': 'return=representation'}),
+            body: JSON.stringify(p2)
+          })
+          .then(function(r2){ return r2.text(); })
+          .then(function(){ window.closeSgModal(); renderSuggestions(); })
+          .catch(function(){ window.closeSgModal(); });
+        } else {
+          var errMsg = document.getElementById('sgErrMsg');
+          if(errMsg) { errMsg.textContent = '❌ Erreur : ' + res.status + ' — ' + res.body.substring(0,120); errMsg.style.display='block'; }
+        }
+      }
+    })
+    .catch(function(err){
+      btn.textContent = 'Proposer 💚'; btn.disabled = false;
+      var errMsg = document.getElementById('sgErrMsg');
+      if(errMsg) { errMsg.textContent = '❌ ' + err.message; errMsg.style.display='block'; }
+    });
   };
 
   // Enter key in inputs
