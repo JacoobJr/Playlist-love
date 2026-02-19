@@ -33,7 +33,7 @@ body.light {
   --border: rgba(224,57,122,0.15);
   --shadow: 0 8px 32px rgba(224,57,122,0.12);
 }
-* { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; overflow-x: hidden; -webkit-text-size-adjust: 100%; }
 body {
   font-family: 'DM Sans', sans-serif;
@@ -43,10 +43,6 @@ body {
   padding-bottom: 80px;
   transition: background 0.3s, color 0.3s;
 }
-/* Scroll horizontal sur les sliders */
-.slider, .memo-notes-slider { touch-action: pan-x; }
-/* iOS zoome sur les inputs < 16px — on force 16px */
-input, textarea, select { font-size: 16px !important; }
 
 .fade-in {
   opacity: 0;
@@ -2763,10 +2759,7 @@ function filterSongs(q){
 
   renderSuggestions();
 })();
-// ── ANTI-ZOOM ──
-document.addEventListener('touchmove', function(e){
-  if(e.touches.length > 1) e.preventDefault();
-}, {passive: false});
+
 
 </script>
 </body>
