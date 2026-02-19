@@ -1322,7 +1322,10 @@ body.light .pendu-theme {
 
 <canvas id="particleCanvas"></canvas>
 
-<header>
+<header style="position:relative;">
+  <div id="previewBtn" onclick="previewTrigger()" title="Aperçu 30s">
+    <span class="pbdot"></span> Aperçu
+  </div>
   <div class="hdr-tag">Playlist</div>
   <div class="hdr-name">Jayana 🩷</div>
   <div class="hdr-sub">Notre univers en musique</div>
@@ -1402,6 +1405,34 @@ body.light .pendu-theme {
 </div>
 
 <style>
+/* ── Bouton preview ── */
+#previewBtn {
+  position: absolute;
+  top: 14px; right: 16px;
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 11px;
+  border-radius: 20px;
+  background: rgba(29,185,84,0.12);
+  border: 1px solid rgba(29,185,84,0.3);
+  color: var(--green);
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  cursor: pointer; user-select: none;
+  transition: background 0.15s, transform 0.15s;
+  z-index: 10;
+}
+#previewBtn:hover { background: rgba(29,185,84,0.22); transform: scale(1.04); }
+#previewBtn.running {
+  background: rgba(220,30,60,0.12);
+  border-color: rgba(220,30,60,0.35);
+  color: #e03060;
+}
+#previewBtn .pbdot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: currentColor;
+  animation: blink 1s ease-in-out infinite;
+}
+
 #storyVideoWrap { transition: opacity 0.8s ease; }
 #tlContent      { transition: opacity 0.8s ease; }
 
@@ -1411,12 +1442,16 @@ body.light .pendu-theme {
   50%     { box-shadow: 0 0 0 3px rgba(80,255,120,0.7), 0 0 28px rgba(80,255,120,0.5), 0 0 50px rgba(80,255,120,0.2); border-color: rgba(80,255,120,0.9); }
 }
 @keyframes counterGlowLight {
-  0%,100% { box-shadow: 0 0 0 2px rgba(20,160,60,0.25), 0 0 10px rgba(20,160,60,0.15); border-color: rgba(20,160,60,0.4); }
-  50%     { box-shadow: 0 0 0 3px rgba(20,160,60,0.6), 0 0 24px rgba(20,160,60,0.4), 0 0 44px rgba(20,160,60,0.15); border-color: rgba(20,160,60,0.85); }
+  0%,100% { box-shadow: 0 0 0 2px rgba(240,85,142,0.3), 0 0 10px rgba(240,85,142,0.2); border-color: rgba(240,85,142,0.5); }
+  50%     { box-shadow: 0 0 0 3px rgba(240,85,142,0.7), 0 0 24px rgba(240,85,142,0.5), 0 0 44px rgba(240,85,142,0.2); border-color: rgba(240,85,142,0.9); }
 }
 @keyframes counterTopBar {
   0%,100% { opacity: 0.5; background: linear-gradient(90deg, #50ff78, transparent); }
   50%     { opacity: 1;   background: linear-gradient(90deg, #50ff78, #a0ffb8); }
+}
+@keyframes counterTopBarLight {
+  0%,100% { opacity: 0.5; background: linear-gradient(90deg, #f0558e, transparent); }
+  50%     { opacity: 1;   background: linear-gradient(90deg, #f0558e, #ffadd0); }
 }
 .counter-unit.glowing {
   animation: counterGlow 1.8s ease-in-out infinite;
@@ -1429,6 +1464,10 @@ body.light .pendu-theme {
 }
 body.light .counter-unit.glowing {
   animation: counterGlowLight 1.8s ease-in-out infinite;
+}
+body.light .counter-unit.glowing::before {
+  animation: counterTopBarLight 1.8s ease-in-out infinite;
+  opacity: 1;
 }
 
 /* ── Coeur battant dans l'overlay vidéo ── */
@@ -1517,6 +1556,48 @@ body.light .counter-unit.glowing {
       if (storyHeart) storyHeart.style.display = 'none';
     }
   }
+
+  // ── Bouton preview 30s ────────────────────────────────────────────────────
+  var previewTimeout = null;
+  window.previewTrigger = function() {
+    var btn = document.getElementById('previewBtn');
+    if (previewTimeout) {
+      // Annuler
+      clearTimeout(previewTimeout);
+      previewTimeout = null;
+      btn.classList.remove('running');
+      btn.innerHTML = '<span class="pbdot"></span> Aperçu';
+      applyState(); // repasse en mode normal
+      return;
+    }
+    // Forcer l'activation
+    tlContent.style.display = 'none';
+    videoWrap.style.display = 'block';
+    video.play().catch(function(){});
+    counterUnits.forEach(function(u){ u.classList.add('glowing'); });
+    if (storyHeart) storyHeart.style.display = 'block';
+    btn.classList.add('running');
+
+    // Countdown visuel dans le bouton
+    var secs = 30;
+    btn.innerHTML = '<span class="pbdot"></span> ' + secs + 's';
+    var tick = setInterval(function(){
+      secs--;
+      if (secs > 0) {
+        btn.innerHTML = '<span class="pbdot"></span> ' + secs + 's';
+      } else {
+        clearInterval(tick);
+      }
+    }, 1000);
+
+    previewTimeout = setTimeout(function(){
+      previewTimeout = null;
+      clearInterval(tick);
+      btn.classList.remove('running');
+      btn.innerHTML = '<span class="pbdot"></span> Aperçu';
+      applyState();
+    }, 30000);
+  };
 
   // Appliquer immédiatement au chargement
   applyState();
@@ -4143,5 +4224,7 @@ function filterSongs(q){
 
 
 </script>
+<div style="position:fixed;bottom:74px;left:12px;font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;pointer-events:none;z-index:999;font-family:'DM Sans',sans-serif;">v.26.01.02</div>
+
 </body>
 </html>
