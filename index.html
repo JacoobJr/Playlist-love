@@ -606,7 +606,7 @@ body.light #lockNavBtn { color: #7c3aed; }
 .result-text { font-family:'Playfair Display',serif; font-size:15px; font-style:italic; color:var(--text); margin-top:1px; }
 
 #lockPopup {
-  position:fixed; bottom:72px; left:8px;
+  position:fixed; bottom:72px; right:8px;
   background:var(--s2); border-radius:14px; display:none; z-index:1500;
   width:230px; border:1px solid var(--border);
   box-shadow: var(--shadow);
@@ -697,22 +697,22 @@ body.light #lockNavBtn { color: #7c3aed; }
 .memo-note-add-icon { font-size:28px; line-height:1; }
 .memo-note-add-lbl { font-size:10px; font-weight:600; letter-spacing:0.5px; }
 .memo-notes-empty { font-size:12px; color:var(--muted); font-style:italic; padding:8px 0 4px; }
-.memo-todo-card { background:var(--s1); border:1px solid var(--border); border-radius:10px; padding:14px 16px; position:relative; overflow:hidden; }
-.memo-todo-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:#FF69B4; border-radius:3px 0 0 3px; opacity:0.5; }
-.todo-item { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); }
+.memo-todo-card { background:var(--s1); border:1px solid var(--border); border-radius:8px; padding:8px 12px; position:relative; overflow:hidden; }
+.memo-todo-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background:#FF69B4; border-radius:2px 0 0 2px; opacity:0.4; }
+.todo-item { display:flex; align-items:center; gap:8px; padding:5px 0; border-bottom:1px solid var(--border); }
 .todo-item:last-child { border-bottom:none; }
-.todo-check { width:20px; height:20px; border-radius:50%; border:2px solid var(--muted); flex-shrink:0; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:border-color 0.15s, background 0.15s; font-size:10px; }
+.todo-check { width:15px; height:15px; border-radius:50%; border:1.5px solid var(--muted); flex-shrink:0; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:border-color 0.15s, background 0.15s; font-size:8px; }
 .todo-check.done { background:var(--green); border-color:var(--green); color:#000; }
-.todo-text { flex:1; font-size:13px; color:var(--text); line-height:1.4; transition:color 0.15s; }
+.todo-text { flex:1; font-size:12px; color:var(--text); line-height:1.3; transition:color 0.15s; }
 .todo-text.done { color:var(--muted); text-decoration:line-through; }
-.todo-del { font-size:14px; color:var(--muted); cursor:pointer; padding:2px 5px; border-radius:4px; opacity:0; transition:opacity 0.15s, color 0.15s; }
+.todo-del { font-size:11px; color:var(--muted); cursor:pointer; padding:2px 4px; border-radius:4px; opacity:0; transition:opacity 0.15s, color 0.15s; }
 .todo-item:hover .todo-del { opacity:1; }
 .todo-del:hover { color:#e05555; }
-.todo-empty { font-size:12px; color:var(--muted); text-align:center; padding:18px 0; font-style:italic; }
-.todo-add-row { display:flex; gap:8px; margin-top:12px; }
-.todo-add-input { flex:1; padding:9px 12px; font-size:13px; border:1px solid var(--border); border-radius:6px; background:var(--s3); color:var(--text); font-family:'DM Sans',sans-serif; outline:none; transition:border-color 0.2s; }
+.todo-empty { font-size:11px; color:var(--muted); text-align:center; padding:10px 0; font-style:italic; }
+.todo-add-row { display:flex; gap:6px; margin-top:8px; }
+.todo-add-input { flex:1; padding:6px 10px; font-size:12px; border:1px solid var(--border); border-radius:6px; background:var(--s3); color:var(--text); font-family:'DM Sans',sans-serif; outline:none; transition:border-color 0.2s; }
 .todo-add-input:focus { border-color:var(--green); }
-.todo-add-btn { padding:9px 14px; background:var(--green); color:#000; border:none; border-radius:6px; font-size:13px; font-weight:700; cursor:pointer; font-family:'DM Sans',sans-serif; transition:background 0.15s; }
+.todo-add-btn { padding:6px 11px; background:var(--green); color:#000; border:none; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer; font-family:'DM Sans',sans-serif; transition:background 0.15s; }
 .todo-add-btn:hover { background:var(--green2); }
 
 #memoModal { position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:2500; display:none; align-items:center; justify-content:center; padding:24px 16px; backdrop-filter:blur(4px); }
@@ -1014,6 +1014,16 @@ body.light .sg-song:hover { background: rgba(0,0,0,0.04); }
 .sg-gender-btn.selected-boy  .boy-icon  { background: rgba(91,156,246,0.3); }
 .sg-dot-girl { background: #e879a0 !important; opacity: 0.85 !important; }
 .sg-dot-boy  { background: #5b9cf6 !important; opacity: 0.85 !important; }
+.sg-num {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  width: 18px;
+  text-align: right;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
 
 /* ── AUTH MODAL SUGGESTION ── */
 #sgAuthModal {
@@ -1920,14 +1930,14 @@ document.getElementById('spinBtn').addEventListener('click',function(){
 
 // ── LOCK ──
 var lockPopup=document.getElementById('lockPopup'),lockInput=document.getElementById('lockInput'),lockError=document.getElementById('lockError');
-function toggleLockPopup(){var isOpen=lockPopup.style.display==='block';document.getElementById('libraryPopup').style.display='none';lockPopup.style.display=isOpen?'none':'block';if(!isOpen){lockInput.focus();lockError.style.display='none';lockInput.value='';}}
+function toggleLockPopup(){var isOpen=lockPopup.style.display==='block';document.getElementById('libraryPopup').style.display='none';lockPopup.style.display=isOpen?'none':'block';if(!isOpen){lockError.style.display='none';lockInput.value='';}}
 function checkCode(){
   var val=lockInput.value.trim().toUpperCase();lockError.style.display='none';
   if(val==='NEMO'){lockPopup.style.display='none';document.getElementById('prankOverlay').classList.add('show');return;}
   if(val==='BILOUTE'){lockPopup.style.display='none';openHiddenPage();return;}
-  lockError.style.display='block';lockError.textContent='❌ Code incorrect, recommence !';lockInput.value='';lockInput.focus();
+  lockError.style.display='block';lockError.textContent='❌ Code incorrect, recommence !';lockInput.value='';
 }
-function closePrank(){document.getElementById('prankOverlay').classList.remove('show');lockPopup.style.display='block';lockInput.value='';lockInput.focus();}
+function closePrank(){document.getElementById('prankOverlay').classList.remove('show');lockPopup.style.display='block';lockInput.value='';}
 function openHiddenPage(){document.getElementById('hiddenPage').classList.add('active');window.scrollTo(0,0);}
 function closeHiddenPage(){document.getElementById('hiddenPage').classList.remove('active');}
 lockInput.addEventListener('keydown',function(e){if(e.key==='Enter')checkCode();});
@@ -2405,10 +2415,11 @@ function filterSongs(q){
         list.appendChild(em);
         return;
       }
-      items.forEach(function(item){
+      items.forEach(function(item, index){
         var row = document.createElement('div');
         row.className = 'sg-song';
         row.innerHTML =
+          '<div class="sg-num">' + (index + 1) + '</div>' +
           '<div class="sg-dot' + (item.gender === 'girl' ? ' sg-dot-girl' : item.gender === 'boy' ? ' sg-dot-boy' : '') + '"></div>' +
           '<div class="sg-info"><div class="sg-title">' + escSg(item.title) + '</div><div class="sg-artist">' + escSg(item.artist) + '</div></div>' +
           (item.note ? '<div class="sg-note">' + escSg(item.note) + '</div>' : '<div style="width:110px;flex-shrink:0"></div>') +
