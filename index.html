@@ -677,6 +677,55 @@ body.light #lockNavBtn { color: #7c3aed; }
 .memory-win-replay { margin-top: 16px; padding: 11px 24px; background: rgba(255,105,180,0.2); color: #FF69B4; border: 1px solid rgba(255,105,180,0.35); border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s; }
 .memory-win-replay:hover { background: rgba(255,105,180,0.3); }
 
+/* ── GENDER SELECT ── */
+.gender-select-screen { background: rgba(255,105,180,0.07); border: 1px solid rgba(255,105,180,0.2); border-radius: 14px; padding: 28px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.gender-select-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--text); }
+.gender-select-sub { font-size: 12px; color: var(--sub); }
+.gender-select-btns { display: flex; gap: 12px; width: 100%; max-width: 280px; }
+.gender-select-btn {
+  flex: 1; padding: 14px 10px; border-radius: 12px;
+  border: 1.5px solid var(--border); background: var(--s2);
+  color: var(--sub); font-size: 13px; font-weight: 700;
+  font-family: 'DM Sans', sans-serif; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.1s;
+  user-select: none;
+}
+.gender-select-btn:hover { background: var(--s3); }
+.gender-select-btn.girl {
+  border-color: #e879a0; background: rgba(232,121,160,0.1); color: #e879a0;
+}
+.gender-select-btn.boy {
+  border-color: #5b9cf6; background: rgba(91,156,246,0.1); color: #5b9cf6;
+}
+.gender-select-icon { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; }
+.gender-select-btn.girl .gender-select-icon { background: rgba(232,121,160,0.22); color: #e879a0; }
+.gender-select-btn.boy  .gender-select-icon { background: rgba(91,156,246,0.22);  color: #5b9cf6; }
+
+/* ── LEADERBOARD ── */
+.leaderboard-wrap { margin-top: 20px; }
+.leaderboard-title { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.leaderboard-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.leaderboard-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+.lb-tab { flex: 1; padding: 6px 10px; border-radius: 20px; background: var(--s2); color: var(--sub); font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); text-align: center; transition: background 0.15s, color 0.15s; user-select: none; }
+.lb-tab.active-girl { background: rgba(232,121,160,0.15); color: #e879a0; border-color: rgba(232,121,160,0.4); }
+.lb-tab.active-boy  { background: rgba(91,156,246,0.15);  color: #5b9cf6;  border-color: rgba(91,156,246,0.4); }
+.lb-tab.active-all  { background: rgba(29,185,84,0.12);   color: var(--green); border-color: rgba(29,185,84,0.35); }
+.lb-row { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 8px; transition: background 0.12s; }
+.lb-row:hover { background: var(--s2); }
+.lb-rank { width: 22px; font-size: 12px; font-weight: 700; color: var(--muted); text-align: center; flex-shrink: 0; }
+.lb-rank.gold   { color: #f5c518; font-size: 15px; }
+.lb-rank.silver { color: #aaa; font-size: 14px; }
+.lb-rank.bronze { color: #cd7f32; font-size: 13px; }
+.lb-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.lb-dot.girl { background: #e879a0; }
+.lb-dot.boy  { background: #5b9cf6; }
+.lb-name { font-size: 12px; font-weight: 600; color: var(--text); flex: 1; }
+.lb-score { font-size: 11px; color: var(--sub); font-variant-numeric: tabular-nums; }
+.lb-score span { color: var(--text); font-weight: 700; }
+.lb-empty { font-size: 12px; color: var(--muted); text-align: center; padding: 14px 0; font-style: italic; }
+.lb-loading { font-size: 11px; color: var(--muted); text-align: center; padding: 10px 0; }
+
 #memoCoupleSection { padding: 26px 16px 0; }
 .memo-lock-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 9px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; background: var(--s2); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; cursor: pointer; transition: color 0.15s, border-color 0.15s, transform 0.12px; user-select: none; }
 .memo-lock-badge:hover { color: var(--text); border-color: var(--green); transform: scale(1.03); }
@@ -1054,9 +1103,36 @@ body.light .sg-song:hover { background: rgba(0,0,0,0.04); }
 .gv-tag { font-size:10px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--green); margin-bottom:4px; }
 .gv-title { font-family:'Playfair Display',serif; font-size:clamp(28px,8vw,46px); font-weight:700; color:var(--text); line-height:1.05; letter-spacing:-0.5px; }
 .gv-sub { font-size:12px; color:var(--muted); margin-top:6px; letter-spacing:0.5px; }
-.gv-game-section { padding: 22px 16px 0; }
-.gv-game-label { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:2.5px; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
-.gv-game-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* Liste des jeux */
+.gv-game-list { padding: 20px 16px; display: flex; flex-direction: column; gap: 10px; }
+.gv-game-card {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--s1); border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px 16px; cursor: pointer;
+  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+  position: relative; overflow: hidden;
+}
+.gv-game-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--green); border-radius:3px 0 0 3px; opacity:0.5; }
+.gv-game-card:hover { background: var(--s2); transform: translateY(-2px); box-shadow: var(--shadow); }
+.gv-game-card:hover::before { opacity: 1; }
+.gv-game-card-icon { font-size: 28px; line-height: 1; flex-shrink: 0; }
+.gv-game-card-info { flex: 1; min-width: 0; }
+.gv-game-card-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.gv-game-card-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.gv-game-card-arrow { font-size: 16px; color: var(--muted); flex-shrink: 0; }
+
+/* Vue individuelle d'un jeu */
+#memoryView {
+  display: none; position: fixed; inset: 0; background: var(--bg); z-index: 600;
+  overflow-y: auto; padding-bottom: 80px; transition: background 0.3s;
+}
+#memoryView.active { display: block; animation: slideUp 0.25s ease; }
+.game-view-header { padding: 22px 16px 16px; border-bottom: 1px solid var(--border); }
+.game-view-back { display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:700; color:var(--green); cursor:pointer; margin-bottom:8px; text-transform:uppercase; letter-spacing:2px; transition:opacity 0.15s; }
+.game-view-back:hover { opacity:0.7; }
+.game-view-title { font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:var(--text); }
+.game-view-body { padding: 16px 16px 0; }
 
 </style>
 </head>
@@ -1387,14 +1463,54 @@ body.light .sg-song:hover { background: rgba(0,0,0,0.04); }
     <div class="gv-title">Jeux 🎮</div>
     <div class="gv-sub">Pour se détendre ensemble</div>
   </div>
-  <div class="gv-game-section">
-    <div class="gv-game-label">Jeu de mémoire 🎴</div>
-    <div class="memory-start-screen" id="memoryStartScreen">
+  <div class="gv-game-list">
+    <div class="gv-game-card" onclick="openMemoryGame()">
+      <div class="gv-game-card-icon">🎴</div>
+      <div class="gv-game-card-info">
+        <div class="gv-game-card-name">Jeu de mémoire</div>
+        <div class="gv-game-card-desc">Retrouve toutes les paires — moins de coups = meilleur score</div>
+      </div>
+      <div class="gv-game-card-arrow">›</div>
+    </div>
+    <!-- Ajouter d'autres jeux ici -->
+  </div>
+</div>
+
+<!-- ════ VUE JEU DE MÉMOIRE ════ -->
+<div id="memoryView">
+  <div class="game-view-header">
+    <div class="game-view-back" onclick="closeMemoryGame()">← Retour aux jeux</div>
+    <div class="game-view-title">Jeu de mémoire 🎴</div>
+  </div>
+  <div class="game-view-body">
+
+    <!-- ÉTAPE 1 : Choix du joueur -->
+    <div class="gender-select-screen" id="memoryGenderScreen">
       <div class="memory-start-icon">🎴</div>
-      <div class="memory-start-title">Jeu de mémoire</div>
+      <div class="gender-select-title">Qui joue ?</div>
+      <div class="gender-select-sub">Choisis ton identité pour sauvegarder ton score</div>
+      <div class="gender-select-btns">
+        <button class="gender-select-btn" id="memGenderGirl" onclick="memorySelectGender('girl')">
+          <span class="gender-select-icon">♀</span>
+          Elle
+        </button>
+        <button class="gender-select-btn" id="memGenderBoy" onclick="memorySelectGender('boy')">
+          <span class="gender-select-icon">♂</span>
+          Lui
+        </button>
+      </div>
+    </div>
+
+    <!-- ÉTAPE 2 : Prêt à jouer -->
+    <div class="memory-start-screen" id="memoryStartScreen" style="display:none">
+      <div class="memory-start-icon" id="memoryStartEmoji">🎴</div>
+      <div class="memory-start-title" id="memoryStartTitle">Jeu de mémoire</div>
       <div class="memory-start-sub">Retrouve toutes les paires d'émojis cachées. Moins de coups = meilleur score !</div>
       <button class="memory-start-btn" onclick="memoryLaunch()">▶ Jouer</button>
+      <div style="font-size:11px;color:var(--muted);cursor:pointer;margin-top:-4px;" onclick="memoryBackToGender()">← Changer de joueur</div>
     </div>
+
+    <!-- JEU EN COURS -->
     <div id="memoryGameArea" style="display:none">
       <div class="memory-header">
         <div class="memory-stats">
@@ -1415,6 +1531,18 @@ body.light .sg-song:hover { background: rgba(0,0,0,0.04); }
         <button class="memory-win-replay" onclick="memoryRestart()">Rejouer 🔄</button>
       </div>
     </div>
+
+    <!-- CLASSEMENT — intégré dans la vue du jeu -->
+    <div class="leaderboard-wrap" id="memoryLeaderboard">
+      <div class="leaderboard-title">Classement</div>
+      <div class="leaderboard-tabs">
+        <div class="lb-tab active-all" id="lbTabAll" onclick="lbSetTab('all')">Tous</div>
+        <div class="lb-tab" id="lbTabGirl" onclick="lbSetTab('girl')">Elle ♀</div>
+        <div class="lb-tab" id="lbTabBoy" onclick="lbSetTab('boy')">Lui ♂</div>
+      </div>
+      <div id="lbList"><div class="lb-loading"><span class="spinner"></span> Chargement...</div></div>
+    </div>
+
   </div>
 </div>
 
@@ -1953,8 +2081,41 @@ document.addEventListener('click',function(e){
 // ── MEMORY ──
 var MEMORY_EMOJIS=['💕','🌸','💋','🥰','🌙','✨','🎵','💎'];
 var memCards=[],memFlipped=[],memMatched=0,memMoves=0,memLocked=false,memTimerInt=null,memSeconds=0,memStarted=false;
-function memoryLaunch(){document.getElementById('memoryStartScreen').style.display='none';document.getElementById('memoryGameArea').style.display='block';memoryInit();}
-function memoryQuit(){clearInterval(memTimerInt);document.getElementById('memoryGameArea').style.display='none';document.getElementById('memoryStartScreen').style.display='flex';document.getElementById('memoryWin').classList.remove('show');}
+var memCurrentPlayer = null; // 'girl' ou 'boy'
+
+// ── Sélection du genre ──
+function memorySelectGender(gender) {
+  memCurrentPlayer = gender;
+  // Highlight bouton sélectionné
+  document.getElementById('memGenderGirl').className = 'gender-select-btn' + (gender === 'girl' ? ' girl' : '');
+  document.getElementById('memGenderBoy').className  = 'gender-select-btn' + (gender === 'boy'  ? ' boy'  : '');
+  // Afficher titre personnalisé
+  document.getElementById('memoryStartTitle').textContent = gender === 'girl' ? 'Jeu de mémoire — Elle 💗' : 'Jeu de mémoire — Lui 💙';
+  // Transition vers écran de départ
+  document.getElementById('memoryGenderScreen').style.display = 'none';
+  document.getElementById('memoryStartScreen').style.display  = 'flex';
+}
+
+function memoryBackToGender() {
+  memCurrentPlayer = null;
+  document.getElementById('memoryStartScreen').style.display  = 'none';
+  document.getElementById('memoryGenderScreen').style.display = 'flex';
+  document.getElementById('memGenderGirl').className = 'gender-select-btn';
+  document.getElementById('memGenderBoy').className  = 'gender-select-btn';
+}
+
+function memoryLaunch(){
+  document.getElementById('memoryStartScreen').style.display='none';
+  document.getElementById('memoryGameArea').style.display='block';
+  memoryInit();
+}
+function memoryQuit(){
+  clearInterval(memTimerInt);
+  document.getElementById('memoryGameArea').style.display='none';
+  document.getElementById('memoryWin').classList.remove('show');
+  // Retour à l'écran genre
+  memoryBackToGender();
+}
 function memoryInit(){
   clearInterval(memTimerInt);memCards=[];memFlipped=[];memMatched=0;memMoves=0;memSeconds=0;memLocked=false;memStarted=false;
   document.getElementById('memScore').textContent='0';document.getElementById('memMoves').textContent='0';document.getElementById('memTime').textContent='0s';document.getElementById('memoryWin').classList.remove('show');
@@ -1982,13 +2143,92 @@ function checkMemMatch(){
   else{a.classList.add('wrong');b.classList.add('wrong');setTimeout(function(){a.classList.remove('flipped','wrong');b.classList.remove('flipped','wrong');},350);}
   memFlipped=[];memLocked=false;
 }
+
+// Calcul score : moins de coups et moins de temps = meilleur score
+function memoryCalcScore(moves, seconds) {
+  var base = 1000;
+  var penalty = moves * 10 + seconds * 2;
+  return Math.max(0, base - penalty);
+}
+
 function memoryWinFn(){
   var win=document.getElementById('memoryWin');win.classList.add('show');
   var stars=memMoves<=20?'🌟🌟🌟':memMoves<=30?'🌟🌟':'🌟';
-  var msg=memMoves<=20?'Parfaite ! '+memMoves+' coups en '+document.getElementById('memTime').textContent+' — t\'es vraiment trop forte 💕':memMoves<=30?'Bien joué ! '+memMoves+' coups en '+document.getElementById('memTime').textContent+' — presque parfaite 😊':'Bravo ! '+memMoves+' coups en '+document.getElementById('memTime').textContent+' — tu peux faire mieux 😏';
-  document.getElementById('memoryWinTitle').textContent=stars+' Terminé !';document.getElementById('memoryWinSub').textContent=msg;
+  var timeStr = document.getElementById('memTime').textContent;
+  var who = memCurrentPlayer === 'girl' ? 'Elle' : 'Lui';
+  var msg = memMoves<=20 ? 'Parfait '+who+' ! '+memMoves+' coups en '+timeStr+' 💕' : memMoves<=30 ? 'Bien joué '+who+' ! '+memMoves+' coups en '+timeStr+' 😊' : 'Bravo '+who+' ! '+memMoves+' coups en '+timeStr+' 😏';
+  document.getElementById('memoryWinTitle').textContent=stars+' Terminé !';
+  document.getElementById('memoryWinSub').textContent=msg;
   win.scrollIntoView({behavior:'smooth',block:'center'});
+
+  // Sauvegarder dans Supabase
+  if(memCurrentPlayer) {
+    var scoreVal = memoryCalcScore(memMoves, memSeconds);
+    sbPost('game_scores', {
+      game_id: 'memory',
+      player: memCurrentPlayer,
+      score: scoreVal,
+      moves: memMoves,
+      time_seconds: memSeconds
+    }).then(function(){ lbLoad(); }).catch(function(){});
+  }
 }
+
+// ── LEADERBOARD ──
+var lbCurrentTab = 'all';
+
+function lbSetTab(tab) {
+  lbCurrentTab = tab;
+  ['all','girl','boy'].forEach(function(t) {
+    var el = document.getElementById('lbTab' + t.charAt(0).toUpperCase() + t.slice(1));
+    if(el) el.className = 'lb-tab' + (t === tab ? ' active-' + tab : '');
+  });
+  lbRender(lbCurrentData);
+}
+
+var lbCurrentData = [];
+
+function lbLoad() {
+  var list = document.getElementById('lbList');
+  list.innerHTML = '<div class="lb-loading"><span class="spinner"></span></div>';
+  sbGet('game_scores', 'game_id=eq.memory&order=score.desc&limit=50')
+    .then(function(rows) {
+      lbCurrentData = Array.isArray(rows) ? rows : [];
+      lbRender(lbCurrentData);
+    })
+    .catch(function() {
+      list.innerHTML = '<div class="lb-empty">❌ Erreur de connexion.</div>';
+    });
+}
+
+function lbRender(rows) {
+  var list = document.getElementById('lbList');
+  var filtered = lbCurrentTab === 'all' ? rows : rows.filter(function(r){ return r.player === lbCurrentTab; });
+  // Top 10 seulement
+  var top = filtered.slice(0, 10);
+  if(!top.length) {
+    list.innerHTML = '<div class="lb-empty">Aucun score encore — soyez les premiers ! 🎮</div>';
+    return;
+  }
+  var rankIcons = ['🥇','🥈','🥉'];
+  list.innerHTML = top.map(function(row, i) {
+    var rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+    var rankDisplay = i < 3 ? rankIcons[i] : (i + 1);
+    var playerLabel = row.player === 'girl' ? 'Elle' : 'Lui';
+    var dotClass = row.player === 'girl' ? 'girl' : 'boy';
+    var m = Math.floor(row.time_seconds / 60), s = row.time_seconds % 60;
+    var timeStr = m ? m + 'm' + String(s).padStart(2,'0') + 's' : s + 's';
+    return '<div class="lb-row">' +
+      '<div class="lb-rank ' + rankClass + '">' + rankDisplay + '</div>' +
+      '<div class="lb-dot ' + dotClass + '"></div>' +
+      '<div class="lb-name">' + playerLabel + '</div>' +
+      '<div class="lb-score"><span>' + row.score + 'pts</span> · ' + row.moves + ' coups · ' + timeStr + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// Charger le classement à l'ouverture des jeux
+var _gamesLbLoaded = false;
 
 // ── QUIZ ──
   
@@ -2081,11 +2321,38 @@ function showResult(){
 }
 
 // ── NAV ──
-function openGames(){document.getElementById('gamesView').classList.add('active');particleActive=false;hideDance();window.scrollTo(0,0);}
-function closeGames(){document.getElementById('gamesView').classList.remove('active');clearInterval(memTimerInt);var ga=document.getElementById('memoryGameArea');var ms=document.getElementById('memoryStartScreen');if(ga)ga.style.display='none';if(ms)ms.style.display='flex';var mw=document.getElementById('memoryWin');if(mw)mw.classList.remove('show');}
-function scrollToTop(){if(isQuizOpen){closeQuiz();return;}if(document.getElementById('gamesView').classList.contains('active')){closeGames();return;}if(document.getElementById('hiddenPage').classList.contains('active')){closeHiddenPage();return;}window.scrollTo({top:0,behavior:'smooth'});}
+function openGames(){
+  document.getElementById('gamesView').classList.add('active');
+  particleActive=false;hideDance();window.scrollTo(0,0);
+}
+function closeGames(){
+  document.getElementById('gamesView').classList.remove('active');
+}
+function openMemoryGame(){
+  document.getElementById('memoryView').classList.add('active');
+  window.scrollTo(0,0);
+  lbLoad();
+}
+function closeMemoryGame(){
+  document.getElementById('memoryView').classList.remove('active');
+  clearInterval(memTimerInt);
+  document.getElementById('memoryGameArea').style.display='none';
+  document.getElementById('memoryStartScreen').style.display='none';
+  document.getElementById('memoryGenderScreen').style.display='flex';
+  document.getElementById('memoryWin').classList.remove('show');
+  memCurrentPlayer=null;
+  document.getElementById('memGenderGirl').className='gender-select-btn';
+  document.getElementById('memGenderBoy').className='gender-select-btn';
+}
+function closeAllViews(){
+  if(isQuizOpen) closeQuiz();
+  if(document.getElementById('memoryView').classList.contains('active')) closeMemoryGame();
+  if(document.getElementById('gamesView').classList.contains('active')) closeGames();
+  if(document.getElementById('hiddenPage').classList.contains('active')) closeHiddenPage();
+}
+function scrollToTop(){closeAllViews();window.scrollTo({top:0,behavior:'smooth'});}
 function toggleLibrary(){var p=document.getElementById('libraryPopup');p.style.display=p.style.display==='block'?'none':'block';}
-function goTo(id){if(isQuizOpen)closeQuiz();setTimeout(function(){document.getElementById(id).scrollIntoView({behavior:'smooth'});document.getElementById('libraryPopup').style.display='none';},isQuizOpen?120:0);}
+function goTo(id){closeAllViews();document.getElementById('libraryPopup').style.display='none';setTimeout(function(){var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth'});},150);}
 function spawnHeart(){var h=document.createElement('div');h.className='like-heart';h.textContent='🤍';document.body.appendChild(h);setTimeout(function(){h.remove();},600);}
 function openSearch(){if(isQuizOpen)return;document.getElementById('searchOverlay').style.display='block';document.getElementById('searchInput').focus();}
 function closeSearch(){document.getElementById('searchOverlay').style.display='none';document.getElementById('searchResults').innerHTML='';}
