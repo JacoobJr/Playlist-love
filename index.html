@@ -1197,6 +1197,125 @@ body.light .sg-song:hover { background: rgba(0,0,0,0.04); }
 .game-start-btn{padding:12px 30px;background:rgba(232,121,160,0.2);color:#e879a0;border:1.5px solid rgba(232,121,160,0.45);border-radius:50px;font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background 0.15s,transform 0.12s;}
 .game-start-btn:hover{background:rgba(232,121,160,0.32);transform:scale(1.05);}
 
+/* ════ MINI PLAYER ════ */
+#miniPlayer {
+  position: fixed;
+  bottom: 64px; /* au-dessus de la bottom-nav */
+  left: 0; width: 100%;
+  z-index: 999;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(.4,0,.2,1), opacity 0.35s;
+  opacity: 0;
+  pointer-events: none;
+}
+#miniPlayer.visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: all;
+}
+#miniPlayer.game-hidden {
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+.mp-inner {
+  margin: 0 8px;
+  background: rgba(18,18,18,0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 14px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.5);
+}
+body.light .mp-inner {
+  background: rgba(255,255,255,0.88);
+  border-color: rgba(224,57,122,0.18);
+  box-shadow: 0 -4px 24px rgba(224,57,122,0.1);
+}
+.mp-info {
+  flex: 1;
+  min-width: 0;
+}
+.mp-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mp-artist {
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+.mp-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.mp-btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.12s;
+  flex-shrink: 0;
+}
+.mp-btn:hover { background: rgba(255,255,255,0.1); transform: scale(1.08); }
+body.light .mp-btn:hover { background: rgba(0,0,0,0.07); }
+.mp-btn-play {
+  width: 38px; height: 38px;
+  background: var(--green);
+  color: #000;
+  border-radius: 50%;
+}
+.mp-btn-play:hover { background: var(--green2); }
+.mp-btn-mode.active { color: var(--green); }
+.mp-btn-stop { color: var(--muted); }
+.mp-btn-stop:hover { color: #e05555 !important; background: rgba(220,50,50,0.1) !important; }
+/* SVG icons inside mp buttons */
+.mp-btn svg { width: 16px; height: 16px; }
+.mp-btn-play svg { width: 18px; height: 18px; }
+
+/* Pendu theme label */
+.pendu-theme {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--green);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+  padding: 4px 10px;
+  background: rgba(29,185,84,0.08);
+  border: 1px solid rgba(29,185,84,0.18);
+  border-radius: 20px;
+  display: inline-block;
+}
+body.light .pendu-theme {
+  color: var(--green);
+  background: rgba(224,57,122,0.07);
+  border-color: rgba(224,57,122,0.2);
+}
+.pendu-theme-wrap {
+  text-align: center;
+  margin: 8px 0 4px;
+}
+
 </style>
 </head>
 <body>
@@ -1665,6 +1784,7 @@ body.light .sg-song:hover { background: rgba(0,0,0,0.04); }
         <line x1="110" y1="98" x2="128" y2="125" stroke="#e879a0" stroke-width="2.5" stroke-linecap="round" id="ph-leg2" style="display:none"/>
       </svg>
       <div class="pendu-errors" id="penduErrors">0 / 7 erreurs</div>
+      <div class="pendu-theme-wrap" id="penduThemeWrap"></div>
       <div class="pendu-hint" id="penduHint"></div>
       <div class="pendu-word" id="penduWord"></div>
       <div class="pendu-keyboard" id="penduKeyboard"></div>
@@ -1831,6 +1951,41 @@ body.light .sg-song:hover { background: rgba(0,0,0,0.04); }
     <input type="text" class="sg-input" id="sgNoteInput" placeholder="ex: trop bonne pour toi 😏" maxlength="100">
     <div id="sgErrMsg" style="display:none;font-size:11px;color:#e05555;margin-bottom:8px;padding:8px 10px;background:rgba(220,50,50,0.07);border-radius:6px;border:1px solid rgba(220,50,50,0.2);word-break:break-all;"></div>
     <button class="sg-modal-save" onclick="sgSave()">Proposer 💚</button>
+  </div>
+</div>
+
+<!-- ════ MINI PLAYER ════ -->
+<div id="miniPlayer">
+  <div class="mp-inner">
+    <div class="mp-info">
+      <div class="mp-title" id="mpTitle">—</div>
+      <div class="mp-artist" id="mpArtist">—</div>
+    </div>
+    <div class="mp-controls">
+      <!-- Bouton mode (ordre/aléatoire/répéter) -->
+      <button class="mp-btn mp-btn-mode" id="mpModeBtn" title="Mode de lecture" onclick="mpCycleMode()">
+        <svg id="mpModeIconOrder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        <svg id="mpModeIconShuffle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+        <svg id="mpModeIconRepeat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/><text x="9" y="19" font-size="7" fill="currentColor" stroke="none" font-weight="700" font-family="sans-serif">1</text></svg>
+      </button>
+      <!-- Précédent -->
+      <button class="mp-btn" id="mpPrevBtn" title="Précédent" onclick="mpPrev()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+      </button>
+      <!-- Play/Pause -->
+      <button class="mp-btn mp-btn-play" id="mpPlayBtn" title="Lecture/Pause" onclick="mpToggle()">
+        <svg id="mpIconPlay" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="mpIconPause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      </button>
+      <!-- Suivant -->
+      <button class="mp-btn" id="mpNextBtn" title="Suivant" onclick="mpNext()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+      </button>
+      <!-- Arrêt complet -->
+      <button class="mp-btn mp-btn-stop" id="mpStopBtn" title="Arrêter la musique" onclick="mpStop()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -2027,8 +2182,8 @@ function createSongEl(song, num) {
   div.innerHTML = '<div class="song-num">'+num+'</div><div class="song-info"><div class="song-title">'+song.title+'</div><div class="song-artist">'+song.artist+'</div></div><div class="song-actions"><button class="btn-play">&#9654;</button><button class="btn-yt">YT</button><audio src="'+song.file+'"></audio></div>';
   var btn=div.querySelector('.btn-play'), audio=div.querySelector('audio');
   div.querySelector('.btn-yt').addEventListener('click',function(){window.open(song.yt,'_blank');});
-  function ps(){audio.pause();btn.innerHTML='&#9654;';btn.classList.remove('active');div.classList.remove('playing');particleActive=false;hideDance();}
-  function pl(){audio.play();btn.textContent='⏸';btn.classList.add('active');div.classList.add('playing');particleActive=true;showDance();}
+  function ps(){audio.pause();btn.innerHTML='&#9654;';btn.classList.remove('active');div.classList.remove('playing');particleActive=false;hideDance();if(window.mpUpdate) mpUpdate();}
+  function pl(){audio.play();btn.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';btn.classList.add('active');div.classList.add('playing');particleActive=true;showDance();if(window.mpUpdate) mpUpdate();}
   btn.addEventListener('click',function(){if(currentAudio===audio){audio.paused?pl():ps();}else{stopCurrent();currentAudio=audio;currentBtn=btn;currentRow=div;pl();}});
   audio.addEventListener('ended',function(){ps();currentAudio=null;currentBtn=null;currentRow=null;});
   return div;
@@ -2077,8 +2232,8 @@ function renderTop50() {
     songRows[song.file] = { div:div, btn:btn, audio:audio };
 
     ytb.addEventListener('click', function(e){ e.stopPropagation(); window.open(song.yt,'_blank'); });
-    function ps(){ audio.pause(); btn.innerHTML='&#9654;'; btn.classList.remove('active'); div.classList.remove('playing'); particleActive=false; hideDance(); }
-    function pl(){ audio.play(); btn.textContent='⏸'; btn.classList.add('active'); div.classList.add('playing'); particleActive=true; showDance(); }
+    function ps(){ audio.pause(); btn.innerHTML='&#9654;'; btn.classList.remove('active'); div.classList.remove('playing'); particleActive=false; hideDance(); if(window.mpUpdate) mpUpdate(); }
+    function pl(){ audio.play(); btn.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'; btn.classList.add('active'); div.classList.add('playing'); particleActive=true; showDance(); if(window.mpUpdate) mpUpdate(); }
     function toggle(e){ if(e) e.stopPropagation(); if(currentAudio===audio){ audio.paused?pl():ps(); }else{ stopCurrent(); currentAudio=audio; currentBtn=btn; currentRow=div; pl(); } }
     btn.addEventListener('click', toggle);
     div.addEventListener('click', toggle);
@@ -2565,61 +2720,61 @@ function showResult(){
 // ── PENDU ──
 // ══════════════════════════════════════════
 var PENDU_WORDS = [
-  {w:'amour',h:'Un sentiment fort entre deux personnes'},
-  {w:'bisou',h:'Un petit geste de tendresse sur les lèvres'},
-  {w:'calin',h:'On se serre fort dans les bras'},
-  {w:'coeur',h:'Symbole de l\'amour ❤️'},
-  {w:'douceur',h:'Une qualité précieuse chez quelqu\'un de gentil'},
-  {w:'etoile',h:'Elle brille la nuit dans le ciel'},
-  {w:'fleur',h:'Souvent offerte pour la Saint-Valentin'},
-  {w:'gateau',h:'On le mange lors d\'un anniversaire'},
-  {w:'hasard',h:'Quand quelque chose arrive sans être prévu'},
-  {w:'infini',h:'Quelque chose qui ne finit jamais'},
-  {w:'jaloux',h:'Un sentiment parfois difficile à gérer'},
-  {w:'kawaii',h:'Mot japonais qui signifie mignon'},
-  {w:'lune',h:'Elle éclaire les nuits romantiques'},
-  {w:'magie',h:'Ce qu\'on ressent quand tout est parfait'},
-  {w:'nuage',h:'Il flotte dans le ciel comme les rêves'},
-  {w:'ocean',h:'Une grande étendue d\'eau bleue'},
-  {w:'papillon',h:'Il symbolise la transformation et la liberté'},
-  {w:'quartz',h:'Une pierre précieuse rose'},
-  {w:'rose',h:'La fleur de l\'amour par excellence'},
-  {w:'soleil',h:'Il réchauffe comme un sourire'},
-  {w:'tendre',h:'Quelqu\'un de doux et affectueux'},
-  {w:'univers',h:'Tout ce qui existe autour de nous'},
-  {w:'voyage',h:'Partir découvrir de nouveaux endroits'},
-  {w:'week-end',h:'Les deux jours qu\'on attend toute la semaine'},
-  {w:'zinzin',h:'Un peu fou, mais attachant'},
-  {w:'rire',h:'Le meilleur remède au blues'},
-  {w:'musique',h:'Ce site en est plein'},
-  {w:'playlist',h:'Une liste de sons qu\'on aime'},
-  {w:'melodie',h:'Une suite de notes harmonieuses'},
-  {w:'rythme',h:'Ce qui donne envie de danser'},
-  {w:'chanson',h:'Un texte mis en musique'},
-  {w:'artiste',h:'Quelqu\'un qui crée de l\'art'},
-  {w:'concert',h:'Un spectacle musical en direct'},
-  {w:'guitare',h:'Instrument à cordes'},
-  {w:'piano',h:'Instrument à touches noir et blanc'},
-  {w:'microphone',h:'On parle ou chante dedans'},
-  {w:'studio',h:'Là où on enregistre la musique'},
-  {w:'album',h:'Une collection de chansons'},
-  {w:'refrain',h:'La partie répétée d\'une chanson'},
-  {w:'couplet',h:'La partie narrative d\'une chanson'},
-  {w:'beatbox',h:'Faire de la musique avec sa bouche'},
-  {w:'rappeur',h:'Il place des rimes sur un beat'},
-  {w:'freestyle',h:'Improviser sans préparation'},
-  {w:'casque',h:'On met ça sur les oreilles pour écouter'},
-  {w:'vinyle',h:'Un vieux disque noir qui tourne'},
-  {w:'festival',h:'Un grand événement musical en plein air'},
-  {w:'karaoké',h:'On chante sur les paroles affichées'},
-  {w:'baguette',h:'Accessoire du chef d\'orchestre'},
-  {w:'harmonie',h:'Quand tout s\'accorde parfaitement'},
-  {w:'ballade',h:'Une chanson douce et lente'},
-  {w:'silence',h:'L\'absence de son'},
-  {w:'vibration',h:'Ce que la musique fait ressentir'},
+  {w:'amour',h:'Un sentiment fort entre deux personnes',t:'💑 Couple'},
+  {w:'bisou',h:'Un petit geste de tendresse sur les lèvres',t:'💑 Couple'},
+  {w:'calin',h:'On se serre fort dans les bras',t:'💑 Couple'},
+  {w:'coeur',h:'Symbole de l\'amour ❤️',t:'💑 Couple'},
+  {w:'douceur',h:'Une qualité précieuse chez quelqu\'un de gentil',t:'✨ Sentiment'},
+  {w:'etoile',h:'Elle brille la nuit dans le ciel',t:'🌙 Nature'},
+  {w:'fleur',h:'Souvent offerte pour la Saint-Valentin',t:'🌸 Nature'},
+  {w:'gateau',h:'On le mange lors d\'un anniversaire',t:'🎂 Fête'},
+  {w:'hasard',h:'Quand quelque chose arrive sans être prévu',t:'✨ Sentiment'},
+  {w:'infini',h:'Quelque chose qui ne finit jamais',t:'✨ Sentiment'},
+  {w:'jaloux',h:'Un sentiment parfois difficile à gérer',t:'✨ Sentiment'},
+  {w:'kawaii',h:'Mot japonais qui signifie mignon',t:'🌸 Mignon'},
+  {w:'lune',h:'Elle éclaire les nuits romantiques',t:'🌙 Nature'},
+  {w:'magie',h:'Ce qu\'on ressent quand tout est parfait',t:'✨ Sentiment'},
+  {w:'nuage',h:'Il flotte dans le ciel comme les rêves',t:'🌙 Nature'},
+  {w:'ocean',h:'Une grande étendue d\'eau bleue',t:'🌊 Nature'},
+  {w:'papillon',h:'Il symbolise la transformation et la liberté',t:'🌸 Nature'},
+  {w:'quartz',h:'Une pierre précieuse rose',t:'💎 Bijou'},
+  {w:'rose',h:'La fleur de l\'amour par excellence',t:'🌸 Nature'},
+  {w:'soleil',h:'Il réchauffe comme un sourire',t:'🌙 Nature'},
+  {w:'tendre',h:'Quelqu\'un de doux et affectueux',t:'💑 Couple'},
+  {w:'univers',h:'Tout ce qui existe autour de nous',t:'✨ Sentiment'},
+  {w:'voyage',h:'Partir découvrir de nouveaux endroits',t:'✈️ Voyage'},
+  {w:'week-end',h:'Les deux jours qu\'on attend toute la semaine',t:'🎉 Vie'},
+  {w:'zinzin',h:'Un peu fou, mais attachant',t:'🤪 Fun'},
+  {w:'rire',h:'Le meilleur remède au blues',t:'😄 Fun'},
+  {w:'musique',h:'Ce site en est plein',t:'🎵 Musique'},
+  {w:'playlist',h:'Une liste de sons qu\'on aime',t:'🎵 Musique'},
+  {w:'melodie',h:'Une suite de notes harmonieuses',t:'🎵 Musique'},
+  {w:'rythme',h:'Ce qui donne envie de danser',t:'🎵 Musique'},
+  {w:'chanson',h:'Un texte mis en musique',t:'🎵 Musique'},
+  {w:'artiste',h:'Quelqu\'un qui crée de l\'art',t:'🎵 Musique'},
+  {w:'concert',h:'Un spectacle musical en direct',t:'🎵 Musique'},
+  {w:'guitare',h:'Instrument à cordes',t:'🎸 Instrument'},
+  {w:'piano',h:'Instrument à touches noir et blanc',t:'🎹 Instrument'},
+  {w:'microphone',h:'On parle ou chante dedans',t:'🎤 Musique'},
+  {w:'studio',h:'Là où on enregistre la musique',t:'🎵 Musique'},
+  {w:'album',h:'Une collection de chansons',t:'🎵 Musique'},
+  {w:'refrain',h:'La partie répétée d\'une chanson',t:'🎵 Musique'},
+  {w:'couplet',h:'La partie narrative d\'une chanson',t:'🎵 Musique'},
+  {w:'beatbox',h:'Faire de la musique avec sa bouche',t:'🎤 Musique'},
+  {w:'rappeur',h:'Il place des rimes sur un beat',t:'🎤 Musique'},
+  {w:'freestyle',h:'Improviser sans préparation',t:'🎤 Musique'},
+  {w:'casque',h:'On met ça sur les oreilles pour écouter',t:'🎧 Musique'},
+  {w:'vinyle',h:'Un vieux disque noir qui tourne',t:'🎵 Musique'},
+  {w:'festival',h:'Un grand événement musical en plein air',t:'🎉 Fête'},
+  {w:'karaoké',h:'On chante sur les paroles affichées',t:'🎤 Musique'},
+  {w:'baguette',h:'Accessoire du chef d\'orchestre',t:'🎵 Musique'},
+  {w:'harmonie',h:'Quand tout s\'accorde parfaitement',t:'🎵 Musique'},
+  {w:'ballade',h:'Une chanson douce et lente',t:'🎵 Musique'},
+  {w:'silence',h:'L\'absence de son',t:'✨ Sentiment'},
+  {w:'vibration',h:'Ce que la musique fait ressentir',t:'🎵 Musique'},
 ];
 
-var penduPlayer=null, penduWord='', penduHint='', penduGuessed=[], penduErrors=0, penduMaxErrors=7;
+var penduPlayer=null, penduWord='', penduHint='', penduTheme='', penduGuessed=[], penduErrors=0, penduMaxErrors=7;
 var penduScore=0, penduWins=0;
 var PENDU_PARTS=['ph-head','ph-body','ph-arm1','ph-arm2','ph-leg1','ph-leg2'];
 
@@ -2648,12 +2803,15 @@ function penduSelectGender(g){
 }
 function penduNewWord(){
   var idx=Math.floor(Math.random()*PENDU_WORDS.length);
-  penduWord=PENDU_WORDS[idx].w; penduHint=PENDU_WORDS[idx].h;
+  penduWord=PENDU_WORDS[idx].w; penduHint=PENDU_WORDS[idx].h; penduTheme=PENDU_WORDS[idx].t||'❓ Thème';
   penduGuessed=[]; penduErrors=0;
   // Reset pendu drawing
   PENDU_PARTS.forEach(function(id){ document.getElementById(id).style.display='none'; });
   document.getElementById('penduErrors').textContent='0 / 7 erreurs';
   document.getElementById('penduHint').textContent='💡 '+penduHint;
+  // Afficher le thème
+  var themeWrap=document.getElementById('penduThemeWrap');
+  if(themeWrap) themeWrap.innerHTML='<span class="pendu-theme">Thème : '+penduTheme+'</span>';
   document.getElementById('penduResult').style.display='none';
   document.getElementById('penduGameArea').querySelectorAll('.pendu-key').forEach(function(k){ k.remove(); });
   renderPenduWord();
@@ -3257,8 +3415,158 @@ function filterSongs(q){
 })();
 
 // ════════════════════════════════════════════
-// SECTION SUGGESTIONS — AUTRE 🎵
+// MINI PLAYER
 // ════════════════════════════════════════════
+(function(){
+  var mp = document.getElementById('miniPlayer');
+  var mpTitle = document.getElementById('mpTitle');
+  var mpArtist = document.getElementById('mpArtist');
+  var mpIconPlay = document.getElementById('mpIconPlay');
+  var mpIconPause = document.getElementById('mpIconPause');
+  var mpModeIconOrder = document.getElementById('mpModeIconOrder');
+  var mpModeIconShuffle = document.getElementById('mpModeIconShuffle');
+  var mpModeIconRepeat = document.getElementById('mpModeIconRepeat');
+  var mpModeBtn = document.getElementById('mpModeBtn');
+
+  // Track if we're in a game (to hide mini player)
+  var _gameViews = ['memoryView','penduView','puzzleView','snakeView','gamesView','quizView'];
+
+  function isGameActive(){
+    return _gameViews.some(function(id){
+      var el = document.getElementById(id);
+      return el && el.classList.contains('active');
+    });
+  }
+
+  function mpShow(){
+    if(isGameActive()){ mp.classList.add('game-hidden'); return; }
+    mp.classList.remove('game-hidden');
+    mp.classList.add('visible');
+  }
+  function mpHide(){
+    mp.classList.remove('visible');
+  }
+
+  // Update mini player state from currentAudio
+  window.mpUpdate = function(){
+    if(!currentAudio || !currentRow){
+      // If no current audio, check if paused (still has info)
+      mpUpdateIcons();
+      return;
+    }
+    // Find song info
+    var songData = songsLove.find(function(s){ return currentAudio.src && currentAudio.src.indexOf(s.file) !== -1; });
+    if(songData){
+      mpTitle.textContent = songData.title;
+      mpArtist.textContent = songData.artist;
+    }
+    mpUpdateIcons();
+    mpShow();
+  };
+
+  function mpUpdateIcons(){
+    var playing = currentAudio && !currentAudio.paused;
+    mpIconPlay.style.display = playing ? 'none' : '';
+    mpIconPause.style.display = playing ? '' : 'none';
+  }
+
+  window.mpUpdateMode = function(){
+    var mode = typeof playMode !== 'undefined' ? playMode : 'order';
+    mpModeIconOrder.style.display = mode === 'order' ? '' : 'none';
+    mpModeIconShuffle.style.display = mode === 'shuffle' ? '' : 'none';
+    mpModeIconRepeat.style.display = mode === 'repeat' ? '' : 'none';
+    mpModeBtn.classList.toggle('active', mode !== 'order');
+  };
+
+  // Actions
+  window.mpToggle = function(){
+    if(!currentAudio) return;
+    if(currentAudio.paused){
+      currentAudio.play();
+      if(currentBtn){ currentBtn.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'; currentBtn.classList.add('active'); }
+      if(currentRow){ currentRow.classList.add('playing'); }
+      particleActive=true; showDance();
+    } else {
+      currentAudio.pause();
+      if(currentBtn){ currentBtn.innerHTML='&#9654;'; currentBtn.classList.remove('active'); }
+      if(currentRow){ currentRow.classList.remove('playing'); }
+      particleActive=false; hideDance();
+    }
+    mpUpdateIcons();
+  };
+
+  window.mpStop = function(){
+    stopCurrent();
+    mpHide();
+  };
+
+  window.mpNext = function(){
+    if(!currentRow) return;
+    var songs = Array.from(document.querySelectorAll('#Love .sp-song'));
+    if(typeof playMode !== 'undefined' && playMode === 'repeat'){
+      var btn = currentRow.querySelector('.sp-btn-play'); if(btn) btn.click();
+    } else if(typeof playMode !== 'undefined' && playMode === 'shuffle'){
+      var idx = Math.floor(Math.random()*songs.length);
+      var btn = songs[idx] && songs[idx].querySelector('.sp-btn-play'); if(btn) btn.click();
+    } else {
+      var idx = songs.indexOf(currentRow);
+      var next = songs[idx+1] || songs[0];
+      if(next){ var btn = next.querySelector('.sp-btn-play'); if(btn) btn.click(); }
+    }
+  };
+
+  window.mpPrev = function(){
+    if(!currentRow) return;
+    var songs = Array.from(document.querySelectorAll('#Love .sp-song'));
+    var idx = songs.indexOf(currentRow);
+    var prev = songs[idx-1] || songs[songs.length-1];
+    if(prev){ var btn = prev.querySelector('.sp-btn-play'); if(btn) btn.click(); }
+  };
+
+  window.mpCycleMode = function(){
+    var mode = typeof playMode !== 'undefined' ? playMode : 'order';
+    var next = mode === 'order' ? 'shuffle' : mode === 'shuffle' ? 'repeat' : 'order';
+    setPlayMode(next);
+    mpUpdateMode();
+  };
+
+  // Show/hide based on game state
+  window.mpCheckGameState = function(){
+    if(currentAudio && !currentAudio.paused){
+      if(isGameActive()){
+        mp.classList.add('game-hidden');
+      } else {
+        mp.classList.remove('game-hidden');
+        mp.classList.add('visible');
+      }
+    } else if(!currentAudio || currentAudio.paused){
+      // Do nothing — keep hidden unless playing
+    }
+  };
+
+  // Poll for updates
+  setInterval(function(){
+    if(currentAudio && !currentAudio.paused) {
+      mpUpdate();
+    }
+    mpUpdateMode();
+    mpCheckGameState();
+  }, 500);
+})();
+
+// Patch openGames / closeGames / open*Game / close*Game to call mpCheckGameState
+(function(){
+  var patchOpen = ['openGames','openMemoryGame','openPenduGame','openPuzzleGame','openSnakeGame','openQuiz'];
+  var patchClose = ['closeGames','closeMemoryGame','closePenduGame','closePuzzleGame','closeSnakeGame','closeQuiz'];
+  patchOpen.forEach(function(fn){
+    var orig = window[fn];
+    if(orig) window[fn] = function(){ orig.apply(this,arguments); if(window.mpCheckGameState) mpCheckGameState(); };
+  });
+  patchClose.forEach(function(fn){
+    var orig = window[fn];
+    if(orig) window[fn] = function(){ orig.apply(this,arguments); setTimeout(function(){ if(window.mpCheckGameState) mpCheckGameState(); if(window.mpUpdate) mpUpdate(); }, 300); };
+  });
+})();
 (function(){
   var SG_CODE = 'BILOUTE';
   var sgUnlocked = false;
