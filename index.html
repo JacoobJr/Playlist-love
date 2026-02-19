@@ -341,7 +341,7 @@ header::before {
 
 .postit-wrap {
   position: relative;
-  height: 80px;
+  height: 90px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -349,7 +349,7 @@ header::before {
 .postit {
   border-radius: 8px;
   position: absolute;
-  width: 100%;
+  width: calc(100% - 0px);
   max-width: 500px;
   overflow: hidden;
   box-shadow: var(--shadow);
@@ -361,20 +361,21 @@ header::before {
   height: 74px;
 }
 .p-art {
-  width: 72px; flex-shrink: 0;
+  width: 60px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 28px;
+  font-size: 26px;
 }
 .p-body {
-  flex: 1; padding: 10px 14px;
+  flex: 1; padding: 10px 12px;
   background: var(--s2);
-  display: flex; flex-direction: column; justify-content: center; gap: 4px;
-  min-width: 0;
+  display: flex; flex-direction: column; justify-content: center; gap: 3px;
+  min-width: 0; overflow: hidden;
 }
-.p-title { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-title { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .p-text {
   font-size: 11px; color: var(--sub); line-height: 1.4;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  word-break: break-word;
 }
 .stack-hint { font-size: 10px; color: var(--muted); text-align: center; margin-top: 10px; }
 .stack-ctr  { font-size: 10px; color: var(--green); text-align: center; margin-top: 4px; font-weight: 600; }
@@ -5111,7 +5112,7 @@ function refreshAllHearts(){
 
 function toggleFavorite(file, btn){
   var profile = localStorage.getItem('jayana_profile');
-  if(!profile){ alert('Sélectionne ton profil (Zelda ou Link) d\'abord !'); return; }
+  if(!profile) return; // pas de profil = rien
 
   var current = favoritesCache[profile];
 
