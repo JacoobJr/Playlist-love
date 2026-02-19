@@ -3276,10 +3276,24 @@ animP();
 // ── LOVE BOX ──
 var loveWords=["Je t'aime Anaelle 💘","Mon cœur ❤️","Mon amour 💕","Mon ange ☀️","Ma madame ✨","Ma chérie 💓","Mon petit bonheur 🥰","Love you biloute 🤡💖","Ma vieille dame préférée 👵💕","Mon équilibre 🌙","Ma meilleure amie 💞","Mon monde 🌍","T'es tout ce qu'il me faut 💎"];
 var lastLI=-1;
+var loveBoxTimeout=null, loveBoxBusy=false;
 document.getElementById('loveBox').addEventListener('click',function(e){
   var i;do{i=Math.floor(Math.random()*loveWords.length);}while(i===lastLI);lastLI=i;
   var textEl=document.getElementById('loveBoxText');
-  if(textEl){ textEl.style.opacity='0'; setTimeout(function(){textEl.textContent=loveWords[i]; document.querySelector('.lb-icon').style.display='none'; textEl.style.opacity='1';},150); }
+  if(!textEl) return;
+  // Annuler tout timeout en cours et forcer la mise à jour immédiate
+  if(loveBoxTimeout){ clearTimeout(loveBoxTimeout); loveBoxTimeout=null; }
+  textEl.style.transition='none';
+  textEl.style.opacity='0';
+  // Forcer un reflow pour que le navigateur applique opacity:0 avant de continuer
+  void textEl.offsetHeight;
+  textEl.style.transition='opacity 0.2s';
+  loveBoxTimeout=setTimeout(function(){
+    textEl.textContent=loveWords[i];
+    document.querySelector('.lb-icon').style.display='none';
+    textEl.style.opacity='1';
+    loveBoxTimeout=null;
+  },150);
   // Cœurs qui jaillissent depuis le bouton
   var rect=e.currentTarget.getBoundingClientRect();
   var cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
