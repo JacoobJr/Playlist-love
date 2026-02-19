@@ -2935,19 +2935,53 @@ function renderPuzzle(){
   grid.style.gridTemplateColumns='repeat('+puzzleSize+',1fr)';
   grid.style.width=sz+'px'; grid.style.height=sz+'px';
   grid.innerHTML='';
-  var pct=100/puzzleSize;
-  puzzleOrder.forEach(function(pos,idx){
-    var div=document.createElement('div'); div.className='puzzle-piece';
-    var row=Math.floor(pos/puzzleSize), col=pos%puzzleSize;
-    div.style.backgroundImage='url('+puzzleImg+')';
-    div.style.backgroundSize=(puzzleSize*100)+'%';
-    div.style.backgroundPosition=(-col*sz/puzzleSize*(puzzleSize))+'px '+(-row*sz/puzzleSize*(puzzleSize))+'px';
-    div.style.backgroundSize=(puzzleSize*100)+'% '+(puzzleSize*100)+'%';
-    div.style.backgroundPosition=(col*pct/(puzzleSize-1||1)*100)+'% '+(row*pct/(puzzleSize-1||1)*100)+'%';
-    if(pos===idx) div.classList.add('correct-pos');
-    (function(i){ div.addEventListener('click',function(){ puzzleClick(i); }); })(idx);
-    grid.appendChild(div);
-  });
+
+  var pieceSz = sz / puzzleSize;
+
+  // Charger l'image pour connaitre ses dimensions réelles
+  var img = new Image();
+  img.onload = function(){
+    var imgW = img.naturalWidth, imgH = img.naturalHeight;
+    // Simuler object-fit: cover sur le carré sz x sz
+    var scale = Math.max(sz / imgW, sz / imgH);
+    var bsW = imgW * scale;   // background-size largeur rendue
+    var bsH = imgH * scale;   // background-size hauteur rendue
+    // Centrer
+    var offsetX = (bsW - sz) / 2;
+    var offsetY = (bsH - sz) / 2;
+
+    // Re-créer les pièces avec les bonnes positions
+    grid.innerHTML = '';
+    puzzleOrder.forEach(function(pos,idx){
+      var div=document.createElement('div'); div.className='puzzle-piece';
+      var row=Math.floor(pos/puzzleSize), col=pos%puzzleSize;
+      // Position de la pièce dans l'image "couverte"
+      var bpX = -(col * pieceSz) - offsetX;
+      var bpY = -(row * pieceSz) - offsetY;
+      div.style.backgroundImage='url('+puzzleImg+')';
+      div.style.backgroundSize = bsW+'px '+bsH+'px';
+      div.style.backgroundPosition = bpX+'px '+bpY+'px';
+      div.style.backgroundRepeat = 'no-repeat';
+      if(pos===idx) div.classList.add('correct-pos');
+      (function(i){ div.addEventListener('click',function(){ puzzleClick(i); }); })(idx);
+      grid.appendChild(div);
+    });
+  };
+  img.onerror = function(){
+    // Fallback si image ne charge pas
+    puzzleOrder.forEach(function(pos,idx){
+      var div=document.createElement('div'); div.className='puzzle-piece';
+      var row=Math.floor(pos/puzzleSize), col=pos%puzzleSize;
+      var pct=100/puzzleSize;
+      div.style.backgroundImage='url('+puzzleImg+')';
+      div.style.backgroundSize=(puzzleSize*100)+'% '+(puzzleSize*100)+'%';
+      div.style.backgroundPosition=(col*pct/(puzzleSize-1||1)*100)+'% '+(row*pct/(puzzleSize-1||1)*100)+'%';
+      if(pos===idx) div.classList.add('correct-pos');
+      (function(i){ div.addEventListener('click',function(){ puzzleClick(i); }); })(idx);
+      grid.appendChild(div);
+    });
+  };
+  img.src = puzzleImg;
 }
 function puzzleClick(idx){
   if(puzzleSelected===null){
