@@ -492,6 +492,15 @@ body.light #loveBox::before { background: radial-gradient(ellipse at center, rgb
 body.light .tl-line { background: linear-gradient(to bottom, #e0397a, transparent); }
 body.light .tl-dot { background: #e0397a; box-shadow: 0 0 0 3px rgba(224,57,122,0.2); }
 body.light .wheel-center { border-color: #e0397a; }
+body.light .memory-start-btn { background: rgba(224,57,122,0.15); color: #e0397a; border-color: rgba(224,57,122,0.35); }
+body.light .memory-restart-btn { background: rgba(224,57,122,0.1); color: #e0397a; border-color: rgba(224,57,122,0.25); }
+body.light .memory-win { background: rgba(224,57,122,0.07); border-color: rgba(224,57,122,0.25); }
+body.light .memory-win-replay { background: rgba(224,57,122,0.12); color: #e0397a; border-color: rgba(224,57,122,0.3); }
+body.light .memory-stat-num { color: #e0397a; }
+body.light .mem-card-back { background: rgba(224,57,122,0.12); border-color: rgba(224,57,122,0.3); }
+body.light .mem-card.matched .mem-card-back { background: rgba(224,57,122,0.2); border-color: rgba(224,57,122,0.5); box-shadow: 0 0 18px rgba(224,57,122,0.2); }
+body.light .gv-back { color: #e0397a; }
+body.light .gv-tag { color: #e0397a; }
 body.light #wheelResult.has-result { border-color: rgba(224,57,122,0.4); }
 .nav-item {
   display: flex; flex-direction: column; align-items: center;
@@ -631,19 +640,19 @@ body.light #lockNavBtn { color: #7c3aed; }
 .hp-sub { margin-top:5px; font-size:13px; color:rgba(255,255,255,0.45); }
 
 .memory-section { padding: 22px 16px 0; }
-.memory-section .section-label { color: rgba(255,255,255,0.35); }
-.memory-section .section-label::after { background: rgba(255,255,255,0.08); }
+.memory-section .section-label { color: var(--muted); }
+.memory-section .section-label::after { background: var(--border); }
 .memory-start-screen { background: rgba(255,105,180,0.07); border: 1px solid rgba(255,105,180,0.2); border-radius: 14px; padding: 32px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; }
 .memory-start-icon { font-size: 52px; line-height: 1; }
-.memory-start-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: #fff; }
-.memory-start-sub { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.5; max-width: 260px; }
+.memory-start-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--text); }
+.memory-start-sub { font-size: 13px; color: var(--sub); line-height: 1.5; max-width: 260px; }
 .memory-start-btn { padding: 12px 30px; background: rgba(255,105,180,0.2); color: #FF69B4; border: 1.5px solid rgba(255,105,180,0.45); border-radius: 50px; font-size: 14px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s, transform 0.12s; margin-top: 4px; }
 .memory-start-btn:hover { background: rgba(255,105,180,0.32); transform: scale(1.05); }
 .memory-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
 .memory-stats { display: flex; gap: 12px; }
-.memory-stat { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 12px; text-align: center; min-width: 60px; }
+.memory-stat { background: var(--s2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; text-align: center; min-width: 60px; }
 .memory-stat-num { font-size: 18px; font-weight: 700; color: #FF69B4; display: block; line-height: 1; }
-.memory-stat-lbl { font-size: 9px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; display: block; }
+.memory-stat-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; display: block; }
 .memory-restart-btn { padding: 8px 16px; background: rgba(255,105,180,0.15); color: #FF69B4; border: 1px solid rgba(255,105,180,0.3); border-radius: 8px; font-size: 12px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s, transform 0.12s; }
 .memory-restart-btn:hover { background: rgba(255,105,180,0.25); transform: scale(1.04); }
 .memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-width: 360px; margin: 0 auto; }
@@ -653,7 +662,7 @@ body.light #lockNavBtn { color: #7c3aed; }
 .mem-card.flipped .mem-card-inner { transform: rotateY(180deg); }
 .mem-card.matched .mem-card-inner { transform: rotateY(180deg); }
 .mem-card-front, .mem-card-back { position: absolute; inset: 0; border-radius: 10px; display: flex; align-items: center; justify-content: center; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-.mem-card-front { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); font-size: 22px; }
+.mem-card-front { background: var(--s2); border: 1px solid var(--border); font-size: 22px; }
 .mem-card-front::before { content: '💜'; font-size: 20px; opacity: 0.35; }
 .mem-card-back { background: rgba(255,105,180,0.15); border: 1px solid rgba(255,105,180,0.3); font-size: 26px; transform: rotateY(180deg); }
 .mem-card.matched .mem-card-back { background: rgba(255,105,180,0.25); border-color: rgba(255,105,180,0.6); box-shadow: 0 0 18px rgba(255,105,180,0.25); animation: matchPop 0.35s cubic-bezier(.4,2,.55,.9); }
@@ -663,8 +672,8 @@ body.light #lockNavBtn { color: #7c3aed; }
 .memory-win { margin: 20px 0 0; background: rgba(255,105,180,0.1); border: 1px solid rgba(255,105,180,0.3); border-radius: 12px; padding: 24px 16px; text-align: center; display: none; animation: slideUp 0.4s ease; }
 .memory-win.show { display: block; }
 .memory-win-emoji { font-size: 48px; display: block; margin-bottom: 10px; }
-.memory-win-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 6px; }
-.memory-win-sub { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.5; }
+.memory-win-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.memory-win-sub { font-size: 13px; color: var(--sub); line-height: 1.5; }
 .memory-win-replay { margin-top: 16px; padding: 11px 24px; background: rgba(255,105,180,0.2); color: #FF69B4; border: 1px solid rgba(255,105,180,0.35); border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s; }
 .memory-win-replay:hover { background: rgba(255,105,180,0.3); }
 
@@ -1019,6 +1028,26 @@ body.light .sg-song:hover { background: rgba(0,0,0,0.04); }
   backdrop-filter: blur(4px);
 }
 #sgAuthModal.open { display: flex; }
+
+/* ════════════════════════════════════════════
+   GAMES VIEW
+════════════════════════════════════════════ */
+#gamesView {
+  display: none; position: fixed; inset: 0; background: var(--bg); z-index: 500;
+  overflow-y: auto; padding-bottom: 80px; transition: background 0.3s, color 0.3s;
+}
+#gamesView.active { display: block; animation: slideUp 0.3s ease; }
+.gv-header { padding: 28px 16px 20px; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
+.gv-header::before { content:''; position:absolute; inset:0; background:radial-gradient(circle at 80% 20%, rgba(255,105,180,0.07) 0%, transparent 60%); pointer-events:none; }
+.gv-back { display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:700; color:var(--green); cursor:pointer; margin-bottom:10px; text-transform:uppercase; letter-spacing:3px; transition:opacity 0.15s; }
+.gv-back:hover { opacity:0.7; }
+.gv-tag { font-size:10px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--green); margin-bottom:4px; }
+.gv-title { font-family:'Playfair Display',serif; font-size:clamp(28px,8vw,46px); font-weight:700; color:var(--text); line-height:1.05; letter-spacing:-0.5px; }
+.gv-sub { font-size:12px; color:var(--muted); margin-top:6px; letter-spacing:0.5px; }
+.gv-game-section { padding: 22px 16px 0; }
+.gv-game-label { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:2.5px; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+.gv-game-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
 </style>
 </head>
 <body>
@@ -1034,6 +1063,7 @@ body.light .sg-song:hover { background: rgba(0,0,0,0.04); }
 <div id="topBubbleMenu">
   <div class="bubbleBtn" id="themeToggle">🌙 Thème</div>
   <div class="bubbleBtn" id="quizBtn" style="background:#3a1a2a;color:#FF69B4;border-color:rgba(255,105,180,0.25)">Quiz 💖</div>
+  <div class="bubbleBtn" id="gamesBtn" style="background:#1a2a3a;color:#60a5fa;border-color:rgba(96,165,250,0.25)">Jeux 🎮</div>
   <div class="bubbleBtn" id="betisesBtn">Bêtises 🤡</div>
 </div>
 
@@ -1305,15 +1335,13 @@ body.light .sg-song:hover { background: rgba(0,0,0,0.04); }
 </div>
 
 <div id="libraryPopup">
+  <div class="lib-item" onclick="goTo('memoCoupleSection')">📝 Mémo couple</div>
   <div class="lib-item" onclick="goTo('Love')">💕 Love</div>
   <div class="lib-item" onclick="goTo('autreSection')">🎵 Autre</div>
   <div class="lib-item" onclick="goTo('Books')">📚 Idées livre</div>
-  <div class="lib-item" onclick="goTo('timelineSection')">🕐 Notre histoire</div>
-  <div class="lib-item" onclick="goTo('reasonSection')">💖 Pourquoi je t'aime</div>
-  <div class="lib-item" onclick="goTo('postitsSection')">📝 Petits mots</div>
-  <div class="lib-item" onclick="goTo('memoCoupleSection')">🗒️ Mémo couple</div>
-  <div class="lib-item" onclick="goTo('wheelSection')">🎲 On fait quoi ?</div>
 </div>
+
+
 
 <div id="lockPopup">
   <div style="padding:12px 14px 6px;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:2px">Mode caché 🔐</div>
@@ -1330,8 +1358,27 @@ body.light .sg-song:hover { background: rgba(0,0,0,0.04); }
     <div class="hp-title">Mode 🌈 Biloute</div>
     <div class="hp-sub">La page secrète, rien que pour toi 💛</div>
   </div>
-  <div class="memory-section">
-    <div class="section-label">Jeu de mémoire 🎴</div>
+  <div style="padding: 40px 16px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px;">
+    <div style="font-size: 52px; line-height: 1;">🚧</div>
+    <div style="font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: #fff;">En construction...</div>
+    <div style="font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.6; max-width: 260px;">Cette section se remplira bientôt de surprises 💛<br>Reste à l'écoute !</div>
+    <div style="margin-top: 8px; display: flex; gap: 6px;">
+      <span style="font-size: 22px; animation: pulseGlow 1.5s ease-in-out infinite">✨</span>
+      <span style="font-size: 22px; animation: pulseGlow 1.5s ease-in-out 0.3s infinite">💛</span>
+      <span style="font-size: 22px; animation: pulseGlow 1.5s ease-in-out 0.6s infinite">✨</span>
+    </div>
+  </div>
+</div>
+
+<div id="gamesView">
+  <div class="gv-header">
+    <div class="gv-back" onclick="closeGames()">← Retour à la playlist</div>
+    <div class="gv-tag">Jeux</div>
+    <div class="gv-title">Jeux 🎮</div>
+    <div class="gv-sub">Pour se détendre ensemble</div>
+  </div>
+  <div class="gv-game-section">
+    <div class="gv-game-label">Jeu de mémoire 🎴</div>
     <div class="memory-start-screen" id="memoryStartScreen">
       <div class="memory-start-icon">🎴</div>
       <div class="memory-start-title">Jeu de mémoire</div>
@@ -1347,7 +1394,7 @@ body.light .sg-song:hover { background: rgba(0,0,0,0.04); }
         </div>
         <div style="display:flex;gap:8px;">
           <button class="memory-restart-btn" onclick="memoryRestart()">🔄</button>
-          <button class="memory-restart-btn" onclick="memoryQuit()" style="color:rgba(255,255,255,0.5);border-color:rgba(255,255,255,0.15)">✕ Quitter</button>
+          <button class="memory-restart-btn" onclick="memoryQuit()" style="color:var(--muted);border-color:var(--border)">✕ Quitter</button>
         </div>
       </div>
       <div class="memory-grid" id="memoryGrid"></div>
@@ -1884,7 +1931,14 @@ function closePrank(){document.getElementById('prankOverlay').classList.remove('
 function openHiddenPage(){document.getElementById('hiddenPage').classList.add('active');window.scrollTo(0,0);}
 function closeHiddenPage(){document.getElementById('hiddenPage').classList.remove('active');}
 lockInput.addEventListener('keydown',function(e){if(e.key==='Enter')checkCode();});
-document.addEventListener('click',function(e){if(lockPopup.style.display==='block'&&!lockPopup.contains(e.target)&&!document.getElementById('lockNavBtn').contains(e.target))lockPopup.style.display='none';});
+document.addEventListener('click',function(e){
+  if(lockPopup.style.display==='block'&&!lockPopup.contains(e.target)&&!document.getElementById('lockNavBtn').contains(e.target))lockPopup.style.display='none';
+  var lib=document.getElementById('libraryPopup');
+  if(lib.style.display==='block'){
+    var libNav=document.querySelector('.nav-item:nth-child(3)');
+    if(!lib.contains(e.target)&&!(libNav&&libNav.contains(e.target)))lib.style.display='none';
+  }
+});
 
 // ── MEMORY ──
 var MEMORY_EMOJIS=['💕','🌸','💋','🥰','🌙','✨','🎵','💎'];
@@ -1970,6 +2024,7 @@ var ALL_QUIZ_QUESTIONS=[
 ];
 var QUIZ_TOTAL=10,qzCurrent=0,qzScore=0,qzAnswered=false,qzSession=[];
 document.getElementById('quizBtn').addEventListener('click',function(){openQuiz();});
+document.getElementById('gamesBtn').addEventListener('click',function(){openGames();});
 function openQuiz(){isQuizOpen=true;document.getElementById('quizView').classList.add('active');particleActive=false;hideDance();document.getElementById('navSearch').style.display='none';startQuiz();window.scrollTo(0,0);}
 function closeQuiz(){isQuizOpen=false;document.getElementById('quizView').classList.remove('active');document.getElementById('navSearch').style.display='';}
 function getHints(){try{return JSON.parse(localStorage.getItem('qz_hints')||'{}');}catch(e){return{};}}
@@ -2014,7 +2069,9 @@ function showResult(){
 }
 
 // ── NAV ──
-function scrollToTop(){if(isQuizOpen){closeQuiz();return;}if(document.getElementById('hiddenPage').classList.contains('active')){closeHiddenPage();return;}window.scrollTo({top:0,behavior:'smooth'});}
+function openGames(){document.getElementById('gamesView').classList.add('active');particleActive=false;hideDance();window.scrollTo(0,0);}
+function closeGames(){document.getElementById('gamesView').classList.remove('active');clearInterval(memTimerInt);var ga=document.getElementById('memoryGameArea');var ms=document.getElementById('memoryStartScreen');if(ga)ga.style.display='none';if(ms)ms.style.display='flex';var mw=document.getElementById('memoryWin');if(mw)mw.classList.remove('show');}
+function scrollToTop(){if(isQuizOpen){closeQuiz();return;}if(document.getElementById('gamesView').classList.contains('active')){closeGames();return;}if(document.getElementById('hiddenPage').classList.contains('active')){closeHiddenPage();return;}window.scrollTo({top:0,behavior:'smooth'});}
 function toggleLibrary(){var p=document.getElementById('libraryPopup');p.style.display=p.style.display==='block'?'none':'block';}
 function goTo(id){if(isQuizOpen)closeQuiz();setTimeout(function(){document.getElementById(id).scrollIntoView({behavior:'smooth'});document.getElementById('libraryPopup').style.display='none';},isQuizOpen?120:0);}
 function spawnHeart(){var h=document.createElement('div');h.className='like-heart';h.textContent='🤍';document.body.appendChild(h);setTimeout(function(){h.remove();},600);}
