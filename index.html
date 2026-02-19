@@ -38,6 +38,8 @@ html {
   scroll-behavior: smooth;
   overflow-x: hidden;
   width: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 body {
   font-family: 'DM Sans', sans-serif;
@@ -49,6 +51,10 @@ body {
   padding-bottom: 80px;
   transition: background 0.3s, color 0.3s;
   touch-action: pan-y;
+}
+/* iOS zoome automatiquement sur les inputs avec font-size < 16px — on force 16px */
+input, textarea, select {
+  font-size: 16px !important;
 }
 /* Rétablir le scroll touch sur les conteneurs défilables */
 .slider, .memo-notes-slider, #gamesView, #memoryView, #hiddenPage, #quizView, #searchResults {
@@ -2770,27 +2776,10 @@ function filterSongs(q){
 
   renderSuggestions();
 })();
-// ── ANTI-ZOOM iOS WebKit (Chrome/Safari iOS) ──
-(function(){
-  // Bloque le pinch à 2 doigts
-  document.addEventListener('touchmove', function(e){
-    if(e.touches.length > 1) e.preventDefault();
-  }, {passive: false});
-
-  // visualViewport : dès que scale != 1, on scrolle programmatiquement
-  // pour forcer WebKit à recalculer et annuler le zoom
-  if(window.visualViewport){
-    window.visualViewport.addEventListener('resize', function(){
-      if(window.visualViewport.scale !== 1){
-        document.body.style.zoom = 1 / window.visualViewport.scale;
-        setTimeout(function(){
-          document.body.style.zoom = '';
-          window.scrollTo(window.scrollX, window.scrollY);
-        }, 1);
-      }
-    });
-  }
-})();
+// ── ANTI-ZOOM iOS ──
+document.addEventListener('touchmove', function(e){
+  if(e.touches.length > 1) e.preventDefault();
+}, {passive: false});
 
 </script>
 </body>
