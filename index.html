@@ -2342,11 +2342,16 @@ function showResult(){
 
 // ── NAV ──
 function resetZoom(){
-  if(window.visualViewport && window.visualViewport.scale !== 1){
-    var m = document.querySelector('meta[name="viewport"]');
-    m.setAttribute('content','width=device-width,initial-scale=1');
-    setTimeout(function(){ m.setAttribute('content','width=device-width,initial-scale=1'); }, 50);
-  }
+  var m = document.querySelector('meta[name="viewport"]');
+  // Étape 1 : retirer la contrainte pour que le navigateur accepte le changement
+  m.setAttribute('content', 'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5');
+  // Étape 2 : forcer le retour à scale=1
+  setTimeout(function(){
+    m.setAttribute('content', 'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5');
+    if(window.visualViewport && window.visualViewport.scale !== 1){
+      window.scrollTo(window.scrollX * window.visualViewport.scale, window.scrollY * window.visualViewport.scale);
+    }
+  }, 30);
 }
 function openGames(){
   resetZoom();
