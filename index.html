@@ -408,9 +408,9 @@ header::before {
 .badge-new { font-size:7px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; vertical-align:super; line-height:1; margin-left:4px; background:linear-gradient(90deg, var(--green) 0%, #fff 50%, var(--green) 100%); background-size:200% auto; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation:badgeShimmer 2.5s linear infinite; }
 @keyframes badgeShimmer { 0%{background-position:200% center} 100%{background-position:-200% center} }
 .song-actions { display:flex; gap:5px; flex-shrink:0; }
-.btn-play { width:32px; height:32px; border-radius:50%; border:none; background:var(--s3); color:var(--text); font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.15s, transform 0.12s; }
-.btn-play:hover { background:var(--green); color:#000; transform:scale(1.1); }
-.btn-play.active { background:var(--green); color:#000; }
+.btn-play { width:34px; height:34px; border-radius:50%; border:none; background:var(--green); color:#000; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.15s, transform 0.12s; box-shadow:0 2px 8px rgba(0,201,167,0.25); flex-shrink:0; }
+.btn-play:hover { background:var(--green2); transform:scale(1.08); }
+.btn-play.active { background:var(--green2); }
 .btn-yt { width:32px; height:32px; border-radius:50%; border:none; background:var(--s3); color:var(--sub); font-size:10px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.15s, transform 0.12s; }
 .btn-yt:hover { background:#FF0000; color:#fff; transform:scale(1.1); }
 audio { display: none; }
@@ -499,10 +499,10 @@ body.light .top50-play-all.playing {
 .sp-artist { font-size:11px; color:var(--muted); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .sp-plays { width:72px; flex-shrink:0; text-align:right; font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; font-weight:500; }
 .sp-actions { width:72px; flex-shrink:0; display:flex; gap:4px; justify-content:flex-end; }
-.sp-btn-play { width:30px; height:30px; border-radius:50%; border:none; background:transparent; color:var(--muted); font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:color 0.15s,transform 0.12s,background 0.15s; opacity:0; }
+.sp-btn-play { width:30px; height:30px; border-radius:50%; border:none; background:var(--green); color:#000; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.15s,transform 0.12s; opacity:0; box-shadow:0 2px 6px rgba(0,201,167,0.2); }
 .sp-song:hover .sp-btn-play,.sp-btn-play.active { opacity:1; }
-.sp-btn-play:hover { color:var(--text); transform:scale(1.1); background:var(--s3); }
-.sp-btn-play.active { color:var(--green); }
+.sp-btn-play:hover { background:var(--green2); transform:scale(1.08); }
+.sp-btn-play.active { background:var(--green2); }
 .sp-btn-yt { width:30px; height:30px; border-radius:50%; border:none; background:transparent; color:var(--muted); font-size:9px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:color 0.15s,background 0.15s; opacity:0; }
 .sp-song:hover .sp-btn-yt { opacity:1; }
 .sp-btn-yt:hover { color:#fff; background:#FF0000; }
