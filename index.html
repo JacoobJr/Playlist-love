@@ -617,11 +617,11 @@ body.light #lockNavBtn { color: #7c3aed; }
 .wheel-spin-btn { background:var(--green); color:#000; border:none; border-radius:50px; padding:13px 34px; font-size:14px; font-weight:700; cursor:pointer; font-family:'DM Sans',sans-serif; transition:background 0.15s, transform 0.12s; letter-spacing:0.5px; }
 .wheel-spin-btn:hover { background:var(--green2); transform:scale(1.05); }
 .wheel-spin-btn:disabled { background:var(--s3); color:var(--muted); cursor:not-allowed; transform:none; }
-#wheelResult { background:var(--s1); border:1px solid var(--border); border-radius:10px; padding:12px 16px; text-align:center; width:100%; min-height:52px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; transition:border-color 0.3s, box-shadow 0.3s; }
+#wheelResult { background:var(--s1); border:1px solid var(--border); border-radius:10px; padding:14px 20px; text-align:center; width:100%; min-height:52px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; transition:border-color 0.3s, box-shadow 0.3s; }
 #wheelResult.has-result { border-color:rgba(29,185,84,0.35); box-shadow:0 0 20px rgba(29,185,84,0.08); }
-.result-icon { font-size:24px; line-height:1; }
-.result-label { font-size:9px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:2px; }
-.result-text { font-family:'Playfair Display',serif; font-size:15px; font-style:italic; color:var(--text); margin-top:1px; }
+.result-icon { font-size:28px; line-height:1; }
+.result-label { font-size:9px; font-weight:700; color:var(--green); text-transform:uppercase; letter-spacing:2.5px; }
+.result-text { font-family:'DM Sans',sans-serif; font-size:16px; font-weight:600; color:var(--text); margin-top:2px; letter-spacing:-0.2px; }
 
 #lockPopup {
   position:fixed; bottom:72px; right:8px;
@@ -1842,7 +1842,7 @@ body.light .pendu-theme {
         <div style="font-size:44px">🏆</div>
         <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--text);margin:8px 0" id="puzzleWinTitle"></div>
         <div style="font-size:13px;color:var(--sub)" id="puzzleWinSub"></div>
-        <button class="game-start-btn" style="margin-top:14px" onclick="puzzleInit()">Rejouer 🔀</button>
+        <button class="game-start-btn" style="margin-top:14px" onclick="puzzleReplay()">Rejouer 🔀</button>
       </div>
     </div>
     <div class="leaderboard-wrap" id="puzzleLeaderboard" style="margin-top:20px">
@@ -2919,6 +2919,12 @@ function puzzleSetSize(n, btn){
   btn.classList.add('active');
   puzzleInit();
 }
+function puzzleReplay(){
+  // Choisir une image différente de l'actuelle
+  var available = PUZZLE_IMAGES.filter(function(img){ return img !== puzzleImg; });
+  puzzleImg = available[Math.floor(Math.random()*available.length)];
+  puzzleInit();
+}
 function puzzleInit(){
   puzzleMoveCount=0; puzzleSelected=null;
   document.getElementById('puzzleMoves').textContent='0 échanges';
@@ -3010,7 +3016,7 @@ function puzzleShowPreview(){
 function puzzleWin(){
   var score=Math.max(0,1000-puzzleMoveCount*5);
   var win=document.getElementById('puzzleWin'); win.style.display='block';
-  win.innerHTML='<div style="font-size:44px">🏆</div><div style="font-family:\'Playfair Display\',serif;font-size:18px;font-weight:700;color:var(--text);margin:8px 0">Puzzle terminé !</div><div style="font-size:13px;color:var(--sub)">'+puzzleMoveCount+' échanges · '+score+' pts</div><button class="game-start-btn" style="margin-top:14px" onclick="puzzleInit()">Rejouer 🔀</button>';
+  win.innerHTML='<div style="font-size:44px">🏆</div><div style="font-family:\'Playfair Display\',serif;font-size:18px;font-weight:700;color:var(--text);margin:8px 0">Puzzle terminé !</div><div style="font-size:13px;color:var(--sub)">'+puzzleMoveCount+' échanges · '+score+' pts</div><button class="game-start-btn" style="margin-top:14px" onclick="puzzleReplay()">Rejouer 🔀</button>';
   if(puzzlePlayer){
     sbPost('game_scores',{game_id:'puzzle',player:puzzlePlayer,score:score,moves:puzzleMoveCount,time_seconds:0})
       .then(function(){ zplbLoad(); }).catch(function(){});
