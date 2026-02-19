@@ -1534,6 +1534,9 @@ body.light .counter-unit.glowing::before {
   var storyHeart   = document.getElementById('storyHeart');
 
   function applyState() {
+    // Ne pas interrompre un preview en cours
+    if (typeof previewTimeout !== 'undefined' && previewTimeout) return;
+
     if (isInVideoWindow()) {
       // Cacher la timeline, montrer la vidéo en boucle
       tlContent.style.display  = 'none';
@@ -1559,15 +1562,21 @@ body.light .counter-unit.glowing::before {
 
   // ── Bouton preview 30s ────────────────────────────────────────────────────
   var previewTimeout = null;
+  var previewTick    = null;
+  var previewSecsLeft = 0;
+
   window.previewTrigger = function() {
     var btn = document.getElementById('previewBtn');
     if (previewTimeout) {
       // Annuler
       clearTimeout(previewTimeout);
+      clearInterval(previewTick);
       previewTimeout = null;
+      previewTick    = null;
+      previewSecsLeft = 0;
       btn.classList.remove('running');
       btn.innerHTML = '<span class="pbdot"></span> Aperçu';
-      applyState(); // repasse en mode normal
+      applyState();
       return;
     }
     // Forcer l'activation
@@ -1578,21 +1587,22 @@ body.light .counter-unit.glowing::before {
     if (storyHeart) storyHeart.style.display = 'block';
     btn.classList.add('running');
 
-    // Countdown visuel dans le bouton
-    var secs = 30;
-    btn.innerHTML = '<span class="pbdot"></span> ' + secs + 's';
-    var tick = setInterval(function(){
-      secs--;
-      if (secs > 0) {
-        btn.innerHTML = '<span class="pbdot"></span> ' + secs + 's';
-      } else {
-        clearInterval(tick);
+    // Countdown visuel dans le bouton — seconde par seconde
+    previewSecsLeft = 30;
+    btn.innerHTML = '<span class="pbdot"></span> ' + previewSecsLeft + 's';
+    previewTick = setInterval(function(){
+      previewSecsLeft--;
+      if (previewSecsLeft > 0) {
+        btn.innerHTML = '<span class="pbdot"></span> ' + previewSecsLeft + 's';
       }
     }, 1000);
 
+    // Fin exacte après 30 000ms
     previewTimeout = setTimeout(function(){
-      previewTimeout = null;
-      clearInterval(tick);
+      clearInterval(previewTick);
+      previewTimeout  = null;
+      previewTick     = null;
+      previewSecsLeft = 0;
       btn.classList.remove('running');
       btn.innerHTML = '<span class="pbdot"></span> Aperçu';
       applyState();
