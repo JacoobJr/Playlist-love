@@ -959,6 +959,52 @@ body.light .sg-song:hover { background: rgba(0,0,0,0.04); }
   transition: background 0.15s, transform 0.1s;
 }
 .sg-modal-save:hover { background: var(--green2); transform: scale(1.02); }
+.sg-gender-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.sg-gender-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--s2);
+  color: var(--sub);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.1s;
+  user-select: none;
+}
+.sg-gender-btn:hover { background: var(--s3); color: var(--text); }
+.sg-gender-btn.selected-girl {
+  border-color: #e879a0;
+  background: rgba(232,121,160,0.1);
+  color: #e879a0;
+}
+.sg-gender-btn.selected-boy {
+  border-color: #5b9cf6;
+  background: rgba(91,156,246,0.1);
+  color: #5b9cf6;
+}
+.sg-gender-icon {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+.sg-gender-btn .girl-icon { background: rgba(232,121,160,0.18); color: #e879a0; }
+.sg-gender-btn .boy-icon  { background: rgba(91,156,246,0.18);  color: #5b9cf6; }
+.sg-gender-btn.selected-girl .girl-icon { background: rgba(232,121,160,0.3); }
+.sg-gender-btn.selected-boy  .boy-icon  { background: rgba(91,156,246,0.3); }
+.sg-dot-girl { background: #e879a0 !important; opacity: 0.85 !important; }
+.sg-dot-boy  { background: #5b9cf6 !important; opacity: 0.85 !important; }
 
 /* ── AUTH MODAL SUGGESTION ── */
 #sgAuthModal {
@@ -2183,7 +2229,20 @@ function filterSongs(q){
   }
 
   // Suggestion modal
+  var sgGender = null;
+
+  window.sgSelectGender = function(g){
+    sgGender = g;
+    var btnG = document.getElementById('sgBtnGirl');
+    var btnB = document.getElementById('sgBtnBoy');
+    btnG.className = 'sg-gender-btn' + (g === 'girl' ? ' selected-girl' : '');
+    btnB.className = 'sg-gender-btn' + (g === 'boy'  ? ' selected-boy'  : '');
+  };
+
   window.openSgModal = function(){
+    sgGender = null;
+    document.getElementById('sgBtnGirl').className = 'sg-gender-btn';
+    document.getElementById('sgBtnBoy').className  = 'sg-gender-btn';
     document.getElementById('sgTitleInput').value = '';
     document.getElementById('sgArtistInput').value = '';
     document.getElementById('sgNoteInput').value = '';
@@ -2200,14 +2259,13 @@ function filterSongs(q){
     var artist = document.getElementById('sgArtistInput').value.trim();
     var note = document.getElementById('sgNoteInput').value.trim();
     if(!title || !artist) {
-      // Shake empty fields
       if(!title) document.getElementById('sgTitleInput').style.borderColor='#e05555';
       if(!artist) document.getElementById('sgArtistInput').style.borderColor='#e05555';
       return;
     }
     var btn = document.querySelector('.sg-modal-save');
     btn.textContent = '⏳'; btn.disabled = true;
-    sbPost('suggestion_songs', { title: title, artist: artist, note: note || null })
+    sbPost('suggestion_songs', { title: title, artist: artist, note: note || null, gender: sgGender || 'neutral' })
       .then(function(){
         btn.textContent = 'Proposer 💚'; btn.disabled = false;
         window.closeSgModal();
@@ -2244,7 +2302,7 @@ function filterSongs(q){
         var row = document.createElement('div');
         row.className = 'sg-song';
         row.innerHTML =
-          '<div class="sg-dot"></div>' +
+          '<div class="sg-dot' + (item.gender === 'girl' ? ' sg-dot-girl' : item.gender === 'boy' ? ' sg-dot-boy' : '') + '"></div>' +
           '<div class="sg-info"><div class="sg-title">' + escSg(item.title) + '</div><div class="sg-artist">' + escSg(item.artist) + '</div></div>' +
           (item.note ? '<div class="sg-note">' + escSg(item.note) + '</div>' : '<div style="width:110px;flex-shrink:0"></div>') +
           (sgUnlocked ? '<button class="sg-del" title="Supprimer">✕</button>' : '');
