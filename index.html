@@ -4738,8 +4738,10 @@ function filterSongs(q){
       mpUpdateIcons();
       return;
     }
-    // Find song info
-    var songData = songsLove.find(function(s){ return currentAudio.src && currentAudio.src.indexOf(s.file) !== -1; });
+    // Find song info (decode URL to handle special chars like é, ï, apostrophes)
+    var decodedSrc = '';
+    try { decodedSrc = decodeURIComponent(currentAudio.src || ''); } catch(e) { decodedSrc = currentAudio.src || ''; }
+    var songData = songsLove.find(function(s){ return decodedSrc.indexOf(s.file) !== -1; });
     if(songData){
       mpTitle.textContent = songData.title;
       mpArtist.textContent = songData.artist;
