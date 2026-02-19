@@ -669,7 +669,7 @@ body.light #lockNavBtn { color: #7c3aed; }
 .memory-win-replay:hover { background: rgba(255,105,180,0.3); }
 
 #memoCoupleSection { padding: 26px 16px 0; }
-.memo-lock-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 9px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; background: var(--s2); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; cursor: pointer; transition: color 0.15s, border-color 0.15s, transform 0.12s; user-select: none; }
+.memo-lock-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 9px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; background: var(--s2); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; cursor: pointer; transition: color 0.15s, border-color 0.15s, transform 0.12px; user-select: none; }
 .memo-lock-badge:hover { color: var(--text); border-color: var(--green); transform: scale(1.03); }
 .memo-lock-badge.unlocked { color: var(--green); border-color: rgba(29,185,84,0.35); }
 .memo-header-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
@@ -742,6 +742,237 @@ body.light #lockNavBtn { color: #7c3aed; }
 @keyframes spin { to{transform:rotate(360deg)} }
 .spinner { display:inline-block; width:14px; height:14px; border:2px solid var(--border); border-top-color:var(--green); border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; margin-right:5px; }
 .memo-note-date-badge { position:absolute; top:7px; right:7px; background:rgba(0,0,0,0.45); backdrop-filter:blur(4px); border-radius:5px; padding:2px 6px; font-size:9px; font-weight:600; color:rgba(255,255,255,0.85); z-index:2; pointer-events:none; }
+
+/* ════════════════════════════════════════════
+   SUGGESTION SECTION
+════════════════════════════════════════════ */
+.suggestion-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 26px 16px 0;
+}
+.suggestion-lock-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, transform 0.12s;
+  user-select: none;
+}
+.suggestion-lock-badge:hover {
+  color: var(--text);
+  border-color: var(--green);
+  transform: scale(1.03);
+}
+.suggestion-lock-badge.unlocked {
+  color: var(--green);
+  border-color: rgba(29,185,84,0.35);
+}
+.suggestion-col-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 10px 8px 16px;
+  border-bottom: 1px solid var(--border);
+  margin: 8px 0 2px;
+}
+.sg-song {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px 7px 16px;
+  border-radius: 6px;
+  transition: background 0.12s;
+  border: 1px solid transparent;
+}
+.sg-song:hover { background: rgba(255,255,255,0.06); }
+body.light .sg-song:hover { background: rgba(0,0,0,0.04); }
+.sg-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  opacity: 0.4;
+  flex-shrink: 0;
+}
+.sg-info { flex: 1; min-width: 0; }
+.sg-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sg-artist {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sg-note {
+  font-size: 10px;
+  color: var(--muted);
+  font-style: italic;
+  max-width: 110px;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+  padding-right: 4px;
+}
+.sg-del {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+  opacity: 0;
+  flex-shrink: 0;
+}
+.sg-song:hover .sg-del { opacity: 1; }
+.sg-del:hover { color: #e05555; background: rgba(220,50,50,0.1); }
+.sg-empty {
+  padding: 20px 16px;
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+  text-align: center;
+}
+.sg-add-btn {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 16px 0;
+  padding: 10px 14px;
+  background: rgba(29,185,84,0.07);
+  border: 1px dashed rgba(29,185,84,0.3);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  user-select: none;
+}
+.sg-add-btn:hover { background: rgba(29,185,84,0.12); border-color: rgba(29,185,84,0.5); }
+
+/* ── SUGGESTION MODAL ── */
+#sgModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 2500;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  backdrop-filter: blur(4px);
+}
+#sgModal.open { display: flex; }
+.sg-modal-inner {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 380px;
+  position: relative;
+  box-shadow: var(--shadow);
+  animation: slideUp 0.22s ease;
+}
+.sg-modal-close {
+  position: absolute;
+  top: 14px; right: 14px;
+  font-size: 18px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.sg-modal-close:hover { color: var(--text); }
+.sg-modal-tag {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  margin-bottom: 8px;
+}
+.sg-modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 18px;
+}
+.sg-field-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 5px;
+}
+.sg-input {
+  width: 100%;
+  padding: 10px 13px;
+  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--s2);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 12px;
+}
+.sg-input:focus { border-color: var(--green); }
+.sg-modal-save {
+  width: 100%;
+  padding: 12px;
+  margin-top: 4px;
+  background: var(--green);
+  color: #000;
+  font-weight: 700;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.sg-modal-save:hover { background: var(--green2); transform: scale(1.02); }
+
+/* ── AUTH MODAL SUGGESTION ── */
+#sgAuthModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 2600;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  backdrop-filter: blur(4px);
+}
+#sgAuthModal.open { display: flex; }
 </style>
 </head>
 <body>
@@ -908,9 +1139,31 @@ body.light #lockNavBtn { color: #7c3aed; }
   <div id="loveBox">💖 Tapote-moi</div>
 </div>
 
-<div class="section fade-in" style="padding-top:22px;">
-  <div class="section-label">Autre 🎵</div>
-  <div class="song-list" id="Chill"></div>
+<!-- ══════════════════════════════════════════
+     SECTION AUTRE — SUGGESTIONS
+══════════════════════════════════════════ -->
+<div class="fade-in" id="autreSection">
+  <div class="suggestion-header-row">
+    <div class="section-label" style="margin-bottom:0;padding:0;flex:1">Autre 🎵</div>
+    <div class="suggestion-lock-badge" id="sgLockBadge" onclick="sgToggleLock()">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+      </svg>
+      <span id="sgLockTxt">Suggestion</span>
+    </div>
+  </div>
+  <div>
+    <div class="suggestion-col-header">
+      <div style="flex:1;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px">Titre</div>
+      <div style="width:110px;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;text-align:right;flex-shrink:0;padding-right:4px">Note</div>
+      <div style="width:30px;flex-shrink:0"></div>
+    </div>
+    <div id="sgList"></div>
+    <div class="sg-add-btn" id="sgAddBtn" onclick="openSgModal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"/></svg>
+      Proposer une musique
+    </div>
+  </div>
 </div>
 
 <div class="section fade-in" id="Books">
@@ -1007,7 +1260,7 @@ body.light #lockNavBtn { color: #7c3aed; }
 
 <div id="libraryPopup">
   <div class="lib-item" onclick="goTo('Love')">💕 Love</div>
-  <div class="lib-item" onclick="goTo('Chill')">🎵 Autre</div>
+  <div class="lib-item" onclick="goTo('autreSection')">🎵 Autre</div>
   <div class="lib-item" onclick="goTo('Books')">📚 Idées livre</div>
   <div class="lib-item" onclick="goTo('timelineSection')">🕐 Notre histoire</div>
   <div class="lib-item" onclick="goTo('reasonSection')">💖 Pourquoi je t'aime</div>
@@ -1069,9 +1322,37 @@ body.light #lockNavBtn { color: #7c3aed; }
   <button class="prank-close" onclick="closePrank()">OK je réessaie 🔁</button>
 </div>
 
+<!-- ══ SUGGESTION MODALS ══ -->
+<div id="sgAuthModal">
+  <div class="memo-auth-inner">
+    <div class="memo-auth-icon">🎵</div>
+    <div class="memo-auth-title">Suggérer une musique</div>
+    <div class="memo-auth-sub">Entre le code pour déverrouiller</div>
+    <input type="text" class="memo-auth-input" id="sgAuthInput" placeholder="Code..." autocomplete="off">
+    <button class="memo-auth-btn" onclick="sgCheckAuth()">Valider</button>
+    <div class="memo-auth-err" id="sgAuthErr">❌ Code incorrect, réessaie !</div>
+    <span class="memo-auth-cancel" onclick="closeSgAuth()">Annuler</span>
+  </div>
+</div>
+
+<div id="sgModal">
+  <div class="sg-modal-inner">
+    <span class="sg-modal-close" onclick="closeSgModal()">✕</span>
+    <div class="sg-modal-tag">Nouvelle suggestion</div>
+    <div class="sg-modal-title">Proposer un son 🎵</div>
+    <div class="sg-field-label">Titre de la musique *</div>
+    <input type="text" class="sg-input" id="sgTitleInput" placeholder="ex: Savage Love" maxlength="80">
+    <div class="sg-field-label">Artiste *</div>
+    <input type="text" class="sg-input" id="sgArtistInput" placeholder="ex: Jawsh 685" maxlength="80">
+    <div class="sg-field-label">Note (optionnel)</div>
+    <input type="text" class="sg-input" id="sgNoteInput" placeholder="ex: trop bonne pour toi 😏" maxlength="100">
+    <button class="sg-modal-save" onclick="sgSave()">Proposer 💚</button>
+  </div>
+</div>
+
 <script>
 // ════════════════════════════════════════════
-// SUPABASE CONFIG — doit être EN PREMIER pour que tout le code y ait accès
+// SUPABASE CONFIG
 // ════════════════════════════════════════════
 var SB_URL = 'https://zjmbyjpxqrojnuymnpcf.supabase.co';
 var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqbWJ5anB4cXJvam51eW1ucGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0MzEzNjcsImV4cCI6MjA4NzAwNzM2N30.vNRgLgCNqZ9g351YmodZoXYDqars-thVDFmri2Z3oxE';
@@ -1223,13 +1504,10 @@ var songsLove = [
   {title:"Solide",             artist:"Ronisia",        file:"solide_ronisia.mp3",          yt:"https://www.youtube.com/watch?v=RHOhrdsGOc0"},
   {title:"Soleil Bleu",        artist:"Luiza",          file:"soleil_bleu_luiza.mp3",       yt:"https://www.youtube.com/watch?v=nd8RD3tjNQE"}
 ];
-
 songsLove.forEach(function(x){ x.plays = 0; });
 
 function fmtPlays(n){if(n>=1e6)return(n/1e6).toFixed(1).replace('.0','')+'M';if(n>=1e3)return(n/1e3).toFixed(1).replace('.0','')+'k';return n?String(n):'—';}
 
-// savePlays — appelle la RPC qui retourne directement le nouveau play_count
-// Plus de double fetch, plus de flash : un seul aller-retour
 function savePlays(file){
   fetch(SB_URL + '/rest/v1/rpc/increment_play', {
     method: 'POST',
@@ -1238,10 +1516,7 @@ function savePlays(file){
   })
   .then(function(r){ return r.json(); })
   .then(function(result){
-    console.log('RPC increment_play result:', JSON.stringify(result));
-    // La RPC retourne directement le nouveau play_count (INTEGER)
     var newCount = Array.isArray(result) ? result[0] : result;
-    console.log('newCount:', newCount, 'type:', typeof newCount);
     if(typeof newCount === 'number'){
       var s = songsLove.find(function(x){ return x.file === file; });
       if(s) s.plays = newCount;
@@ -1324,9 +1599,6 @@ function renderTop50() {
     btn.addEventListener('click', toggle);
     div.addEventListener('click', toggle);
 
-    // ── COMPTEUR D'ÉCOUTES ──
-    // Pas d'incrément local — la RPC retourne directement la vraie valeur
-    // Donc zéro flash, zéro retour en arrière
     audio.addEventListener('timeupdate', function(){
       if(!audio._counted && audio.currentTime >= 3){
         audio._counted = true;
@@ -1433,7 +1705,7 @@ document.getElementById('top50PlayAll').addEventListener('click', function(){
   if(first) first.querySelector('.sp-btn-play').click();
 });
 
-// ── CHARGEMENT INITIAL depuis Supabase + rafraîchissement toutes les 30s ──
+// ── CHARGEMENT INITIAL depuis Supabase ──
 (function(){
   sbGet('song_plays', 'select=song_key,play_count').then(function(rows){
     if(!Array.isArray(rows)) { renderTop50(); return; }
@@ -1853,6 +2125,145 @@ function filterSongs(q){
   document.getElementById('memoTodoInput').addEventListener('keydown',function(e){if(e.key==='Enter')window.memoAddTodoItem();});
 
   renderNotes();renderTodos();
+})();
+
+// ════════════════════════════════════════════
+// SECTION SUGGESTIONS — AUTRE 🎵
+// ════════════════════════════════════════════
+(function(){
+  var SG_CODE = 'BILOUTE';
+  var sgUnlocked = false;
+  var _sgAuthCb = null;
+
+  function escSg(str){ return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // Auth modal
+  function openSgAuth(cb){
+    _sgAuthCb = cb;
+    document.getElementById('sgAuthModal').classList.add('open');
+    document.getElementById('sgAuthInput').value = '';
+    document.getElementById('sgAuthErr').style.display = 'none';
+    setTimeout(function(){ document.getElementById('sgAuthInput').focus(); }, 80);
+  }
+  window.closeSgAuth = function(){
+    document.getElementById('sgAuthModal').classList.remove('open');
+  };
+  window.sgCheckAuth = function(){
+    var val = document.getElementById('sgAuthInput').value.trim().toUpperCase();
+    if(val === SG_CODE){
+      window.closeSgAuth();
+      if(_sgAuthCb){ _sgAuthCb(); _sgAuthCb = null; }
+    } else {
+      document.getElementById('sgAuthErr').style.display = 'block';
+      document.getElementById('sgAuthInput').value = '';
+      document.getElementById('sgAuthInput').focus();
+    }
+  };
+  document.getElementById('sgAuthInput').addEventListener('keydown', function(e){ if(e.key==='Enter') window.sgCheckAuth(); });
+  document.getElementById('sgAuthModal').addEventListener('click', function(e){ if(e.target===this) window.closeSgAuth(); });
+
+  // Toggle lock
+  window.sgToggleLock = function(){
+    if(sgUnlocked){ sgLock(); } else { openSgAuth(sgUnlock); }
+  };
+
+  function sgUnlock(){
+    sgUnlocked = true;
+    document.getElementById('sgLockBadge').classList.add('unlocked');
+    document.getElementById('sgLockTxt').textContent = 'Verrouiller';
+    document.getElementById('sgAddBtn').style.display = 'flex';
+    renderSuggestions();
+  }
+  function sgLock(){
+    sgUnlocked = false;
+    document.getElementById('sgLockBadge').classList.remove('unlocked');
+    document.getElementById('sgLockTxt').textContent = 'Suggestion';
+    document.getElementById('sgAddBtn').style.display = 'none';
+    renderSuggestions();
+  }
+
+  // Suggestion modal
+  window.openSgModal = function(){
+    document.getElementById('sgTitleInput').value = '';
+    document.getElementById('sgArtistInput').value = '';
+    document.getElementById('sgNoteInput').value = '';
+    document.getElementById('sgModal').classList.add('open');
+    setTimeout(function(){ document.getElementById('sgTitleInput').focus(); }, 80);
+  };
+  window.closeSgModal = function(){
+    document.getElementById('sgModal').classList.remove('open');
+  };
+  document.getElementById('sgModal').addEventListener('click', function(e){ if(e.target===this) window.closeSgModal(); });
+
+  window.sgSave = function(){
+    var title = document.getElementById('sgTitleInput').value.trim();
+    var artist = document.getElementById('sgArtistInput').value.trim();
+    var note = document.getElementById('sgNoteInput').value.trim();
+    if(!title || !artist) {
+      // Shake empty fields
+      if(!title) document.getElementById('sgTitleInput').style.borderColor='#e05555';
+      if(!artist) document.getElementById('sgArtistInput').style.borderColor='#e05555';
+      return;
+    }
+    var btn = document.querySelector('.sg-modal-save');
+    btn.textContent = '⏳'; btn.disabled = true;
+    sbPost('suggestion_songs', { title: title, artist: artist, note: note || null })
+      .then(function(){
+        btn.textContent = 'Proposer 💚'; btn.disabled = false;
+        window.closeSgModal();
+        renderSuggestions();
+      })
+      .catch(function(){
+        btn.textContent = 'Proposer 💚'; btn.disabled = false;
+        window.closeSgModal();
+      });
+  };
+
+  // Enter key in inputs
+  ['sgTitleInput','sgArtistInput','sgNoteInput'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el){
+      el.addEventListener('keydown', function(e){ if(e.key==='Enter') window.sgSave(); });
+      el.addEventListener('focus', function(){ this.style.borderColor=''; });
+    }
+  });
+
+  function renderSuggestions(){
+    var list = document.getElementById('sgList');
+    list.innerHTML = '<div class="sg-empty"><span class="spinner"></span></div>';
+    sbGet('suggestion_songs', 'order=created_at.asc').then(function(items){
+      list.innerHTML = '';
+      if(!Array.isArray(items) || !items.length){
+        var em = document.createElement('div');
+        em.className = 'sg-empty';
+        em.textContent = sgUnlocked ? 'Aucune suggestion — propose-en une ! 🎵' : 'Aucune suggestion pour l\'instant. 🎵';
+        list.appendChild(em);
+        return;
+      }
+      items.forEach(function(item){
+        var row = document.createElement('div');
+        row.className = 'sg-song';
+        row.innerHTML =
+          '<div class="sg-dot"></div>' +
+          '<div class="sg-info"><div class="sg-title">' + escSg(item.title) + '</div><div class="sg-artist">' + escSg(item.artist) + '</div></div>' +
+          (item.note ? '<div class="sg-note">' + escSg(item.note) + '</div>' : '<div style="width:110px;flex-shrink:0"></div>') +
+          (sgUnlocked ? '<button class="sg-del" title="Supprimer">✕</button>' : '');
+        if(sgUnlocked){
+          (function(id){
+            row.querySelector('.sg-del').addEventListener('click', function(e){
+              e.stopPropagation();
+              sbDelete('suggestion_songs', id).then(renderSuggestions);
+            });
+          })(item.id);
+        }
+        list.appendChild(row);
+      });
+    }).catch(function(){
+      list.innerHTML = '<div class="sg-empty">❌ Erreur de connexion.</div>';
+    });
+  }
+
+  renderSuggestions();
 })();
 </script>
 </body>
