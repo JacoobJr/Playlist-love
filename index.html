@@ -1152,6 +1152,51 @@ body.light .sg-song:hover { background: rgba(0,0,0,0.04); }
 .game-view-title { font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:var(--text); }
 .game-view-body { padding: 16px 16px 0; }
 
+/* ════ PENDU ════ */
+#penduView,#puzzleView,#snakeView{display:none;position:fixed;inset:0;background:var(--bg);z-index:600;overflow-y:auto;padding-bottom:80px;transition:background 0.3s;}
+#penduView.active,#puzzleView.active,#snakeView.active{display:block;animation:slideUp 0.25s ease;}
+.pendu-svg{display:block;margin:0 auto 8px;}
+.pendu-word{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.pendu-letter{width:26px;height:34px;border-bottom:2px solid var(--text);display:flex;align-items:flex-end;justify-content:center;font-size:17px;font-weight:700;color:var(--text);text-transform:uppercase;}
+.pendu-keyboard{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin:12px 0;}
+.pendu-key{width:30px;height:34px;border-radius:6px;border:1px solid var(--border);background:var(--s2);color:var(--text);font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background 0.1s;display:flex;align-items:center;justify-content:center;text-transform:uppercase;}
+.pendu-key:hover:not(.used){background:var(--s3);}
+.pendu-key.correct{background:rgba(29,185,84,0.2);border-color:var(--green);color:var(--green);}
+.pendu-key.wrong{background:rgba(220,50,50,0.15);border-color:#e05555;color:#e05555;}
+.pendu-key.used{opacity:0.35;cursor:default;}
+.pendu-hint{font-size:12px;color:var(--muted);text-align:center;font-style:italic;margin:4px 0 8px;}
+.pendu-errors{font-size:12px;color:#e05555;text-align:center;font-weight:600;margin-bottom:6px;}
+.pendu-result{text-align:center;padding:16px 0;}
+.pendu-result-emoji{font-size:44px;display:block;margin-bottom:8px;}
+.pendu-word-reveal{font-size:18px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:3px;margin:8px 0;}
+
+/* ════ PUZZLE ════ */
+.puzzle-grid{display:grid;gap:2px;margin:12px auto;background:var(--border);border-radius:8px;overflow:hidden;border:1px solid var(--border);}
+.puzzle-piece{background-size:cover;cursor:pointer;transition:box-shadow 0.1s;position:relative;}
+.puzzle-piece.selected{box-shadow:0 0 0 3px #e879a0 inset;z-index:3;}
+.puzzle-piece.correct-pos{box-shadow:0 0 0 2px var(--green) inset;}
+.puzzle-moves{font-size:12px;color:var(--sub);text-align:center;margin-bottom:6px;}
+.puzzle-size-btns{display:flex;gap:8px;justify-content:center;margin:10px 0;}
+.puzzle-size-btn{padding:7px 16px;border-radius:20px;border:1px solid var(--border);background:var(--s2);color:var(--sub);font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;}
+.puzzle-size-btn.active{background:rgba(232,121,160,0.15);color:#e879a0;border-color:rgba(232,121,160,0.4);}
+
+/* ════ SNAKE ════ */
+#snakeCanvas{display:block;margin:10px auto;border-radius:10px;border:1px solid var(--border);touch-action:none;}
+.snake-score-bar{display:flex;justify-content:space-around;align-items:center;padding:0 4px;margin-bottom:6px;}
+.snake-stat{text-align:center;}
+.snake-stat-num{font-size:20px;font-weight:700;color:#e879a0;display:block;}
+.snake-stat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.snake-controls{display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(2,48px);gap:6px;margin:14px auto 0;width:fit-content;}
+.snake-btn{width:48px;height:48px;border-radius:10px;background:var(--s2);border:1px solid var(--border);color:var(--text);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;}
+.snake-btn:active{background:var(--s3);}
+.snake-wrap{position:relative;width:fit-content;margin:0 auto;}
+.snake-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(0,0,0,0.72);border-radius:10px;}
+.snake-overlay-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#fff;}
+.snake-overlay-sub{font-size:12px;color:rgba(255,255,255,0.6);text-align:center;}
+.snake-overlay-btn{padding:11px 28px;background:#e879a0;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;}
+.game-start-btn{padding:12px 30px;background:rgba(232,121,160,0.2);color:#e879a0;border:1.5px solid rgba(232,121,160,0.45);border-radius:50px;font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background 0.15s,transform 0.12s;}
+.game-start-btn:hover{background:rgba(232,121,160,0.32);transform:scale(1.05);}
+
 </style>
 </head>
 <body>
@@ -1492,7 +1537,30 @@ body.light .sg-song:hover { background: rgba(0,0,0,0.04); }
       </div>
       <div class="gv-game-card-arrow">›</div>
     </div>
-    <!-- Ajouter d'autres jeux ici -->
+    <div class="gv-game-card" onclick="openPenduGame()">
+      <div class="gv-game-card-icon">🪓</div>
+      <div class="gv-game-card-info">
+        <div class="gv-game-card-name">Le Pendu</div>
+        <div class="gv-game-card-desc">Devine le mot lettre par lettre avant qu'il soit trop tard</div>
+      </div>
+      <div class="gv-game-card-arrow">›</div>
+    </div>
+    <div class="gv-game-card" onclick="openPuzzleGame()">
+      <div class="gv-game-card-icon">🧩</div>
+      <div class="gv-game-card-info">
+        <div class="gv-game-card-name">Puzzle Photo</div>
+        <div class="gv-game-card-desc">Reconstitue l'image en moins de coups possible</div>
+      </div>
+      <div class="gv-game-card-arrow">›</div>
+    </div>
+    <div class="gv-game-card" onclick="openSnakeGame()">
+      <div class="gv-game-card-icon">🐍</div>
+      <div class="gv-game-card-info">
+        <div class="gv-game-card-name">Snake</div>
+        <div class="gv-game-card-desc">Mange les cœurs, évite les murs — bats le score de l'autre</div>
+      </div>
+      <div class="gv-game-card-arrow">›</div>
+    </div>
   </div>
 </div>
 
@@ -1563,6 +1631,159 @@ body.light .sg-song:hover { background: rgba(0,0,0,0.04); }
       <div id="lbList"><div class="lb-loading"><span class="spinner"></span> Chargement...</div></div>
     </div>
 
+  </div>
+</div>
+
+
+<!-- ════ VUE PENDU ════ -->
+<div id="penduView">
+  <div class="game-view-header">
+    <div class="game-view-back" onclick="closePenduGame()">← Retour aux jeux</div>
+    <div class="game-view-title">Le Pendu 🪓</div>
+  </div>
+  <div class="game-view-body">
+    <div class="gender-select-screen" id="penduGenderScreen">
+      <div style="font-size:48px">🪓</div>
+      <div class="gender-select-title">Qui joue ?</div>
+      <div class="gender-select-sub">Choisis ton identité pour le classement</div>
+      <div class="gender-select-btns">
+        <button class="gender-select-btn" id="penduGenderGirl" onclick="penduSelectGender('girl')"><span class="gender-select-icon">♀</span>Elle</button>
+        <button class="gender-select-btn" id="penduGenderBoy"  onclick="penduSelectGender('boy')"><span class="gender-select-icon">♂</span>Lui</button>
+      </div>
+    </div>
+    <div id="penduGameArea" style="display:none">
+      <svg class="pendu-svg" width="160" height="160" viewBox="0 0 160 160" id="penduSvg">
+        <line x1="20" y1="155" x2="140" y2="155" stroke="var(--border)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="50" y1="155" x2="50" y2="10"  stroke="var(--border)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="50" y1="10"  x2="110" y2="10" stroke="var(--border)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="110" y1="10" x2="110" y2="30" stroke="var(--border)" stroke-width="3" stroke-linecap="round" id="ph-rope"/>
+        <circle cx="110" cy="44" r="14" stroke="#e879a0" stroke-width="2.5" fill="none" id="ph-head" style="display:none"/>
+        <line x1="110" y1="58" x2="110" y2="98" stroke="#e879a0" stroke-width="2.5" stroke-linecap="round" id="ph-body" style="display:none"/>
+        <line x1="110" y1="68" x2="90"  y2="85" stroke="#e879a0" stroke-width="2.5" stroke-linecap="round" id="ph-arm1" style="display:none"/>
+        <line x1="110" y1="68" x2="130" y2="85" stroke="#e879a0" stroke-width="2.5" stroke-linecap="round" id="ph-arm2" style="display:none"/>
+        <line x1="110" y1="98" x2="92"  y2="125" stroke="#e879a0" stroke-width="2.5" stroke-linecap="round" id="ph-leg1" style="display:none"/>
+        <line x1="110" y1="98" x2="128" y2="125" stroke="#e879a0" stroke-width="2.5" stroke-linecap="round" id="ph-leg2" style="display:none"/>
+      </svg>
+      <div class="pendu-errors" id="penduErrors">0 / 7 erreurs</div>
+      <div class="pendu-hint" id="penduHint"></div>
+      <div class="pendu-word" id="penduWord"></div>
+      <div class="pendu-keyboard" id="penduKeyboard"></div>
+      <div class="pendu-result" id="penduResult" style="display:none">
+        <span class="pendu-result-emoji" id="penduResultEmoji"></span>
+        <div id="penduResultMsg" style="font-size:14px;color:var(--sub);margin-bottom:8px"></div>
+        <div class="pendu-word-reveal" id="penduWordReveal"></div>
+        <button class="game-start-btn" style="margin-top:14px" onclick="penduNextWord()">Mot suivant →</button>
+      </div>
+    </div>
+    <div class="leaderboard-wrap" id="penduLeaderboard" style="margin-top:20px">
+      <div class="leaderboard-title">Classement</div>
+      <div class="leaderboard-tabs">
+        <div class="lb-tab active-all" id="plbTabAll"  onclick="plbSetTab('all')">Tous</div>
+        <div class="lb-tab"            id="plbTabGirl" onclick="plbSetTab('girl')">Elle ♀</div>
+        <div class="lb-tab"            id="plbTabBoy"  onclick="plbSetTab('boy')">Lui ♂</div>
+      </div>
+      <div id="plbList"><div class="lb-loading">Chargement...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ VUE PUZZLE ════ -->
+<div id="puzzleView">
+  <div class="game-view-header">
+    <div class="game-view-back" onclick="closePuzzleGame()">← Retour aux jeux</div>
+    <div class="game-view-title">Puzzle Photo 🧩</div>
+  </div>
+  <div class="game-view-body">
+    <div class="gender-select-screen" id="puzzleGenderScreen">
+      <div style="font-size:48px">🧩</div>
+      <div class="gender-select-title">Qui joue ?</div>
+      <div class="gender-select-sub">Choisis ton identité pour le classement</div>
+      <div class="gender-select-btns">
+        <button class="gender-select-btn" id="puzzleGenderGirl" onclick="puzzleSelectGender('girl')"><span class="gender-select-icon">♀</span>Elle</button>
+        <button class="gender-select-btn" id="puzzleGenderBoy"  onclick="puzzleSelectGender('boy')"><span class="gender-select-icon">♂</span>Lui</button>
+      </div>
+    </div>
+    <div id="puzzleGameArea" style="display:none">
+      <div style="text-align:center;margin-bottom:8px">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">Taille</div>
+        <div class="puzzle-size-btns">
+          <button class="puzzle-size-btn active" onclick="puzzleSetSize(3,this)">3×3</button>
+          <button class="puzzle-size-btn"        onclick="puzzleSetSize(4,this)">4×4</button>
+          <button class="puzzle-size-btn"        onclick="puzzleSetSize(5,this)">5×5</button>
+        </div>
+        <div class="puzzle-moves" id="puzzleMoves">0 échanges</div>
+      </div>
+      <div class="puzzle-grid" id="puzzleGrid"></div>
+      <div style="text-align:center;margin-top:10px;display:flex;gap:8px;justify-content:center">
+        <button class="game-start-btn" onclick="puzzleInit()">🔀 Mélanger</button>
+        <button class="game-start-btn" style="background:rgba(29,185,84,0.12);color:var(--green);border-color:rgba(29,185,84,0.35)" onclick="puzzleShowPreview()">👁 Aperçu</button>
+      </div>
+      <div id="puzzleWin" style="display:none;text-align:center;padding:20px 0">
+        <div style="font-size:44px">🏆</div>
+        <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--text);margin:8px 0" id="puzzleWinTitle"></div>
+        <div style="font-size:13px;color:var(--sub)" id="puzzleWinSub"></div>
+        <button class="game-start-btn" style="margin-top:14px" onclick="puzzleInit()">Rejouer 🔀</button>
+      </div>
+    </div>
+    <div class="leaderboard-wrap" id="puzzleLeaderboard" style="margin-top:20px">
+      <div class="leaderboard-title">Classement</div>
+      <div class="leaderboard-tabs">
+        <div class="lb-tab active-all" id="zplbTabAll"  onclick="zplbSetTab('all')">Tous</div>
+        <div class="lb-tab"            id="zplbTabGirl" onclick="zplbSetTab('girl')">Elle ♀</div>
+        <div class="lb-tab"            id="zplbTabBoy"  onclick="zplbSetTab('boy')">Lui ♂</div>
+      </div>
+      <div id="zplbList"><div class="lb-loading">Chargement...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ VUE SNAKE ════ -->
+<div id="snakeView">
+  <div class="game-view-header">
+    <div class="game-view-back" onclick="closeSnakeGame()">← Retour aux jeux</div>
+    <div class="game-view-title">Snake 🐍</div>
+  </div>
+  <div class="game-view-body">
+    <div class="gender-select-screen" id="snakeGenderScreen">
+      <div style="font-size:48px">🐍</div>
+      <div class="gender-select-title">Qui joue ?</div>
+      <div class="gender-select-sub">Choisis ton identité pour le classement</div>
+      <div class="gender-select-btns">
+        <button class="gender-select-btn" id="snakeGenderGirl" onclick="snakeSelectGender('girl')"><span class="gender-select-icon">♀</span>Elle</button>
+        <button class="gender-select-btn" id="snakeGenderBoy"  onclick="snakeSelectGender('boy')"><span class="gender-select-icon">♂</span>Lui</button>
+      </div>
+    </div>
+    <div id="snakeGameArea" style="display:none">
+      <div class="snake-score-bar">
+        <div class="snake-stat"><span class="snake-stat-num" id="snakeScore">0</span><span class="snake-stat-lbl">Score</span></div>
+        <div class="snake-stat"><span class="snake-stat-num" id="snakeBest">0</span><span class="snake-stat-lbl">Meilleur</span></div>
+      </div>
+      <div class="snake-wrap">
+        <canvas id="snakeCanvas" width="300" height="300"></canvas>
+        <div class="snake-overlay" id="snakeOverlay">
+          <div class="snake-overlay-title" id="snakeOverlayTitle">Snake 🐍</div>
+          <div class="snake-overlay-sub"  id="snakeOverlaySub">Mange les 💕 sans toucher les murs</div>
+          <button class="snake-overlay-btn" onclick="snakeStart()">▶ Jouer</button>
+        </div>
+      </div>
+      <div class="snake-controls">
+        <div></div>
+        <div class="snake-btn" ontouchstart="snakeDir(0,-1)" onclick="snakeDir(0,-1)">▲</div>
+        <div></div>
+        <div class="snake-btn" ontouchstart="snakeDir(-1,0)" onclick="snakeDir(-1,0)">◀</div>
+        <div class="snake-btn" ontouchstart="snakeDir(0,1)"  onclick="snakeDir(0,1)">▼</div>
+        <div class="snake-btn" ontouchstart="snakeDir(1,0)"  onclick="snakeDir(1,0)">▶</div>
+      </div>
+    </div>
+    <div class="leaderboard-wrap" id="snakeLeaderboard" style="margin-top:20px">
+      <div class="leaderboard-title">Classement</div>
+      <div class="leaderboard-tabs">
+        <div class="lb-tab active-all" id="slbTabAll"  onclick="slbSetTab('all')">Tous</div>
+        <div class="lb-tab"            id="slbTabGirl" onclick="slbSetTab('girl')">Elle ♀</div>
+        <div class="lb-tab"            id="slbTabBoy"  onclick="slbSetTab('boy')">Lui ♂</div>
+      </div>
+      <div id="slbList"><div class="lb-loading">Chargement...</div></div>
+    </div>
   </div>
 </div>
 
@@ -2340,7 +2561,454 @@ function showResult(){
   res.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-// ── NAV ──
+// ══════════════════════════════════════════
+// ── PENDU ──
+// ══════════════════════════════════════════
+var PENDU_WORDS = [
+  {w:'amour',h:'Un sentiment fort entre deux personnes'},
+  {w:'bisou',h:'Un petit geste de tendresse sur les lèvres'},
+  {w:'calin',h:'On se serre fort dans les bras'},
+  {w:'coeur',h:'Symbole de l\'amour ❤️'},
+  {w:'douceur',h:'Une qualité précieuse chez quelqu\'un de gentil'},
+  {w:'etoile',h:'Elle brille la nuit dans le ciel'},
+  {w:'fleur',h:'Souvent offerte pour la Saint-Valentin'},
+  {w:'gateau',h:'On le mange lors d\'un anniversaire'},
+  {w:'hasard',h:'Quand quelque chose arrive sans être prévu'},
+  {w:'infini',h:'Quelque chose qui ne finit jamais'},
+  {w:'jaloux',h:'Un sentiment parfois difficile à gérer'},
+  {w:'kawaii',h:'Mot japonais qui signifie mignon'},
+  {w:'lune',h:'Elle éclaire les nuits romantiques'},
+  {w:'magie',h:'Ce qu\'on ressent quand tout est parfait'},
+  {w:'nuage',h:'Il flotte dans le ciel comme les rêves'},
+  {w:'ocean',h:'Une grande étendue d\'eau bleue'},
+  {w:'papillon',h:'Il symbolise la transformation et la liberté'},
+  {w:'quartz',h:'Une pierre précieuse rose'},
+  {w:'rose',h:'La fleur de l\'amour par excellence'},
+  {w:'soleil',h:'Il réchauffe comme un sourire'},
+  {w:'tendre',h:'Quelqu\'un de doux et affectueux'},
+  {w:'univers',h:'Tout ce qui existe autour de nous'},
+  {w:'voyage',h:'Partir découvrir de nouveaux endroits'},
+  {w:'week-end',h:'Les deux jours qu\'on attend toute la semaine'},
+  {w:'zinzin',h:'Un peu fou, mais attachant'},
+  {w:'rire',h:'Le meilleur remède au blues'},
+  {w:'musique',h:'Ce site en est plein'},
+  {w:'playlist',h:'Une liste de sons qu\'on aime'},
+  {w:'melodie',h:'Une suite de notes harmonieuses'},
+  {w:'rythme',h:'Ce qui donne envie de danser'},
+  {w:'chanson',h:'Un texte mis en musique'},
+  {w:'artiste',h:'Quelqu\'un qui crée de l\'art'},
+  {w:'concert',h:'Un spectacle musical en direct'},
+  {w:'guitare',h:'Instrument à cordes'},
+  {w:'piano',h:'Instrument à touches noir et blanc'},
+  {w:'microphone',h:'On parle ou chante dedans'},
+  {w:'studio',h:'Là où on enregistre la musique'},
+  {w:'album',h:'Une collection de chansons'},
+  {w:'refrain',h:'La partie répétée d\'une chanson'},
+  {w:'couplet',h:'La partie narrative d\'une chanson'},
+  {w:'beatbox',h:'Faire de la musique avec sa bouche'},
+  {w:'rappeur',h:'Il place des rimes sur un beat'},
+  {w:'freestyle',h:'Improviser sans préparation'},
+  {w:'casque',h:'On met ça sur les oreilles pour écouter'},
+  {w:'vinyle',h:'Un vieux disque noir qui tourne'},
+  {w:'festival',h:'Un grand événement musical en plein air'},
+  {w:'karaoké',h:'On chante sur les paroles affichées'},
+  {w:'baguette',h:'Accessoire du chef d\'orchestre'},
+  {w:'harmonie',h:'Quand tout s\'accorde parfaitement'},
+  {w:'ballade',h:'Une chanson douce et lente'},
+  {w:'silence',h:'L\'absence de son'},
+  {w:'vibration',h:'Ce que la musique fait ressentir'},
+];
+
+var penduPlayer=null, penduWord='', penduHint='', penduGuessed=[], penduErrors=0, penduMaxErrors=7;
+var penduScore=0, penduWins=0;
+var PENDU_PARTS=['ph-head','ph-body','ph-arm1','ph-arm2','ph-leg1','ph-leg2'];
+
+function openPenduGame(){
+  resetZoom();
+  document.getElementById('penduView').classList.add('active');
+  window.scrollTo(0,0);
+  plbLoad();
+}
+function closePenduGame(){
+  document.getElementById('penduView').classList.remove('active');
+  penduPlayer=null;
+  document.getElementById('penduGenderScreen').style.display='flex';
+  document.getElementById('penduGameArea').style.display='none';
+  document.getElementById('penduGenderGirl').className='gender-select-btn';
+  document.getElementById('penduGenderBoy').className='gender-select-btn';
+}
+function penduSelectGender(g){
+  penduPlayer=g;
+  document.getElementById('penduGenderGirl').className='gender-select-btn'+(g==='girl'?' girl':'');
+  document.getElementById('penduGenderBoy').className='gender-select-btn'+(g==='boy'?' boy':'');
+  document.getElementById('penduGenderScreen').style.display='none';
+  document.getElementById('penduGameArea').style.display='block';
+  penduWins=0; penduScore=0;
+  penduNewWord();
+}
+function penduNewWord(){
+  var idx=Math.floor(Math.random()*PENDU_WORDS.length);
+  penduWord=PENDU_WORDS[idx].w; penduHint=PENDU_WORDS[idx].h;
+  penduGuessed=[]; penduErrors=0;
+  // Reset pendu drawing
+  PENDU_PARTS.forEach(function(id){ document.getElementById(id).style.display='none'; });
+  document.getElementById('penduErrors').textContent='0 / 7 erreurs';
+  document.getElementById('penduHint').textContent='💡 '+penduHint;
+  document.getElementById('penduResult').style.display='none';
+  document.getElementById('penduGameArea').querySelectorAll('.pendu-key').forEach(function(k){ k.remove(); });
+  renderPenduWord();
+  renderPenduKeyboard();
+}
+function penduNextWord(){ penduNewWord(); }
+function renderPenduWord(){
+  var el=document.getElementById('penduWord'); el.innerHTML='';
+  penduWord.split('').forEach(function(c){
+    var d=document.createElement('div'); d.className='pendu-letter';
+    if(c==='-') d.textContent='-';
+    else d.textContent=penduGuessed.includes(c)?c:'';
+    el.appendChild(d);
+  });
+}
+function renderPenduKeyboard(){
+  var el=document.getElementById('penduKeyboard'); el.innerHTML='';
+  'abcdefghijklmnopqrstuvwxyz'.split('').forEach(function(c){
+    var btn=document.createElement('button'); btn.className='pendu-key'; btn.textContent=c;
+    btn.addEventListener('click',function(){ penduGuess(c,btn); });
+    el.appendChild(btn);
+  });
+}
+function penduGuess(c, btn){
+  if(penduGuessed.includes(c)||btn.classList.contains('used')) return;
+  penduGuessed.push(c);
+  btn.classList.add('used');
+  if(penduWord.includes(c)){
+    btn.classList.add('correct');
+    renderPenduWord();
+    // Vérif victoire
+    var won=penduWord.split('').every(function(l){ return l==='-'||penduGuessed.includes(l); });
+    if(won){ penduWins++; penduScore+=100-penduErrors*10; penduEndGame(true); }
+  } else {
+    btn.classList.add('wrong');
+    penduErrors++;
+    document.getElementById('penduErrors').textContent=penduErrors+' / 7 erreurs';
+    if(penduErrors<=PENDU_PARTS.length) document.getElementById(PENDU_PARTS[penduErrors-1]).style.display='';
+    if(penduErrors>=7) penduEndGame(false);
+  }
+}
+function penduEndGame(won){
+  var res=document.getElementById('penduResult');
+  res.style.display='block';
+  document.getElementById('penduResultEmoji').textContent=won?'🎉':'💀';
+  document.getElementById('penduResultMsg').textContent=won?'Bravo ! Mot trouvé 🎊 Score : '+penduScore+' pts':'Perdu... Tu avais '+penduErrors+' erreurs';
+  document.getElementById('penduWordReveal').textContent=penduWord.toUpperCase();
+  if(penduPlayer && penduScore>0){
+    sbPost('game_scores',{game_id:'pendu',player:penduPlayer,score:penduScore,moves:penduErrors,time_seconds:0})
+      .then(function(){ plbLoad(); }).catch(function(){});
+  }
+}
+
+// Classement Pendu
+var plbTab='all', plbData=[];
+function plbSetTab(t){
+  plbTab=t;
+  ['all','girl','boy'].forEach(function(x){
+    document.getElementById('plbTab'+x.charAt(0).toUpperCase()+x.slice(1)).className='lb-tab'+(x===t?' active-'+t:'');
+  });
+  plbRender(plbData);
+}
+function plbLoad(){
+  document.getElementById('plbList').innerHTML='<div class="lb-loading">Chargement...</div>';
+  sbGet('game_scores','game_id=eq.pendu&order=score.desc&limit=50').then(function(r){
+    plbData=Array.isArray(r)?r:[];plbRender(plbData);
+  }).catch(function(){ document.getElementById('plbList').innerHTML='<div class="lb-empty">❌ Erreur</div>'; });
+}
+function plbRender(rows){
+  renderLb('plbList', plbTab==='all'?rows:rows.filter(function(r){return r.player===plbTab;}), function(r){ return '<span>'+r.score+'pts</span> · '+r.moves+' erreurs'; });
+}
+
+// ══════════════════════════════════════════
+// ── PUZZLE ──
+// ══════════════════════════════════════════
+var PUZZLE_IMAGES=['image-1.jpg','image-2.jpg','image-3.jpg','image-4.jpg','image-5.jpg','image-6.jpg','image-7.jpg','image-8.jpg','image-9.jpg','image-10.jpg'];
+var puzzlePlayer=null, puzzleSize=3, puzzleOrder=[], puzzleSelected=null, puzzleMoveCount=0, puzzleImg='';
+
+function openPuzzleGame(){
+  resetZoom();
+  document.getElementById('puzzleView').classList.add('active');
+  window.scrollTo(0,0);
+  zplbLoad();
+}
+function closePuzzleGame(){
+  document.getElementById('puzzleView').classList.remove('active');
+  puzzlePlayer=null;
+  document.getElementById('puzzleGenderScreen').style.display='flex';
+  document.getElementById('puzzleGameArea').style.display='none';
+  document.getElementById('puzzleGenderGirl').className='gender-select-btn';
+  document.getElementById('puzzleGenderBoy').className='gender-select-btn';
+}
+function puzzleSelectGender(g){
+  puzzlePlayer=g;
+  document.getElementById('puzzleGenderGirl').className='gender-select-btn'+(g==='girl'?' girl':'');
+  document.getElementById('puzzleGenderBoy').className='gender-select-btn'+(g==='boy'?' boy':'');
+  document.getElementById('puzzleGenderScreen').style.display='none';
+  document.getElementById('puzzleGameArea').style.display='block';
+  puzzleImg=PUZZLE_IMAGES[Math.floor(Math.random()*PUZZLE_IMAGES.length)];
+  puzzleInit();
+}
+function puzzleSetSize(n, btn){
+  puzzleSize=n;
+  document.querySelectorAll('.puzzle-size-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  puzzleInit();
+}
+function puzzleInit(){
+  puzzleMoveCount=0; puzzleSelected=null;
+  document.getElementById('puzzleMoves').textContent='0 échanges';
+  document.getElementById('puzzleWin').style.display='none';
+  var n=puzzleSize*puzzleSize;
+  puzzleOrder=Array.from({length:n},function(_,i){return i;});
+  // Mélange
+  for(var i=n-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=puzzleOrder[i];puzzleOrder[i]=puzzleOrder[j];puzzleOrder[j]=t;}
+  renderPuzzle();
+}
+function renderPuzzle(){
+  var grid=document.getElementById('puzzleGrid');
+  var sz=Math.min(340,window.innerWidth*0.92);
+  grid.style.gridTemplateColumns='repeat('+puzzleSize+',1fr)';
+  grid.style.width=sz+'px'; grid.style.height=sz+'px';
+  grid.innerHTML='';
+  var pct=100/puzzleSize;
+  puzzleOrder.forEach(function(pos,idx){
+    var div=document.createElement('div'); div.className='puzzle-piece';
+    var row=Math.floor(pos/puzzleSize), col=pos%puzzleSize;
+    div.style.backgroundImage='url('+puzzleImg+')';
+    div.style.backgroundSize=(puzzleSize*100)+'%';
+    div.style.backgroundPosition=(-col*sz/puzzleSize*(puzzleSize))+'px '+(-row*sz/puzzleSize*(puzzleSize))+'px';
+    div.style.backgroundSize=(puzzleSize*100)+'% '+(puzzleSize*100)+'%';
+    div.style.backgroundPosition=(col*pct/(puzzleSize-1||1)*100)+'% '+(row*pct/(puzzleSize-1||1)*100)+'%';
+    if(pos===idx) div.classList.add('correct-pos');
+    (function(i){ div.addEventListener('click',function(){ puzzleClick(i); }); })(idx);
+    grid.appendChild(div);
+  });
+}
+function puzzleClick(idx){
+  if(puzzleSelected===null){
+    puzzleSelected=idx;
+    document.getElementById('puzzleGrid').children[idx].classList.add('selected');
+  } else {
+    if(puzzleSelected===idx){
+      document.getElementById('puzzleGrid').children[idx].classList.remove('selected');
+      puzzleSelected=null; return;
+    }
+    // Échange
+    var t=puzzleOrder[puzzleSelected]; puzzleOrder[puzzleSelected]=puzzleOrder[idx]; puzzleOrder[idx]=t;
+    puzzleMoveCount++;
+    document.getElementById('puzzleMoves').textContent=puzzleMoveCount+' échange'+(puzzleMoveCount>1?'s':'');
+    puzzleSelected=null;
+    renderPuzzle();
+    // Vérif victoire
+    if(puzzleOrder.every(function(v,i){return v===i;})) puzzleWin();
+  }
+}
+function puzzleShowPreview(){
+  var w=document.getElementById('puzzleWin');
+  w.style.display='block';
+  w.innerHTML='<img src="'+puzzleImg+'" style="width:120px;height:120px;border-radius:8px;object-fit:cover;margin-bottom:8px"><br><button class="game-start-btn" onclick="document.getElementById(\'puzzleWin\').style.display=\'none\'">Fermer</button>';
+}
+function puzzleWin(){
+  var score=Math.max(0,1000-puzzleMoveCount*5);
+  var win=document.getElementById('puzzleWin'); win.style.display='block';
+  win.innerHTML='<div style="font-size:44px">🏆</div><div style="font-family:\'Playfair Display\',serif;font-size:18px;font-weight:700;color:var(--text);margin:8px 0">Puzzle terminé !</div><div style="font-size:13px;color:var(--sub)">'+puzzleMoveCount+' échanges · '+score+' pts</div><button class="game-start-btn" style="margin-top:14px" onclick="puzzleInit()">Rejouer 🔀</button>';
+  if(puzzlePlayer){
+    sbPost('game_scores',{game_id:'puzzle',player:puzzlePlayer,score:score,moves:puzzleMoveCount,time_seconds:0})
+      .then(function(){ zplbLoad(); }).catch(function(){});
+  }
+}
+
+// Classement Puzzle
+var zplbTab='all', zplbData=[];
+function zplbSetTab(t){
+  zplbTab=t;
+  ['all','girl','boy'].forEach(function(x){
+    document.getElementById('zplbTab'+x.charAt(0).toUpperCase()+x.slice(1)).className='lb-tab'+(x===t?' active-'+t:'');
+  });
+  zplbRender(zplbData);
+}
+function zplbLoad(){
+  document.getElementById('zplbList').innerHTML='<div class="lb-loading">Chargement...</div>';
+  sbGet('game_scores','game_id=eq.puzzle&order=score.desc&limit=50').then(function(r){
+    zplbData=Array.isArray(r)?r:[];zplbRender(zplbData);
+  }).catch(function(){ document.getElementById('zplbList').innerHTML='<div class="lb-empty">❌ Erreur</div>'; });
+}
+function zplbRender(rows){
+  renderLb('zplbList', zplbTab==='all'?rows:rows.filter(function(r){return r.player===zplbTab;}), function(r){ return '<span>'+r.score+'pts</span> · '+r.moves+' échanges'; });
+}
+
+// ══════════════════════════════════════════
+// ── SNAKE ──
+// ══════════════════════════════════════════
+var snakePlayer=null, snakeRunning=false, snakeInterval=null;
+var SNAKE_CELL=20, SNAKE_COLS=15, SNAKE_ROWS=15;
+var snakeCvs, snakeCtx2, snakeBody=[], snakeDx=1, snakeDy=0, snakeNextDx=1, snakeNextDy=0;
+var snakeFoodX=0, snakeFoodY=0, snakeCurScore=0, snakeBestScore=0;
+
+function openSnakeGame(){
+  resetZoom();
+  document.getElementById('snakeView').classList.add('active');
+  window.scrollTo(0,0);
+  slbLoad();
+  snakeCvs=document.getElementById('snakeCanvas');
+  snakeCtx2=snakeCvs.getContext('2d');
+  var s=Math.min(300,window.innerWidth-32);
+  snakeCvs.width=s; snakeCvs.height=s;
+  SNAKE_CELL=Math.floor(s/SNAKE_COLS);
+  snakeDrawIdle();
+}
+function closeSnakeGame(){
+  clearInterval(snakeInterval); snakeRunning=false;
+  document.getElementById('snakeView').classList.remove('active');
+  snakePlayer=null;
+  document.getElementById('snakeGenderScreen').style.display='flex';
+  document.getElementById('snakeGameArea').style.display='none';
+  document.getElementById('snakeGenderGirl').className='gender-select-btn';
+  document.getElementById('snakeGenderBoy').className='gender-select-btn';
+}
+function snakeSelectGender(g){
+  snakePlayer=g;
+  document.getElementById('snakeGenderGirl').className='gender-select-btn'+(g==='girl'?' girl':'');
+  document.getElementById('snakeGenderBoy').className='gender-select-btn'+(g==='boy'?' boy':'');
+  document.getElementById('snakeGenderScreen').style.display='none';
+  document.getElementById('snakeGameArea').style.display='block';
+  snakeBestScore=0;
+  document.getElementById('snakeBest').textContent='0';
+  document.getElementById('snakeOverlayTitle').textContent='Snake 🐍';
+  document.getElementById('snakeOverlaySub').textContent='Mange les 💕 sans toucher les murs';
+  document.getElementById('snakeOverlay').style.display='flex';
+  snakeCvs=document.getElementById('snakeCanvas');
+  snakeCtx2=snakeCvs.getContext('2d');
+  var s=Math.min(300,window.innerWidth-32);
+  snakeCvs.width=s; snakeCvs.height=s;
+  SNAKE_CELL=Math.floor(s/SNAKE_COLS);
+  snakeDrawIdle();
+}
+function snakeDrawIdle(){
+  if(!snakeCtx2) return;
+  snakeCtx2.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--s1').trim()||'#181818';
+  snakeCtx2.fillRect(0,0,snakeCvs.width,snakeCvs.height);
+}
+function snakeStart(){
+  document.getElementById('snakeOverlay').style.display='none';
+  clearInterval(snakeInterval);
+  snakeBody=[{x:7,y:7},{x:6,y:7},{x:5,y:7}];
+  snakeDx=1; snakeDy=0; snakeNextDx=1; snakeNextDy=0;
+  snakeCurScore=0;
+  document.getElementById('snakeScore').textContent='0';
+  snakePlaceFood();
+  snakeInterval=setInterval(snakeTick, 160);
+  snakeRunning=true;
+}
+function snakePlaceFood(){
+  do{ snakeFoodX=Math.floor(Math.random()*SNAKE_COLS); snakeFoodY=Math.floor(Math.random()*SNAKE_ROWS); }
+  while(snakeBody.some(function(s){ return s.x===snakeFoodX&&s.y===snakeFoodY; }));
+}
+function snakeTick(){
+  snakeDx=snakeNextDx; snakeDy=snakeNextDy;
+  var head={x:snakeBody[0].x+snakeDx, y:snakeBody[0].y+snakeDy};
+  // Collision mur ou soi
+  if(head.x<0||head.x>=SNAKE_COLS||head.y<0||head.y>=SNAKE_ROWS||snakeBody.some(function(s){return s.x===head.x&&s.y===head.y;})){
+    snakeGameOver(); return;
+  }
+  snakeBody.unshift(head);
+  if(head.x===snakeFoodX&&head.y===snakeFoodY){
+    snakeCurScore+=10;
+    document.getElementById('snakeScore').textContent=snakeCurScore;
+    snakePlaceFood();
+  } else { snakeBody.pop(); }
+  snakeDraw();
+}
+function snakeDraw(){
+  var ctx=snakeCtx2, c=SNAKE_CELL;
+  ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--s1').trim()||'#181818';
+  ctx.fillRect(0,0,snakeCvs.width,snakeCvs.height);
+  // Grille légère
+  ctx.strokeStyle='rgba(255,255,255,0.03)';
+  ctx.lineWidth=0.5;
+  for(var i=0;i<=SNAKE_COLS;i++){ctx.beginPath();ctx.moveTo(i*c,0);ctx.lineTo(i*c,snakeCvs.height);ctx.stroke();}
+  for(var j=0;j<=SNAKE_ROWS;j++){ctx.beginPath();ctx.moveTo(0,j*c);ctx.lineTo(snakeCvs.width,j*c);ctx.stroke();}
+  // Food
+  ctx.font=Math.floor(c*0.8)+'px sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('💕',snakeFoodX*c+c/2,snakeFoodY*c+c/2);
+  // Serpent
+  snakeBody.forEach(function(s,i){
+    var alpha=i===0?1:0.75-i*0.02;
+    ctx.fillStyle='rgba(232,121,160,'+Math.max(0.3,alpha)+')';
+    ctx.beginPath();
+    ctx.roundRect(s.x*c+1,s.y*c+1,c-2,c-2,i===0?6:4);
+    ctx.fill();
+    if(i===0){
+      ctx.fillStyle='#fff';
+      ctx.fillRect(s.x*c+c*0.25,s.y*c+c*0.25,c*0.15,c*0.15);
+      ctx.fillRect(s.x*c+c*0.55,s.y*c+c*0.25,c*0.15,c*0.15);
+    }
+  });
+}
+function snakeGameOver(){
+  clearInterval(snakeInterval); snakeRunning=false;
+  if(snakeCurScore>snakeBestScore){ snakeBestScore=snakeCurScore; document.getElementById('snakeBest').textContent=snakeBestScore; }
+  document.getElementById('snakeOverlayTitle').textContent='Game Over 💀';
+  document.getElementById('snakeOverlaySub').textContent='Score : '+snakeCurScore+' pts';
+  document.getElementById('snakeOverlay').style.display='flex';
+  if(snakePlayer&&snakeCurScore>0){
+    sbPost('game_scores',{game_id:'snake',player:snakePlayer,score:snakeCurScore,moves:0,time_seconds:0})
+      .then(function(){ slbLoad(); }).catch(function(){});
+  }
+}
+function snakeDir(dx,dy){
+  if(!snakeRunning) return;
+  if(dx===1&&snakeDx===-1) return; if(dx===-1&&snakeDx===1) return;
+  if(dy===1&&snakeDy===-1) return; if(dy===-1&&snakeDy===1) return;
+  snakeNextDx=dx; snakeNextDy=dy;
+}
+// Clavier
+document.addEventListener('keydown',function(e){
+  if(!snakeRunning) return;
+  var map={'ArrowUp':[0,-1],'ArrowDown':[0,1],'ArrowLeft':[-1,0],'ArrowRight':[1,0]};
+  if(map[e.key]){ e.preventDefault(); snakeDir(map[e.key][0],map[e.key][1]); }
+});
+
+// Classement Snake
+var slbTab='all', slbData=[];
+function slbSetTab(t){
+  slbTab=t;
+  ['all','girl','boy'].forEach(function(x){
+    document.getElementById('slbTab'+x.charAt(0).toUpperCase()+x.slice(1)).className='lb-tab'+(x===t?' active-'+t:'');
+  });
+  slbRender(slbData);
+}
+function slbLoad(){
+  document.getElementById('slbList').innerHTML='<div class="lb-loading">Chargement...</div>';
+  sbGet('game_scores','game_id=eq.snake&order=score.desc&limit=50').then(function(r){
+    slbData=Array.isArray(r)?r:[];slbRender(slbData);
+  }).catch(function(){ document.getElementById('slbList').innerHTML='<div class="lb-empty">❌ Erreur</div>'; });
+}
+function slbRender(rows){
+  renderLb('slbList', slbTab==='all'?rows:rows.filter(function(r){return r.player===slbTab;}), function(r){ return '<span>'+r.score+'pts</span>'; });
+}
+
+// ── Fonction commune de rendu leaderboard ──
+function renderLb(elId, rows, detailFn){
+  var list=document.getElementById(elId);
+  var top=rows.slice(0,10);
+  if(!top.length){ list.innerHTML='<div class="lb-empty">Aucun score encore 🎮</div>'; return; }
+  var icons=['🥇','🥈','🥉'];
+  list.innerHTML=top.map(function(r,i){
+    var rc=i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    return '<div class="lb-row"><div class="lb-rank '+rc+'">'+(i<3?icons[i]:i+1)+'</div><div class="lb-dot '+(r.player==='girl'?'girl':'boy')+'"></div><div class="lb-name">'+(r.player==='girl'?'Elle':'Lui')+'</div><div class="lb-score">'+detailFn(r)+'</div></div>';
+  }).join('');
+}
+
+// ── NAV : closeAllViews étendu ──
 function resetZoom(){
   var m = document.querySelector('meta[name="viewport"]');
   m.setAttribute('content', 'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5');
@@ -2376,7 +3044,10 @@ function closeMemoryGame(){
 function closeAllViews(){
   if(isQuizOpen) closeQuiz();
   if(document.getElementById('memoryView').classList.contains('active')) closeMemoryGame();
-  if(document.getElementById('gamesView').classList.contains('active')) closeGames();
+  if(document.getElementById('penduView').classList.contains('active'))  closePenduGame();
+  if(document.getElementById('puzzleView').classList.contains('active')) closePuzzleGame();
+  if(document.getElementById('snakeView').classList.contains('active'))  closeSnakeGame();
+  if(document.getElementById('gamesView').classList.contains('active'))  closeGames();
   if(document.getElementById('hiddenPage').classList.contains('active')) closeHiddenPage();
 }
 function scrollToTop(){resetZoom();closeAllViews();window.scrollTo({top:0,behavior:'smooth'});}
