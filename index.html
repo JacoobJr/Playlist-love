@@ -2055,6 +2055,7 @@ body.light .dm-id-overlay { background: transparent; }
   user-select: none;
   -webkit-touch-callout: none;
 }
+.dm-msg-wrap.has-reaction { margin-bottom: 18px; }
 @keyframes dmMsgIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
 .dm-msg-wrap.mine { flex-direction:row-reverse; }
 .dm-msg-avatar { width:26px; height:26px; font-size:10px; flex-shrink:0; }
@@ -7453,6 +7454,9 @@ loadFavorites();
               r.textContent = msg.reaction;
               r.addEventListener('click', function(){ setReaction(cached, wrap, null); });
               wrap.querySelector('.dm-bubble').appendChild(r);
+              wrap.classList.add('has-reaction');
+            } else {
+              wrap.classList.remove('has-reaction');
             }
           }
         }
@@ -7583,6 +7587,9 @@ loadFavorites();
       r.textContent = reaction;
       r.addEventListener('click', function(){ setReaction(msg, wrap, null); });
       wrap.querySelector('.dm-bubble').appendChild(r);
+      wrap.classList.add('has-reaction');
+    } else {
+      wrap.classList.remove('has-reaction');
     }
     // Persist Supabase
     if(String(msg.id).indexOf('tmp_') === 0) return;
@@ -7724,6 +7731,7 @@ loadFavorites();
       r.textContent = msg.reaction;
       r.addEventListener('click', function(){ setReaction(msg, wrap, null); });
       bbl.appendChild(r);
+      wrap.classList.add('has-reaction');
     }
 
     wrap.appendChild(bbl);
