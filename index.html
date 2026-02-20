@@ -2878,18 +2878,19 @@ body.light .mood-emoji-btn.selected { border-color: var(--green); background: rg
 body.light .mood-emoji-btn:hover { background: var(--s3); border-color: rgba(200,24,94,0.18); }
 .mood-picker-cancel { font-size: 11px; color: var(--muted); text-align: center; cursor: pointer; padding: 4px 0; transition: color 0.15s; }
 .mood-picker-close {
-  width: 20px; height: 20px;
+  width: 22px; height: 22px;
   display: flex; align-items: center; justify-content: center;
-  border-radius: 50%;
+  border-radius: 6px;
   background: var(--s3);
-  color: var(--sub);
-  font-size: 10px;
+  color: var(--text);
+  font-size: 11px;
   font-weight: 700;
   cursor: pointer;
   flex-shrink: 0;
+  border: 1px solid var(--border);
   transition: background 0.15s, color 0.15s;
 }
-.mood-picker-close:hover { background: rgba(239,83,80,0.2); color: #ef5350; }
+.mood-picker-close:hover { background: rgba(239,83,80,0.2); color: #ef5350; border-color: rgba(239,83,80,0.4); }
 #moodPickerDesc {
   font-size: 10px;
   color: var(--sub);
@@ -6910,6 +6911,9 @@ loadFavorites();
         // Afficher le bouton effacer
         var cb = picker.querySelector('.mood-clear-btn');
         if(cb) cb.style.display = 'flex';
+        // Réinitialiser le timer de fermeture automatique
+        if(window._moodPickerTimer) clearTimeout(window._moodPickerTimer);
+        window._moodPickerTimer = setTimeout(function(){ window.closeMoodPicker(); }, 10000);
       };
       grid.appendChild(btn);
     });
