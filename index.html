@@ -4374,9 +4374,11 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     var el = document.getElementById('prankVictimName');
     if(el) el.textContent = victim;
     document.getElementById('prankMenu').classList.add('show');
+    document.body.style.overflow = 'hidden';
   };
   window.closePrankMenu = function(){
     document.getElementById('prankMenu').classList.remove('show');
+    document.body.style.overflow = '';
   };
 
   /* ── Annuler toutes les bêtises en attente ── */
@@ -4396,6 +4398,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
       setTimeout(function(){
         if(btn) btn.textContent = '🗑️ Annuler toutes mes bêtises en attente';
         document.getElementById('prankMenu').classList.remove('show');
+        document.body.style.overflow = '';
       }, 1200);
     }).catch(function(){
       if(btn) btn.textContent = '🗑️ Annuler toutes mes bêtises en attente';
@@ -9092,7 +9095,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.05.1</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.05.2</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
