@@ -2408,10 +2408,12 @@ body.anniv-mode .counter-block-top {
 
   <!-- Picker humeur -->
   <div id="moodPicker">
-    <div class="mood-picker-label">Comment tu te sens ?</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+      <div class="mood-picker-label" style="margin-bottom:0;">Comment tu te sens ?</div>
+      <div class="mood-picker-close" onclick="closeMoodPicker()">✕</div>
+    </div>
     <div class="mood-picker-grid" id="moodPickerGrid"></div>
     <div id="moodPickerDesc"></div>
-    <div class="mood-picker-cancel" onclick="closeMoodPicker()">Fermer</div>
   </div>
 
   <div class="hdr-tag">Playlist</div>
@@ -2875,6 +2877,19 @@ body.light #moodPicker { box-shadow: 0 4px 24px rgba(180,20,80,0.14); }
 body.light .mood-emoji-btn.selected { border-color: var(--green); background: rgba(200,24,94,0.10); }
 body.light .mood-emoji-btn:hover { background: var(--s3); border-color: rgba(200,24,94,0.18); }
 .mood-picker-cancel { font-size: 11px; color: var(--muted); text-align: center; cursor: pointer; padding: 4px 0; transition: color 0.15s; }
+.mood-picker-close {
+  width: 20px; height: 20px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--s3);
+  color: var(--sub);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+.mood-picker-close:hover { background: rgba(239,83,80,0.2); color: #ef5350; }
 #moodPickerDesc {
   font-size: 10px;
   color: var(--sub);
@@ -6689,16 +6704,16 @@ loadFavorites();
   var MOOD_TABLE = 'moods';
   var EMOJIS   = { neutral:'👤', girl:'👧', boy:'👦' };
   var OTHER    = { girl:'boy', boy:'girl' };
-  var MOODS    = ['😊','😍','🥰','😴','😔','🥺','😂','🔥','😎','🤩','😤','🥳','😇','🤗','💪'];
+  var MOODS    = ['😊','😍','🥰','😴','😔','🥺','😂','🔥','😎','🤩','😤','🥳','😇','🤗','💪','😏'];
   var MOOD_LABELS = window.MOOD_LABELS = {
     '😊':'Heureuse','😍':'Amoureuse','🥰':'Câline','😴':'Fatiguée','😔':'Triste',
     '🥺':'Sensible','😂':'Morte de rire','🔥':'Motivée','😎':'Sereine','🤩':'Excitée',
-    '😤':'Frustrée','🥳':'En fête','😇':'Sage','🤗':'Affectueuse','💪':'Énergique'
+    '😤':'Frustrée','🥳':'En fête','😇':'Sage','🤗':'Affectueuse','💪':'Énergique','😏':'Coquine'
   };
   var MOOD_LABELS_BOY = window.MOOD_LABELS_BOY = {
     '😊':'Heureux','😍':'Amoureux','🥰':'Câlin','😴':'Fatigué','😔':'Triste',
     '🥺':'Sensible','😂':'Mort de rire','🔥':'Motivé','😎':'Serein','🤩':'Excité',
-    '😤':'Frustré','🥳':'En fête','😇':'Sage','🤗':'Affectueux','💪':'Énergique'
+    '😤':'Frustré','🥳':'En fête','😇':'Sage','🤗':'Affectueux','💪':'Énergique','😏':'Coquin'
   };
 
   function get(){ return localStorage.getItem(KEY) || null; }
@@ -6926,12 +6941,19 @@ loadFavorites();
     else grid.after(clearBtn);
     picker.classList.add('open');
     picker.onclick = function(ev){ ev.stopPropagation(); };
+
+    // Auto-fermeture après 10 secondes
+    if(window._moodPickerTimer) clearTimeout(window._moodPickerTimer);
+    window._moodPickerTimer = setTimeout(function(){
+      window.closeMoodPicker();
+    }, 10000);
   };
 
   window.closeMoodPicker = function(){
     var picker = document.getElementById('moodPicker');
     if(picker) picker.classList.remove('open');
     document.removeEventListener('click', window._moodPickerOutsideClick);
+    if(window._moodPickerTimer){ clearTimeout(window._moodPickerTimer); window._moodPickerTimer = null; }
   };
 
   // Fermeture au clic extérieur
