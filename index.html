@@ -4898,7 +4898,7 @@ var QUIZ_TOTAL=10,qzCurrent=0,qzScore=0,qzAnswered=false,qzSession=[];
 document.getElementById('quizBtn').addEventListener('click',function(){openQuiz();});
 document.getElementById('gamesBtn').addEventListener('click',function(){openGames();});
 function openQuiz(){resetZoom();isQuizOpen=true;document.getElementById('quizView').classList.add('active');particleActive=false;hideDance();document.getElementById('navSearch').style.display='none';startQuiz();window.scrollTo(0,0);}
-function closeQuiz(){isQuizOpen=false;document.getElementById('quizView').classList.remove('active');document.getElementById('navSearch').style.display='';}
+function closeQuiz(){isQuizOpen=false;document.getElementById('quizView').classList.remove('active');document.getElementById('navSearch').style.display='';try{history.replaceState({jayana:null},'');}catch(ex){}}
 function getHints(){try{return JSON.parse(localStorage.getItem('qz_hints')||'{}');}catch(e){return{};}}
 function saveHint(id,hint){var h=getHints();h[id]=hint;try{localStorage.setItem('qz_hints',JSON.stringify(h));}catch(e){}}
 function pickQuestions(){var pool=ALL_QUIZ_QUESTIONS.slice(),picked=[];while(picked.length<QUIZ_TOTAL&&pool.length>0){var i=Math.floor(Math.random()*pool.length);picked.push(pool.splice(i,1)[0]);}return picked;}
@@ -5723,6 +5723,7 @@ function openGames(){
 }
 function closeGames(){
   document.getElementById('gamesView').classList.remove('active');
+  try { history.replaceState({ jayana: null }, ''); } catch(ex){}
 }
 function openMemoryGame(){
   resetZoom();
@@ -6142,18 +6143,35 @@ function filterSongs(q){
 })();
 
 
-// ── History API — bouton retour navigateur ─────────────────────────────────
+// ── History API — bouton retour ET avant navigateur ────────────────────────
 (function(){
-  var _navigating = false; // flag anti-double déclenchement
+  var _navigating = false;
 
-  // Niveaux de navigation (du plus profond au plus haut)
+  // ── Profondeur des écrans DM ──
+  var DM_DEPTH = { entry: 0, home: 1, conv: 2, chat: 3 };
+
+  // ── Jeux/quiz ──
   var VIEWS = {
-    quiz:   { el: 'quizView',   close: 'closeQuiz',        depth: 1 },
-    games:  { el: 'gamesView',  close: 'closeGames',        depth: 1 },
-    memory: { el: 'memoryView', close: 'closeMemoryGame',   depth: 2 },
-    pendu:  { el: 'penduView',  close: 'closePenduGame',    depth: 2 },
-    puzzle: { el: 'puzzleView', close: 'closePuzzleGame',   depth: 2 },
-    snake:  { el: 'snakeView',  close: 'closeSnakeGame',    depth: 2 },
+    quiz:   { el: 'quizView',   close: 'closeQuiz',       depth: 1 },
+    games:  { el: 'gamesView',  close: 'closeGames',       depth: 1 },
+    memory: { el: 'memoryView', close: 'closeMemoryGame',  depth: 2 },
+    pendu:  { el: 'penduView',  close: 'closePenduGame',   depth: 2 },
+    puzzle: { el: 'puzzleView', close: 'closePuzzleGame',  depth: 2 },
+    snake:  { el: 'snakeView',  close: 'closeSnakeGame',   depth: 2 },
+  };
+  // Fonctions d'ouverture directes (sans pushState) pour la flèche avant
+  var OPEN_DIRECT = {
+    quiz:   function(){ if(window._openQuizDirect)   window._openQuizDirect();   },
+    games:  function(){ if(window._openGamesDirect)  window._openGamesDirect();  },
+    memory: function(){ if(window._openMemoryDirect) window._openMemoryDirect(); },
+    pendu:  function(){ if(window._openPenduDirect)  window._openPenduDirect();  },
+    puzzle: function(){ if(window._openPuzzleDirect) window._openPuzzleDirect(); },
+    snake:  function(){ if(window._openSnakeDirect)  window._openSnakeDirect();  },
+  };
+  var FN_TO_VIEW = {
+    openQuiz: 'quiz', openGames: 'games',
+    openMemoryGame: 'memory', openPenduGame: 'pendu',
+    openPuzzleGame: 'puzzle', openSnakeGame: 'snake'
   };
 
   function getActiveView() {
@@ -6166,58 +6184,124 @@ function filterSongs(q){
     return null;
   }
 
-  // Patch des fonctions open* pour pousser un état
-  var origOpen = {};
+  // ── Patch open* jeux/quiz : version patchée (avec pushState) + version directe ──
+  var _origOpenFns = {};
   ['openQuiz','openGames','openMemoryGame','openPenduGame','openPuzzleGame','openSnakeGame'].forEach(function(fn){
-    origOpen[fn] = window[fn];
+    _origOpenFns[fn] = window[fn];
+    // Version patchée avec pushState
     window[fn] = function(){
-      origOpen[fn].apply(this, arguments);
-      if (!_navigating) history.pushState({ jayana: fn }, '');
+      if(_origOpenFns[fn]) _origOpenFns[fn].apply(this, arguments);
+      if(!_navigating) history.pushState({ jayana: fn }, '');
     };
   });
+  // Versions directes sans pushState (pour flèche avant)
+  window._openQuizDirect   = function(){ if(_origOpenFns.openQuiz)        _origOpenFns.openQuiz();        };
+  window._openGamesDirect  = function(){ if(_origOpenFns.openGames)       _origOpenFns.openGames();       };
+  window._openMemoryDirect = function(){ if(_origOpenFns.openMemoryGame)  _origOpenFns.openMemoryGame();  };
+  window._openPenduDirect  = function(){ if(_origOpenFns.openPenduGame)   _origOpenFns.openPenduGame();   };
+  window._openPuzzleDirect = function(){ if(_origOpenFns.openPuzzleGame)  _origOpenFns.openPuzzleGame();  };
+  window._openSnakeDirect  = function(){ if(_origOpenFns.openSnakeGame)   _origOpenFns.openSnakeGame();   };
 
-  // ── Patch openHiddenPage pour pousser un état History ──
+  // ── Patch openHiddenPage ──
   var _origOpenHP = window.openHiddenPage;
   window.openHiddenPage = function(){
     if(_origOpenHP) _origOpenHP.apply(this, arguments);
-    if(!_navigating) history.pushState({ jayana: 'hiddenPage', dmScreen: 'entry' }, '');
+    if(!_navigating) history.pushState({ jayana: 'hiddenPage', dmScreen: 'entry', pos: 0 }, '');
   };
 
-  // Hook global pour que le IIFE DM puisse pousser des états lors des transitions internes
+  // ── Hook transitions DM internes ──
   window._historyPushDM = function(screen){
-    if(!_navigating) history.pushState({ jayana: 'hiddenPage', dmScreen: screen }, '');
+    if(_navigating) return;
+    var pos = DM_DEPTH[screen] !== undefined ? DM_DEPTH[screen] : 1;
+    history.pushState({ jayana: 'hiddenPage', dmScreen: screen, pos: pos }, '');
   };
 
-  // Écouter le bouton retour
+  // ── Naviguer vers un écran DM sans pushState (flèche avant) ──
+  function goToDMScreen(screen){
+    var hp = document.getElementById('hiddenPage');
+    if(!hp) return;
+    if(!hp.classList.contains('active')){
+      if(window._origOpenHPBase) window._origOpenHPBase();
+      else hp.classList.add('active');
+    }
+    if(screen === 'entry' || screen === 'home'){
+      if(window.showScreenDirect) window.showScreenDirect('home');
+    } else if(screen === 'conv'){
+      if(window.dmShowConvDirect) window.dmShowConvDirect();
+    } else if(screen === 'chat'){
+      if(window.dmOpenMessagingDirect) window.dmOpenMessagingDirect();
+    }
+  }
+
+  // ── Lire la profondeur DM actuelle depuis l'UI ──
+  function getCurrentDMDepth(){
+    var btn = document.getElementById('dmTopbarBack');
+    var dest = btn ? (btn.dataset.dest || 'close') : 'close';
+    if(dest === 'close') return 1;    // home
+    if(dest === 'logo')  return 2;    // conv
+    return 3;                         // chat
+  }
+
+  // ── popstate : retour ET avant ──
   window.addEventListener('popstate', function(e){
     if(_navigating) return;
-
     var state = e.state;
 
-    // ── Retour depuis le mode caché ou ses sous-écrans DM ──
+    // ════ MODE CACHÉ ════
     if(state && state.jayana === 'hiddenPage'){
-      var hp = document.getElementById('hiddenPage');
-      if(!hp || !hp.classList.contains('active')) return;
       _navigating = true;
-      // Déléguer au handler DM interne qui connait l'état courant (home/conv/chat)
-      if(window.dmHandleBack){
-        window.dmHandleBack();
-      } else {
-        if(window.closeHiddenPage) window.closeHiddenPage();
+      var targetScreen = state.dmScreen || 'entry';
+      var hp = document.getElementById('hiddenPage');
+      var hpActive = hp && hp.classList.contains('active');
+
+      if(!hpActive){
+        // hiddenPage fermé → flèche AVANT : le rouvrir puis naviguer
+        // BLOQUÉ : on ne doit pas rouvrir le mode caché depuis la page principale
+        // (closeHiddenPage purge l'historique, donc ce cas ne devrait plus arriver)
+        _navigating = false;
+        return;
       }
+
+      var targetDepth = DM_DEPTH[targetScreen] !== undefined ? DM_DEPTH[targetScreen] : 1;
+      var currentDepth = getCurrentDMDepth();
+
+      if(targetDepth < currentDepth){
+        // RETOUR
+        if(window.dmHandleBack) window.dmHandleBack(true);
+      } else if(targetDepth > currentDepth){
+        // AVANT
+        goToDMScreen(targetScreen);
+      }
+      // targetDepth === currentDepth → même écran, rien à faire
+
       setTimeout(function(){ _navigating = false; }, 80);
       return;
     }
 
-    // ── Retour depuis les jeux/quiz ──
+    // ════ JEUX / QUIZ ════
     var active = getActiveView();
-    if (!active) return;
 
+    // Flèche AVANT vers un jeu/quiz
+    if(state && state.jayana && FN_TO_VIEW[state.jayana]){
+      var viewKey = FN_TO_VIEW[state.jayana];
+      if(active !== viewKey){
+        _navigating = true;
+        OPEN_DIRECT[viewKey]();
+        setTimeout(function(){ _navigating = false; }, 80);
+        return;
+      }
+    }
+
+    // Pas de vue active et pas d'état jayana → page principale, rien à faire
+    if(!active) return;
+
+    // RETOUR depuis un jeu/quiz
     _navigating = true;
     var closeFn = VIEWS[active].close;
-    if (window[closeFn]) window[closeFn]();
+    if(window[closeFn]) window[closeFn]();
 
-    if (['memory','pendu','puzzle','snake'].indexOf(active) !== -1) {
+    // Depuis un jeu individuel → repousser l'état "menu jeux" pour que la flèche avant refonctionne
+    if(['memory','pendu','puzzle','snake'].indexOf(active) !== -1){
       setTimeout(function(){
         history.pushState({ jayana: 'openGames' }, '');
         _navigating = false;
@@ -6226,6 +6310,10 @@ function filterSongs(q){
       setTimeout(function(){ _navigating = false; }, 50);
     }
   });
+
+  // ── Exposer le flag pour closeHiddenPage ──
+  window._historyNavigating = function(){ return _navigating; };
+  window._setHistoryNavigating = function(v){ _navigating = v; };
 })();
 
 // Patch openGames / closeGames / open*Game / close*Game to call mpCheckGameState
@@ -7885,6 +7973,23 @@ loadFavorites();
 
   /* ══ OPEN / CLOSE ══ */
   var _origOpen = window.openHiddenPage;
+
+  // Exposer la fonction de base (ouvre hiddenPage sans pushState) pour la navigation avant
+  window._origOpenHPBase = function(){
+    var hp = document.getElementById('hiddenPage');
+    if(hp) hp.classList.add('active');
+    syncTheme();
+    var fb = document.getElementById('floatingThemeBtn');
+    if(fb){ fb.style.opacity = '0'; fb.style.pointerEvents = 'none'; }
+    var saved = localStorage.getItem('jayana_profile');
+    if(saved === 'girl' || saved === 'boy') identity = saved;
+    attached = false;
+    if(window._dmUpdateVP) window._dmUpdateVP();
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+  };
+
   window.openHiddenPage = function(){
     if(_origOpen) _origOpen.apply(this, arguments);
     syncTheme();
@@ -7901,6 +8006,22 @@ loadFavorites();
     document.body.style.width = '100%';
   };
 
+  // ── Fonctions directes (sans pushState) pour la navigation avant du navigateur ──
+  window.showScreenDirect = function(name){
+    showScreen(name, true); // _fromHistory=true → pas de pushState
+  };
+  window.dmShowConvDirect = function(){
+    window.dmShowConv(true); // _fromHistory=true → pas de pushState
+  };
+  window.dmOpenMessagingDirect = function(){
+    var saved = localStorage.getItem('jayana_profile');
+    if(saved === 'girl' || saved === 'boy'){
+      identity = saved;
+      showScreen('chat', true);
+      startChat();
+    }
+  };
+
   var _origClose = window.closeHiddenPage;
   window.closeHiddenPage = function(){
     stopPoll();
@@ -7913,6 +8034,10 @@ loadFavorites();
     document.body.style.width = '';
     if(window._dmUpdateVP) window._dmUpdateVP();
     if(_origClose) _origClose.apply(this, arguments);
+    // ── Purger les états jayana de l'historique pour bloquer la flèche avant ──
+    // On remplace l'état courant par un état neutre, ce qui empêche de revenir en avant
+    // vers le mode caché depuis la page principale.
+    try { history.replaceState({ jayana: null }, ''); } catch(ex){}
   };
 
 })();
@@ -8037,7 +8162,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.02.25</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.02.26</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
