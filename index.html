@@ -4376,8 +4376,11 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     var victim = profile === 'boy' ? 'girl' : 'boy';
     var btn = document.getElementById('prankCancelAllBtn');
     if(btn) btn.textContent = '⏳ Annulation…';
+    // PATCH active=false au lieu de DELETE — permet à la victime de détecter l'annulation en cours
     fetch(SB_URL+'/rest/v1/'+PRANK_TABLE+'?author=eq.'+profile+'&victim=eq.'+victim+'&active=eq.true', {
-      method: 'DELETE', headers: sbHeaders()
+      method: 'PATCH',
+      headers: sbHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
+      body: JSON.stringify({ active: false })
     }).then(function(){
       if(btn) btn.textContent = '✅ Bêtises annulées !';
       setTimeout(function(){
@@ -4479,6 +4482,32 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
       case 'splash':  startSplash(p); break;
       case 'lock':    startLock(p); break;
     }
+  }
+
+  /* ── Stopper une bêtise annulée à distance (sans gotcha) ── */
+  function abortActivePrank(){
+    if(!_activePrank) return;
+    var type = _activePrank.type;
+    _activePrank = null;
+    _prankQueue  = []; // vider aussi la file d'attente
+
+    // Stopper tous les effets visuels selon le type
+    document.body.classList.remove('prank-shake');
+    document.body.classList.remove('prank-flip');
+    document.getElementById('prankShakeBanner').classList.remove('show');
+    document.getElementById('prankFlipBanner').classList.remove('show');
+    document.getElementById('prankCurtain').classList.remove('show');
+    document.getElementById('prankCurtainBanner').classList.remove('show');
+    document.getElementById('prankIntrus').classList.remove('show');
+    document.getElementById('prankIntrusBanner').classList.remove('show');
+    document.getElementById('prankSplash').classList.remove('show');
+    document.getElementById('prankSplashBanner').classList.remove('show');
+    document.getElementById('prankLock').classList.remove('show');
+    if(_intrusTimer){ clearInterval(_intrusTimer); _intrusTimer = null; }
+
+    // Retirer les listeners du shake
+    document.removeEventListener('touchstart', onShakeTap);
+    document.removeEventListener('click', onShakeClick);
   }
 
   /* ── Marquer la bêtise comme terminée ── */
@@ -4779,10 +4808,21 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
   function startPrankPoll(gender){
     stopPrankPoll();
     _prankPollTimer = setInterval(function(){
-      // Ne pas vérifier si une bêtise est déjà en cours
-      if(_activePrank) return;
-      window.checkActivePrank(gender);
-    }, 15000); // toutes les 15 secondes
+      if(_activePrank){
+        // Vérifier si la bêtise en cours a été annulée par l'auteur
+        fetch(SB_URL+'/rest/v1/'+PRANK_TABLE+'?id=eq.'+_activePrank.id+'&select=active', {
+          headers: sbHeaders()
+        }).then(function(r){ return r.json(); })
+        .then(function(rows){
+          if(rows && rows.length && rows[0].active === false){
+            // Annulée à distance — on stoppe tout proprement sans gotcha
+            abortActivePrank();
+          }
+        }).catch(function(){});
+      } else {
+        window.checkActivePrank(gender);
+      }
+    }, 15000);
   }
   function stopPrankPoll(){
     if(_prankPollTimer){ clearInterval(_prankPollTimer); _prankPollTimer = null; }
@@ -9042,7 +9082,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.04.8</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.04.7</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
