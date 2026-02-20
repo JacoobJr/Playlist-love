@@ -1761,7 +1761,10 @@ body.light .pendu-theme {
 ════════════════════════════════════════════ */
 
 #hiddenPage {
-  display: none; position: fixed; inset: 0; z-index: 600;
+  display: none; position: fixed;
+  top: 0; left: 0; right: 0;
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  z-index: 1100;
   overflow: hidden; background: var(--bg);
   flex-direction: column; transition: background 0.3s;
 }
@@ -1836,9 +1839,10 @@ body.light .pendu-theme {
 .dm-screen {
   flex: 1; display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  overflow-y: auto; width: 100%; background: var(--bg);
+  overflow: hidden; width: 100%; background: var(--bg);
+  min-height: 0;
 }
-.dm-chat-screen { justify-content: flex-start; }
+.dm-chat-screen { justify-content: flex-start; overflow: hidden; align-items: stretch; }
 
 /* Home */
 .dm-home-inner {
@@ -1991,7 +1995,7 @@ body.light .dm-tick.seen { color:#c8185e; }
 /* Input bar */
 .dm-input-bar {
   width:100%; flex-shrink:0;
-  padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));
+  padding:10px 12px 10px;
   background:var(--bg); border-top:1px solid var(--border);
   position:relative; transition:background 0.3s;
 }
@@ -2826,7 +2830,7 @@ body.light #counterBlock.glowing .c-num-big {
   </div>
 
   <!-- ÉCRAN 1 : ACCUEIL -->
-  <div class="dm-screen" id="dmHomeScreen" style="position:relative;">
+  <div class="dm-screen" id="dmHomeScreen" style="position:relative;display:none">
     <!-- Bouton profil flottant en haut à droite -->
     <div id="dmTopbarProfile" onclick="dmShowIdentityPicker()" title="Changer d'identité" style="position:absolute;top:14px;right:14px;z-index:5;"></div>
 
@@ -6019,11 +6023,11 @@ loadFavorites();
       headers: sbHeaders()
     })
     .then(function(r){
-      if(!r.ok) throw new Error(r.status);
+      if(!r.ok) return r.text().then(function(t){ throw new Error(r.status + ' ' + t); });
       return r.json();
     })
     .then(function(rows){
-      if(!Array.isArray(rows)) return;
+      if(!Array.isArray(rows)){ console.error('[DM] fetchMsgs: réponse inattendue', rows); return; }
 
       // Premier chargement
       if(!cache.length){
@@ -6058,7 +6062,7 @@ loadFavorites();
         if(msg.sender !== identity && !msg.seen) markSeen(msg.id);
       });
     })
-    .catch(function(){ /* silently ignore */ });
+    .catch(function(err){ console.error('[DM] fetchMsgs erreur:', err); });
   }
 
   /* ══ RENDU COMPLET ══ */
@@ -6199,7 +6203,10 @@ loadFavorites();
       headers: sbHeaders({'Prefer': 'return=representation'}),
       body: JSON.stringify({ sender: identity, text: text })
     })
-    .then(function(r){ return r.json(); })
+    .then(function(r){
+      if(!r.ok) return r.text().then(function(t){ throw new Error(r.status + ' ' + t); });
+      return r.json();
+    })
     .then(function(rows){
       var real = Array.isArray(rows) ? rows[0] : null;
       if(real && real.id){
@@ -6210,7 +6217,8 @@ loadFavorites();
         if(node) node.dataset.id = real.id;
       }
     })
-    .catch(function(){
+    .catch(function(err){
+      console.error('[DM] doSend erreur:', err);
       cache = cache.filter(function(m){ return m.id !== tmpId; });
       var node = document.querySelector('[data-id="'+tmpId+'"]');
       if(node) node.remove();
@@ -6323,7 +6331,7 @@ loadFavorites();
 </div>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.04.1</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.04.3</span>
 </div>
 
 </body>
