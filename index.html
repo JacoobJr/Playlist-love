@@ -4246,7 +4246,7 @@ buildStack();
     if(!profile) return; // pas connecté, rien à vérifier
     var other = profile === 'girl' ? 'boy' : 'girl';
     // Récupérer les messages non lus envoyés par l'autre
-    fetch(SB_URL + '/rest/v1/dm_messages?sender=eq.' + other + '&seen=eq.false&order=created_at.desc&limit=99', {
+    fetch(SB_URL + '/rest/v1/dm_messages?sender=eq.' + other + '&seen=eq.false&deleted=eq.false&order=created_at.desc&limit=99', {
       headers: sbHeaders()
     })
     .then(function(r){ return r.json(); })
@@ -7794,16 +7794,22 @@ loadFavorites();
         if(p) p.textContent = 'Aucun message encore \u2728';
         return;
       }
-      var last  = rows[0];
-      var unread = rows.filter(function(m){ return !m.seen; }).length;
+      // Ignorer les messages supprimés pour le dernier message affiché
+      var validRows = rows.filter(function(m){ return !m.deleted; });
+      var last  = validRows.length ? validRows[0] : rows[0];
+      // Compter uniquement les messages non-lus de l'autre personne (pas les siens) et non supprimés
+      var other = identity === 'girl' ? 'boy' : (identity === 'boy' ? 'girl' : null);
+      var unread = other
+        ? rows.filter(function(m){ return !m.seen && m.sender === other && !m.deleted; }).length
+        : rows.filter(function(m){ return !m.seen && !m.deleted; }).length;
 
       var p = $('dmHomePreview');
       var t = $('dmHomeTime');
       var b = $('dmHomeBadge');
 
-      if(p){
+      if(p && last){
         var who = last.sender === 'girl' ? 'Zelda' : 'Link';
-        var txt = last.message_type === 'audio' ? '🎤 Vocal' : (last.text || '');
+        var txt = last.deleted ? '🚫 Message supprimé' : (last.message_type === 'audio' ? '🎤 Vocal' : (last.text || ''));
         if(txt.length > 34) txt = txt.slice(0,34) + '…';
       }
       if(t){
