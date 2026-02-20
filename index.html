@@ -1227,6 +1227,83 @@ body:not(.prank-flip) > *:not(#prankFlipBanner):not(#prankGotcha):not(#prankLock
 .prank-lock-btn { background:linear-gradient(135deg,#e8507a,#c8185e); color:#fff; border:none; border-radius:50px; padding:12px 32px; font-size:14px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; }
 .prank-lock-err { font-size:12px; color:#e05555; min-height:16px; }
 
+/* ══ NOUVELLES BÊTISES CSS ══ */
+
+/* 🌫️ BROUILLARD */
+#prankFogOverlay { position:fixed; inset:0; z-index:4500; pointer-events:none; display:none; backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); transition:backdrop-filter 0.4s ease, -webkit-backdrop-filter 0.4s ease; }
+#prankFogOverlay.show { display:block; }
+#prankFogBanner { position:fixed; bottom:120px; left:50%; transform:translateX(-50%); z-index:4600; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.15); border-radius:50px; padding:12px 24px; font-size:13px; font-weight:700; color:#fff; display:none; white-space:nowrap; pointer-events:all; }
+#prankFogBanner.show { display:block; }
+
+/* 🌈 COULEURS FOLLES */
+#prankColorsBanner { position:fixed; bottom:120px; left:50%; transform:translateX(-50%); z-index:4600; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.15); border-radius:50px; padding:12px 24px; font-size:13px; font-weight:700; color:#fff; display:none; white-space:nowrap; pointer-events:all; text-align:center; }
+#prankColorsBanner.show { display:block; }
+#prankColorsHoldBtn { font-size:28px; cursor:pointer; user-select:none; -webkit-user-select:none; touch-action:none; padding:6px 12px; display:inline-block; }
+#prankColorsProgress { width:100px; height:7px; background:rgba(255,255,255,0.2); border-radius:4px; overflow:hidden; margin:6px auto 0; }
+#prankColorsProgressBar { height:100%; width:0%; background:linear-gradient(90deg,#f472b6,#a78bfa,#60a5fa); border-radius:4px; transition:width 0.08s linear; }
+
+/* ⌨️ FAUX CLAVIER */
+#prankKeyboard { position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:4500; display:none; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:20px; backdrop-filter:blur(10px); }
+#prankKeyboard.show { display:flex; animation:slideUp 0.3s ease; }
+.pkb-word-display { font-size:28px; font-weight:900; color:#fff; letter-spacing:8px; text-align:center; font-family:'DM Sans',sans-serif; }
+.pkb-word-blur { filter:blur(2.5px); display:inline-block; transition:filter 0.15s; }
+.pkb-typed { font-size:18px; letter-spacing:5px; color:#a78bfa; min-height:28px; font-weight:700; }
+.pkb-hint { font-size:11px; color:rgba(255,255,255,0.4); }
+.pkb-err { font-size:12px; color:#e05555; min-height:16px; }
+.pkb-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; width:100%; max-width:340px; }
+.pkb-key { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:11px 4px; font-size:15px; font-weight:700; color:#fff; text-align:center; cursor:pointer; user-select:none; -webkit-user-select:none; transition:background 0.1s, transform 0.1s; touch-action:manipulation; }
+.pkb-key:active { background:rgba(167,139,250,0.4); transform:scale(0.93); }
+.pkb-key.backspace { grid-column:span 2; font-size:13px; background:rgba(255,80,80,0.15); }
+.pkb-key.backspace:active { background:rgba(255,80,80,0.35); }
+
+/* 🎯 CIBLE */
+#prankTarget { position:fixed; z-index:4700; display:none; cursor:pointer; user-select:none; -webkit-user-select:none; pointer-events:all; }
+#prankTarget.show { display:block; }
+.pt-circle { width:64px; height:64px; border-radius:50%; background:radial-gradient(circle, #ef4444 30%, #fff 31%, #fff 45%, #ef4444 46%, #ef4444 60%, #fff 61%, #fff 74%, #b91c1c 75%); box-shadow:0 4px 20px rgba(239,68,68,0.5); transition:left 0.18s cubic-bezier(.4,2,.55,.9), top 0.18s cubic-bezier(.4,2,.55,.9); }
+#prankTargetBanner { position:fixed; bottom:120px; left:50%; transform:translateX(-50%); z-index:4600; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.15); border-radius:50px; padding:12px 24px; font-size:13px; font-weight:700; color:#fff; display:none; white-space:nowrap; }
+#prankTargetBanner.show { display:block; }
+
+/* 🃏 MEMORY EXPRESS */
+#prankMemoryOverlay { position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:4500; display:none; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:24px; backdrop-filter:blur(10px); }
+#prankMemoryOverlay.show { display:flex; animation:slideUp 0.3s ease; }
+.pmem-title { font-family:'Playfair Display',serif; font-size:20px; color:#fff; text-align:center; }
+.pmem-sub { font-size:12px; color:rgba(255,255,255,0.5); text-align:center; }
+.pmem-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; width:100%; max-width:300px; }
+.pmem-card { height:70px; border-radius:12px; cursor:pointer; user-select:none; -webkit-user-select:none; position:relative; transform-style:preserve-3d; transition:transform 0.35s ease; touch-action:manipulation; }
+.pmem-card.flipped { transform:rotateY(180deg); }
+.pmem-card.matched { transform:rotateY(180deg); opacity:0.5; pointer-events:none; }
+.pmem-face { position:absolute; inset:0; border-radius:12px; backface-visibility:hidden; -webkit-backface-visibility:hidden; display:flex; align-items:center; justify-content:center; }
+.pmem-back { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); font-size:24px; }
+.pmem-front { background:rgba(167,139,250,0.25); border:1px solid rgba(167,139,250,0.5); font-size:28px; transform:rotateY(180deg); }
+.pmem-status { font-size:13px; color:rgba(255,255,255,0.6); }
+
+/* 👁️ YEUX */
+#prankEyesOverlay { position:fixed; inset:0; background:rgba(0,0,0,0.0); z-index:4500; display:none; pointer-events:none; }
+#prankEyesOverlay.show { display:block; }
+.prank-eye-pair { position:absolute; display:flex; gap:10px; pointer-events:all; cursor:default; user-select:none; }
+.prank-eye { width:52px; height:52px; border-radius:50%; background:#fff; border:3px solid #222; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+.prank-eye-pupil { width:20px; height:20px; border-radius:50%; background:#111; position:absolute; transition:transform 0.1s ease; }
+.prank-eye-timer { position:absolute; bottom:-22px; left:50%; transform:translateX(-50%); white-space:nowrap; font-size:10px; font-weight:700; color:#fff; background:rgba(0,0,0,0.6); border-radius:20px; padding:2px 8px; }
+.prank-eye-ring { position:absolute; inset:-4px; border-radius:50%; border:3px solid transparent; }
+.prank-eye-ring.active { border-color:#a78bfa; animation:eyeRingPulse 1s linear infinite; }
+@keyframes eyeRingPulse { 0%{opacity:0.4} 50%{opacity:1} 100%{opacity:0.4} }
+#prankEyesBanner { position:fixed; bottom:120px; left:50%; transform:translateX(-50%); z-index:4600; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.15); border-radius:50px; padding:12px 24px; font-size:13px; font-weight:700; color:#fff; display:none; white-space:nowrap; }
+#prankEyesBanner.show { display:block; }
+#prankEyesMessage { position:fixed; inset:0; z-index:4800; background:rgba(0,0,0,0.9); display:none; flex-direction:column; align-items:center; justify-content:center; gap:16px; }
+#prankEyesMessage.show { display:flex; animation:slideUp 0.3s ease; }
+.prank-eyes-msg-emoji { font-size:72px; animation:wobble 0.6s infinite alternate; }
+.prank-eyes-msg-text { font-family:'Playfair Display',serif; font-size:22px; color:#fff; text-align:center; padding:0 24px; line-height:1.4; }
+
+/* 📱 FAUSSE NOTIF */
+#prankNotif { position:fixed; top:-120px; left:12px; right:12px; z-index:5000; background:rgba(30,30,35,0.97); border:1px solid rgba(255,255,255,0.12); border-radius:18px; padding:14px 16px; display:flex; align-items:center; gap:12px; backdrop-filter:blur(20px); box-shadow:0 8px 32px rgba(0,0,0,0.6); transition:top 0.45s cubic-bezier(.4,2,.35,.9); max-width:400px; margin:0 auto; }
+#prankNotif.show { top:12px; }
+.pn-icon { font-size:32px; flex-shrink:0; }
+.pn-content { flex:1; min-width:0; }
+.pn-app { font-size:10px; font-weight:700; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; }
+.pn-title { font-size:14px; font-weight:700; color:#fff; margin-bottom:2px; }
+.pn-body { font-size:12px; color:rgba(255,255,255,0.7); line-height:1.4; }
+.pn-time { font-size:10px; color:rgba(255,255,255,0.35); flex-shrink:0; align-self:flex-start; }
+
 /* #hiddenPage — défini dans le bloc InstaLove ci-dessous */
 .hp-header { padding: 28px 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); position: relative; overflow: hidden; }
 .hp-back { display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:600; color:var(--sub); background:var(--s2); border:1px solid var(--border); border-radius:20px; padding:7px 14px; cursor:pointer; margin-bottom:10px; transition:background 0.15s, color 0.15s, transform 0.12s; }
@@ -3992,9 +4069,90 @@ body.light #counterBlock.glowing .c-num-big {
       <div class="prank-menu-item-icon">🔐</div>
       <div><div class="prank-menu-item-name">Le cadenas</div><div class="prank-menu-item-desc">Trouve le mot secret pour déverrouiller</div></div>
     </div>
+    <div class="prank-menu-item" onclick="prankSelectType('fog')">
+      <div class="prank-menu-item-icon">🌫️</div>
+      <div><div class="prank-menu-item-name">Le brouillard</div><div class="prank-menu-item-desc">Tapote 10 fois pour dissiper le flou</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('colors')">
+      <div class="prank-menu-item-icon">🌈</div>
+      <div><div class="prank-menu-item-name">Les couleurs folles</div><div class="prank-menu-item-desc">Maintiens le bouton pour stabiliser les couleurs</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('keyboard')">
+      <div class="prank-menu-item-icon">⌨️</div>
+      <div><div class="prank-menu-item-name">Le faux clavier</div><div class="prank-menu-item-desc">Tape le mot affiché avec les touches mélangées</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('target')">
+      <div class="prank-menu-item-icon">🎯</div>
+      <div><div class="prank-menu-item-name">La cible qui esquive</div><div class="prank-menu-item-desc">Clique dessus 10 fois — elle accélère !</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('memory')">
+      <div class="prank-menu-item-icon">🃏</div>
+      <div><div class="prank-menu-item-name">Memory express</div><div class="prank-menu-item-desc">Mémorise et retrouve les 4 paires</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('eyes')">
+      <div class="prank-menu-item-icon">👁️</div>
+      <div><div class="prank-menu-item-name">Les yeux qui surveillent</div><div class="prank-menu-item-desc">Fixe chaque paire 5s sans bouger</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('notif')">
+      <div class="prank-menu-item-icon">📱</div>
+      <div><div class="prank-menu-item-name">Fausse notification</div><div class="prank-menu-item-desc">Une notif surprise avec ton message</div></div>
+    </div>
   </div>
   <div class="prank-menu-cancel" onclick="closePrankMenu()">Annuler</div>
   <div class="prank-menu-cancel" id="prankCancelAllBtn" onclick="prankCancelAll()" style="color:rgba(255,100,100,0.6);margin-top:0;">🗑️ Annuler toutes mes bêtises en attente</div>
+</div>
+
+<!-- ══ NOUVELLES BÊTISES HTML ══ -->
+
+<!-- 🌫️ Brouillard -->
+<div id="prankFogOverlay"></div>
+<div id="prankFogBanner">🌫️ Tapote l'écran pour dissiper le brouillard — <span id="prankFogCount">10</span> restants</div>
+
+<!-- 🌈 Couleurs folles -->
+<div id="prankColorsBanner">
+  🌈 Maintiens le bouton pour stabiliser les couleurs !<br>
+  <div id="prankColorsHoldBtn">🎨</div>
+  <div id="prankColorsProgress"><div id="prankColorsProgressBar"></div></div>
+</div>
+
+<!-- ⌨️ Faux clavier -->
+<div id="prankKeyboard">
+  <div class="pkb-word-display" id="pkbWordDisplay"></div>
+  <div class="pkb-typed" id="pkbTyped"></div>
+  <div class="pkb-hint">⌨️ Les touches sont mélangées… cherche bien !</div>
+  <div class="pkb-err" id="pkbErr"></div>
+  <div class="pkb-grid" id="pkbGrid"></div>
+</div>
+
+<!-- 🎯 Cible -->
+<div id="prankTarget"><div class="pt-circle"></div></div>
+<div id="prankTargetBanner">🎯 <span id="prankTargetCount">10</span> touches restantes — vise bien !</div>
+
+<!-- 🃏 Memory express -->
+<div id="prankMemoryOverlay">
+  <div class="pmem-title">🃏 Memory express !</div>
+  <div class="pmem-sub" id="pmemSub">Mémorise les paires… tu as 3 secondes !</div>
+  <div class="pmem-grid" id="pmemGrid"></div>
+  <div class="pmem-status" id="pmemStatus"></div>
+</div>
+
+<!-- 👁️ Les yeux -->
+<div id="prankEyesOverlay"></div>
+<div id="prankEyesBanner">👁️ Fixe chaque paire d'yeux 5 secondes sans bouger</div>
+<div id="prankEyesMessage">
+  <div class="prank-eyes-msg-emoji">🫵👀</div>
+  <div class="prank-eyes-msg-text">C'est bon j'ai fini de te surveiller 🫵👀</div>
+</div>
+
+<!-- 📱 Fausse notif -->
+<div id="prankNotif">
+  <div class="pn-icon">📱</div>
+  <div class="pn-content">
+    <div class="pn-app" id="pnApp">Messages</div>
+    <div class="pn-title" id="pnTitle">Nouveau message</div>
+    <div class="pn-body" id="pnBody"></div>
+  </div>
+  <div class="pn-time">maintenant</div>
 </div>
 
 <!-- Modal message perso + mot secret si lock -->
@@ -4350,12 +4508,19 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
   var _activePrank  = null;
 
   var PRANK_DEFS = {
-    shake:   { emoji:'📳', label:'L\'écran qui tremble' },
-    curtain: { emoji:'🌧️', label:'Le rideau d\'emojis' },
-    intrus:  { emoji:'👾', label:'L\'intrus qui esquive' },
-    flip:    { emoji:'🔤', label:'Le texte à l\'envers' },
-    splash:  { emoji:'🎨', label:'La flaque de peinture' },
-    lock:    { emoji:'🔐', label:'Le cadenas' }
+    shake:    { emoji:'📳', label:'L\'écran qui tremble' },
+    curtain:  { emoji:'🌧️', label:'Le rideau d\'emojis' },
+    intrus:   { emoji:'👾', label:'L\'intrus qui esquive' },
+    flip:     { emoji:'🔤', label:'Le texte à l\'envers' },
+    splash:   { emoji:'🎨', label:'La flaque de peinture' },
+    lock:     { emoji:'🔐', label:'Le cadenas' },
+    fog:      { emoji:'🌫️', label:'Le brouillard' },
+    colors:   { emoji:'🌈', label:'Les couleurs folles' },
+    keyboard: { emoji:'⌨️', label:'Le faux clavier' },
+    target:   { emoji:'🎯', label:'La cible qui esquive' },
+    memory:   { emoji:'🃏', label:'Memory express' },
+    eyes:     { emoji:'👁️', label:'Les yeux qui surveillent' },
+    notif:    { emoji:'📱', label:'Fausse notification' }
   };
 
   function showPrankToast(msg){
@@ -4508,39 +4673,410 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
   function triggerPrank(p){
     if(!p) return;
     switch(p.type){
-      case 'shake':   startShake(p); break;
-      case 'curtain': startCurtain(p); break;
-      case 'intrus':  startIntrus(p); break;
-      case 'flip':    startFlip(p); break;
-      case 'splash':  startSplash(p); break;
-      case 'lock':    startLock(p); break;
+      case 'shake':    startShake(p); break;
+      case 'curtain':  startCurtain(p); break;
+      case 'intrus':   startIntrus(p); break;
+      case 'flip':     startFlip(p); break;
+      case 'splash':   startSplash(p); break;
+      case 'lock':     startLock(p); break;
+      case 'fog':      startFog(p); break;
+      case 'colors':   startColors(p); break;
+      case 'keyboard': startKeyboard(p); break;
+      case 'target':   startTarget(p); break;
+      case 'memory':   startMemoryPrank(p); break;
+      case 'eyes':     startEyes(p); break;
+      case 'notif':    startNotif(p); break;
     }
   }
 
-  /* ── Stopper une bêtise annulée à distance (sans gotcha) ── */
+  /* ════ BÊTISE 7 : BROUILLARD ════ */
+  var _fogTaps = 0; var _fogLock = false;
+  function startFog(p){
+    _fogTaps = 0; _fogLock = false;
+    var overlay = document.getElementById('prankFogOverlay');
+    overlay.classList.add('show');
+    overlay.style.backdropFilter = 'blur(20px)';
+    overlay.style.webkitBackdropFilter = 'blur(20px)';
+    document.getElementById('prankFogCount').textContent = 10;
+    document.getElementById('prankFogBanner').classList.add('show');
+    document.addEventListener('touchstart', onFogTap, { passive: false });
+    document.addEventListener('click', onFogClick);
+  }
+  function onFogTap(e){ e.preventDefault(); if(_fogLock) return; _fogLock=true; setTimeout(function(){ _fogLock=false; },300); doFogTap(); }
+  function onFogClick(){ if(_fogLock) return; doFogTap(); }
+  function doFogTap(){
+    _fogTaps++;
+    var left = 10 - _fogTaps;
+    document.getElementById('prankFogCount').textContent = Math.max(0, left);
+    var blurVal = Math.round(20 * (left / 10));
+    var overlay = document.getElementById('prankFogOverlay');
+    overlay.style.backdropFilter = 'blur('+blurVal+'px)';
+    overlay.style.webkitBackdropFilter = 'blur('+blurVal+'px)';
+    if(_fogTaps >= 10){
+      document.removeEventListener('touchstart', onFogTap);
+      document.removeEventListener('click', onFogClick);
+      overlay.classList.remove('show');
+      document.getElementById('prankFogBanner').classList.remove('show');
+      prankDone();
+    }
+  }
+
+  /* ════ BÊTISE 8 : COULEURS FOLLES ════ */
+  var _colorsAnim = null; var _colorsHue = 0;
+  var _colorsHolding = false; var _colorsTimer = null; var _colorsProgress = 0;
+  function startColors(p){
+    _colorsHue = 0; _colorsProgress = 0; _colorsHolding = false;
+    _colorsAnim = setInterval(function(){
+      _colorsHue = (_colorsHue + 3) % 360;
+      document.documentElement.style.filter = 'hue-rotate('+_colorsHue+'deg) saturate(2)';
+    }, 30);
+    document.getElementById('prankColorsBanner').classList.add('show');
+    document.getElementById('prankColorsProgressBar').style.width = '0%';
+    var btn = document.getElementById('prankColorsHoldBtn');
+    var newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    function startHold(){ _colorsHolding=true; _colorsProgress=0; runColorsProgress(); }
+    function stopHold(){ _colorsHolding=false; clearTimeout(_colorsTimer); document.getElementById('prankColorsProgressBar').style.width='0%'; }
+    newBtn.addEventListener('mousedown', startHold);
+    newBtn.addEventListener('touchstart', function(e){ e.preventDefault(); startHold(); }, { passive:false });
+    newBtn.addEventListener('mouseup', stopHold);
+    newBtn.addEventListener('mouseleave', stopHold);
+    newBtn.addEventListener('touchend', stopHold);
+    newBtn.addEventListener('touchcancel', stopHold);
+  }
+  function runColorsProgress(){
+    if(!_colorsHolding) return;
+    _colorsProgress += 4;
+    document.getElementById('prankColorsProgressBar').style.width = Math.min(_colorsProgress,100)+'%';
+    if(_colorsProgress >= 100){
+      clearInterval(_colorsAnim);
+      document.documentElement.style.filter = '';
+      document.getElementById('prankColorsBanner').classList.remove('show');
+      prankDone();
+    } else {
+      _colorsTimer = setTimeout(runColorsProgress, 80);
+    }
+  }
+
+  /* ════ BÊTISE 9 : FAUX CLAVIER ════ */
+  var KEYBOARD_WORDS = ['BISOUS','AMOUR','ZELDA','TRESOR','CHATON','SOLEIL','GATEAU','POISSON','PAPILLON','ETOILE'];
+  var _kbWord = ''; var _kbTyped = ''; var _kbMap = {};
+  function startKeyboard(p){
+    _kbWord = KEYBOARD_WORDS[Math.floor(Math.random()*KEYBOARD_WORDS.length)];
+    _kbTyped = '';
+    // Créer un mapping aléatoire lettre → touche affichée
+    var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    var shuffled = letters.slice().sort(function(){ return Math.random()-0.5; });
+    _kbMap = {};
+    letters.forEach(function(l,i){ _kbMap[l] = shuffled[i]; });
+    // Afficher le mot avec légère superposition (blur partiel)
+    var display = document.getElementById('pkbWordDisplay');
+    display.innerHTML = _kbWord.split('').map(function(c){
+      return '<span class="pkb-word-blur">'+c+'</span>';
+    }).join('');
+    // Lever le blur lettre par lettre toutes les 600ms
+    var spans = display.querySelectorAll('.pkb-word-blur');
+    spans.forEach(function(s,i){ setTimeout(function(){ s.style.filter='none'; }, i*600); });
+    document.getElementById('pkbTyped').textContent = '';
+    document.getElementById('pkbErr').textContent = '';
+    // Construire la grille : touches mélangées
+    var grid = document.getElementById('pkbGrid');
+    grid.innerHTML = '';
+    var keysToShow = Object.keys(_kbMap); // 26 lettres mélangées
+    keysToShow.forEach(function(realLetter){
+      var key = document.createElement('div');
+      key.className = 'pkb-key';
+      key.textContent = _kbMap[realLetter]; // affiche la fausse touche
+      key.dataset.real = realLetter;
+      key.addEventListener('touchstart', function(e){ e.preventDefault(); kbPress(realLetter); }, { passive:false });
+      key.addEventListener('click', function(){ kbPress(realLetter); });
+      grid.appendChild(key);
+    });
+    // Touche retour arrière
+    var bk = document.createElement('div');
+    bk.className = 'pkb-key backspace'; bk.textContent = '⌫ Effacer';
+    bk.addEventListener('touchstart', function(e){ e.preventDefault(); kbBackspace(); }, { passive:false });
+    bk.addEventListener('click', kbBackspace);
+    grid.appendChild(bk);
+    document.getElementById('prankKeyboard').classList.add('show');
+  }
+  function kbPress(letter){
+    if(_kbTyped.length >= _kbWord.length) return;
+    _kbTyped += letter;
+    document.getElementById('pkbTyped').textContent = _kbTyped;
+    if(_kbTyped.length === _kbWord.length){
+      if(_kbTyped === _kbWord){
+        document.getElementById('prankKeyboard').classList.remove('show');
+        prankDone();
+      } else {
+        var el = document.getElementById('pkbTyped');
+        el.style.color = '#e05555';
+        document.getElementById('pkbErr').textContent = '❌ Raté ! Recommence…';
+        setTimeout(function(){ _kbTyped=''; el.textContent=''; el.style.color=''; document.getElementById('pkbErr').textContent=''; }, 800);
+      }
+    }
+  }
+  function kbBackspace(){
+    _kbTyped = _kbTyped.slice(0,-1);
+    document.getElementById('pkbTyped').textContent = _kbTyped;
+    document.getElementById('pkbErr').textContent = '';
+  }
+
+  /* ════ BÊTISE 10 : CIBLE ════ */
+  var _targetHits = 0; var _targetSpeed = 180; var _targetMoveTimer = null; var _targetLock = false;
+  function startTarget(p){
+    _targetHits = 0; _targetSpeed = 180; _targetLock = false;
+    var el = document.getElementById('prankTarget');
+    el.classList.add('show');
+    document.getElementById('prankTargetCount').textContent = 10;
+    document.getElementById('prankTargetBanner').classList.add('show');
+    moveTarget();
+    _targetMoveTimer = setInterval(moveTarget, _targetSpeed * 3);
+    el.addEventListener('touchstart', onTargetHit, { passive:false });
+    el.addEventListener('click', onTargetHit);
+  }
+  function moveTarget(){
+    var el = document.getElementById('prankTarget');
+    var size = 64;
+    var x = 8 + Math.random()*(window.innerWidth - size - 16);
+    var y = 60 + Math.random()*(window.innerHeight - size - 200);
+    el.style.left = x+'px'; el.style.top = y+'px';
+    el.style.transition = 'left '+(_targetSpeed/1000)+'s cubic-bezier(.4,2,.55,.9), top '+(_targetSpeed/1000)+'s cubic-bezier(.4,2,.55,.9)';
+  }
+  function onTargetHit(e){
+    e.stopPropagation();
+    if(e.type==='touchstart') e.preventDefault();
+    if(_targetLock) return; _targetLock=true; setTimeout(function(){ _targetLock=false; },200);
+    _targetHits++;
+    var left = 10 - _targetHits;
+    document.getElementById('prankTargetCount').textContent = left;
+    // Accélérer à chaque touche
+    _targetSpeed = Math.max(60, _targetSpeed - 12);
+    clearInterval(_targetMoveTimer);
+    moveTarget();
+    _targetMoveTimer = setInterval(moveTarget, Math.max(600, _targetSpeed*3));
+    if(_targetHits >= 10){
+      clearInterval(_targetMoveTimer);
+      var el = document.getElementById('prankTarget');
+      el.classList.remove('show');
+      el.removeEventListener('touchstart', onTargetHit);
+      el.removeEventListener('click', onTargetHit);
+      document.getElementById('prankTargetBanner').classList.remove('show');
+      prankDone();
+    }
+  }
+
+  /* ════ BÊTISE 11 : MEMORY EXPRESS ════ */
+  var MEMORY_EMOJIS = ['💖','🌸','🎀','🦋','🌈','🍓','⭐','🎵'];
+  var _memCards = []; var _memFlipped = []; var _memMatched = 0; var _memLock = false;
+  function startMemoryPrank(p){
+    _memMatched = 0; _memFlipped = []; _memLock = true;
+    var pairs = MEMORY_EMOJIS.slice(0,4);
+    var deck = pairs.concat(pairs).sort(function(){ return Math.random()-0.5; });
+    var grid = document.getElementById('pmemGrid');
+    grid.innerHTML = '';
+    _memCards = [];
+    deck.forEach(function(emoji, i){
+      var card = document.createElement('div');
+      card.className = 'pmem-card flipped'; // commence retournée (emoji visible)
+      card.innerHTML = '<div class="pmem-face pmem-back">❓</div><div class="pmem-face pmem-front">'+emoji+'</div>';
+      card.dataset.emoji = emoji;
+      card.dataset.idx = i;
+      card.addEventListener('touchstart', function(e){ e.preventDefault(); memFlip(card); }, { passive:false });
+      card.addEventListener('click', function(){ memFlip(card); });
+      grid.appendChild(card);
+      _memCards.push(card);
+    });
+    document.getElementById('pmemSub').textContent = 'Mémorise les paires… tu as 3 secondes !';
+    document.getElementById('pmemStatus').textContent = '';
+    document.getElementById('prankMemoryOverlay').classList.add('show');
+    // Après 3s, retourner toutes les cartes face cachée
+    setTimeout(function(){
+      _memCards.forEach(function(c){ c.classList.remove('flipped'); });
+      document.getElementById('pmemSub').textContent = 'Retrouve les 4 paires !';
+      _memLock = false;
+    }, 3000);
+  }
+  function memFlip(card){
+    if(_memLock) return;
+    if(card.classList.contains('flipped') || card.classList.contains('matched')) return;
+    card.classList.add('flipped');
+    _memFlipped.push(card);
+    if(_memFlipped.length === 2){
+      _memLock = true;
+      var a = _memFlipped[0], b = _memFlipped[1];
+      if(a.dataset.emoji === b.dataset.emoji){
+        a.classList.add('matched'); b.classList.add('matched');
+        _memMatched++;
+        document.getElementById('pmemStatus').textContent = _memMatched + ' / 4 paires trouvées';
+        _memFlipped = []; _memLock = false;
+        if(_memMatched >= 4){
+          setTimeout(function(){
+            document.getElementById('prankMemoryOverlay').classList.remove('show');
+            prankDone();
+          }, 600);
+        }
+      } else {
+        setTimeout(function(){
+          a.classList.remove('flipped'); b.classList.remove('flipped');
+          _memFlipped = []; _memLock = false;
+        }, 900);
+      }
+    }
+  }
+
+  /* ════ BÊTISE 12 : LES YEUX ════ */
+  var _eyesPairs = []; var _eyesCurrent = 0; var _eyesTimer = null; var _eyesProgress = 0;
+  var _eyesAnimFrame = null; var _eyesInterrupted = false;
+  function startEyes(p){
+    _eyesCurrent = 0; _eyesInterrupted = false;
+    var overlay = document.getElementById('prankEyesOverlay');
+    overlay.innerHTML = '';
+    overlay.classList.add('show');
+    document.getElementById('prankEyesBanner').classList.add('show');
+    _eyesPairs = [];
+    // Créer 3 paires à positions aléatoires dans la zone sûre
+    var positions = [];
+    for(var i=0; i<3; i++){
+      var x, y, safe;
+      do {
+        safe = true;
+        x = 20 + Math.random()*(window.innerWidth - 140);
+        y = 80 + Math.random()*(window.innerHeight - 280);
+        positions.forEach(function(pos){ if(Math.abs(pos.x-x)<140 && Math.abs(pos.y-y)<80) safe=false; });
+      } while(!safe);
+      positions.push({x:x,y:y});
+      var pair = createEyePair(i, x, y);
+      overlay.appendChild(pair.el);
+      _eyesPairs.push(pair);
+    }
+    // Lancer le suivi des pupilles
+    _eyesAnimFrame = requestAnimationFrame(trackEyes);
+    // Commencer avec la première paire
+    setTimeout(function(){ startEyePair(0); }, 600);
+  }
+  function createEyePair(idx, x, y){
+    var el = document.createElement('div');
+    el.className = 'prank-eye-pair';
+    el.style.left = x+'px'; el.style.top = y+'px';
+    el.innerHTML = [0,1].map(function(){
+      return '<div class="prank-eye"><div class="prank-eye-pupil"></div><div class="prank-eye-ring"></div></div>';
+    }).join('');
+    var timer = document.createElement('div');
+    timer.className = 'prank-eye-timer';
+    timer.textContent = '';
+    el.appendChild(timer);
+    return { el:el, idx:idx, done:false, timer:timer };
+  }
+  function trackEyes(){
+    // Les pupilles suivent le centre de l'écran (simulateur de regard)
+    var cx = window.innerWidth/2, cy = window.innerHeight/2;
+    _eyesPairs.forEach(function(pair){
+      var rect = pair.el.getBoundingClientRect();
+      var pupils = pair.el.querySelectorAll('.prank-eye-pupil');
+      pupils.forEach(function(pupil, i){
+        var eyeCx = rect.left + (i===0 ? 26 : 86);
+        var eyeCy = rect.top + 26;
+        var dx = cx - eyeCx, dy = cy - eyeCy;
+        var dist = Math.sqrt(dx*dx+dy*dy);
+        var max = 12;
+        var tx = dist>0 ? (dx/dist)*Math.min(dist,max) : 0;
+        var ty = dist>0 ? (dy/dist)*Math.min(dist,max) : 0;
+        pupil.style.transform = 'translate('+tx+'px,'+ty+'px)';
+      });
+    });
+    _eyesAnimFrame = requestAnimationFrame(trackEyes);
+  }
+  function startEyePair(idx){
+    if(idx >= _eyesPairs.length){ eyesDone(); return; }
+    var pair = _eyesPairs[idx];
+    var rings = pair.el.querySelectorAll('.prank-eye-ring');
+    rings.forEach(function(r){ r.classList.add('active'); });
+    var timeLeft = 5;
+    pair.timer.textContent = timeLeft+'s';
+    _eyesProgress = 0;
+    _eyesTimer = setInterval(function(){
+      timeLeft--;
+      pair.timer.textContent = timeLeft > 0 ? timeLeft+'s' : '✅';
+      if(timeLeft <= 0){
+        clearInterval(_eyesTimer);
+        rings.forEach(function(r){ r.classList.remove('active'); });
+        pair.done = true;
+        startEyePair(idx+1);
+      }
+    }, 1000);
+  }
+  function eyesDone(){
+    cancelAnimationFrame(_eyesAnimFrame);
+    clearInterval(_eyesTimer);
+    document.getElementById('prankEyesOverlay').classList.remove('show');
+    document.getElementById('prankEyesBanner').classList.remove('show');
+    // Afficher le message final sans gotcha
+    var msg = document.getElementById('prankEyesMessage');
+    msg.classList.add('show');
+    setTimeout(function(){
+      msg.classList.remove('show');
+      // Marquer comme terminée sans gotcha
+      if(_activePrank){
+        fetch(SB_URL+'/rest/v1/'+PRANK_TABLE+'?id=eq.'+_activePrank.id, {
+          method:'PATCH',
+          headers: sbHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
+          body: JSON.stringify({ active: false })
+        }).catch(function(){});
+        _activePrank = null;
+        setTimeout(function(){ dequeueNextPrank(); }, 500);
+      }
+    }, 3500);
+  }
+
+  /* ════ BÊTISE 13 : FAUSSE NOTIF ════ */
+  function startNotif(p){
+    var authorName = p.author === 'boy' ? 'Link 💙' : 'Zelda 💖';
+    document.getElementById('pnApp').textContent = authorName;
+    document.getElementById('pnTitle').textContent = '😈 Surprise !';
+    document.getElementById('pnBody').textContent = p.message || 'Hehe je t\'ai eu !';
+    var notif = document.getElementById('prankNotif');
+    notif.classList.add('show');
+    // Disparaît après 4s puis prankDone
+    setTimeout(function(){
+      notif.classList.remove('show');
+      setTimeout(function(){ prankDone(); }, 500);
+    }, 4000);
+  }
+
+  
   function abortActivePrank(){
     if(!_activePrank) return;
-    var type = _activePrank.type;
     _activePrank = null;
-    _prankQueue  = []; // vider aussi la file d'attente
+    _prankQueue  = [];
 
-    // Stopper tous les effets visuels selon le type
     document.body.classList.remove('prank-shake');
     document.body.classList.remove('prank-flip');
-    document.getElementById('prankShakeBanner').classList.remove('show');
-    document.getElementById('prankFlipBanner').classList.remove('show');
-    document.getElementById('prankCurtain').classList.remove('show');
-    document.getElementById('prankCurtainBanner').classList.remove('show');
-    document.getElementById('prankIntrus').classList.remove('show');
-    document.getElementById('prankIntrusBanner').classList.remove('show');
-    document.getElementById('prankSplash').classList.remove('show');
-    document.getElementById('prankSplashBanner').classList.remove('show');
-    document.getElementById('prankLock').classList.remove('show');
-    if(_intrusTimer){ clearInterval(_intrusTimer); _intrusTimer = null; }
+    document.documentElement.style.filter = '';
 
-    // Retirer les listeners du shake
+    ['prankShakeBanner','prankFlipBanner','prankCurtainBanner','prankIntrusBanner',
+     'prankSplashBanner','prankFogBanner','prankColorsBanner','prankTargetBanner',
+     'prankEyesBanner','prankEyesMessage'].forEach(function(id){
+      var el = document.getElementById(id); if(el) el.classList.remove('show');
+    });
+    ['prankCurtain','prankSplash','prankFogOverlay','prankKeyboard',
+     'prankMemoryOverlay','prankEyesOverlay','prankLock'].forEach(function(id){
+      var el = document.getElementById(id); if(el) el.classList.remove('show');
+    });
+    ['prankIntrus','prankTarget','prankNotif'].forEach(function(id){
+      var el = document.getElementById(id); if(el) el.classList.remove('show');
+    });
+
+    if(_intrusTimer){ clearInterval(_intrusTimer); _intrusTimer = null; }
+    if(_targetMoveTimer){ clearInterval(_targetMoveTimer); _targetMoveTimer = null; }
+    if(_colorsAnim){ clearInterval(_colorsAnim); _colorsAnim = null; }
+    if(_eyesAnimFrame){ cancelAnimationFrame(_eyesAnimFrame); _eyesAnimFrame = null; }
+    if(_eyesTimer){ clearInterval(_eyesTimer); _eyesTimer = null; }
+
     document.removeEventListener('touchstart', onShakeTap);
     document.removeEventListener('click', onShakeClick);
+    document.removeEventListener('touchstart', onFogTap);
+    document.removeEventListener('click', onFogClick);
   }
 
   /* ── Marquer la bêtise comme terminée ── */
@@ -9115,7 +9651,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.05.3</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.05.5</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
