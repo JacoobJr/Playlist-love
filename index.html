@@ -812,9 +812,43 @@ body.light #reasonBox { background: #fff5f8; }
 }
 .nav-item:hover { color: var(--text); transform: translateY(-2px); }
 .nav-item svg { flex-shrink: 0; }
-#lockNavBtn { color: #a78bfa; }
+#lockNavBtn { color: #a78bfa; position: relative; }
 #lockNavBtn:hover { color: #c4b5fd; }
 body.light #lockNavBtn { color: #7c3aed; }
+
+/* Badge non-lus sur le cadenas */
+#lockUnreadBadge {
+  position: absolute;
+  top: 2px; right: 6px;
+  min-width: 16px; height: 16px;
+  background: #ff4444;
+  color: #fff;
+  font-size: 9px; font-weight: 800;
+  border-radius: 8px;
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 0 4px;
+  border: 1.5px solid var(--bg);
+  line-height: 1;
+  z-index: 10;
+}
+#lockUnreadBadge.visible { display: flex; }
+
+/* Clignotement cadenas quand non-lus */
+@keyframes lockPulse {
+  0%,100% { color: #a78bfa; filter: drop-shadow(0 0 0px #a78bfa); }
+  50%     { color: #c4b5fd; filter: drop-shadow(0 0 6px #a78bfa); }
+}
+#lockNavBtn.has-unread {
+  animation: lockPulse 1.6s ease-in-out infinite;
+}
+body.light #lockNavBtn.has-unread {
+  animation: lockPulseLight 1.6s ease-in-out infinite;
+}
+@keyframes lockPulseLight {
+  0%,100% { color: #7c3aed; filter: drop-shadow(0 0 0px #7c3aed); }
+  50%     { color: #a78bfa; filter: drop-shadow(0 0 6px #7c3aed); }
+}
 
 @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:none;opacity:1} }
 #searchOverlay {
@@ -2023,13 +2057,18 @@ body.light .dm-id-overlay { background: transparent; }
 .dm-msg-wrap:not(.mine) .dm-bubble { background:var(--s2); color:var(--text); border-radius:20px 20px 20px 4px; }
 .dm-msg-wrap:not(.mine).first-in-group .dm-bubble { border-radius:4px 20px 20px 20px; }
 .dm-msg-wrap.mine .dm-bubble {
-  background:linear-gradient(135deg,#833ab4,#fd1d1d 60%,#fcb045);
+  background:linear-gradient(145deg,#c8185e 0%,#e8507a 100%);
   color:#fff; border-radius:20px 20px 4px 20px;
+  box-shadow:0 2px 12px rgba(200,24,94,0.3);
+  text-shadow:0 1px 2px rgba(0,0,0,0.15);
 }
-body.light .dm-msg-wrap.mine .dm-bubble { background:linear-gradient(135deg,#c8185e,#e879a0); }
+body.light .dm-msg-wrap.mine .dm-bubble {
+  background:linear-gradient(145deg,#b01050,#e8507a);
+  box-shadow:0 2px 12px rgba(200,24,94,0.25);
+}
 .dm-msg-wrap.mine.first-in-group .dm-bubble { border-radius:20px 4px 20px 20px; }
-.dm-bubble-text { display:block; }
-.dm-bubble-meta { font-size:9px; margin-top:3px; text-align:right; opacity:0.55; display:none; }
+.dm-bubble-text { display:block; letter-spacing:0.01em; }
+.dm-bubble-meta { font-size:9px; margin-top:4px; text-align:right; opacity:0.7; display:none; }
 .dm-msg-wrap.last-in-group .dm-bubble-meta { display:block; }
 .dm-msg-wrap.mine .dm-bubble-meta { color:rgba(255,255,255,0.8); }
 .dm-msg-wrap:not(.mine) .dm-bubble-meta { color:var(--muted); }
@@ -2132,6 +2171,72 @@ body.light .dm-send-btn { background:linear-gradient(135deg,#c8185e,#e879a0); }
 .dm-send-btn.ready { opacity:1; }
 .dm-send-btn.ready:hover { transform:scale(1.1); }
 .dm-send-btn:active { transform:scale(0.92); }
+/* ══ VOCAUX INSTALOVE ══ */
+.dm-mic-btn {
+  width:36px; height:36px; border-radius:50%; border:none;
+  background:var(--s3); color:var(--muted);
+  cursor:pointer; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  transition:background 0.15s, color 0.15s, transform 0.15s;
+  touch-action:none; user-select:none;
+}
+.dm-mic-btn:hover { background:var(--s2); color:var(--text); }
+.dm-mic-btn.recording {
+  background:linear-gradient(135deg,#e05555,#ff8c00);
+  color:#fff; animation:micPulse 0.7s ease-in-out infinite;
+}
+@keyframes micPulse {
+  0%,100% { transform:scale(1); box-shadow:0 0 0 0 rgba(224,85,85,0.4); }
+  50%      { transform:scale(1.08); box-shadow:0 0 0 6px rgba(224,85,85,0); }
+}
+.dm-rec-indicator {
+  display:none; align-items:center; gap:6px;
+  font-size:11px; color:#e05555; font-weight:600;
+  padding:0 8px;
+}
+.dm-rec-indicator.active { display:flex; }
+.dm-rec-dot {
+  width:7px; height:7px; border-radius:50%; background:#e05555;
+  animation:recBlink 1s ease-in-out infinite;
+}
+@keyframes recBlink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+/* Bulle vocale */
+.dm-audio-bubble {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 14px; min-width:180px;
+}
+/* Bouton play — mes messages */
+.dm-audio-play {
+  width:34px; height:34px; border-radius:50%; border:none;
+  background:rgba(255,255,255,0.2); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; flex-shrink:0; transition:transform 0.15s, background 0.15s;
+}
+.dm-audio-play:hover { background:rgba(255,255,255,0.32); transform:scale(1.08); }
+/* Bouton play — messages reçus */
+.dm-msg-wrap:not(.mine) .dm-audio-play {
+  background:var(--s3); color:var(--text);
+}
+.dm-msg-wrap:not(.mine) .dm-audio-play:hover { background:var(--border); }
+/* Barre de progression */
+.dm-audio-bar {
+  flex:1; height:4px; border-radius:4px;
+  background:rgba(0,0,0,0.2); position:relative; cursor:pointer;
+}
+.dm-msg-wrap:not(.mine) .dm-audio-bar { background:rgba(131,58,180,0.25); }
+.dm-audio-progress {
+  height:100%; border-radius:4px; background:rgba(255,255,255,0.9);
+  width:0%; transition:width 0.1s linear; pointer-events:none;
+}
+.dm-msg-wrap:not(.mine) .dm-audio-progress { background:#833ab4; }
+/* Durée */
+.dm-audio-dur {
+  font-size:11px; font-weight:700; flex-shrink:0; min-width:30px;
+  color:rgba(255,255,255,0.95);
+}
+.dm-msg-wrap:not(.mine) .dm-audio-dur { color:var(--text); }
+
 .dm-emoji-picker {
   position:absolute; bottom:calc(100% + 10px); left:0; right:0;
   background:var(--s1); border:1px solid var(--border); border-radius:16px;
@@ -2159,11 +2264,104 @@ body.light #hiddenPage { background:var(--bg); }
 .dm-loading-dots span:nth-child(3) { animation-delay:.4s; }
 @keyframes dmDot { 0%,80%,100%{transform:scale(.8);opacity:.4} 40%{transform:scale(1.1);opacity:.9} }
 
+/* ════════════════════════════════════════════
+   MODE ANNIVERSAIRE MENSUEL
+════════════════════════════════════════════ */
+#annivBanner {
+  display: none;
+  margin: 0 16px 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255,180,0,0.13), rgba(255,100,150,0.13));
+  border: 1px solid rgba(255,180,0,0.35);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+#annivBanner::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.07) 50%, transparent 60%);
+  background-size: 200% 100%;
+  animation: annivShimmer 2.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes annivShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+#annivBanner.visible { display: block; }
+.anniv-emoji { font-size: 22px; display: block; margin-bottom: 4px; animation: annivBounce 1.2s ease-in-out infinite; }
+@keyframes annivBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+.anniv-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(14px, 4vw, 18px);
+  font-weight: 700;
+  background: linear-gradient(90deg, #f5c518, #ff6eb0, #f5c518);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: annivGold 3s linear infinite;
+}
+@keyframes annivGold { 0%{background-position:0%} 100%{background-position:200%} }
+.anniv-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* Header en mode anniv */
+body.anniv-mode .hdr-name {
+  background: linear-gradient(90deg, #f5c518, #ff6eb0, #a78bfa, #f5c518);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: annivGold 4s linear infinite;
+}
+body.anniv-mode header::before {
+  background: radial-gradient(circle, rgba(245,197,24,0.15) 0%, transparent 70%);
+}
+body.light.anniv-mode .hdr-name {
+  background: linear-gradient(90deg, #c8185e, #f5c518, #c8185e);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: annivGold 4s linear infinite;
+}
+
+/* Compteur spécial anniv */
+body.anniv-mode #counterBlock {
+  border-color: rgba(245,197,24,0.4);
+  box-shadow: 0 0 0 1px rgba(245,197,24,0.15), 0 8px 32px rgba(0,0,0,0.45);
+}
+body.anniv-mode .counter-block-top {
+  background: linear-gradient(90deg, #f5c518, #ff6eb0, transparent);
+  opacity: 0.8;
+}
+
+/* Confettis canvas */
+#annivCanvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 8999;
+  display: none;
+}
+#annivCanvas.visible { display: block; }
+
 </style>
 </head>
 <body>
 
 <canvas id="particleCanvas"></canvas>
+<canvas id="annivCanvas"></canvas>
+
+<!-- Bannière anniversaire mensuel -->
+<div id="annivBanner">
+  <span class="anniv-emoji">🎉</span>
+  <div class="anniv-title" id="annivTitle">Bonne mensiversaire mon amour 💑</div>
+  <div class="anniv-sub" id="annivSub"></div>
+</div>
 <div id="floatingThemeBtn" title="Changer le thème">🌙 Thème</div>
 
 <header style="position:relative;">
@@ -2171,15 +2369,48 @@ body.light #hiddenPage { background:var(--bg); }
     <span class="pbdot"></span> Aperçu
   </div>
 
-  <div id="profileAvatar" onclick="toggleProfilePopup()">👤</div>
+  <!-- Système double avatar profil + humeur -->
+  <div id="profileAvatarWrap">
+    <!-- Avatar de l'autre (secondaire, bas-gauche) -->
+    <div id="profileAvatarOther">
+      <span id="profileAvatarOtherEmoji">👤</span>
+    </div>
+    <!-- Bulle emoji humeur — positionnée en haut-gauche de l'avatar -->
+    <div id="profileMoodOther"></div>
+    <!-- Capsule qui se déplie vers la gauche depuis la bulle -->
+    <div id="moodBandeau" onclick="triggerMoodBandeau()">
+      <span id="moodBandeauText" style="margin-right:4px;"></span>
+      <span id="moodBandeauEmoji" style="font-size:13px;line-height:1;flex-shrink:0;"></span>
+    </div>
+    <!-- Avatar principal (sélectionné) -->
+    <div id="profileAvatar" onclick="toggleProfilePopup()">
+      <span id="profileAvatarEmoji">👤</span>
+      <div id="profileMoodSelf"></div>
+    </div>
+  </div>
+
   <div id="profilePopup">
-    <div class="profile-popup-label">Je suis…</div>
+    <div class="profile-popup-label">Qui es-tu ?</div>
     <div class="profile-popup-btn" id="ppBtnGirl" onclick="setProfile('girl')">
       <span class="profile-popup-dot girl"></span> Zelda
     </div>
     <div class="profile-popup-btn" id="ppBtnBoy" onclick="setProfile('boy')">
       <span class="profile-popup-dot boy"></span> Link
     </div>
+    <div class="profile-popup-sep" style="display:none;"></div>
+    <div class="profile-popup-btn" id="ppBtnMood" onclick="openMoodPicker(event)" style="display:none;">
+      <span id="ppMoodIcon">😶</span> Mon humeur
+    </div>
+    <div class="profile-popup-btn" id="ppBtnLogout" onclick="nativeLogout()" style="display:none;color:#e05555;border-color:rgba(224,85,85,0.3);">
+      🔓 Se déconnecter
+    </div>
+  </div>
+
+  <!-- Picker humeur -->
+  <div id="moodPicker">
+    <div class="mood-picker-label">Comment tu te sens ?</div>
+    <div class="mood-picker-grid" id="moodPickerGrid"></div>
+    <div class="mood-picker-cancel" onclick="closeMoodPicker()">Annuler</div>
   </div>
 
   <div class="hdr-tag">Playlist</div>
@@ -2193,6 +2424,20 @@ body.light #hiddenPage { background:var(--bg); }
   <div class="bubbleBtn" id="gamesBtn" style="color:#60a5fa;border-color:rgba(96,165,250,0.4);background:rgba(96,165,250,0.08);font-weight:600;">Jeux 🎮</div>
   <div class="bubbleBtn" id="betisesBtn">Bêtises 🤡</div>
 </div>
+
+<script>
+async function nativeLogout(){
+  localStorage.removeItem('jayana_sb_session');
+  localStorage.removeItem('jayana_profile');
+  _sbAccessToken = null;
+  await fetch(SB_URL+'/auth/v1/logout', {
+    method:'POST', headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).catch(function(){});
+  location.reload();
+}
+
+
+</script>
 
 <div class="section fade-in">
   <div class="section-label">On compte les jours</div>
@@ -2337,90 +2582,309 @@ body.light #hiddenPage { background:var(--bg); }
 }
 
 /* ── Avatar Profil ── */
-#profileAvatar {
+/* ── Double avatar profil ── */
+#profileAvatarWrap {
   position: absolute;
   top: 50%; right: 16px;
   transform: translateY(-50%);
-  width: 40px; height: 40px;
+  width: 64px; height: 64px;
+  z-index: 10;
+  overflow: visible;
+}
+
+/* Avatar principal — sélectionné */
+#profileAvatar {
+  position: absolute;
+  top: 0; right: 0;
+  width: 42px; height: 42px;
   border-radius: 50%;
   background: #1a2a4a;
   border: 2px solid rgba(91,156,246,0.4);
   display: flex; align-items: center; justify-content: center;
   font-size: 20px; cursor: pointer;
-  transition: box-shadow 0.3s, border-color 0.3s, background 0.3s;
-  z-index: 10; user-select: none;
+  transition: box-shadow 0.3s, border-color 0.3s, background 0.3s, opacity 0.3s;
+  user-select: none;
+  z-index: 2;
 }
-#profileAvatar.neutral {
-  animation: avatarPulse 2.2s ease-in-out infinite;
-}
+#profileAvatar.neutral { animation: avatarPulse 2.2s ease-in-out infinite; }
 @keyframes avatarPulse {
   0%,100% { box-shadow: 0 0 0px rgba(91,156,246,0.0); border-color: rgba(91,156,246,0.3); }
   50%     { box-shadow: 0 0 12px rgba(91,156,246,0.6), 0 0 24px rgba(91,156,246,0.2); border-color: rgba(91,156,246,0.9); }
 }
-body.light #profileAvatar {
-  background: rgba(200,24,94,0.10);
-  border-color: rgba(200,24,94,0.35);
-}
-body.light #profileAvatar.neutral {
-  animation: avatarPulseLight 2.2s ease-in-out infinite;
-}
+body.light #profileAvatar.neutral { background: rgba(200,24,94,0.10); border-color: rgba(200,24,94,0.35); animation: avatarPulseLight 2.2s ease-in-out infinite; }
 @keyframes avatarPulseLight {
   0%,100% { box-shadow: 0 0 0px rgba(200,24,94,0.0); border-color: rgba(200,24,94,0.2); }
   50%     { box-shadow: 0 0 12px rgba(200,24,94,0.5), 0 0 24px rgba(200,24,94,0.15); border-color: rgba(200,24,94,0.8); }
 }
-#profileAvatar.girl {
-  border-color: #e879a0;
-  box-shadow: 0 0 8px rgba(232,121,160,0.5), 0 0 18px rgba(232,121,160,0.2);
-  animation: none;
+#profileAvatar.girl { border-color: #e879a0; box-shadow: 0 0 8px rgba(232,121,160,0.5), 0 0 18px rgba(232,121,160,0.2); animation: none; }
+#profileAvatar.boy  { border-color: #5b9cf6; box-shadow: 0 0 8px rgba(91,156,246,0.5),  0 0 18px rgba(91,156,246,0.2);  animation: none; }
+body.light #profileAvatar.girl { background: rgba(232,121,160,0.12); border-color: #c8185e; box-shadow: 0 0 8px rgba(200,24,94,0.35), 0 0 18px rgba(200,24,94,0.12); }
+body.light #profileAvatar.boy  { background: rgba(59,125,216,0.10);  border-color: #3b7dd8; box-shadow: 0 0 8px rgba(59,125,216,0.35),  0 0 18px rgba(59,125,216,0.12); }
+
+/* Avatar secondaire — l'autre, discret en bas-gauche */
+#profileAvatarOther {
+  position: absolute;
+  bottom: -4px; left: -10px;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--s2);
+  border: 1.5px solid var(--border);
+  display: none;
+  align-items: center; justify-content: center;
+  font-size: 17px;
+  opacity: 0.55;
+  z-index: 2;
+  transition: opacity 0.3s;
+  user-select: none;
+  cursor: pointer;
+  pointer-events: all;
 }
-#profileAvatar.boy {
-  border-color: #5b9cf6;
-  box-shadow: 0 0 8px rgba(91,156,246,0.5), 0 0 18px rgba(91,156,246,0.2);
-  animation: none;
+#profileAvatarOther.visible { display: flex; }
+@keyframes otherAvatarPing {
+  0%,100% { box-shadow: 0 0 0px rgba(232,121,160,0); border-color: var(--border); }
+  50%     { box-shadow: 0 0 10px rgba(232,121,160,0.8), 0 0 20px rgba(232,121,160,0.3); border-color: #e879a0; }
+}
+@keyframes otherAvatarPingBoy {
+  0%,100% { box-shadow: 0 0 0px rgba(91,156,246,0); border-color: var(--border); }
+  50%     { box-shadow: 0 0 10px rgba(91,156,246,0.8), 0 0 20px rgba(91,156,246,0.3); border-color: #5b9cf6; }
+}
+
+/* Bulle emoji humeur — haut-gauche de l'avatar secondaire
+   avatar: bottom:-4px, left:-10px, size:34px
+   Bulle: 20px, on la place à top-left de cet avatar */
+#profileMoodOther {
+  position: absolute;
+  bottom: 22px;   /* -4 + 34 - 10 = haut de l'avatar - demi bulle */
+  left: -22px;    /* -10 - 12 : légèrement à gauche */
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  display: none;
+  align-items: center; justify-content: center;
+  font-size: 12px;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0.55;
+  transition: border-color 0.2s, box-shadow 0.2s, opacity 0.2s;
+}
+#profileMoodOther.visible { display: flex; }
+#profileMoodOther.mood-highlight-girl,
+#profileMoodOther.mood-highlight-boy { opacity: 1; }
+
+/* ── Clignotement doux + effet lumière en veille ── */
+#profileMoodOther.idle-glow {
+  animation: moodIdleGlow 3s ease-in-out infinite;
+}
+@keyframes moodIdleGlow {
+  0%   { opacity: 0.55; box-shadow: none; border-color: var(--border); }
+  40%  { opacity: 0.85; box-shadow: 0 0 6px rgba(255,255,255,0.18), 0 0 12px rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25); }
+  55%  { opacity: 0.90; box-shadow: 0 0 10px rgba(255,255,255,0.22), 0 0 18px rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.32); }
+  100% { opacity: 0.55; box-shadow: none; border-color: var(--border); }
+}
+body.light #profileMoodOther.idle-glow {
+  animation: moodIdleGlowLight 3s ease-in-out infinite;
+}
+@keyframes moodIdleGlowLight {
+  0%   { opacity: 0.55; box-shadow: none; border-color: var(--border); }
+  40%  { opacity: 0.85; box-shadow: 0 0 6px rgba(200,24,94,0.25), 0 0 12px rgba(200,24,94,0.10); border-color: rgba(200,24,94,0.35); }
+  55%  { opacity: 0.90; box-shadow: 0 0 10px rgba(200,24,94,0.30), 0 0 18px rgba(200,24,94,0.14); border-color: rgba(200,24,94,0.45); }
+  100% { opacity: 0.55; box-shadow: none; border-color: var(--border); }
+}
+
+/* Capsule texte — s'étire vers la gauche, son bord droit touche la bulle */
+/* bulle: left:-22px, width:20px → bord droit bulle = -22+20 = -2px
+   On place la capsule à right = 100% - (-2px) de son parent, mais plus simple :
+   on ancre à right depuis le wrap, en sachant que le wrap fait 64px
+   et que le bord droit de la bulle est à left=-2px dans le wrap = 64-2=62px depuis la droite */
+/* La pillule remplace la bulle emoji : même ancrage (bottom:22px, right:66px)
+   Elle grossit depuis la taille de la bulle vers la gauche */
+#moodBandeau {
+  position: absolute;
+  bottom: 22px;
+  right: 66px;
+  height: 20px;
+  background: var(--s2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  display: none;
+  align-items: center;
+  gap: 5px;
+  padding: 0 7px;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--sub);
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  z-index: 5;
+  overflow: hidden;
+  max-width: 20px;
+  opacity: 0;
+  transition: max-width 0.35s cubic-bezier(.4,0,.2,1),
+              opacity 0.2s ease,
+              border-color 0.2s ease,
+              background 0.2s ease;
+}
+#moodBandeau.visible { display: flex; }
+#moodBandeau.open { max-width: 200px; opacity: 1; }
+body.light #moodBandeau { border-color: rgba(200,24,94,0.18); }
+body.light #moodBandeau.open { color: var(--sub); }
+#moodBandeauEmoji { opacity: 0; transition: opacity 0.12s ease 0.1s; flex-shrink: 0; font-size: 12px; line-height: 1; }
+#moodBandeauText  { opacity: 0; transition: opacity 0.15s ease 0.25s; white-space: nowrap; }
+#moodBandeau.open #moodBandeauEmoji { opacity: 1; }
+#moodBandeau.open #moodBandeauText  { opacity: 1; }
+
+/* Clignotement synchronisé — capsule + bulle, même animation */
+#moodBandeau.mood-highlight-girl,
+#profileMoodOther.mood-highlight-girl {
+  animation: bandeauPingGirl 0.7s ease-in-out 5;
+  border-color: rgba(232,121,160,0.8);
+}
+#moodBandeau.mood-highlight-girl { color: #e879a0; background: rgba(232,121,160,0.10); }
+#moodBandeau.mood-highlight-boy,
+#profileMoodOther.mood-highlight-boy {
+  animation: bandeauPingBoy 0.7s ease-in-out 5;
+  border-color: rgba(91,156,246,0.8);
+}
+#moodBandeau.mood-highlight-boy { color: #5b9cf6; background: rgba(91,156,246,0.10); }
+
+/* Light — highlight girl : rose plus soutenu */
+body.light #moodBandeau.mood-highlight-girl { color: #c8185e; background: rgba(200,24,94,0.10); border-color: rgba(200,24,94,0.75); }
+body.light #profileMoodOther.mood-highlight-girl { border-color: rgba(200,24,94,0.75); }
+/* Light — highlight boy : bleu légèrement assombri pour contraster sur fond rose */
+body.light #moodBandeau.mood-highlight-boy { color: #3b7dd8; background: rgba(59,125,216,0.10); border-color: rgba(59,125,216,0.75); }
+body.light #profileMoodOther.mood-highlight-boy { border-color: rgba(59,125,216,0.75); }
+
+@keyframes bandeauPingGirl {
+  0%,100% { box-shadow: none; }
+  50%     { box-shadow: 0 0 10px rgba(232,121,160,0.6), 0 0 18px rgba(232,121,160,0.2); }
+}
+@keyframes bandeauPingBoy {
+  0%,100% { box-shadow: none; }
+  50%     { box-shadow: 0 0 10px rgba(91,156,246,0.6), 0 0 18px rgba(91,156,246,0.2); }
+}
+body.light #moodBandeau.mood-highlight-girl,
+body.light #profileMoodOther.mood-highlight-girl {
+  animation: bandeauPingGirlLight 0.7s ease-in-out 5;
+}
+body.light #moodBandeau.mood-highlight-boy,
+body.light #profileMoodOther.mood-highlight-boy {
+  animation: bandeauPingBoyLight 0.7s ease-in-out 5;
+}
+@keyframes bandeauPingGirlLight {
+  0%,100% { box-shadow: none; }
+  50%     { box-shadow: 0 0 10px rgba(200,24,94,0.45), 0 0 18px rgba(200,24,94,0.18); }
+}
+@keyframes bandeauPingBoyLight {
+  0%,100% { box-shadow: none; }
+  50%     { box-shadow: 0 0 10px rgba(59,125,216,0.40), 0 0 18px rgba(59,125,216,0.15); }
+}
+
+/* Badge humeur soi-même */
+#profileMoodSelf {
+  position: absolute;
+  top: -4px; right: -4px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  display: none;
+  align-items: center; justify-content: center;
+  font-size: 11px;
+  z-index: 3;
+  pointer-events: none;
+}
+#profileMoodSelf.visible { display: flex; }
+
+.profile-popup-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 2px 0;
 }
 
 #profilePopup {
-  position: absolute;
-  top: 50%; right: 64px;
-  transform: translateY(-50%);
+  position: fixed;
+  top: 14px; right: 64px;
   background: var(--s1);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 8px;
-  z-index: 200;
+  z-index: 1100;
   display: none;
   flex-direction: column;
   gap: 5px;
-  min-width: 110px;
+  min-width: 130px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.3);
   animation: profilePopIn 0.15s ease;
 }
+body.light #profilePopup { box-shadow: 0 4px 16px rgba(180,20,80,0.12); }
 #profilePopup.open { display: flex; }
 @keyframes profilePopIn {
-  from { opacity:0; transform:translateY(-50%) translateX(6px) scale(0.97); }
-  to   { opacity:1; transform:translateY(-50%) translateX(0) scale(1); }
+  from { opacity:0; transform:translateX(6px) scale(0.97); }
+  to   { opacity:1; transform:translateX(0) scale(1); }
 }
-.profile-popup-label {
-  font-size: 8px; font-weight: 700; color: var(--muted);
-  text-transform: uppercase; letter-spacing: 2px;
-  padding-bottom: 5px; border-bottom: 1px solid var(--border);
-}
-.profile-popup-btn {
-  display: flex; align-items: center; gap: 7px;
-  padding: 6px 9px; border-radius: 8px;
-  border: 1.5px solid var(--border);
-  background: var(--s2); color: var(--sub);
-  font-size: 11px; font-weight: 600;
-  font-family: 'DM Sans', sans-serif;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-}
+.profile-popup-label { font-size: 8px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+.profile-popup-btn { display: flex; align-items: center; gap: 7px; padding: 6px 9px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--s2); color: var(--sub); font-size: 11px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s; }
 .profile-popup-btn:hover { background: var(--s3); color: var(--text); }
+body.light .profile-popup-btn:hover { background: var(--s3); color: var(--green); border-color: rgba(200,24,94,0.3); }
 .profile-popup-btn.sel-girl { border-color:#e879a0; background:rgba(232,121,160,0.12); color:#e879a0; }
 .profile-popup-btn.sel-boy  { border-color:#5b9cf6; background:rgba(91,156,246,0.12);  color:#5b9cf6; }
+body.light .profile-popup-btn.sel-girl { border-color:#c8185e; background:rgba(200,24,94,0.10); color:#c8185e; }
+body.light .profile-popup-btn.sel-boy  { border-color:#3b7dd8; background:rgba(59,125,216,0.10); color:#3b7dd8; }
 .profile-popup-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 .profile-popup-dot.girl { background:#e879a0; box-shadow:0 0 5px rgba(232,121,160,0.7); }
 .profile-popup-dot.boy  { background:#5b9cf6; box-shadow:0 0 5px rgba(91,156,246,0.7); }
+body.light .profile-popup-dot.girl { background:#c8185e; box-shadow:0 0 5px rgba(200,24,94,0.5); }
+body.light .profile-popup-dot.boy  { background:#3b7dd8; box-shadow:0 0 5px rgba(59,125,216,0.4); }
+
+/* ── Picker humeur ── */
+#moodPicker {
+  position: absolute;
+  top: 50%; right: 16px;
+  transform: translateY(-50%);
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  z-index: 300;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 200px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+  animation: profilePopIn 0.15s ease;
+}
+body.light #moodPicker { box-shadow: 0 4px 24px rgba(180,20,80,0.14); }
+#moodPicker.open { display: flex; }
+.mood-picker-label { font-size: 9px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; }
+.mood-picker-grid { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.mood-emoji-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--s2);
+  border: 1.5px solid transparent;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; cursor: pointer;
+  transition: transform 0.15s, background 0.15s, border-color 0.15s;
+  user-select: none;
+}
+.mood-emoji-btn:hover { transform: scale(1.2); background: var(--s3); }
+.mood-emoji-btn.selected { border-color: var(--green); background: rgba(0,201,167,0.12); transform: scale(1.15); }
+body.light .mood-emoji-btn.selected { border-color: var(--green); background: rgba(200,24,94,0.10); }
+body.light .mood-emoji-btn:hover { background: var(--s3); border-color: rgba(200,24,94,0.18); }
+.mood-picker-cancel { font-size: 11px; color: var(--muted); text-align: center; cursor: pointer; padding: 4px 0; transition: color 0.15s; }
+.mood-picker-cancel:hover { color: var(--text); }
+body.light .mood-picker-cancel:hover { color: var(--green); }
+.mood-clear-btn {
+  font-size: 10px; font-weight: 600; color: #ef5350;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  cursor: pointer; padding: 5px 10px; border-radius: 8px;
+  border: 1px solid rgba(239,83,80,0.25); background: rgba(239,83,80,0.07);
+  transition: background 0.15s, border-color 0.15s;
+}
+.mood-clear-btn:hover { background: rgba(239,83,80,0.15); border-color: rgba(239,83,80,0.5); }
 
 #storyVideoWrap { transition: opacity 0.8s ease; }
 #tlContent      { transition: opacity 0.8s ease; }
@@ -2731,7 +3195,7 @@ body.light #counterBlock.glowing .c-num-big {
 <div class="section fade-in" id="postitsSection">
   <div class="section-label">Petits mots pour toi</div>
   <div class="postit-wrap" id="postitStack"></div>
-  <div class="stack-hint">👆 Tape pour passer au suivant</div>
+  <div class="stack-hint">👆 Tape ou swipe pour passer au suivant</div>
   <div class="stack-ctr" id="stackCounter"></div>
 </div>
 
@@ -2879,6 +3343,7 @@ body.light #counterBlock.glowing .c-num-big {
   </div>
   <div class="nav-item" id="lockNavBtn" onclick="toggleLockPopup()">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>Caché
+    <div id="lockUnreadBadge"></div>
   </div>
   </div>
   <div class="bottom-nav-safe"></div>
@@ -3005,7 +3470,13 @@ body.light #counterBlock.glowing .c-num-big {
           <span>🔥</span><span>✨</span><span>💀</span><span>🫶</span>
           <span>😭</span><span>💅</span><span>🥰</span><span>😈</span>
         </div>
+        <div class="dm-rec-indicator" id="dmRecIndicator">
+          <div class="dm-rec-dot"></div> <span id="dmRecTime">0:00</span>
+        </div>
         <input type="text" class="dm-input" id="dmInput" placeholder="Message…" autocomplete="off" maxlength="500">
+        <button class="dm-mic-btn" id="dmMicBtn" title="Maintenir pour enregistrer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-1 16.93A8.001 8.001 0 0 1 4 10H2a10 10 0 0 0 9 9.93V22h2v-2.07A10 10 0 0 0 22 10h-2a8 8 0 0 1-7 7.93V17.93z"/></svg>
+        </button>
         <button class="dm-send-btn" id="dmSendBtn">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
         </button>
@@ -3394,8 +3865,60 @@ body.light #counterBlock.glowing .c-num-big {
 var SB_URL = 'https://zjmbyjpxqrojnuymnpcf.supabase.co';
 var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqbWJ5anB4cXJvam51eW1ucGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0MzEzNjcsImV4cCI6MjA4NzAwNzM2N30.vNRgLgCNqZ9g351YmodZoXYDqars-thVDFmri2Z3oxE';
 
+// Emails des deux profils (les comptes créés dans Supabase Auth)
+var SB_USERS = {
+  girl: 'kimiha.takeshijr@gmail.com',
+  boy:  'elric.jr22@gmail.com'
+};
+// Mots de passe Supabase — encodés base64, jamais tapés par l'utilisateur
+// Pour encoder : btoa('ton_mot_de_passe') dans la console du navigateur
+var SB_PASS = {
+  girl: atob('Ri12X0wyakEjaT9NTTJG'),
+  boy:  atob('Ri12X0wyakEjaT9NTTJG')
+};
+
+// Token de session actif
+var _sbAccessToken = null;
+var SB_SESSION_KEY = 'jayana_sb_session';
+
+// Charge session depuis localStorage (si non expirée)
+function sbLoadSession(gender){
+  try{
+    var sessions = JSON.parse(localStorage.getItem(SB_SESSION_KEY)||'{}');
+    var s = sessions[gender];
+    if(s && s.access_token && s.expires_at && Date.now()/1000 < s.expires_at - 60){
+      _sbAccessToken = s.access_token;
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+// Sauvegarde session dans localStorage
+function sbSaveSession(gender, data){
+  try{
+    var sessions = JSON.parse(localStorage.getItem(SB_SESSION_KEY)||'{}');
+    sessions[gender] = { access_token: data.access_token, expires_at: data.expires_at };
+    localStorage.setItem(SB_SESSION_KEY, JSON.stringify(sessions));
+    _sbAccessToken = data.access_token;
+  }catch(e){}
+}
+
+// Login Supabase Auth pour un profil donné
+function sbLogin(gender){
+  return fetch(SB_URL+'/auth/v1/token?grant_type=password',{
+    method:'POST',
+    headers:{'apikey':SB_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({email:SB_USERS[gender],password:SB_PASS[gender]})
+  }).then(function(r){return r.json();}).then(function(data){
+    if(data.access_token){ sbSaveSession(gender,data); return true; }
+    return false;
+  }).catch(function(){ return false; });
+}
+
 function sbHeaders(extra){
-  return Object.assign({'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},extra||{});
+  var token = _sbAccessToken || SB_KEY;
+  return Object.assign({'apikey':SB_KEY,'Authorization':'Bearer '+token,'Content-Type':'application/json'},extra||{});
 }
 function sbGet(table,params){
   var url=SB_URL+'/rest/v1/'+table+'?'+(params||'order=created_at.desc');
@@ -3509,8 +4032,65 @@ var postitData = [
   { color:'#1a1a2a', icon:'🌙', title:'80 ans main dans la main', text:"Nos délires de \"vieille dame ch'ti\", nos bêtises... Je veux encore rire comme ça à 80 ans. 💕" },
   { color:'#222222', icon:'💘', title:'Ma seule certitude', text:"T'es pas juste \"la personne que j'aime\". T'es la seule avec qui je veux construire ma vie." }
 ];
+
+// Messages anniversaire mensuels — mois 1 à 11
+var annivPostitMessages = [
+  null, // index 0 non utilisé
+  "Un mois de plus à tes côtés... et j'en veux encore des centaines 💑",
+  "Deux mois. Deux mois à sourire grâce à toi. J'espère ne jamais m'y habituer 🌸",
+  "Trois mois ensemble — et déjà je sais plus comment c'était avant toi 🥺",
+  "Quatre mois. Chaque journée avec toi est un cadeau que je garde précieusement 💝",
+  "Cinq mois. T'es devenue une évidence dans ma vie, et c'est la plus belle des évidences ✨",
+  "Six mois déjà. La moitié d'une année à être heureux — grâce à toi 🎂",
+  "Sept mois. Je recompte parfois depuis le début juste pour me rappeler ma chance 💫",
+  "Huit mois. Nos souvenirs s'accumulent et chacun d'eux me fait sourire 🌟",
+  "Neuf mois. Je t'aime un peu plus fort qu'hier, et moins fort que demain 💞",
+  "Dix mois. T'es mon endroit préféré au monde 🏠💕",
+  "Onze mois. Presque un an... et pourtant ça me semble à peine commencé 🌙"
+];
+
+function getAnnivPostitText(months) {
+  if (months % 12 === 0) {
+    // Anniversaire annuel
+    var years = months / 12;
+    if (years === 1) return "Un an ensemble !! Boucle bouclée, mais notre histoire elle, ne fait que commencer 🎉💑";
+    if (years === 2) return "Deux ans. Deux ans à construire quelque chose de vrai, de beau, de nous. Je t'aime 💍";
+    if (years === 3) return "Trois ans. Trois ans que t'es ma meilleure décision 🥂✨";
+    // Au-delà : message générique annuel
+    return years + " ans ensemble. Je recommencerais mille fois 🎂💑";
+  } else if (months < 12) {
+    // Mois 1 à 11 — message personnalisé
+    return annivPostitMessages[months];
+  } else {
+    // Mois 13+ hors anniversaire annuel — message générique avec le vrai chiffre
+    var m = months % 12 === 0 ? 12 : months % 12;
+    var y = Math.floor(months / 12);
+    return y + " an" + (y > 1 ? "s" : "") + " et " + m + " mois. Chaque jour compte, et chaque jour t'es là 🩷";
+  }
+}
+
 var rots = [-1.8, 1.4, -0.9, 2.0, -1.3, 0.7, -2.2, 1.1];
 var stackIndex = 0;
+
+// Injecte le post-it anniversaire en tête de pile si on est le 29
+(function injectAnnivPostit(){
+  var START  = new Date(2024, 9, 29);
+  var now    = new Date();
+  if (now.getDate() !== 29) return;
+  var months = (now.getFullYear() - START.getFullYear()) * 12
+             + (now.getMonth()    - START.getMonth());
+  if (months < 1) return;
+  var msg = getAnnivPostitText(months);
+  var annivPostit = {
+    color: '#2a1a1a',
+    icon:  '🎂',
+    title: 'Bonne mensiversaire 🩷',
+    text:  msg,
+    isAnniv: true
+  };
+  postitData.unshift(annivPostit); // En tête → s'affiche en premier
+  rots.unshift(0.4);
+})();
 
 function buildStack() {
   var stackWrap = document.getElementById('postitStack');
@@ -3527,26 +4107,165 @@ function buildStack() {
     el.style.transform = 'translateY(' + (depth * 4) + 'px) rotate(' + rots[dIdx % rots.length] + 'deg)';
     el.style.opacity = depth === 0 ? '1' : String(Math.max(0.38, 1 - depth * 0.16));
     el.innerHTML = '<div class="p-art" style="background:' + dd.color + '">' + dd.icon + '</div><div class="p-body"><div class="p-title">' + dd.title + '</div><div class="p-text">' + dd.text + '</div></div>';
+    if (dd.isAnniv) {
+      el.style.boxShadow = '0 0 0 2px rgba(245,197,24,0.6), 0 8px 32px rgba(0,0,0,0.45)';
+      el.style.outline = 'none';
+    }
     stackWrap.appendChild(el);
   }
   stackCtr.textContent = (stackIndex + 1) + ' / ' + n;
   var top = stackWrap.lastElementChild;
-  if (top) top.addEventListener('click', flipTop);
+  if (top) attachPostitEvents(top);
 }
 
-function flipTop() {
+function dismissTop(dirX) {
   var top = document.getElementById('postitStack').lastElementChild;
-  if (!top) return;
-  top.style.transition = 'transform 0.32s ease, opacity 0.26s';
-  top.style.transform = 'translateX(110%) rotate(15deg)';
+  if (!top || top._dismissing) return;
+  top._dismissing = true;
+  var angle = dirX > 0 ? 18 : -18;
+  var tx = dirX > 0 ? '115%' : '-115%';
+  top.style.transition = 'transform 0.32s cubic-bezier(.4,0,.6,1), opacity 0.26s';
+  top.style.transform = 'translateX(' + tx + ') rotate(' + angle + 'deg)';
   top.style.opacity = '0';
   top.style.pointerEvents = 'none';
   stackIndex = (stackIndex + 1) % postitData.length;
-  setTimeout(buildStack, 310);
+  setTimeout(buildStack, 300);
+}
+
+function attachPostitEvents(el) {
+  var startX, startY, dragging = false, moved = false;
+  var baseRot = rots[stackIndex % rots.length];
+
+  /* ── Touch ── */
+  el.addEventListener('touchstart', function(e) {
+    if (el._dismissing) return;
+    var t = e.touches[0];
+    startX = t.clientX;
+    startY = t.clientY;
+    dragging = true;
+    moved = false;
+    el.style.transition = 'none';
+  }, { passive: true });
+
+  el.addEventListener('touchmove', function(e) {
+    if (!dragging || el._dismissing) return;
+    var t = e.touches[0];
+    var dx = t.clientX - startX;
+    var dy = t.clientY - startY;
+    if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+    moved = true;
+    // N'intercepte que si le mouvement est majoritairement horizontal
+    if (Math.abs(dx) > Math.abs(dy)) {
+      e.preventDefault();
+      var rot = baseRot + dx * 0.06;
+      var lift = Math.min(Math.abs(dx) * 0.04, 6);
+      el.style.transform = 'translateX(' + dx + 'px) translateY(-' + lift + 'px) rotate(' + rot + 'deg)';
+      el.style.opacity = String(Math.max(0.3, 1 - Math.abs(dx) / 280));
+    }
+  }, { passive: false });
+
+  el.addEventListener('touchend', function(e) {
+    if (!dragging || el._dismissing) return;
+    dragging = false;
+    var t = e.changedTouches[0];
+    var dx = t.clientX - startX;
+    var dy = t.clientY - startY;
+
+    if (!moved) {
+      // Simple tap
+      dismissTop(1);
+      return;
+    }
+
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 60) {
+      dismissTop(dx > 0 ? 1 : -1);
+    } else {
+      // Snap back
+      el.style.transition = 'transform 0.3s cubic-bezier(.4,2,.55,.9), opacity 0.2s';
+      el.style.transform = 'translateY(0px) rotate(' + baseRot + 'deg)';
+      el.style.opacity = '1';
+    }
+  }, { passive: true });
+
+  /* ── Mouse (desktop) ── */
+  el.addEventListener('mousedown', function(e) {
+    if (el._dismissing) return;
+    startX = e.clientX;
+    startY = e.clientY;
+    dragging = true;
+    moved = false;
+    el.style.transition = 'none';
+    el.style.cursor = 'grabbing';
+  });
+
+  document.addEventListener('mousemove', function onMove(e) {
+    if (!dragging || el._dismissing) return;
+    var dx = e.clientX - startX;
+    var dy = e.clientY - startY;
+    if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+    moved = true;
+    var rot = baseRot + dx * 0.06;
+    var lift = Math.min(Math.abs(dx) * 0.04, 6);
+    el.style.transform = 'translateX(' + dx + 'px) translateY(-' + lift + 'px) rotate(' + rot + 'deg)';
+    el.style.opacity = String(Math.max(0.3, 1 - Math.abs(dx) / 280));
+    el._onMove = onMove;
+  });
+
+  document.addEventListener('mouseup', function onUp(e) {
+    if (!dragging || el._dismissing) return;
+    dragging = false;
+    el.style.cursor = 'pointer';
+    document.removeEventListener('mousemove', el._onMove);
+    document.removeEventListener('mouseup', onUp);
+    var dx = e.clientX - startX;
+    var dy = e.clientY - startY;
+
+    if (!moved) {
+      dismissTop(1);
+      return;
+    }
+
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 60) {
+      dismissTop(dx > 0 ? 1 : -1);
+    } else {
+      el.style.transition = 'transform 0.3s cubic-bezier(.4,2,.55,.9), opacity 0.2s';
+      el.style.transform = 'translateY(0px) rotate(' + baseRot + 'deg)';
+      el.style.opacity = '1';
+    }
+  });
 }
 buildStack();
 
-// ── SONGS ──
+// ── POLLING badge non-lus (page principale) ──
+// Vérifie les messages non-lus toutes les 30s pour mettre à jour le cadenas
+(function startLockBadgePolling(){
+  function checkUnread(){
+    // Ne pas vérifier si InstaLove est ouvert (il gère lui-même)
+    if(document.getElementById('hiddenPage').classList.contains('active')) return;
+    fetch(SB_URL + '/rest/v1/messages?order=created_at.desc&limit=50', {
+      headers: sbHeaders()
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(rows){
+      if(!Array.isArray(rows)) return;
+      var unread = rows.filter(function(m){ return !m.seen; }).length;
+      var lockBtn   = document.getElementById('lockNavBtn');
+      var lockBadge = document.getElementById('lockUnreadBadge');
+      if(!lockBtn || !lockBadge) return;
+      if(unread > 0){
+        lockBadge.textContent = unread > 99 ? '99+' : unread;
+        lockBadge.classList.add('visible');
+        lockBtn.classList.add('has-unread');
+      } else {
+        lockBadge.classList.remove('visible');
+        lockBtn.classList.remove('has-unread');
+      }
+    })
+    .catch(function(){});
+  }
+  checkUnread(); // Vérification immédiate au chargement
+  setInterval(checkUnread, 30000); // Puis toutes les 30 secondes
+})();
 var songsLove = [
   {title:"Perfect",            artist:"Ed Sheeran",     file:"perfect.mp3",                yt:"https://www.youtube.com/watch?v=2Vv-BfVoq4g"},
   {title:"Imagine",            artist:"Carbone",        file:"imagine_carbone.mp3",         yt:"https://www.youtube.com/watch?v=iuSUZyTWi6o"},
@@ -3950,10 +4669,15 @@ document.getElementById('spinBtn').addEventListener('click',function(){
 // ── LOCK ──
 var lockPopup=document.getElementById('lockPopup'),lockInput=document.getElementById('lockInput'),lockError=document.getElementById('lockError');
 function toggleLockPopup(){resetZoom();var isOpen=lockPopup.style.display==='block';document.getElementById('libraryPopup').style.display='none';lockPopup.style.display=isOpen?'none':'block';if(!isOpen){lockError.style.display='none';lockInput.value='';}}
-function checkCode(){
+var _HASH_NEMO='eb38eebd7bef45d49aef46835c8460fc98c9af3f68f6af759a08173709cd76ea';
+var _HASH_KEVIN='9e1822c2d03202bc1cf8dfb8b858c5f679302f17db901abb111a9f8eecaae8db';
+var _S=atob('UGxAeWxpc3RfSjR5YW5hXzIwMjUheEs5');
+async function _sha256(str){var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str+_S));return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');}
+async function checkCode(){
   var val=lockInput.value.trim().toUpperCase();lockError.style.display='none';
-  if(val==='NEMO'){lockPopup.style.display='none';document.getElementById('prankOverlay').classList.add('show');return;}
-  if(val==='KEVIN'){lockPopup.style.display='none';openHiddenPage();return;}
+  var h=await _sha256(val);
+  if(h===_HASH_NEMO){lockPopup.style.display='none';document.getElementById('prankOverlay').classList.add('show');return;}
+  if(h===_HASH_KEVIN){lockPopup.style.display='none';openHiddenPage();return;}
   lockError.style.display='block';lockError.textContent='❌ Code incorrect, recommence !';lockInput.value='';
 }
 function closePrank(){document.getElementById('prankOverlay').classList.remove('show');lockPopup.style.display='block';lockInput.value='';}
@@ -5101,7 +5825,7 @@ function filterSongs(q){
 
 // ── MEMO COUPLE — Supabase ──
 (function(){
-  var MEMO_CODE='BILOUTE', memoUnlocked=false, memoCurrentNote=null;
+  var _MEMO_HASH='a586ffe3acf28484d17760d1ddaa2af699666c870aaaa66f8cfc826a528429ce', memoUnlocked=false, memoCurrentNote=null;
   var NOTE_COLORS=['#1a3a2a','#2a1a2e','#1a2a3a','#2a2216','#1a2a2a','#2a1a1a','#1a1a2a','#222222'];
   var NOTE_ICONS=['💬','✍️','💌','📖','🌙','💭','✨','🎵'];
 
@@ -5116,15 +5840,21 @@ function filterSongs(q){
     setTimeout(function(){document.getElementById('memoAuthInput').focus();},80);
   }
   window.closeMemoAuth=function(){document.getElementById('memoAuthModal').classList.remove('open');};
-  window.memoCheckAuth=function(){
+  window.memoCheckAuth=async function(){
     var val=document.getElementById('memoAuthInput').value.trim().toUpperCase();
-    if(val===MEMO_CODE){window.closeMemoAuth();if(_authCb){_authCb();_authCb=null;}}
+    var h=await _sha256(val);
+    if(h===_MEMO_HASH){window.closeMemoAuth();if(_authCb){_authCb();_authCb=null;}}
     else{document.getElementById('memoAuthErr').style.display='block';document.getElementById('memoAuthInput').value='';document.getElementById('memoAuthInput').focus();}
   };
   document.getElementById('memoAuthInput').addEventListener('keydown',function(e){if(e.key==='Enter')window.memoCheckAuth();});
   document.getElementById('memoAuthModal').addEventListener('click',function(e){if(e.target===this)window.closeMemoAuth();});
 
-  window.memoRequestUnlock=function(){if(memoUnlocked){memoLock();return;}openMemoAuth(function(){memoUnlock();});};
+  window.memoRequestUnlock=function(){
+    if(memoUnlocked){memoLock();return;}
+    // Si connecté (session active), pas de code demandé
+    if(_sbAccessToken){memoUnlock();return;}
+    openMemoAuth(function(){memoUnlock();});
+  };
 
   function memoUnlock(){
     memoUnlocked=true;
@@ -5486,7 +6216,7 @@ function filterSongs(q){
   });
 })();
 (function(){
-  var SG_CODE = 'BILOUTE';
+  var _SG_HASH = 'a586ffe3acf28484d17760d1ddaa2af699666c870aaaa66f8cfc826a528429ce';
   var sgUnlocked = false;
   var _sgAuthCb = null;
 
@@ -5503,9 +6233,10 @@ function filterSongs(q){
   window.closeSgAuth = function(){
     document.getElementById('sgAuthModal').classList.remove('open');
   };
-  window.sgCheckAuth = function(){
+  window.sgCheckAuth = async function(){
     var val = document.getElementById('sgAuthInput').value.trim().toUpperCase();
-    if(val === SG_CODE){
+    var h = await _sha256(val);
+    if(h === _SG_HASH){
       window.closeSgAuth();
       if(_sgAuthCb){ _sgAuthCb(); _sgAuthCb = null; }
     } else {
@@ -5519,7 +6250,10 @@ function filterSongs(q){
 
   // Toggle lock
   window.sgToggleLock = function(){
-    if(sgUnlocked){ sgLock(); } else { openSgAuth(sgUnlock); }
+    if(sgUnlocked){ sgLock(); return; }
+    // Si connecté (session active), pas de code demandé
+    if(_sbAccessToken){ sgUnlock(); return; }
+    openSgAuth(sgUnlock);
   };
 
   function sgUnlock(){
@@ -5812,44 +6546,416 @@ function toggleFavorite(file, btn){
 
 loadFavorites();
 
-// ── Profil Avatar ─────────────────────────────────────────────────────────
+// ── Profil Avatar + Humeur du jour ────────────────────────────────────────
 (function(){
-  var KEY = 'jayana_profile';
-  var EMOJIS = { neutral:'👤', girl:'👧', boy:'👦' };
+  var KEY      = 'jayana_profile';
+  var MOOD_KEY = 'jayana_mood';
+  var MOOD_TABLE = 'moods';
+  var EMOJIS   = { neutral:'👤', girl:'👧', boy:'👦' };
+  var OTHER    = { girl:'boy', boy:'girl' };
+  var MOODS    = ['😊','😍','🥰','😴','😔','🥺','😂','🔥','😎','🤩','😤','🥳','😇','🤗','💪'];
+  var MOOD_LABELS = window.MOOD_LABELS = {
+    '😊':'Heureuse','😍':'Amoureuse','🥰':'Câline','😴':'Fatiguée','😔':'Triste',
+    '🥺':'Sensible','😂':'Morte de rire','🔥':'Motivée','😎':'Sereine','🤩':'Excitée',
+    '😤':'Frustrée','🥳':'En fête','😇':'Sage','🤗':'Affectueuse','💪':'Énergique'
+  };
+  var MOOD_LABELS_BOY = window.MOOD_LABELS_BOY = {
+    '😊':'Heureux','😍':'Amoureux','🥰':'Câlin','😴':'Fatigué','😔':'Triste',
+    '🥺':'Sensible','😂':'Mort de rire','🔥':'Motivé','😎':'Serein','🤩':'Excité',
+    '😤':'Frustré','🥳':'En fête','😇':'Sage','🤗':'Affectueux','💪':'Énergique'
+  };
 
   function get(){ return localStorage.getItem(KEY) || null; }
   function save(g){ localStorage.setItem(KEY, g); }
+  window._profileSave = save;
+  window._profileApply = function(g){ apply(g); };
+  window._profileLoadMoods = function(){ loadMoods(); };
 
+  // ── Humeur Supabase ──
+  function getTodayStr(){
+    var d = new Date();
+    return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
+  }
+
+  function saveMood(sender, emoji){
+    var today = getTodayStr();
+    // Upsert : si une humeur existe déjà aujourd'hui pour ce sender, on la met à jour
+    fetch(SB_URL + '/rest/v1/' + MOOD_TABLE + '?sender=eq.' + sender + '&date=eq.' + today, {
+      method: 'DELETE', headers: sbHeaders()
+    }).then(function(){
+      fetch(SB_URL + '/rest/v1/' + MOOD_TABLE, {
+        method: 'POST',
+        headers: sbHeaders({'Prefer':'return=minimal'}),
+        body: JSON.stringify({ sender: sender, emoji: emoji, date: today })
+      }).catch(function(){});
+    }).catch(function(){});
+  }
+
+  var _lastOtherMood = null; // mémorise la dernière humeur connue de l'autre
+  var _moodFirstLoad = true; // premier chargement → pas de notif
+
+  function notifyMoodChange(emoji){
+    // Scroll haut uniquement si on est sur la page principale (pas mode caché)
+    var hiddenPage = document.getElementById('hiddenPage');
+    var isHidden = hiddenPage && hiddenPage.classList.contains('active');
+    if(!isHidden){
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    // Déclencher la capsule pillule après un court délai (laisse le scroll se faire)
+    setTimeout(function(){
+      if(window.triggerMoodBandeau) triggerMoodBandeau();
+    }, isHidden ? 0 : 400);
+  }
+
+  function loadMoods(){
+    var today = getTodayStr();
+    fetch(SB_URL + '/rest/v1/' + MOOD_TABLE + '?date=eq.' + today, {
+      headers: sbHeaders()
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(rows){
+      if(!Array.isArray(rows)) return;
+      var profile = get();
+      var otherProfile = profile ? OTHER[profile] : null;
+      var selfFound  = false;
+      var otherFound = false;
+      rows.forEach(function(row){
+        if(profile && row.sender === profile){
+          selfFound = true;
+          updateMoodBadge('self', row.emoji);
+          window._myMood = row.emoji;
+          var ppIcon = document.getElementById('ppMoodIcon');
+          if(ppIcon) ppIcon.textContent = row.emoji;
+        } else if(otherProfile && row.sender === otherProfile){
+          otherFound = true;
+          updateMoodBadge('other', row.emoji);
+          // Détecter le changement d'humeur de l'autre
+          if(row.emoji !== _lastOtherMood){
+            _lastOtherMood = row.emoji;
+            if(!_moodFirstLoad) notifyMoodChange(row.emoji);
+          }
+        }
+      });
+      if(!selfFound)  updateMoodBadge('self',  null);
+      if(!otherFound){
+        updateMoodBadge('other', null);
+        _lastOtherMood = null;
+      }
+    })
+    .catch(function(){});
+  }
+
+  function updateMoodBadge(who, emoji){
+    var el = document.getElementById(who === 'self' ? 'profileMoodSelf' : 'profileMoodOther');
+    var bandeau = document.getElementById('moodBandeau');
+    if(!el) return;
+    if(emoji){
+      el.textContent = emoji;
+      el.classList.add('visible');
+      if(who === 'other'){
+        if(bandeau) bandeau.classList.add('visible');
+        el.classList.add('idle-glow');
+      }
+    } else {
+      el.classList.remove('visible', 'idle-glow');
+      if(who === 'other' && bandeau) bandeau.classList.remove('visible');
+    }
+  }
+
+  // ── Rendu des avatars ──
   function apply(gender){
-    var av  = document.getElementById('profileAvatar');
-    var bg  = document.getElementById('ppBtnGirl');
-    var bb  = document.getElementById('ppBtnBoy');
+    var av       = document.getElementById('profileAvatar');
+    var avEmoji  = document.getElementById('profileAvatarEmoji');
+    var avOther  = document.getElementById('profileAvatarOther');
+    var avOtherE = document.getElementById('profileAvatarOtherEmoji');
+    var bg       = document.getElementById('ppBtnGirl');
+    var bb       = document.getElementById('ppBtnBoy');
+    var ppMood   = document.getElementById('ppBtnMood');
     if(!av) return;
-    av.textContent = EMOJIS[gender] || EMOJIS.neutral;
-    av.className   = gender || 'neutral';
+
+    var ppLabel = document.querySelector('#profilePopup .profile-popup-label');
+    if(!gender){
+      // Non connecté : avatar neutre seul, popup simplifié
+      if(avEmoji) avEmoji.textContent = EMOJIS.neutral;
+      av.className = 'neutral';
+      if(avOther) avOther.classList.remove('visible');
+      var bandeau = document.getElementById('moodBandeau');
+      if(bandeau) bandeau.classList.remove('visible','open');
+      if(ppMood)  ppMood.style.display = 'none';
+      if(bg) bg.style.display = 'flex';
+      if(bb) bb.style.display = 'flex';
+      if(ppLabel) ppLabel.textContent = 'Qui es-tu ?';
+      var ppSep = document.querySelector('#profilePopup .profile-popup-sep');
+      if(ppSep) ppSep.style.display = 'none';
+      var ppLogout2 = document.getElementById('ppBtnLogout');
+      if(ppLogout2) ppLogout2.style.display = 'none';
+    } else {
+      if(avEmoji) avEmoji.textContent = EMOJIS[gender];
+      av.className = gender;
+      if(avOther && avOtherE){
+        avOtherE.textContent = EMOJIS[OTHER[gender]];
+        avOther.classList.add('visible');
+      }
+      var bandeau2 = document.getElementById('moodBandeau');
+      if(bandeau2) bandeau2.classList.add('visible');
+      if(ppMood) ppMood.style.display = 'flex';
+      if(bg) bg.style.display = 'flex';
+      if(bb) bb.style.display = 'flex';
+      if(ppLabel) ppLabel.textContent = 'Je suis…';
+      var ppSep2 = document.querySelector('#profilePopup .profile-popup-sep');
+      if(ppSep2) ppSep2.style.display = '';
+      var ppLogout = document.getElementById('ppBtnLogout');
+      if(ppLogout) ppLogout.style.display = 'flex';
+    }
     if(bg){ bg.className = 'profile-popup-btn' + (gender==='girl' ? ' sel-girl' : ''); }
     if(bb){ bb.className = 'profile-popup-btn' + (gender==='boy'  ? ' sel-boy'  : ''); }
   }
 
+  // ── Picker humeur ──
+  function deleteMood(sender){
+    var today = getTodayStr();
+    fetch(SB_URL + '/rest/v1/' + MOOD_TABLE + '?sender=eq.' + sender + '&date=eq.' + today, {
+      method: 'DELETE', headers: sbHeaders()
+    }).catch(function(){});
+  }
+
+  window.openMoodPicker = function(e){
+    if(e && e.stopPropagation) e.stopPropagation();
+    var pp = document.getElementById('profilePopup');
+    if(pp) pp.classList.remove('open');
+    var picker = document.getElementById('moodPicker');
+    var grid   = document.getElementById('moodPickerGrid');
+    if(!picker || !grid) return;
+    grid.innerHTML = '';
+    MOODS.forEach(function(emoji){
+      var btn = document.createElement('div');
+      btn.className = 'mood-emoji-btn' + (window._myMood === emoji ? ' selected' : '');
+      btn.textContent = emoji;
+      btn.onclick = function(){
+        var profile = get();
+        if(!profile) return;
+        window._myMood = emoji;
+        saveMood(profile, emoji);
+        updateMoodBadge('self', emoji);
+        var ppIcon = document.getElementById('ppMoodIcon');
+        if(ppIcon) ppIcon.textContent = emoji;
+        closeMoodPicker();
+      };
+      grid.appendChild(btn);
+    });
+    // Supprimer l'ancien bouton effacer s'il existe
+    var oldClear = picker.querySelector('.mood-clear-btn');
+    if(oldClear) oldClear.remove();
+    // Bouton supprimer — visible seulement si une humeur est définie
+    var selfBadgeEl = document.getElementById('profileMoodSelf');
+    var hasMood = !!(window._myMood) || !!(selfBadgeEl && selfBadgeEl.classList.contains('visible') && selfBadgeEl.textContent.trim().length > 0);
+    var clearBtn = document.createElement('div');
+    clearBtn.className = 'mood-clear-btn';
+    clearBtn.textContent = '🗑 Effacer mon humeur';
+    clearBtn.style.display = hasMood ? 'flex' : 'none';
+    clearBtn.onclick = function(ev){
+      ev.stopPropagation();
+      var profile = get();
+      if(!profile) return;
+      deleteMood(profile);
+      window._myMood = null;
+      updateMoodBadge('self', null);
+      var ppIcon = document.getElementById('ppMoodIcon');
+      if(ppIcon) ppIcon.textContent = '😶';
+      var selfBadge = document.getElementById('profileMoodSelf');
+      if(selfBadge){ selfBadge.textContent = ''; selfBadge.classList.remove('visible'); }
+      closeMoodPicker();
+    };
+    grid.after(clearBtn);
+    picker.classList.add('open');
+  };
+
+  window.closeMoodPicker = function(){
+    var picker = document.getElementById('moodPicker');
+    if(picker) picker.classList.remove('open');
+  };
+
+  // Modal de code profil
+  window.showProfileCodeModal = function showProfileCodeModal(gender, onSuccess){
+    // Crée la modal si elle n'existe pas
+    var existing = document.getElementById('profileAuthModal');
+    if(existing) existing.remove();
+    var modal = document.createElement('div');
+    modal.id = 'profileAuthModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;';
+    var icon = gender==='girl' ? '👧' : '👦';
+    var name = gender==='girl' ? 'Zelda' : 'Link';
+    modal.innerHTML = '<div style="background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:28px 22px;width:100%;max-width:320px;text-align:center;box-shadow:var(--shadow);">'
+      +'<div style="font-size:36px;margin-bottom:8px;">'+icon+'</div>'
+      +'<div style="font-family:serif;font-size:19px;font-weight:700;color:var(--text);margin-bottom:4px;">Profil '+name+'</div>'
+      +'<div style="font-size:12px;color:var(--muted);margin-bottom:18px;">Entre le code pour te connecter</div>'
+      +'<input id="profileAuthInput" type="password" placeholder="Code..." autocomplete="off" style="width:100%;padding:11px 14px;font-size:15px;border:1px solid var(--border);border-radius:8px;background:var(--s2);color:var(--text);font-family:sans-serif;outline:none;text-align:center;letter-spacing:3px;box-sizing:border-box;">'
+      +'<div id="profileAuthErr" style="font-size:11px;color:#e05555;margin-top:8px;display:none;">❌ Code incorrect, réessaie !</div>'
+      +'<button id="profileAuthBtn" style="width:100%;padding:12px;margin-top:10px;background:var(--green);color:#000;font-weight:700;font-size:14px;font-family:sans-serif;border:none;border-radius:8px;cursor:pointer;">Valider</button>'
+      +'<span id="profileAuthCancel" style="font-size:11px;color:var(--muted);cursor:pointer;margin-top:10px;display:block;">Annuler</span>'
+      +'</div>';
+    document.body.appendChild(modal);
+    var input = document.getElementById('profileAuthInput');
+    var err   = document.getElementById('profileAuthErr');
+    var btn   = document.getElementById('profileAuthBtn');
+    var cancel= document.getElementById('profileAuthCancel');
+    setTimeout(function(){ input.focus(); }, 80);
+    var _S2 = atob('UGxAeWxpc3RfSjR5YW5hXzIwMjUheEs5');
+    var _HASH_BILOUTE = 'a586ffe3acf28484d17760d1ddaa2af699666c870aaaa66f8cfc826a528429ce';
+    async function tryAuth(){
+      var val = input.value.trim().toUpperCase();
+      var h = await _sha256(val);
+      if(h !== _HASH_BILOUTE){ err.style.display='block'; input.value=''; input.focus(); return; }
+      btn.textContent = '⏳ Connexion...';
+      btn.disabled = true;
+      var ok = await sbLogin(gender);
+      if(ok){
+        modal.remove();
+        onSuccess();
+      } else {
+        btn.textContent = 'Valider';
+        btn.disabled = false;
+        err.style.display = 'block';
+        err.textContent = '❌ Erreur de connexion, réessaie !';
+        input.value = '';
+        input.focus();
+      }
+    }
+    btn.addEventListener('click', tryAuth);
+    input.addEventListener('keydown', function(e){ if(e.key==='Enter') tryAuth(); });
+    cancel.addEventListener('click', function(){ modal.remove(); });
+  }
+
   window.setProfile = function(gender){
-    save(gender);
-    apply(gender);
-    document.getElementById('profilePopup').classList.remove('open');
+    // Si session déjà valide pour ce profil, pas de code demandé
+    if(sbLoadSession(gender)){
+      save(gender);
+      apply(gender);
+      var pp = document.getElementById('profilePopup');
+      if(pp) pp.classList.remove('open');
+      loadMoods();
+      return;
+    }
+    // Sinon, demander le code une fois
+    var pp = document.getElementById('profilePopup');
+    if(pp) pp.classList.remove('open');
+    showProfileCodeModal(gender, function(){
+      save(gender);
+      apply(gender);
+      loadMoods();
+    });
   };
 
   window.toggleProfilePopup = function(){
-    document.getElementById('profilePopup').classList.toggle('open');
+    var pp = document.getElementById('profilePopup');
+    if(pp) pp.classList.toggle('open');
+    var picker = document.getElementById('moodPicker');
+    if(picker) picker.classList.remove('open');
   };
 
   // Fermer au clic extérieur
   document.addEventListener('click', function(e){
-    var av = document.getElementById('profileAvatar');
-    var pp = document.getElementById('profilePopup');
-    if(pp && pp.classList.contains('open') && !pp.contains(e.target) && e.target !== av)
+    var wrap   = document.getElementById('profileAvatarWrap');
+    var pp     = document.getElementById('profilePopup');
+    var picker = document.getElementById('moodPicker');
+    if(pp && pp.classList.contains('open') && wrap && !wrap.contains(e.target))
       pp.classList.remove('open');
+    if(picker && picker.classList.contains('open') && !picker.contains(e.target) && wrap && !wrap.contains(e.target))
+      picker.classList.remove('open');
   });
 
+  // Au démarrage : charger la session Supabase si un profil est déjà mémorisé
+  (function(){
+    var saved = get();
+    if(saved) sbLoadSession(saved); // restaure le token en mémoire si valide
+  })();
   apply(get());
+  if(get()) loadMoods();
+  _moodFirstLoad = false;
+  setInterval(function(){ if(get()) loadMoods(); }, 30000);
+
+  // ── Réinitialisation à minuit ──
+  function resetMoodsUI(){
+    window._myMood = null;
+    updateMoodBadge('self',  null);
+    updateMoodBadge('other', null);
+    var ppIcon  = document.getElementById('ppMoodIcon');
+    if(ppIcon) ppIcon.textContent = '😶';
+    var bandeau = document.getElementById('moodBandeau');
+    if(bandeau){ clearTimeout(window._bandeauTimer); bandeau.classList.remove('open','visible','mood-highlight-girl','mood-highlight-boy'); }
+  }
+
+  function scheduleMidnightReset(){
+    var now  = new Date();
+    var next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 2); // minuit + 2s
+    var ms   = next - now;
+    setTimeout(function(){
+      resetMoodsUI();
+      scheduleMidnightReset(); // reprogrammer pour le lendemain
+    }, ms);
+  }
+  scheduleMidnightReset();
+
+  window.triggerMoodBandeau = function(){
+    var bandeau    = document.getElementById('moodBandeau');
+    var bandeauTxt = document.getElementById('moodBandeauText');
+    var bandeauEmo = document.getElementById('moodBandeauEmoji');
+    var moodBadge  = document.getElementById('profileMoodOther');
+    var avOther    = document.getElementById('profileAvatarOther');
+    if(!bandeau) return;
+
+    var myProfile    = get();
+    var otherProfile = OTHER[myProfile];
+    var hlBandeau    = otherProfile === 'boy' ? 'mood-highlight-boy' : 'mood-highlight-girl';
+    var labels       = otherProfile === 'boy' ? MOOD_LABELS_BOY : MOOD_LABELS;
+    var currentMood  = moodBadge ? moodBadge.textContent : '';
+    var label        = currentMood && labels[currentMood] ? labels[currentMood] : '';
+    if(bandeauEmo) bandeauEmo.textContent = currentMood || '';
+    if(bandeauTxt) bandeauTxt.textContent = label;
+
+    // Reset
+    if(avOther) avOther.classList.remove('mood-highlight','mood-highlight-boy');
+    if(moodBadge) moodBadge.classList.remove('mood-highlight-girl','mood-highlight-boy');
+    bandeau.classList.remove('open','mood-highlight-girl','mood-highlight-boy');
+    void bandeau.offsetWidth;
+
+    // Masquer la bulle emoji — la pillule la remplace
+    if(moodBadge){ moodBadge.style.opacity = '0'; moodBadge.classList.remove('idle-glow'); }
+
+    // Ouvrir + animer
+    bandeau.classList.add('open');
+    setTimeout(function(){
+      bandeau.classList.add(hlBandeau);
+      if(moodBadge) moodBadge.classList.add(hlBandeau);
+    }, 150);
+
+    // Fermer après 4s — réafficher la bulle
+    clearTimeout(window._bandeauTimer);
+    window._bandeauTimer = setTimeout(function(){
+      bandeau.classList.remove('open','mood-highlight-girl','mood-highlight-boy');
+      if(moodBadge) moodBadge.classList.remove('mood-highlight-girl','mood-highlight-boy');
+      // Réafficher la bulle après la fermeture de la pillule
+      setTimeout(function(){
+        if(moodBadge){ moodBadge.style.opacity = ''; moodBadge.classList.add('idle-glow'); }
+      }, 200);
+    }, 4000);
+  };
+
+  // Brancher le clic sur l'avatar secondaire
+  document.addEventListener('click', function(e){
+    var avOther = document.getElementById('profileAvatarOther');
+    if(avOther && avOther.contains(e.target)){
+      var moodBadge = document.getElementById('profileMoodOther');
+      var hasMood = moodBadge && moodBadge.textContent.trim().length > 0;
+      if(hasMood) triggerMoodBandeau();
+    }
+  });
+
+  // Init bandeau caché si pas de profil
+  (function(){
+    var bandeau = document.getElementById('moodBandeau');
+    if(bandeau && !get()) bandeau.classList.remove('visible');
+  })();
 
   // Appliquer l'aura de suggestion sur les boutons genre des jeux
   function applyGenderHint(){
@@ -5870,8 +6976,6 @@ loadFavorites();
       if(profile === 'boy')  btnBoy.classList.add('profile-hint-boy');
     });
   }
-
-  // Appliquer au chargement et à chaque ouverture de jeu
   applyGenderHint();
   ['openGames','openMemoryGame','openPenduGame','openPuzzleGame','openSnakeGame'].forEach(function(fn){
     var orig = window[fn];
@@ -5962,6 +7066,11 @@ loadFavorites();
         '</div>';
       if(backBtn){ backBtn.dataset.dest = 'home'; }
       var lbl2 = $('dmBackLabel'); if(lbl2) lbl2.textContent = 'InstaLove';
+      // On entre dans le chat → effacer le badge sur le cadenas
+      var lockBadge = document.getElementById('lockUnreadBadge');
+      var lockBtn   = document.getElementById('lockNavBtn');
+      if(lockBadge) lockBadge.classList.remove('visible');
+      if(lockBtn)   lockBtn.classList.remove('has-unread');
     }
     updateProfilePill(name);
   }
@@ -6046,23 +7155,37 @@ loadFavorites();
   }
 
   window.dmSetIdentity = function(g){
-    identity = g;
-    localStorage.setItem('jayana_profile', g);
-    closeIdentityOverlay();
-    updateIdButtons();
-    var chat = $('dmChatScreen');
-    var chatVisible = chat && chat.style.display !== 'none';
-    if(chatVisible){
-      // Déjà dans le chat → juste update pill (cachée)
-      updateProfilePill('chat');
-    } else if(identityPickerContext === 'chat'){
-      // Ouvert depuis "Nous" → aller au chat
-      showScreen('chat');
-      startChat();
-    } else {
-      // Ouvert depuis le bouton profil → rester sur l'accueil
-      updateProfilePill('home');
+    // Vérifier session ou demander le code via setProfile
+    // setProfile gère la modal et ne sauvegarde qu'après succès
+    function afterAuth(){
+      identity = g;
+      closeIdentityOverlay();
+      updateIdButtons();
+      var chat = $('dmChatScreen');
+      var chatVisible = chat && chat.style.display !== 'none';
+      if(chatVisible){
+        updateProfilePill('chat');
+      } else if(identityPickerContext === 'chat'){
+        showScreen('chat');
+        startChat();
+      } else {
+        updateProfilePill('home');
+      }
     }
+    // Si session déjà valide, pas de code
+    if(sbLoadSession(g)){
+      if(window._profileSave) window._profileSave(g);
+      if(window._profileApply) window._profileApply(g);
+      afterAuth();
+      return;
+    }
+    // Sinon demander le code — ne rien sauvegarder avant succès
+    showProfileCodeModal(g, function(){
+      if(window._profileSave) window._profileSave(g);
+      if(window._profileApply) window._profileApply(g);
+      if(window._profileLoadMoods) window._profileLoadMoods();
+      afterAuth();
+    });
   };
 
   /* ══ CHAT ══ */
@@ -6374,10 +7497,57 @@ loadFavorites();
     var bbl = document.createElement('div');
     bbl.className = 'dm-bubble' + (msg.deleted ? ' deleted' : '');
 
-    var txt = document.createElement('span');
-    txt.className   = 'dm-bubble-text';
-    txt.textContent = msg.text;
-    bbl.appendChild(txt);
+    if(msg.message_type === 'audio' && msg.audio_data && !msg.deleted){
+      // Bulle vocale
+      var audioBubble = document.createElement('div');
+      audioBubble.className = 'dm-audio-bubble';
+      var durSecs = msg.audio_duration || 0;
+      var durStr = Math.floor(durSecs/60) + ':' + ('0'+Math.floor(durSecs%60)).slice(-2);
+      audioBubble.innerHTML =
+        '<button class="dm-audio-play" data-playing="0">'
+        + '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>'
+        + '</button>'
+        + '<div class="dm-audio-bar"><div class="dm-audio-progress"></div></div>'
+        + '<span class="dm-audio-dur">'+durStr+'</span>';
+      bbl.appendChild(audioBubble);
+
+      // Logique de lecture
+      (function(ab, audioData){
+        var playBtn  = ab.querySelector('.dm-audio-play');
+        var progress = ab.querySelector('.dm-audio-progress');
+        var durEl    = ab.querySelector('.dm-audio-dur');
+        var aud      = null;
+        var playing  = false;
+        function stopAudio(){
+          if(aud){ aud.pause(); aud.currentTime=0; }
+          playing = false;
+          playBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>';
+          progress.style.width = '0%';
+          durEl.textContent = durStr;
+        }
+        playBtn.addEventListener('click', function(){
+          if(playing){ stopAudio(); return; }
+          if(!aud){
+            aud = new Audio(audioData);
+            aud.addEventListener('timeupdate', function(){
+              var pct = aud.duration ? (aud.currentTime/aud.duration*100) : 0;
+              progress.style.width = pct + '%';
+              var rem = aud.duration - aud.currentTime;
+              durEl.textContent = Math.floor(rem/60)+':'+('0'+Math.floor(rem%60)).slice(-2);
+            });
+            aud.addEventListener('ended', stopAudio);
+          }
+          playing = true;
+          playBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+          aud.play().catch(function(){});
+        });
+      })(audioBubble, 'data:audio/webm;base64,' + msg.audio_data);
+    } else {
+      var txt = document.createElement('span');
+      txt.className   = 'dm-bubble-text';
+      txt.textContent = msg.deleted ? '🚫 Message supprimé' : (msg.text || '');
+      bbl.appendChild(txt);
+    }
 
     // Heure + tick
     var d  = new Date(msg.created_at);
@@ -6468,6 +7638,123 @@ loadFavorites();
   }
   window.dmSend = doSend;
 
+  /* ══ ENREGISTREMENT VOCAL ══ */
+  (function(){
+    var micBtn     = $('dmMicBtn');
+    var recInd     = $('dmRecIndicator');
+    var recTime    = $('dmRecTime');
+    var dmInput    = $('dmInput');
+    if(!micBtn) return;
+
+    var mediaRec   = null;
+    var audioChunks= [];
+    var recStart   = null;
+    var recTimer   = null;
+    var MAX_SEC    = 30;
+    var pressing   = false;
+
+    function fmtTime(s){ return Math.floor(s/60)+':'+('0'+Math.floor(s%60)).slice(-2); }
+
+    function startRecording(){
+      if(!identity){ showIdentityOverlay(); return; }
+      navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+        pressing = true;
+        audioChunks = [];
+        recStart = Date.now();
+        micBtn.classList.add('recording');
+        recInd.classList.add('active');
+        dmInput.placeholder = 'Enregistrement…';
+
+        // Timer affiché
+        recTimer = setInterval(function(){
+          var elapsed = (Date.now() - recStart) / 1000;
+          recTime.textContent = fmtTime(elapsed);
+          if(elapsed >= MAX_SEC) stopRecording(true);
+        }, 200);
+
+        mediaRec = new MediaRecorder(stream, {mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm'});
+        mediaRec.addEventListener('dataavailable', function(e){ if(e.data.size > 0) audioChunks.push(e.data); });
+        mediaRec.addEventListener('stop', function(){
+          stream.getTracks().forEach(function(t){ t.stop(); });
+          if(!pressing && audioChunks.length){
+            var blob = new Blob(audioChunks, {type: mediaRec.mimeType});
+            var duration = (Date.now() - recStart) / 1000;
+            sendAudio(blob, duration);
+          }
+          audioChunks = [];
+        });
+        mediaRec.start();
+      }).catch(function(err){
+        console.warn('[MIC]', err);
+        alert('Micro non disponible : ' + err.message);
+      });
+    }
+
+    function stopRecording(send){
+      if(!mediaRec || mediaRec.state === 'inactive') return;
+      clearInterval(recTimer);
+      pressing = !send;
+      micBtn.classList.remove('recording');
+      recInd.classList.remove('active');
+      recTime.textContent = '0:00';
+      dmInput.placeholder = 'Message…';
+      mediaRec.stop();
+    }
+
+    function sendAudio(blob, duration){
+      var reader = new FileReader();
+      reader.onloadend = function(){
+        var b64 = reader.result.split(',')[1];
+        var tmpId  = 'tmp_' + Date.now();
+        var tmpMsg = {
+          id: tmpId, sender: identity,
+          message_type: 'audio', audio_data: b64,
+          audio_duration: duration,
+          text: '', seen: false, created_at: new Date().toISOString()
+        };
+        cache.push(tmpMsg);
+        appendBubble(tmpMsg, cache.length-1, cache);
+        scrollBottom();
+
+        fetch(SB_URL + '/rest/v1/' + TABLE, {
+          method: 'POST',
+          headers: sbHeaders({'Prefer':'return=representation'}),
+          body: JSON.stringify({
+            sender: identity, text: '',
+            message_type: 'audio', audio_data: b64,
+            audio_duration: Math.round(duration)
+          })
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(rows){
+          var real = Array.isArray(rows) ? rows[0] : null;
+          if(real && real.id){
+            for(var i=0; i<cache.length; i++){
+              if(cache[i].id===tmpId){ cache[i]=real; break; }
+            }
+            var node = document.querySelector('[data-id="'+tmpId+'"]');
+            if(node) node.dataset.id = real.id;
+          }
+        })
+        .catch(function(err){ console.error('[AUDIO SEND]', err); });
+      };
+      reader.readAsDataURL(blob);
+    }
+
+    // Tap pour démarrer / tap pour arrêter et envoyer
+    var isRecording = false;
+    micBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      if(!isRecording){
+        isRecording = true;
+        startRecording();
+      } else {
+        isRecording = false;
+        stopRecording(true);
+      }
+    });
+  })();
+
   function markSeen(id){
     if(!id || String(id).indexOf('tmp_') === 0) return;
     fetch(SB_URL + '/rest/v1/' + TABLE + '?id=eq.' + id, {
@@ -6523,6 +7810,20 @@ loadFavorites();
       if(b){
         if(unread > 0){ b.textContent = unread; b.style.display = 'flex'; }
         else           { b.style.display = 'none'; }
+      }
+
+      // Badge + clignotement sur le cadenas de la nav principale
+      var lockBtn   = document.getElementById('lockNavBtn');
+      var lockBadge = document.getElementById('lockUnreadBadge');
+      if (lockBtn && lockBadge) {
+        if (unread > 0) {
+          lockBadge.textContent = unread > 99 ? '99+' : unread;
+          lockBadge.classList.add('visible');
+          lockBtn.classList.add('has-unread');
+        } else {
+          lockBadge.classList.remove('visible');
+          lockBtn.classList.remove('has-unread');
+        }
       }
     })
     .catch(function(){});
@@ -6582,8 +7883,121 @@ loadFavorites();
   <span id="likeCountGirl" style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;opacity:0.7;">Zelda : <span id="likeNumGirl" style="font-weight:700;color:#e879a0;">—</span> ♥</span>
 </div>
 
+<script>
+/* ════════════════════════════════════════════
+   MODE ANNIVERSAIRE MENSUEL — le 29 de chaque mois
+════════════════════════════════════════════ */
+(function(){
+  var START = new Date(2024, 9, 29); // 29 octobre 2024
+  var now   = new Date();
+  var day   = now.getDate();
+
+  if (day !== 29) return; // Pas le 29 → rien
+
+  // Calcul du nombre de mois écoulés
+  var months = (now.getFullYear() - START.getFullYear()) * 12
+             + (now.getMonth()    - START.getMonth());
+  if (months < 1) return; // Pas encore 1 mois complet
+
+  // ── Activer la classe anniv ──
+  document.body.classList.add('anniv-mode');
+
+  // ── Bannière ──
+  var banner = document.getElementById('annivBanner');
+  var sub    = document.getElementById('annivSub');
+  if (banner) banner.classList.add('visible');
+  if (sub) sub.textContent = 'Ça fait maintenant ' + months + ' mois qu\'on s\'aime 🩷';
+
+  // ── Compteur spécial ──
+  var sinceEl = document.querySelector('.counter-since');
+  if (sinceEl) {
+    sinceEl.innerHTML = '🎂 ' + months + ' mois ensemble aujourd\'hui !';
+    sinceEl.style.color = '#f5c518';
+    sinceEl.style.fontWeight = '600';
+  }
+
+  // ── Confettis ──
+  var canvas = document.getElementById('annivCanvas');
+  if (!canvas) return;
+  canvas.classList.add('visible');
+  var ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  var COLORS = ['#f5c518','#ff6eb0','#a78bfa','#60a5fa','#34d399','#fb923c'];
+  var pieces = [];
+  var MAX    = 55;
+
+  function Piece() {
+    this.x    = Math.random() * canvas.width;
+    this.y    = -10 - Math.random() * 40;
+    this.w    = 6 + Math.random() * 7;
+    this.h    = 3 + Math.random() * 4;
+    this.rot  = Math.random() * Math.PI * 2;
+    this.drot = (Math.random() - 0.5) * 0.12;
+    this.vy   = 1.2 + Math.random() * 2.2;
+    this.vx   = (Math.random() - 0.5) * 1.2;
+    this.color= COLORS[Math.floor(Math.random() * COLORS.length)];
+    this.alpha= 0.75 + Math.random() * 0.25;
+  }
+
+  for (var i = 0; i < MAX; i++) {
+    var p = new Piece();
+    p.y = Math.random() * canvas.height; // Répartis dès le départ
+    pieces.push(p);
+  }
+
+  var running = true;
+  // Arrêter les confettis après 12 secondes (discret)
+  setTimeout(function(){
+    running = false;
+    // Fondu canvas progressif
+    var op = 1;
+    var fade = setInterval(function(){
+      op -= 0.04;
+      canvas.style.opacity = Math.max(0, op);
+      if (op <= 0) { clearInterval(fade); canvas.classList.remove('visible'); }
+    }, 60);
+  }, 12000);
+
+  function loop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (var j = 0; j < pieces.length; j++) {
+      var pc = pieces[j];
+      ctx.save();
+      ctx.globalAlpha = pc.alpha;
+      ctx.translate(pc.x, pc.y);
+      ctx.rotate(pc.rot);
+      ctx.fillStyle = pc.color;
+      ctx.fillRect(-pc.w/2, -pc.h/2, pc.w, pc.h);
+      ctx.restore();
+
+      pc.x   += pc.vx;
+      pc.y   += pc.vy;
+      pc.rot += pc.drot;
+
+      if (pc.y > canvas.height + 20) {
+        if (running) {
+          pieces[j] = new Piece();
+        } else {
+          pieces.splice(j, 1); j--;
+        }
+      }
+    }
+    if (pieces.length > 0) requestAnimationFrame(loop);
+  }
+  loop();
+
+})();
+</script>
+
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.01.11</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.02.25</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
