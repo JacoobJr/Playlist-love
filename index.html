@@ -6554,6 +6554,10 @@ loadFavorites();
     attached = false;
     showScreen('home');
     if(window._dmUpdateVP) window._dmUpdateVP();
+    // Bloquer le scroll du body
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
   };
 
   var _origClose = window.closeHiddenPage;
@@ -6562,6 +6566,11 @@ loadFavorites();
     attached = false;
     var fb = document.getElementById('floatingThemeBtn');
     if(fb){ fb.style.opacity = ''; fb.style.pointerEvents = ''; }
+    // Rétablir le scroll
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+    if(window._dmUpdateVP) window._dmUpdateVP();
     if(_origClose) _origClose.apply(this, arguments);
   };
 
@@ -6574,7 +6583,7 @@ loadFavorites();
 </div>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.05.2</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.01.11</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
