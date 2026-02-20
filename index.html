@@ -4736,13 +4736,39 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
 
   /* ── Hook sur setProfile : vérifier bêtise active ── */
   var _origSetProfile = window.setProfile;
+  var _prankPollTimer = null;
+
+  function startPrankPoll(gender){
+    stopPrankPoll();
+    _prankPollTimer = setInterval(function(){
+      // Ne pas vérifier si une bêtise est déjà en cours
+      if(_activePrank) return;
+      window.checkActivePrank(gender);
+    }, 15000); // toutes les 15 secondes
+  }
+  function stopPrankPoll(){
+    if(_prankPollTimer){ clearInterval(_prankPollTimer); _prankPollTimer = null; }
+  }
+
   window.setProfile = function(gender){
     _origSetProfile(gender);
     setTimeout(function(){ window.checkActivePrank(gender); }, 1500);
+    startPrankPoll(gender);
   };
-  // Vérifier aussi au démarrage si déjà connecté
+
+  // Vérifier aussi au démarrage si déjà connecté + lancer le poll
   var _savedProfile = localStorage.getItem('jayana_profile');
-  if(_savedProfile) setTimeout(function(){ window.checkActivePrank(_savedProfile); }, 2000);
+  if(_savedProfile){
+    setTimeout(function(){ window.checkActivePrank(_savedProfile); }, 2000);
+    startPrankPoll(_savedProfile);
+  }
+
+  // Arrêter le poll si la victime se déconnecte
+  var _origLogout = window.nativeLogout;
+  window.nativeLogout = function(){
+    stopPrankPoll();
+    if(_origLogout) return _origLogout.apply(this, arguments);
+  };
 
 })();
 
