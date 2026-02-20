@@ -1187,11 +1187,20 @@ body.prank-shake { animation:prankShake 0.4s ease infinite; }
 .prank-curtain-emoji:active { transform:scale(1.4); }
 .prank-curtain-emoji.caught { animation:prankCaught 0.3s ease forwards; pointer-events:none; }
 @keyframes prankCaught { 0%{opacity:1;transform:scale(1)} 60%{transform:scale(1.6);opacity:0.4} 100%{transform:scale(0);opacity:0} }
-#prankIntrus { position:fixed; z-index:4500; font-size:48px; cursor:pointer; user-select:none; display:none; filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5)); }
+#prankIntrus { position:fixed; z-index:4700; font-size:48px; cursor:pointer; user-select:none; display:none; filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5)); pointer-events:all; transition: left 0.25s cubic-bezier(.4,2,.55,.9), top 0.25s cubic-bezier(.4,2,.55,.9); }
 #prankIntrus.show { display:block; }
 #prankIntrusBanner { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); z-index:4600; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.15); border-radius:50px; padding:12px 24px; font-size:13px; font-weight:700; color:#fff; display:none; white-space:nowrap; }
 #prankIntrusBanner.show { display:block; }
 body.prank-flip { overflow-x:hidden; }
+/* Tout le contenu se retourne à 180° sauf le bandeau de contrôle et les overlays */
+body.prank-flip > *:not(#prankFlipBanner):not(#prankGotcha):not(#prankLock):not(#prankOverlay):not(#chantierModal) {
+  transform: rotate(180deg) !important;
+  transform-origin: center center;
+  transition: transform 0.5s cubic-bezier(.4,0,.2,1);
+}
+body:not(.prank-flip) > *:not(#prankFlipBanner):not(#prankGotcha):not(#prankLock):not(#prankOverlay):not(#chantierModal) {
+  transition: transform 0.5s cubic-bezier(.4,0,.2,1);
+}
 #prankFlipBanner { position:fixed; top:0; left:0; right:0; z-index:4500; background:linear-gradient(135deg,#7c3aed,#4f46e5); padding:12px 16px; display:none; text-align:center; box-shadow:0 4px 20px rgba(124,58,237,0.5); }
 #prankFlipBanner.show { display:block; animation:slideDown 0.3s ease; }
 .prank-flip-label { font-size:11px; font-weight:700; color:rgba(255,255,255,0.8); margin-bottom:6px; }
@@ -4442,7 +4451,8 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
   function prankDone(){
     if(!_activePrank) return;
     fetch(SB_URL+'/rest/v1/'+PRANK_TABLE+'?id=eq.'+_activePrank.id, {
-      method:'PATCH', headers: sbHeaders(),
+      method:'PATCH',
+      headers: sbHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
       body: JSON.stringify({ active: false })
     }).catch(function(){});
     showGotcha(_activePrank);
@@ -4460,27 +4470,43 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
   };
 
   /* ════ BÊTISE 1 : TREMBLEMENT ════ */
-  var _shakeTaps = 0; var _shakeTimer = null;
+  var _shakeTaps = 0; var _shakeTimer = null; var _shakeLock = false;
   function startShake(p){
     _shakeTaps = 0;
+    _shakeLock = false;
     document.body.classList.add('prank-shake');
     var banner = document.getElementById('prankShakeBanner');
     banner.classList.add('show');
     updateShakeCount();
-    document.addEventListener('click', onShakeTap);
-    document.addEventListener('touchstart', onShakeTap);
+    // On écoute uniquement touchstart sur mobile, click sur desktop
+    // passive:false pour pouvoir appeler preventDefault
+    document.addEventListener('touchstart', onShakeTap, { passive: false });
+    document.addEventListener('click', onShakeClick);
   }
   function updateShakeCount(){
     var el = document.getElementById('prankShakeCount');
     var left = 3 - _shakeTaps;
     if(el) el.textContent = left + ' tap' + (left > 1 ? 's' : '') + ' restant' + (left > 1 ? 's' : '') + ' !';
   }
-  function onShakeTap(){
+  function onShakeTap(e){
+    // touchstart : on bloque le click fantôme qui suit (~300ms après)
+    e.preventDefault();
+    if(_shakeLock) return;
+    _shakeLock = true;
+    setTimeout(function(){ _shakeLock = false; }, 400);
+    doShakeTap();
+  }
+  function onShakeClick(){
+    // click : ne compte que si aucun touch ne vient de se déclencher
+    if(_shakeLock) return;
+    doShakeTap();
+  }
+  function doShakeTap(){
     _shakeTaps++;
     updateShakeCount();
     if(_shakeTaps >= 3){
-      document.removeEventListener('click', onShakeTap);
       document.removeEventListener('touchstart', onShakeTap);
+      document.removeEventListener('click', onShakeClick);
       document.body.classList.remove('prank-shake');
       document.getElementById('prankShakeBanner').classList.remove('show');
       prankDone();
@@ -4498,16 +4524,28 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     _curtainTotal = 18;
     document.getElementById('prankCurtainCount').textContent = _curtainTotal;
     document.getElementById('prankCurtainBanner').classList.add('show');
+
+    // Zone sûre : on réserve le haut (5vh min) et le bas
+    // bannière est à bottom:80px, hauteur ~50px → on évite les 145px du bas
+    // nav du bas ~64px → marge totale basse = 150px
+    var EMOJI_SIZE  = 44;  // taille approximative de l'emoji en px
+    var MARGIN_TOP  = Math.round(window.innerHeight * 0.05);        // 5vh
+    var MARGIN_BOT  = 150;  // bannière + nav
+
+    var safeH = window.innerHeight - MARGIN_TOP - MARGIN_BOT - EMOJI_SIZE;
+    var safeW = window.innerWidth  - EMOJI_SIZE - 8;
+
     for(var i = 0; i < _curtainTotal; i++){
       (function(idx){
         setTimeout(function(){
           var el = document.createElement('div');
           el.className = 'prank-curtain-emoji';
           el.textContent = CURTAIN_EMOJIS[Math.floor(Math.random()*CURTAIN_EMOJIS.length)];
-          el.style.left = (Math.random()*88+1) + 'vw';
-          el.style.top  = (Math.random()*85+5) + 'vh';
+          el.style.left = (4 + Math.random() * safeW) + 'px';
+          el.style.top  = (MARGIN_TOP + Math.random() * safeH) + 'px';
+          // touchstart uniquement sur mobile (preventDefault bloque le click fantôme)
+          el.addEventListener('touchstart', function(e){ e.preventDefault(); catchCurtainEmoji(el); }, { passive: false });
           el.addEventListener('click', function(){ catchCurtainEmoji(el); });
-          el.addEventListener('touchstart', function(e){ e.preventDefault(); catchCurtainEmoji(el); });
           container.appendChild(el);
         }, idx * 120);
       })(i);
@@ -4529,26 +4567,40 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
 
   /* ════ BÊTISE 3 : L'INTRUS QUI ESQUIVE ════ */
   var _intrusTouches = 0; var _intrusTimer = null; var _intrusEl = null;
+  var _intrusHitLock = false;
   function startIntrus(p){
     _intrusTouches = 0;
+    _intrusHitLock = false;
     var el = document.getElementById('prankIntrus');
     _intrusEl = el;
     el.classList.add('show');
     document.getElementById('prankIntrusBanner').classList.add('show');
     document.getElementById('prankIntrusCount').textContent = 3;
+    // Premier placement sans transition (l'emoji apparaît direct à sa place)
+    el.style.transition = 'none';
     moveIntrus();
+    // On rétablit la transition après le premier placement
+    setTimeout(function(){ el.style.transition = ''; }, 50);
     _intrusTimer = setInterval(moveIntrus, 1800);
+    el.addEventListener('touchstart', function(e){ e.preventDefault(); hitIntrus(); }, { passive: false });
     el.addEventListener('click', hitIntrus);
-    el.addEventListener('touchstart', function(e){ e.preventDefault(); hitIntrus(); });
   }
   function moveIntrus(){
     var el = _intrusEl; if(!el) return;
-    var x = Math.random() * (window.innerWidth - 80);
-    var y = Math.random() * (window.innerHeight - 120) + 40;
+    var EMOJI_SIZE = 56;  // un peu plus grand que le font-size pour la marge tactile
+    var MARGIN_TOP = 60;  // évite le header fixe
+    var MARGIN_BOT = 160; // évite la nav + bannière (bottom:80px + ~50px + marge)
+    var safeW = window.innerWidth  - EMOJI_SIZE - 8;
+    var safeH = window.innerHeight - MARGIN_TOP - MARGIN_BOT - EMOJI_SIZE;
+    var x = 4  + Math.random() * safeW;
+    var y = MARGIN_TOP + Math.random() * safeH;
     el.style.left = x + 'px';
     el.style.top  = y + 'px';
   }
   function hitIntrus(){
+    if(_intrusHitLock) return;
+    _intrusHitLock = true;
+    setTimeout(function(){ _intrusHitLock = false; }, 400);
     _intrusTouches++;
     var left = 3 - _intrusTouches;
     document.getElementById('prankIntrusCount').textContent = left;
@@ -4566,17 +4618,34 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
   /* ════ BÊTISE 4 : TEXTE À L'ENVERS ════ */
   var _flipHolding = false; var _flipTimer = null; var _flipProgress = 0;
   function startFlip(p){
-    document.body.classList.add('prank-flip');
+    // Petit délai pour que la victime voit la page normale avant le retournement
+    setTimeout(function(){
+      document.body.classList.add('prank-flip');
+    }, 300);
     document.getElementById('prankFlipBanner').classList.add('show');
     var btn = document.getElementById('prankFlipBtn');
     document.getElementById('prankFlipProgressBar').style.width = '0%';
-    function startHold(){ _flipHolding = true; _flipProgress = 0; runFlipProgress(); }
-    function stopHold(){ _flipHolding = false; clearTimeout(_flipTimer); document.getElementById('prankFlipProgressBar').style.width='0%'; }
-    btn.addEventListener('mousedown', startHold);
-    btn.addEventListener('touchstart', function(e){ e.preventDefault(); startHold(); });
-    btn.addEventListener('mouseup', stopHold);
-    btn.addEventListener('mouseleave', stopHold);
-    btn.addEventListener('touchend', stopHold);
+    _flipHolding = false; _flipProgress = 0;
+
+    function startHold(){
+      _flipHolding = true;
+      _flipProgress = 0;
+      runFlipProgress();
+    }
+    function stopHold(){
+      _flipHolding = false;
+      clearTimeout(_flipTimer);
+      document.getElementById('prankFlipProgressBar').style.width = '0%';
+    }
+    // Nettoyer les anciens listeners en clonant le bouton
+    var newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    newBtn.addEventListener('mousedown',  startHold);
+    newBtn.addEventListener('touchstart', function(e){ e.preventDefault(); startHold(); }, { passive: false });
+    newBtn.addEventListener('mouseup',    stopHold);
+    newBtn.addEventListener('mouseleave', stopHold);
+    newBtn.addEventListener('touchend',   stopHold);
+    newBtn.addEventListener('touchcancel',stopHold);
   }
   function runFlipProgress(){
     if(!_flipHolding) return;
@@ -4640,8 +4709,16 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     document.getElementById('prankLock').classList.add('show');
   }
   window.prankCheckLock = function(){
-    var input = document.getElementById('prankLockInput').value.trim().toLowerCase();
-    var expected = (_lockPrank && _lockPrank.lock_word) ? _lockPrank.lock_word.toLowerCase() : '';
+    var input    = document.getElementById('prankLockInput').value.trim().toLowerCase();
+    var expected = (_lockPrank && _lockPrank.lock_word) ? _lockPrank.lock_word.trim().toLowerCase() : null;
+    // Sécurité : si pas de lock_word en base ou saisie vide → bloquer
+    if(!expected || !input){
+      var inp = document.getElementById('prankLockInput');
+      inp.classList.add('error');
+      document.getElementById('prankLockErr').textContent = '❌ Non ! Essaie encore…';
+      setTimeout(function(){ inp.classList.remove('error'); }, 500);
+      return;
+    }
     if(input === expected){
       document.getElementById('prankLock').classList.remove('show');
       prankDone();
