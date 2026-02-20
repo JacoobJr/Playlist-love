@@ -1044,6 +1044,8 @@ body.light #lockNavBtn.has-unread {
 @keyframes pop { 0%{transform:translate(-50%,-50%) scale(0)} 55%{transform:translate(-50%,-50%) scale(1.2)} 100%{transform:translate(-50%,-50%) scale(1);opacity:0} }
 .clown-pop { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(0); font-size:60px; pointer-events:none; z-index:3000; animation:clownPop 0.55s ease forwards; }
 @keyframes clownPop { 0%{transform:translate(-50%,-50%) scale(0);opacity:1} 55%{transform:translate(-50%,-50%) scale(1.2);opacity:1} 100%{transform:translate(-50%,-50%) scale(1);opacity:0} }
+.prank-toast { position:fixed; left:50%; bottom:120px; transform:translateX(-50%); background:rgba(30,30,40,0.95); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(10px); border-radius:50px; padding:11px 22px; font-size:13px; font-weight:600; color:#fff; white-space:nowrap; z-index:9000; pointer-events:none; animation:prankToastAnim 2.4s ease forwards; }
+@keyframes prankToastAnim { 0%{opacity:0;transform:translateX(-50%) translateY(10px)} 15%{opacity:1;transform:translateX(-50%) translateY(0)} 75%{opacity:1} 100%{opacity:0;transform:translateX(-50%) translateY(-6px)} }
 
 #quizView {
   display: none; position: fixed; inset: 0; background: var(--bg); z-index: 500;
@@ -4356,10 +4358,18 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     lock:    { emoji:'🔐', label:'Le cadenas' }
   };
 
+  function showPrankToast(msg){
+    var t = document.createElement('div');
+    t.className = 'prank-toast';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function(){ t.remove(); }, 2400);
+  }
+
   /* ── Ouverture menu auteur ── */
   window.openPrankMenu = function(){
     var profile = localStorage.getItem('jayana_profile');
-    if(!profile){ alert('Connecte-toi d\'abord !'); return; }
+    if(!profile){ showPrankToast('🔒 Connecte-toi d\'abord !'); return; }
     var victim = profile === 'boy' ? 'Zelda' : 'Link';
     var el = document.getElementById('prankVictimName');
     if(el) el.textContent = victim;
@@ -9082,7 +9092,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.04.7</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.05.1</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
