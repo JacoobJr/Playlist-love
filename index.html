@@ -7251,7 +7251,7 @@ loadFavorites();
 
   /* ══ FETCH MESSAGES ══ */
   function fetchMsgs(){
-    fetch(SB_URL + '/rest/v1/' + TABLE + '?order=created_at.asc&limit=300', {
+    fetch(SB_URL + '/rest/v1/' + TABLE + '?order=created_at.asc&limit=300&select=*', {
       headers: sbHeaders()
     })
     .then(function(r){
@@ -7784,7 +7784,7 @@ loadFavorites();
 
   /* ══ PREVIEW ACCUEIL ══ */
   function loadHomePreview(){
-    fetch(SB_URL + '/rest/v1/' + TABLE + '?order=created_at.desc&limit=50', {
+    fetch(SB_URL + '/rest/v1/' + TABLE + '?order=created_at.desc&limit=50&select=id,sender,text,message_type,seen,created_at,reaction,deleted,audio_duration', {
       headers: sbHeaders()
     })
     .then(function(r){ return r.json(); })
@@ -7803,8 +7803,8 @@ loadFavorites();
 
       if(p){
         var who = last.sender === 'girl' ? 'Zelda' : 'Link';
-        var txt = last.text; if(txt.length > 34) txt = txt.slice(0,34) + '\u2026';
-        p.textContent = who + ' : ' + txt;
+        var txt = last.message_type === 'audio' ? '🎤 Vocal' : (last.text || '');
+        if(txt.length > 34) txt = txt.slice(0,34) + '…';
       }
       if(t){
         var d  = new Date(last.created_at);
