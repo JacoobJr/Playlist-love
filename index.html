@@ -2410,6 +2410,7 @@ body.anniv-mode .counter-block-top {
   <div id="moodPicker">
     <div class="mood-picker-label">Comment tu te sens ?</div>
     <div class="mood-picker-grid" id="moodPickerGrid"></div>
+    <div id="moodPickerDesc"></div>
     <div class="mood-picker-cancel" onclick="closeMoodPicker()">Annuler</div>
   </div>
 
@@ -2841,14 +2842,13 @@ body.light .profile-popup-dot.boy  { background:#3b7dd8; box-shadow:0 0 5px rgba
 
 /* ── Picker humeur ── */
 #moodPicker {
-  position: absolute;
-  top: 50%; right: 16px;
-  transform: translateY(-50%);
+  position: fixed;
+  top: 14px; right: 64px;
   background: var(--s1);
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 12px;
-  z-index: 300;
+  z-index: 2100;
   display: none;
   flex-direction: column;
   gap: 10px;
@@ -2875,6 +2875,17 @@ body.light #moodPicker { box-shadow: 0 4px 24px rgba(180,20,80,0.14); }
 body.light .mood-emoji-btn.selected { border-color: var(--green); background: rgba(200,24,94,0.10); }
 body.light .mood-emoji-btn:hover { background: var(--s3); border-color: rgba(200,24,94,0.18); }
 .mood-picker-cancel { font-size: 11px; color: var(--muted); text-align: center; cursor: pointer; padding: 4px 0; transition: color 0.15s; }
+#moodPickerDesc {
+  font-size: 10px;
+  color: var(--muted);
+  text-align: center;
+  min-height: 14px;
+  transition: opacity 0.2s;
+  opacity: 0.85;
+  font-style: italic;
+  line-height: 1.4;
+  padding: 0 4px;
+}
 .mood-picker-cancel:hover { color: var(--text); }
 body.light .mood-picker-cancel:hover { color: var(--green); }
 .mood-clear-btn {
@@ -6852,11 +6863,22 @@ loadFavorites();
     var picker = document.getElementById('moodPicker');
     var grid   = document.getElementById('moodPickerGrid');
     if(!picker || !grid) return;
+    var profile = get();
+    var moodLabels = (profile === 'boy') ? MOOD_LABELS_BOY : MOOD_LABELS;
+    var descEl = document.getElementById('moodPickerDesc');
+    if(descEl) descEl.textContent = window._myMood ? (moodLabels[window._myMood] || '') : '';
+
     grid.innerHTML = '';
     MOODS.forEach(function(emoji){
       var btn = document.createElement('div');
       btn.className = 'mood-emoji-btn' + (window._myMood === emoji ? ' selected' : '');
       btn.textContent = emoji;
+      btn.onmouseenter = function(){
+        if(descEl) descEl.textContent = moodLabels[emoji] || '';
+      };
+      btn.onmouseleave = function(){
+        if(descEl) descEl.textContent = window._myMood ? (moodLabels[window._myMood] || '') : '';
+      };
       btn.onclick = function(){
         var profile = get();
         if(!profile) return;
@@ -6892,7 +6914,9 @@ loadFavorites();
       if(selfBadge){ selfBadge.textContent = ''; selfBadge.classList.remove('visible'); }
       closeMoodPicker();
     };
-    grid.after(clearBtn);
+    var descEl2 = document.getElementById('moodPickerDesc');
+    if(descEl2) descEl2.after(clearBtn);
+    else grid.after(clearBtn);
     picker.classList.add('open');
   };
 
