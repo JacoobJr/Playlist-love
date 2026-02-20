@@ -4402,17 +4402,12 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     if(_selectedType === 'lock' && !lockWord){ document.getElementById('prankLockWord').focus(); return; }
     var body = { type: _selectedType, author: profile, victim: victim, message: msg, active: true };
     if(lockWord) body.lock_word = lockWord;
-    // Supprimer l'ancienne bêtise active de ce victim d'abord
-    fetch(SB_URL+'/rest/v1/'+PRANK_TABLE+'?victim=eq.'+victim+'&active=eq.true', {
-      method:'DELETE', headers: sbHeaders()
-    }).then(function(){
-      return fetch(SB_URL+'/rest/v1/'+PRANK_TABLE, {
-        method:'POST', headers: sbHeaders({'Prefer':'return=minimal'}),
-        body: JSON.stringify(body)
-      });
+    // On insère directement sans effacer les bêtises précédentes — la file d'attente s'en charge
+    fetch(SB_URL+'/rest/v1/'+PRANK_TABLE, {
+      method:'POST', headers: sbHeaders({'Prefer':'return=minimal'}),
+      body: JSON.stringify(body)
     }).then(function(){
       document.getElementById('prankMsgModal').classList.remove('show');
-      // Feedback auteur
       var fb = document.createElement('div');
       fb.className = 'clown-pop'; fb.textContent = '😈 Bêtise envoyée !';
       fb.style.fontSize = '18px'; fb.style.fontWeight = '700'; fb.style.color = '#e8507a';
@@ -9023,7 +9018,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.04.3</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.04.2</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
