@@ -3992,6 +3992,7 @@ body.light #counterBlock.glowing .c-num-big {
     </div>
   </div>
   <div class="prank-menu-cancel" onclick="closePrankMenu()">Annuler</div>
+  <div class="prank-menu-cancel" id="prankCancelAllBtn" onclick="prankCancelAll()" style="color:rgba(255,100,100,0.6);margin-top:0;">🗑️ Annuler toutes mes bêtises en attente</div>
 </div>
 
 <!-- Modal message perso + mot secret si lock -->
@@ -4366,6 +4367,27 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
   };
   window.closePrankMenu = function(){
     document.getElementById('prankMenu').classList.remove('show');
+  };
+
+  /* ── Annuler toutes les bêtises en attente ── */
+  window.prankCancelAll = function(){
+    var profile = localStorage.getItem('jayana_profile');
+    if(!profile) return;
+    var victim = profile === 'boy' ? 'girl' : 'boy';
+    var btn = document.getElementById('prankCancelAllBtn');
+    if(btn) btn.textContent = '⏳ Annulation…';
+    fetch(SB_URL+'/rest/v1/'+PRANK_TABLE+'?author=eq.'+profile+'&victim=eq.'+victim+'&active=eq.true', {
+      method: 'DELETE', headers: sbHeaders()
+    }).then(function(){
+      if(btn) btn.textContent = '✅ Bêtises annulées !';
+      setTimeout(function(){
+        if(btn) btn.textContent = '🗑️ Annuler toutes mes bêtises en attente';
+        document.getElementById('prankMenu').classList.remove('show');
+      }, 1200);
+    }).catch(function(){
+      if(btn) btn.textContent = '🗑️ Annuler toutes mes bêtises en attente';
+      alert('Erreur réseau, réessaie !');
+    });
   };
 
   /* ── Sélection type → modal message ── */
@@ -9020,7 +9042,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.04.5</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.04.8</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
