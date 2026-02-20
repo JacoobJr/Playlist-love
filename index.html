@@ -7203,7 +7203,8 @@ loadFavorites();
   };
   // Exposer startChat pour applyState
   window.startChat = startChat;
-    var logo = document.getElementById('dmHomeLogo');
+
+  window.dmHideConv = function(){
     var conv = document.getElementById('dmHomeConv');
     if(logo) logo.style.display = '';
     if(conv) conv.style.display = 'none';
@@ -8114,7 +8115,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.02.28</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.02.25</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
