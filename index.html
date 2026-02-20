@@ -6147,8 +6147,6 @@ function filterSongs(q){
   var _navigating = false; // flag anti-double déclenchement
 
   // Niveaux de navigation (du plus profond au plus haut)
-  // niveau 1 = quiz ou menu jeux
-  // niveau 2 = jeu individuel (depuis menu jeux)
   var VIEWS = {
     quiz:   { el: 'quizView',   close: 'closeQuiz',        depth: 1 },
     games:  { el: 'gamesView',  close: 'closeGames',        depth: 1 },
@@ -6158,9 +6156,7 @@ function filterSongs(q){
     snake:  { el: 'snakeView',  close: 'closeSnakeGame',    depth: 2 },
   };
 
-  // Quel view est actuellement actif ?
   function getActiveView() {
-    // Priorité aux vues les plus profondes
     var order = ['memory','pendu','puzzle','snake','quiz','games'];
     for (var i = 0; i < order.length; i++) {
       var v = VIEWS[order[i]];
@@ -6176,26 +6172,51 @@ function filterSongs(q){
     origOpen[fn] = window[fn];
     window[fn] = function(){
       origOpen[fn].apply(this, arguments);
-      // Pousser un état seulement si pas déjà en train de naviguer
-      if (!_navigating) {
-        history.pushState({ jayana: fn }, '');
-      }
+      if (!_navigating) history.pushState({ jayana: fn }, '');
     };
   });
 
+  // ── Patch openHiddenPage pour pousser un état History ──
+  var _origOpenHP = window.openHiddenPage;
+  window.openHiddenPage = function(){
+    if(_origOpenHP) _origOpenHP.apply(this, arguments);
+    if(!_navigating) history.pushState({ jayana: 'hiddenPage', dmScreen: 'entry' }, '');
+  };
+
+  // Hook global pour que le IIFE DM puisse pousser des états lors des transitions internes
+  window._historyPushDM = function(screen){
+    if(!_navigating) history.pushState({ jayana: 'hiddenPage', dmScreen: screen }, '');
+  };
+
   // Écouter le bouton retour
   window.addEventListener('popstate', function(e){
+    if(_navigating) return;
+
+    var state = e.state;
+
+    // ── Retour depuis le mode caché ou ses sous-écrans DM ──
+    if(state && state.jayana === 'hiddenPage'){
+      var hp = document.getElementById('hiddenPage');
+      if(!hp || !hp.classList.contains('active')) return;
+      _navigating = true;
+      // Déléguer au handler DM interne qui connait l'état courant (home/conv/chat)
+      if(window.dmHandleBack){
+        window.dmHandleBack();
+      } else {
+        if(window.closeHiddenPage) window.closeHiddenPage();
+      }
+      setTimeout(function(){ _navigating = false; }, 80);
+      return;
+    }
+
+    // ── Retour depuis les jeux/quiz ──
     var active = getActiveView();
-    if (!active) return; // aucun menu ouvert → comportement natif
+    if (!active) return;
 
-    // Empêcher double déclenchement
-    if (_navigating) return;
     _navigating = true;
-
     var closeFn = VIEWS[active].close;
     if (window[closeFn]) window[closeFn]();
 
-    // Si on ferme un jeu individuel, on repousse un état pour le menu jeux
     if (['memory','pendu','puzzle','snake'].indexOf(active) !== -1) {
       setTimeout(function(){
         history.pushState({ jayana: 'openGames' }, '');
@@ -7036,7 +7057,7 @@ loadFavorites();
   }
 
   /* ══ NAVIGATION ══ */
-  function showScreen(name){
+  function showScreen(name, _fromHistory){
     // Hide all screens
     ['dmHomeScreen','dmChatScreen'].forEach(function(id){
       var el = $(id); if(el) el.style.display = 'none';
@@ -7059,6 +7080,8 @@ loadFavorites();
       if(logo) logo.style.display = '';
       if(conv) conv.style.display = 'none';
       loadHomePreview();
+      // Pousser un état History pour que le retour fonctionne depuis home
+      if(!_fromHistory && window._historyPushDM) window._historyPushDM('home');
     } else if(name === 'chat'){
       var el = $('dmChatScreen');
       if(el) el.style.display = 'flex';
@@ -7078,11 +7101,13 @@ loadFavorites();
       var lockBtn   = document.getElementById('lockNavBtn');
       if(lockBadge) lockBadge.classList.remove('visible');
       if(lockBtn)   lockBtn.classList.remove('has-unread');
+      // Pousser un état History pour que le retour fonctionne depuis le chat
+      if(!_fromHistory && window._historyPushDM) window._historyPushDM('chat');
     }
     updateProfilePill(name);
   }
 
-  window.dmShowConv = function(){
+  window.dmShowConv = function(_fromHistory){
     var logo = document.getElementById('dmHomeLogo');
     var conv = document.getElementById('dmHomeConv');
     if(logo) logo.style.display = 'none';
@@ -7094,6 +7119,8 @@ loadFavorites();
     var lbl = document.getElementById('dmBackLabel');
     if(lbl) lbl.textContent = 'Mode caché';
     loadHomePreview();
+    // Pousser un état History pour le retour depuis l'écran conv intermédiaire
+    if(!_fromHistory && window._historyPushDM) window._historyPushDM('conv');
   };
 
   window.dmHideConv = function(){
@@ -7108,12 +7135,12 @@ loadFavorites();
   };
 
   /* ══ BOUTON RETOUR ══ */
-  window.dmHandleBack = function(){
+  window.dmHandleBack = function(_fromHistory){
     var btn  = $('dmTopbarBack');
     var dest = btn ? (btn.dataset.dest || 'close') : 'close';
     if(dest === 'close')      closeHiddenPage();
-    else if(dest === 'logo')  window.dmHideConv();
-    else                      { stopPoll(); showScreen('home'); }
+    else if(dest === 'logo')  window.dmHideConv(_fromHistory);
+    else                      { stopPoll(); showScreen('home', _fromHistory); }
   };
 
   var identityPickerContext = 'profile'; // 'profile' | 'chat'
