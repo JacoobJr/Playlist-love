@@ -1236,11 +1236,12 @@ body:not(.prank-flip) > *:not(#prankFlipBanner):not(#prankGotcha):not(#prankLock
 #prankFogBanner.show { display:block; }
 
 /* 🌈 COULEURS FOLLES */
-#prankColorsBanner { position:fixed; bottom:120px; left:50%; transform:translateX(-50%); z-index:4600; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.15); border-radius:50px; padding:12px 24px; font-size:13px; font-weight:700; color:#fff; display:none; white-space:nowrap; pointer-events:all; text-align:center; }
+#prankColorsBanner { position:fixed; bottom:100px; left:50%; transform:translateX(-50%); z-index:4600; background:rgba(0,0,0,0.88); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.15); border-radius:20px; padding:14px 20px 16px; font-size:13px; font-weight:700; color:#fff; display:none; white-space:nowrap; pointer-events:all; text-align:center; user-select:none; -webkit-user-select:none; touch-action:none; }
 #prankColorsBanner.show { display:block; }
-#prankColorsHoldBtn { font-size:28px; cursor:pointer; user-select:none; -webkit-user-select:none; touch-action:none; padding:6px 12px; display:inline-block; }
-#prankColorsProgress { width:100px; height:7px; background:rgba(255,255,255,0.2); border-radius:4px; overflow:hidden; margin:6px auto 0; }
+#prankColorsHoldBtn { font-size:40px; cursor:pointer; user-select:none; -webkit-user-select:none; touch-action:none; padding:8px 16px; display:inline-block; line-height:1; }
+#prankColorsProgress { width:120px; height:8px; background:rgba(255,255,255,0.2); border-radius:4px; overflow:hidden; margin:0 auto 10px; }
 #prankColorsProgressBar { height:100%; width:0%; background:linear-gradient(90deg,#f472b6,#a78bfa,#60a5fa); border-radius:4px; transition:width 0.08s linear; }
+.prank-colors-label { font-size:11px; font-weight:700; color:rgba(255,255,255,0.8); margin-bottom:8px; pointer-events:none; }
 
 /* ⌨️ FAUX CLAVIER */
 #prankKeyboard { position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:4500; display:none; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:20px; backdrop-filter:blur(10px); }
@@ -1255,6 +1256,8 @@ body:not(.prank-flip) > *:not(#prankFlipBanner):not(#prankGotcha):not(#prankLock
 .pkb-key:active { background:rgba(167,139,250,0.4); transform:scale(0.93); }
 .pkb-key.backspace { grid-column:span 2; font-size:13px; background:rgba(255,80,80,0.15); }
 .pkb-key.backspace:active { background:rgba(255,80,80,0.35); }
+.pkb-key.hint { background:rgba(167,139,250,0.5); border-color:#a78bfa; animation:kbHintBlink 0.6s ease-in-out infinite; }
+@keyframes kbHintBlink { 0%,100%{box-shadow:0 0 0 0 rgba(167,139,250,0.6)} 50%{box-shadow:0 0 0 4px rgba(167,139,250,0.3)} }
 
 /* 🎯 CIBLE */
 #prankTarget { position:fixed; z-index:4700; display:none; cursor:pointer; user-select:none; -webkit-user-select:none; pointer-events:all; }
@@ -1282,9 +1285,11 @@ body:not(.prank-flip) > *:not(#prankFlipBanner):not(#prankGotcha):not(#prankLock
 #prankEyesOverlay.show { display:block; }
 .prank-eye-pair { position:absolute; display:flex; gap:10px; pointer-events:all; cursor:default; user-select:none; }
 .prank-eye { width:52px; height:52px; border-radius:50%; background:#fff; border:3px solid #222; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
-.prank-eye-pupil { width:20px; height:20px; border-radius:50%; background:#111; position:absolute; transition:transform 0.1s ease; }
+.prank-eye-lid { position:absolute; top:0; left:0; right:0; height:0; background:#1a1a2e; border-radius:0 0 50% 50%; z-index:3; transition:height 0.08s ease; }
+.prank-eye.blink .prank-eye-lid { height:100%; }
+.prank-eye-pupil { width:20px; height:20px; border-radius:50%; background:#111; position:absolute; transition:transform 0.1s ease; z-index:2; }
 .prank-eye-timer { position:absolute; bottom:-22px; left:50%; transform:translateX(-50%); white-space:nowrap; font-size:10px; font-weight:700; color:#fff; background:rgba(0,0,0,0.6); border-radius:20px; padding:2px 8px; }
-.prank-eye-ring { position:absolute; inset:-4px; border-radius:50%; border:3px solid transparent; }
+.prank-eye-ring { position:absolute; inset:-4px; border-radius:50%; border:3px solid transparent; z-index:1; }
 .prank-eye-ring.active { border-color:#a78bfa; animation:eyeRingPulse 1s linear infinite; }
 @keyframes eyeRingPulse { 0%{opacity:0.4} 50%{opacity:1} 100%{opacity:0.4} }
 #prankEyesBanner { position:fixed; bottom:120px; left:50%; transform:translateX(-50%); z-index:4600; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.15); border-radius:50px; padding:12px 24px; font-size:13px; font-weight:700; color:#fff; display:none; white-space:nowrap; }
@@ -1295,14 +1300,15 @@ body:not(.prank-flip) > *:not(#prankFlipBanner):not(#prankGotcha):not(#prankLock
 .prank-eyes-msg-text { font-family:'Playfair Display',serif; font-size:22px; color:#fff; text-align:center; padding:0 24px; line-height:1.4; }
 
 /* 📱 FAUSSE NOTIF */
-#prankNotif { position:fixed; top:-120px; left:12px; right:12px; z-index:5000; background:rgba(30,30,35,0.97); border:1px solid rgba(255,255,255,0.12); border-radius:18px; padding:14px 16px; display:flex; align-items:center; gap:12px; backdrop-filter:blur(20px); box-shadow:0 8px 32px rgba(0,0,0,0.6); transition:top 0.45s cubic-bezier(.4,2,.35,.9); max-width:400px; margin:0 auto; }
+#prankNotif { position:fixed; top:-160px; left:12px; right:12px; z-index:5000; background:rgba(28,28,32,0.97); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:14px 16px; display:flex; align-items:flex-start; gap:12px; backdrop-filter:blur(30px); -webkit-backdrop-filter:blur(30px); box-shadow:0 12px 40px rgba(0,0,0,0.7), 0 0 0 0.5px rgba(255,255,255,0.08); transition:top 0.5s cubic-bezier(.34,1.56,.64,1); max-width:420px; margin:0 auto; cursor:pointer; user-select:none; -webkit-user-select:none; }
 #prankNotif.show { top:12px; }
-.pn-icon { font-size:32px; flex-shrink:0; }
+.pn-avatar { width:44px; height:44px; border-radius:12px; background:linear-gradient(135deg,#a78bfa,#60a5fa); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
 .pn-content { flex:1; min-width:0; }
-.pn-app { font-size:10px; font-weight:700; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; }
-.pn-title { font-size:14px; font-weight:700; color:#fff; margin-bottom:2px; }
-.pn-body { font-size:12px; color:rgba(255,255,255,0.7); line-height:1.4; }
-.pn-time { font-size:10px; color:rgba(255,255,255,0.35); flex-shrink:0; align-self:flex-start; }
+.pn-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:3px; }
+.pn-app { font-size:11px; font-weight:600; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:0.5px; }
+.pn-time { font-size:11px; color:rgba(255,255,255,0.35); }
+.pn-title { font-size:14px; font-weight:700; color:#fff; margin-bottom:3px; line-height:1.3; }
+.pn-body { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.4; }
 
 /* #hiddenPage — défini dans le bloc InstaLove ci-dessous */
 .hp-header { padding: 28px 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); position: relative; overflow: hidden; }
@@ -4110,9 +4116,9 @@ body.light #counterBlock.glowing .c-num-big {
 
 <!-- 🌈 Couleurs folles -->
 <div id="prankColorsBanner">
-  🌈 Maintiens le bouton pour stabiliser les couleurs !<br>
-  <div id="prankColorsHoldBtn">🎨</div>
+  <div class="prank-colors-label">🌈 Maintiens le bouton pour stabiliser les couleurs !</div>
   <div id="prankColorsProgress"><div id="prankColorsProgressBar"></div></div>
+  <div id="prankColorsHoldBtn">🎨</div>
 </div>
 
 <!-- ⌨️ Faux clavier -->
@@ -4145,14 +4151,16 @@ body.light #counterBlock.glowing .c-num-big {
 </div>
 
 <!-- 📱 Fausse notif -->
-<div id="prankNotif">
-  <div class="pn-icon">📱</div>
+<div id="prankNotif" onclick="prankNotifDismiss()">
+  <div class="pn-avatar" id="pnAvatar">💬</div>
   <div class="pn-content">
-    <div class="pn-app" id="pnApp">Messages</div>
-    <div class="pn-title" id="pnTitle">Nouveau message</div>
+    <div class="pn-header">
+      <div class="pn-app" id="pnApp">Messages</div>
+      <div class="pn-time">maintenant</div>
+    </div>
+    <div class="pn-title" id="pnTitle"></div>
     <div class="pn-body" id="pnBody"></div>
   </div>
-  <div class="pn-time">maintenant</div>
 </div>
 
 <!-- Modal message perso + mot secret si lock -->
@@ -4761,51 +4769,76 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
   /* ════ BÊTISE 9 : FAUX CLAVIER ════ */
   var KEYBOARD_WORDS = ['BISOUS','AMOUR','ZELDA','TRESOR','CHATON','SOLEIL','GATEAU','POISSON','PAPILLON','ETOILE'];
   var _kbWord = ''; var _kbTyped = ''; var _kbMap = {};
+  var _kbHintTimer = null; var _kbHintInterval = null; var _kbHintActive = false;
+
   function startKeyboard(p){
     _kbWord = KEYBOARD_WORDS[Math.floor(Math.random()*KEYBOARD_WORDS.length)];
-    _kbTyped = '';
+    _kbTyped = ''; _kbHintActive = false;
+    clearTimeout(_kbHintTimer); clearInterval(_kbHintInterval);
     // Créer un mapping aléatoire lettre → touche affichée
     var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
     var shuffled = letters.slice().sort(function(){ return Math.random()-0.5; });
     _kbMap = {};
     letters.forEach(function(l,i){ _kbMap[l] = shuffled[i]; });
-    // Afficher le mot avec légère superposition (blur partiel)
+    // Afficher le mot avec blur progressif
     var display = document.getElementById('pkbWordDisplay');
     display.innerHTML = _kbWord.split('').map(function(c){
       return '<span class="pkb-word-blur">'+c+'</span>';
     }).join('');
-    // Lever le blur lettre par lettre toutes les 600ms
     var spans = display.querySelectorAll('.pkb-word-blur');
     spans.forEach(function(s,i){ setTimeout(function(){ s.style.filter='none'; }, i*600); });
     document.getElementById('pkbTyped').textContent = '';
     document.getElementById('pkbErr').textContent = '';
-    // Construire la grille : touches mélangées
+    // Construire la grille
     var grid = document.getElementById('pkbGrid');
     grid.innerHTML = '';
-    var keysToShow = Object.keys(_kbMap); // 26 lettres mélangées
+    var keysToShow = Object.keys(_kbMap);
     keysToShow.forEach(function(realLetter){
       var key = document.createElement('div');
       key.className = 'pkb-key';
-      key.textContent = _kbMap[realLetter]; // affiche la fausse touche
+      key.textContent = _kbMap[realLetter];
       key.dataset.real = realLetter;
       key.addEventListener('touchstart', function(e){ e.preventDefault(); kbPress(realLetter); }, { passive:false });
       key.addEventListener('click', function(){ kbPress(realLetter); });
       grid.appendChild(key);
     });
-    // Touche retour arrière
     var bk = document.createElement('div');
     bk.className = 'pkb-key backspace'; bk.textContent = '⌫ Effacer';
     bk.addEventListener('touchstart', function(e){ e.preventDefault(); kbBackspace(); }, { passive:false });
     bk.addEventListener('click', kbBackspace);
     grid.appendChild(bk);
     document.getElementById('prankKeyboard').classList.add('show');
+    // Après 8s sans succès → faire clignoter les bonnes touches une par une
+    _kbHintTimer = setTimeout(kbShowHints, 8000);
   }
+
+  function kbShowHints(){
+    _kbHintActive = true;
+    var hintIdx = 0;
+    var wordLetters = _kbWord.split('').filter(function(c,i,arr){ return arr.indexOf(c)===i; }); // lettres uniques
+    _kbHintInterval = setInterval(function(){
+      // Retirer l'ancienne surbrillance
+      document.querySelectorAll('.pkb-key.hint').forEach(function(k){ k.classList.remove('hint'); });
+      var letter = wordLetters[hintIdx % wordLetters.length];
+      // Trouver la touche correspondante et la faire briller
+      document.querySelectorAll('.pkb-key').forEach(function(k){
+        if(k.dataset.real === letter) k.classList.add('hint');
+      });
+      hintIdx++;
+    }, 1200);
+  }
+
   function kbPress(letter){
     if(_kbTyped.length >= _kbWord.length) return;
+    // Réinitialiser le timer d'indice à chaque frappe
+    clearTimeout(_kbHintTimer); clearInterval(_kbHintInterval);
+    document.querySelectorAll('.pkb-key.hint').forEach(function(k){ k.classList.remove('hint'); });
+    _kbHintTimer = setTimeout(kbShowHints, 8000);
     _kbTyped += letter;
     document.getElementById('pkbTyped').textContent = _kbTyped;
     if(_kbTyped.length === _kbWord.length){
       if(_kbTyped === _kbWord){
+        clearTimeout(_kbHintTimer); clearInterval(_kbHintInterval);
         document.getElementById('prankKeyboard').classList.remove('show');
         prankDone();
       } else {
@@ -4935,41 +4968,75 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     overlay.classList.add('show');
     document.getElementById('prankEyesBanner').classList.add('show');
     _eyesPairs = [];
-    // Créer 3 paires à positions aléatoires dans la zone sûre
-    var positions = [];
-    for(var i=0; i<3; i++){
-      var x, y, safe;
-      do {
-        safe = true;
-        x = 20 + Math.random()*(window.innerWidth - 140);
-        y = 80 + Math.random()*(window.innerHeight - 280);
-        positions.forEach(function(pos){ if(Math.abs(pos.x-x)<140 && Math.abs(pos.y-y)<80) safe=false; });
-      } while(!safe);
-      positions.push({x:x,y:y});
-      var pair = createEyePair(i, x, y);
-      overlay.appendChild(pair.el);
-      _eyesPairs.push(pair);
-    }
-    // Lancer le suivi des pupilles
+    // Créer 3 paires mais les ajouter une par une au bon moment
+    cancelAnimationFrame(_eyesAnimFrame);
     _eyesAnimFrame = requestAnimationFrame(trackEyes);
-    // Commencer avec la première paire
-    setTimeout(function(){ startEyePair(0); }, 600);
+    // Lancer la première paire
+    showNextEyePair(overlay);
   }
+
+  function randomEyePos(existing){
+    var x, y, safe, attempts = 0;
+    do {
+      safe = true;
+      x = 20 + Math.random()*(window.innerWidth - 140);
+      y = 80 + Math.random()*(window.innerHeight - 260);
+      existing.forEach(function(pos){ if(Math.abs(pos.x-x)<150&&Math.abs(pos.y-y)<90) safe=false; });
+      attempts++;
+    } while(!safe && attempts < 20);
+    return {x:x, y:y};
+  }
+
+  function showNextEyePair(overlay){
+    var idx = _eyesPairs.length;
+    if(idx >= 3){ return; } // ne pas créer plus de 3
+    var pos = randomEyePos(_eyesPairs.map(function(p){ return {x:parseInt(p.el.style.left),y:parseInt(p.el.style.top)}; }));
+    var pair = createEyePair(idx, pos.x, pos.y);
+    // Apparition en fondu
+    pair.el.style.opacity = '0';
+    pair.el.style.transform = 'scale(0.5)';
+    pair.el.style.transition = 'opacity 0.4s ease, transform 0.4s cubic-bezier(.4,2,.55,.9)';
+    overlay.appendChild(pair.el);
+    _eyesPairs.push(pair);
+    // Lancer l'animation de clignement
+    startEyeBlink(pair);
+    setTimeout(function(){
+      pair.el.style.opacity = '1';
+      pair.el.style.transform = 'scale(1)';
+    }, 50);
+    // Commencer le timer de fixation après l'apparition
+    setTimeout(function(){ startEyePair(idx); }, 500);
+  }
+
+  function startEyeBlink(pair){
+    // Clignement aléatoire toutes les 2-5s
+    function blink(){
+      var eyes = pair.el.querySelectorAll('.prank-eye');
+      eyes.forEach(function(eye){
+        eye.classList.add('blink');
+        setTimeout(function(){ eye.classList.remove('blink'); }, 180);
+      });
+      var next = 2000 + Math.random()*3000;
+      pair.blinkTimer = setTimeout(blink, next);
+    }
+    pair.blinkTimer = setTimeout(blink, 1000 + Math.random()*2000);
+  }
+
   function createEyePair(idx, x, y){
     var el = document.createElement('div');
     el.className = 'prank-eye-pair';
     el.style.left = x+'px'; el.style.top = y+'px';
     el.innerHTML = [0,1].map(function(){
-      return '<div class="prank-eye"><div class="prank-eye-pupil"></div><div class="prank-eye-ring"></div></div>';
+      return '<div class="prank-eye"><div class="prank-eye-lid"></div><div class="prank-eye-pupil"></div><div class="prank-eye-ring"></div></div>';
     }).join('');
     var timer = document.createElement('div');
     timer.className = 'prank-eye-timer';
     timer.textContent = '';
     el.appendChild(timer);
-    return { el:el, idx:idx, done:false, timer:timer };
+    return { el:el, idx:idx, done:false, timer:timer, blinkTimer:null };
   }
+
   function trackEyes(){
-    // Les pupilles suivent le centre de l'écran (simulateur de regard)
     var cx = window.innerWidth/2, cy = window.innerHeight/2;
     _eyesPairs.forEach(function(pair){
       var rect = pair.el.getBoundingClientRect();
@@ -4987,36 +5054,48 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     });
     _eyesAnimFrame = requestAnimationFrame(trackEyes);
   }
+
   function startEyePair(idx){
-    if(idx >= _eyesPairs.length){ eyesDone(); return; }
+    if(idx >= 3){ eyesDone(); return; }
     var pair = _eyesPairs[idx];
     var rings = pair.el.querySelectorAll('.prank-eye-ring');
     rings.forEach(function(r){ r.classList.add('active'); });
     var timeLeft = 5;
     pair.timer.textContent = timeLeft+'s';
-    _eyesProgress = 0;
     _eyesTimer = setInterval(function(){
       timeLeft--;
       pair.timer.textContent = timeLeft > 0 ? timeLeft+'s' : '✅';
       if(timeLeft <= 0){
         clearInterval(_eyesTimer);
         rings.forEach(function(r){ r.classList.remove('active'); });
+        clearTimeout(pair.blinkTimer);
         pair.done = true;
-        startEyePair(idx+1);
+        // Disparition en fondu puis paire suivante
+        pair.el.style.opacity = '0';
+        pair.el.style.transform = 'scale(0.5)';
+        setTimeout(function(){
+          pair.el.remove();
+          var overlay = document.getElementById('prankEyesOverlay');
+          if(idx + 1 < 3){
+            showNextEyePair(overlay);
+          } else {
+            eyesDone();
+          }
+        }, 400);
       }
     }, 1000);
   }
+
   function eyesDone(){
     cancelAnimationFrame(_eyesAnimFrame);
     clearInterval(_eyesTimer);
+    _eyesPairs.forEach(function(p){ clearTimeout(p.blinkTimer); });
     document.getElementById('prankEyesOverlay').classList.remove('show');
     document.getElementById('prankEyesBanner').classList.remove('show');
-    // Afficher le message final sans gotcha
     var msg = document.getElementById('prankEyesMessage');
     msg.classList.add('show');
     setTimeout(function(){
       msg.classList.remove('show');
-      // Marquer comme terminée sans gotcha
       if(_activePrank){
         fetch(SB_URL+'/rest/v1/'+PRANK_TABLE+'?id=eq.'+_activePrank.id, {
           method:'PATCH',
@@ -5031,18 +5110,37 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
 
   /* ════ BÊTISE 13 : FAUSSE NOTIF ════ */
   function startNotif(p){
-    var authorName = p.author === 'boy' ? 'Link 💙' : 'Zelda 💖';
-    document.getElementById('pnApp').textContent = authorName;
-    document.getElementById('pnTitle').textContent = '😈 Surprise !';
-    document.getElementById('pnBody').textContent = p.message || 'Hehe je t\'ai eu !';
-    var notif = document.getElementById('prankNotif');
-    notif.classList.add('show');
-    // Disparaît après 4s puis prankDone
+    var authorName = p.author === 'boy' ? 'Link' : 'Zelda';
+    var avatar = p.author === 'boy' ? '💙' : '💖';
+    document.getElementById('pnAvatar').textContent = avatar;
+    document.getElementById('pnApp').textContent = authorName + ' • Messages';
+    document.getElementById('pnTitle').textContent = authorName;
+    document.getElementById('pnBody').textContent = p.message || '…';
+    // Scroll vers le haut pour que la notif soit visible
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Vibration (si supportée)
+    if(navigator.vibrate){ navigator.vibrate([80, 60, 80]); }
     setTimeout(function(){
-      notif.classList.remove('show');
-      setTimeout(function(){ prankDone(); }, 500);
-    }, 4000);
+      var notif = document.getElementById('prankNotif');
+      notif.classList.add('show');
+    }, 400);
   }
+  window.prankNotifDismiss = function(){
+    var notif = document.getElementById('prankNotif');
+    notif.classList.remove('show');
+    // Pas de gotcha — terminer proprement sans écran
+    setTimeout(function(){
+      if(_activePrank){
+        fetch(SB_URL+'/rest/v1/'+PRANK_TABLE+'?id=eq.'+_activePrank.id, {
+          method:'PATCH',
+          headers: sbHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
+          body: JSON.stringify({ active: false })
+        }).catch(function(){});
+        _activePrank = null;
+        setTimeout(function(){ dequeueNextPrank(); }, 300);
+      }
+    }, 400);
+  };
 
   
   function abortActivePrank(){
@@ -9651,7 +9749,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.05.5</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.05.9</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
