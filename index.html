@@ -751,383 +751,6 @@ body.light .hp-back { color: #c8185e; }
 body.light .hp-title { color: #1e0510; }
 body.light .hp-sub { color: rgba(30,5,16,0.5); }
 
-/* ══════════════════════════════════════════
-   DM — MESSAGERIE PRIVÉE
-══════════════════════════════════════════ */
-
-/* Topbar */
-.dm-topbar {
-  position: fixed; top: 0; left: 0; right: 0;
-  height: 60px;
-  display: flex; align-items: center; gap: 10px;
-  padding: 0 14px;
-  background: rgba(18,18,18,0.92);
-  backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-  z-index: 700;
-  transition: background 0.3s, border-color 0.3s;
-}
-body.light .dm-topbar {
-  background: rgba(255,245,248,0.93);
-  border-bottom-color: rgba(200,24,94,0.12);
-}
-.dm-topbar-back {
-  width: 36px; height: 36px; border-radius: 50%;
-  border: none; background: transparent;
-  color: var(--text); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.15s; flex-shrink: 0;
-}
-.dm-topbar-back:hover { background: var(--s2); }
-.dm-topbar-center {
-  flex: 1; display: flex; align-items: center; gap: 10px;
-  min-width: 0;
-}
-.dm-topbar-avatars {
-  display: flex; align-items: center; flex-shrink: 0;
-}
-.dm-topbar-avatars .dm-avatar { width: 32px; height: 32px; font-size: 12px; }
-.dm-topbar-avatars .dm-avatar:last-child { margin-left: -10px; }
-.dm-topbar-names {
-  display: flex; flex-direction: column; gap: 1px; min-width: 0;
-}
-.dm-topbar-title {
-  font-size: 13px; font-weight: 700; color: var(--text);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.dm-topbar-status {
-  font-size: 10px; color: var(--muted);
-  display: flex; align-items: center; gap: 4px;
-}
-.dm-topbar-status.online { color: #4ade80; }
-.dm-topbar-theme {
-  width: 36px; height: 36px; border-radius: 50%;
-  border: none; background: transparent;
-  color: var(--muted); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.15s, color 0.15s; flex-shrink: 0;
-}
-.dm-topbar-theme:hover { background: var(--s2); color: var(--text); }
-
-/* Avatars */
-.dm-avatar {
-  width: 36px; height: 36px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 800; flex-shrink: 0;
-  border: 2px solid var(--bg);
-  letter-spacing: 0;
-}
-.dm-avatar-girl {
-  background: linear-gradient(135deg, #f472b6 0%, #e879a0 50%, #c8185e 100%);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(232,121,160,0.4);
-}
-.dm-avatar-boy {
-  background: linear-gradient(135deg, #60a5fa 0%, #5b9cf6 50%, #3b82f6 100%);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(91,156,246,0.4);
-}
-
-/* Identity screen */
-.dm-identity-screen {
-  position: fixed; inset: 60px 0 0 0;
-  display: flex; align-items: center; justify-content: center;
-  padding: 24px;
-  background: var(--bg);
-  transition: background 0.3s;
-  z-index: 10;
-}
-.dm-identity-inner {
-  width: 100%; max-width: 320px;
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
-  animation: dmFadeUp 0.4s cubic-bezier(.4,0,.2,1);
-}
-@keyframes dmFadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.dm-identity-icon {
-  font-size: 52px; line-height: 1; margin-bottom: 4px;
-  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.25));
-}
-.dm-identity-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 24px; font-weight: 700; color: var(--text);
-}
-.dm-identity-sub {
-  font-size: 13px; color: var(--muted);
-  text-align: center; line-height: 1.5; margin-bottom: 8px;
-}
-.dm-identity-btns {
-  display: flex; gap: 12px; width: 100%;
-}
-.dm-identity-btn {
-  flex: 1; padding: 18px 12px;
-  border-radius: 16px; border: 1.5px solid var(--border);
-  background: var(--s1); cursor: pointer;
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px; font-weight: 700; color: var(--sub);
-  transition: transform 0.18s cubic-bezier(.4,2,.55,.9), border-color 0.15s, background 0.15s, box-shadow 0.15s;
-}
-.dm-identity-btn:hover { transform: translateY(-3px); }
-.dm-identity-btn .dm-identity-avatar { width: 52px; height: 52px; font-size: 18px; border: none; }
-.dm-btn-girl:hover, .dm-btn-girl:focus {
-  border-color: #e879a0; background: rgba(232,121,160,0.08);
-  color: #e879a0; box-shadow: 0 8px 24px rgba(232,121,160,0.18);
-}
-.dm-btn-boy:hover, .dm-btn-boy:focus {
-  border-color: #5b9cf6; background: rgba(91,156,246,0.08);
-  color: #5b9cf6; box-shadow: 0 8px 24px rgba(91,156,246,0.18);
-}
-
-/* Chat screen */
-.dm-chat-screen {
-  position: fixed; inset: 60px 0 0 0;
-  display: flex; flex-direction: column;
-  background: var(--bg);
-  transition: background 0.3s;
-}
-.dm-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px 14px 10px;
-  display: flex; flex-direction: column; gap: 2px;
-  overscroll-behavior: contain;
-  scroll-behavior: smooth;
-}
-.dm-messages::-webkit-scrollbar { width: 3px; }
-.dm-messages::-webkit-scrollbar-track { background: transparent; }
-.dm-messages::-webkit-scrollbar-thumb { background: var(--s3); border-radius: 3px; }
-
-/* Day label */
-.dm-day-label {
-  text-align: center;
-  font-size: 10px; font-weight: 600; color: var(--muted);
-  text-transform: uppercase; letter-spacing: 1.5px;
-  padding: 8px 0 12px;
-}
-
-/* Bubble wrapper */
-.dm-msg-wrap {
-  display: flex; align-items: flex-end; gap: 7px;
-  margin-bottom: 1px;
-  animation: dmMsgIn 0.28s cubic-bezier(.4,0,.2,1);
-}
-@keyframes dmMsgIn {
-  from { opacity: 0; transform: translateY(8px) scale(0.97); }
-  to   { opacity: 1; transform: none; }
-}
-.dm-msg-wrap.mine { flex-direction: row-reverse; }
-.dm-msg-avatar { flex-shrink: 0; opacity: 0; }
-.dm-msg-wrap.first-in-group .dm-msg-avatar { opacity: 1; }
-.dm-msg-wrap.mine .dm-msg-avatar { opacity: 0 !important; }
-
-/* Bubble */
-.dm-bubble {
-  max-width: 72%;
-  padding: 9px 13px;
-  border-radius: 20px;
-  font-size: 14px; line-height: 1.45; color: var(--text);
-  word-break: break-word;
-  position: relative;
-  transition: background 0.2s;
-}
-
-/* Theirs = left */
-.dm-msg-wrap:not(.mine) .dm-bubble {
-  background: var(--s2);
-  border-radius: 4px 20px 20px 20px;
-  color: var(--text);
-}
-.dm-msg-wrap:not(.mine).first-in-group .dm-bubble {
-  border-radius: 20px 20px 20px 4px;
-}
-/* Mine = right — gradient Instagram-like */
-.dm-msg-wrap.mine .dm-bubble {
-  background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
-  color: #fff;
-  border-radius: 20px 4px 20px 20px;
-}
-body.light .dm-msg-wrap.mine .dm-bubble {
-  background: linear-gradient(135deg, #c8185e 0%, #e879a0 100%);
-}
-.dm-msg-wrap.mine.first-in-group .dm-bubble {
-  border-radius: 20px 20px 4px 20px;
-}
-
-/* Timestamp */
-.dm-bubble-time {
-  font-size: 9px; font-weight: 500;
-  margin-top: 3px;
-  text-align: right;
-  opacity: 0.5;
-  display: none;
-}
-.dm-msg-wrap.mine .dm-bubble-time { color: rgba(255,255,255,0.7); }
-.dm-msg-wrap:not(.mine) .dm-bubble-time { color: var(--muted); }
-.dm-msg-wrap.last-in-group .dm-bubble-time { display: block; }
-
-/* Read receipt */
-.dm-read-tick {
-  font-size: 10px; color: rgba(255,255,255,0.6);
-  margin-left: 3px; display: inline;
-}
-.dm-read-tick.seen { color: #60a5fa; }
-
-/* Reaction */
-.dm-bubble-reaction {
-  position: absolute; bottom: -10px;
-  font-size: 14px; line-height: 1;
-  background: var(--s1);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1px 4px;
-  cursor: pointer;
-  transition: transform 0.15s;
-  user-select: none;
-}
-.dm-msg-wrap:not(.mine) .dm-bubble-reaction { right: -8px; }
-.dm-msg-wrap.mine .dm-bubble-reaction { left: -8px; }
-.dm-bubble-reaction:hover { transform: scale(1.25); }
-
-/* Typing indicator */
-.dm-typing {
-  display: flex; align-items: center; gap: 7px;
-  padding: 8px 0 4px;
-}
-.dm-typing-avatar { flex-shrink: 0; }
-.dm-typing-dots {
-  background: var(--s2);
-  border-radius: 4px 20px 20px 20px;
-  padding: 10px 14px;
-  display: flex; gap: 4px; align-items: center;
-}
-.dm-typing-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--muted);
-  animation: dmDot 1.2s ease-in-out infinite;
-}
-.dm-typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.dm-typing-dot:nth-child(3) { animation-delay: 0.4s; }
-@keyframes dmDot {
-  0%,60%,100% { transform: translateY(0); opacity: 0.4; }
-  30% { transform: translateY(-5px); opacity: 1; }
-}
-
-/* Separator msg group */
-.dm-spacer { height: 8px; flex-shrink: 0; }
-
-/* Input bar */
-.dm-input-bar {
-  flex-shrink: 0;
-  padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
-  background: var(--bg);
-  border-top: 1px solid var(--border);
-  transition: background 0.3s, border-color 0.3s;
-  position: relative;
-}
-.dm-input-wrap {
-  display: flex; align-items: center; gap: 8px;
-  background: var(--s1);
-  border: 1.5px solid var(--border);
-  border-radius: 26px;
-  padding: 6px 6px 6px 10px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  position: relative;
-}
-.dm-input-wrap:focus-within {
-  border-color: rgba(131,58,180,0.45);
-  box-shadow: 0 0 0 3px rgba(131,58,180,0.1);
-}
-body.light .dm-input-wrap:focus-within {
-  border-color: rgba(200,24,94,0.4);
-  box-shadow: 0 0 0 3px rgba(200,24,94,0.08);
-}
-.dm-emoji-btn {
-  width: 32px; height: 32px;
-  border: none; background: transparent;
-  color: var(--muted); cursor: pointer;
-  border-radius: 50%; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  transition: color 0.15s, background 0.15s;
-}
-.dm-emoji-btn:hover { color: var(--text); background: var(--s2); }
-.dm-emoji-btn.open { color: var(--green); }
-.dm-input {
-  flex: 1; border: none; background: transparent;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px !important; color: var(--text);
-  outline: none; padding: 2px 0;
-  caret-color: var(--green);
-}
-.dm-input::placeholder { color: var(--muted); }
-.dm-send-btn {
-  width: 36px; height: 36px; border-radius: 50%;
-  border: none; background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
-  color: #fff; cursor: pointer; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s;
-  box-shadow: 0 2px 8px rgba(131,58,180,0.35);
-  opacity: 0.4;
-}
-body.light .dm-send-btn {
-  background: linear-gradient(135deg, #c8185e, #e879a0);
-  box-shadow: 0 2px 8px rgba(200,24,94,0.3);
-}
-.dm-send-btn.ready { opacity: 1; }
-.dm-send-btn.ready:hover { transform: scale(1.1); box-shadow: 0 4px 16px rgba(131,58,180,0.4); }
-.dm-send-btn:active { transform: scale(0.93); }
-
-/* Emoji picker */
-.dm-emoji-picker {
-  position: absolute;
-  bottom: calc(100% + 10px); left: 0; right: 0;
-  background: var(--s1);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 12px;
-  display: none; flex-wrap: wrap; gap: 6px; justify-content: center;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
-  z-index: 10;
-  animation: dmFadeUp 0.18s ease;
-}
-.dm-emoji-picker.open { display: flex; }
-.dm-emoji-picker span {
-  font-size: 22px; cursor: pointer; line-height: 1;
-  padding: 4px; border-radius: 8px;
-  transition: transform 0.12s, background 0.1s;
-  user-select: none;
-}
-.dm-emoji-picker span:hover { transform: scale(1.35); background: var(--s2); }
-
-/* Toast "Message envoyé" */
-.dm-toast {
-  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(10px);
-  background: var(--s2); color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 20px; padding: 7px 16px;
-  font-size: 12px; font-weight: 600;
-  opacity: 0; transition: opacity 0.2s, transform 0.2s;
-  pointer-events: none; z-index: 999; white-space: nowrap;
-}
-.dm-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* Empty state */
-.dm-empty {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 8px;
-  padding: 32px 24px; text-align: center;
-}
-.dm-empty-icon { font-size: 48px; opacity: 0.35; }
-.dm-empty-text { font-size: 13px; color: var(--muted); line-height: 1.5; }
-
-/* Light mode adjustments */
-body.light .dm-chat-screen { background: var(--bg); }
-body.light .dm-messages::-webkit-scrollbar-thumb { background: var(--s3); }
-body.light .dm-msg-wrap:not(.mine) .dm-bubble { background: var(--s2); }
-
 /* Quiz */
 body.light .qz-option {
   background: #fff5f8;
@@ -1298,13 +921,7 @@ body.light #lockNavBtn { color: #7c3aed; }
 .prank-close { margin-top:8px; padding:11px 26px; background:#3d9bd4; color:#fff; border:none; border-radius:50px; font-size:13px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; transition:background 0.15s, transform 0.12s; }
 .prank-close:hover { background:#ff85c2; transform:scale(1.04); }
 
-#hiddenPage {
-  display: none; position: fixed; inset: 0; z-index: 600;
-  overflow: hidden;
-  background: var(--bg);
-  transition: background 0.3s;
-}
-#hiddenPage.active { display: block; animation: slideUp 0.3s ease; }
+/* #hiddenPage — défini dans le bloc InstaLove ci-dessous */
 .hp-header { padding: 28px 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); position: relative; overflow: hidden; }
 .hp-back { display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:600; color:var(--sub); background:var(--s2); border:1px solid var(--border); border-radius:20px; padding:7px 14px; cursor:pointer; margin-bottom:10px; transition:background 0.15s, color 0.15s, transform 0.12s; }
 .hp-back:hover { background:var(--s3); color:var(--text); transform:translateX(-2px); }
@@ -1544,6 +1161,9 @@ body.light .memo-note-new-badge {
 }
 /* Masqué sur la page principale (le bubbleBtn Thème suffit) */
 body:not(.subview-open) #floatingThemeBtn { opacity: 0; pointer-events: none; }
+/* Masqué quand InstaLove est ouvert (la topbar a son propre bouton thème) */
+#hiddenPage.active ~ #floatingThemeBtn,
+body:has(#hiddenPage.active) #floatingThemeBtn { opacity: 0 !important; pointer-events: none !important; }
 
 /* ════════════════════════════════════════════
    SUGGESTION SECTION
@@ -2135,6 +1755,303 @@ body.light .pendu-theme {
   text-align: center;
   margin: 8px 0 4px;
 }
+
+/* ════════════════════════════════════════════
+   INSTALOVE — Messagerie privée
+════════════════════════════════════════════ */
+
+#hiddenPage {
+  display: none; position: fixed; inset: 0; z-index: 600;
+  overflow: hidden; background: var(--bg);
+  flex-direction: column; transition: background 0.3s;
+}
+#hiddenPage.active { display: flex; animation: slideUp 0.3s ease; }
+
+/* Topbar */
+.dm-topbar {
+  width: 100%; height: 56px; min-height: 56px; flex-shrink: 0;
+  display: flex; align-items: center; gap: 6px; padding: 0 10px;
+  background: var(--bg); border-bottom: 1px solid var(--border);
+  z-index: 10; transition: background 0.3s, border-color 0.3s;
+}
+.dm-topbar-back {
+  /* remplacé par .gv-back — conservé pour compatibilité */
+  display: none;
+}
+/* Adapter gv-back dans la topbar InstaLove */
+#dmTopbar .gv-back {
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+.dm-topbar-center { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; }
+.dm-topbar-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.dm-topbar-logo-txt {
+  font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700;
+  background: linear-gradient(90deg, #f9ce34, #ee2a7b 50%, #405de6);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.dm-topbar-title { font-size: 14px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dm-topbar-sub { font-size: 10px; color: var(--muted); }
+.dm-topbar-avatars { display: flex; }
+.dm-topbar-avatars .dm-avatar { width: 28px; height: 28px; font-size: 10px; border: 2px solid var(--bg); }
+.dm-topbar-avatars .dm-avatar:last-child { margin-left: -8px; }
+.dm-topbar-names { display: flex; flex-direction: column; gap: 1px; }
+
+/* Profile pill */
+.dm-topbar-profile {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 13px 6px 7px; border-radius: 22px;
+  border: 1.5px solid var(--border); background: var(--s1);
+  cursor: pointer; transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+}
+.dm-topbar-profile:hover { background: var(--s2); box-shadow: 0 4px 16px rgba(0,0,0,0.25); }
+.dm-tp-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 800; color: #fff; flex-shrink: 0;
+}
+.dm-tp-avatar.girl { background: linear-gradient(135deg, #f472b6, #c8185e); }
+.dm-tp-avatar.boy  { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
+.dm-tp-name { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: 0.2px; }
+.dm-tp-chevron { color: var(--muted); }
+.dm-topbar-theme {
+  width: 36px; height: 36px; border-radius: 50%; border: none;
+  background: transparent; color: var(--muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.dm-topbar-theme:hover { background: var(--s2); color: var(--text); }
+
+/* Avatars */
+.dm-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; flex-shrink: 0; border: 2px solid var(--bg);
+}
+.dm-avatar-girl { background: linear-gradient(135deg, #f472b6, #c8185e); color: #fff; box-shadow: 0 2px 8px rgba(200,24,94,0.3); }
+.dm-avatar-boy  { background: linear-gradient(135deg, #60a5fa, #3b82f6); color: #fff; box-shadow: 0 2px 8px rgba(59,130,246,0.3); }
+
+/* Screens */
+.dm-screen {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  overflow-y: auto; width: 100%; background: var(--bg);
+}
+.dm-chat-screen { justify-content: flex-start; }
+
+/* Home */
+.dm-home-inner {
+  width: 100%; max-width: 360px;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 12px 24px 48px;
+  animation: dmUp 0.4s cubic-bezier(.4,0,.2,1);
+}
+@keyframes dmUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:none; } }
+.dm-home-logo-wrap {
+  position: relative; width: 110px; height: 110px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; margin-bottom: 16px; transition: transform 0.2s;
+}
+.dm-home-logo-wrap:hover { transform: scale(1.05); }
+.dm-home-logo-bg {
+  position: absolute; inset: 0; border-radius: 28px;
+  background: linear-gradient(135deg, #f9ce34, #ee2a7b 40%, #9b59b6 75%, #405de6);
+  box-shadow: 0 8px 32px rgba(238,42,123,0.4), 0 2px 8px rgba(64,93,230,0.25);
+  animation: dmLogoPulse 3s ease-in-out infinite;
+}
+@keyframes dmLogoPulse {
+  0%,100% { box-shadow: 0 8px 32px rgba(238,42,123,0.4),0 2px 8px rgba(64,93,230,0.25); }
+  50%     { box-shadow: 0 12px 48px rgba(238,42,123,0.6),0 4px 16px rgba(64,93,230,0.4); }
+}
+.dm-home-logo-icon { position: relative; z-index: 1; width: 54px; height: 54px; }
+.dm-home-appname {
+  font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 700;
+  background: linear-gradient(90deg, #f9ce34, #ee2a7b 50%, #405de6);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  margin-bottom: 4px;
+}
+.dm-home-tagline { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+.dm-home-conv {
+  width: 100%; background: var(--s1); border: 1px solid var(--border);
+  border-radius: 18px; padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; margin-bottom: 16px;
+  transition: background 0.15s, transform 0.18s, border-color 0.15s;
+}
+.dm-home-conv:hover, .dm-home-conv:active { background: var(--s2); border-color: rgba(238,42,123,0.35); transform: scale(1.015); }
+.dm-home-conv-avatars { display: flex; flex-shrink: 0; }
+.dm-home-conv-avatars .dm-avatar { width: 44px; height: 44px; font-size: 16px; border: 2.5px solid var(--s1); }
+.dm-home-conv-avatars .dm-avatar:last-child { margin-left: -12px; }
+.dm-home-conv-info { flex: 1; min-width: 0; }
+.dm-home-conv-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.dm-home-conv-preview { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dm-home-conv-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.dm-home-conv-time { font-size: 10px; color: var(--muted); }
+.dm-home-conv-badge {
+  min-width: 18px; height: 18px; border-radius: 9px; padding: 0 5px;
+  background: linear-gradient(135deg, #ee2a7b, #9b59b6);
+  color: #fff; font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.dm-home-footer { font-size: 11px; color: var(--muted); opacity: 0.55; }
+
+/* Identity overlay (bottom sheet) */
+.dm-id-overlay {
+  position: absolute; inset: 56px 0 0 0; z-index: 20;
+  background: transparent;
+  display: flex; align-items: flex-start; justify-content: flex-end;
+  padding-top: 8px; padding-right: 14px;
+  animation: dmFadeIn 0.2s ease;
+}
+body.light .dm-id-overlay { background: transparent; }
+.dm-id-modal {
+  width: 200px;
+  background: var(--s1); border: 1px solid var(--border); border-radius: 14px;
+  padding: 12px 12px 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  animation: dmSlideUp 0.22s cubic-bezier(.4,0,.2,1);
+}
+@keyframes dmSlideUp { from { transform:translateY(40px); opacity:0; } to { transform:none; opacity:1; } }
+.dm-id-title { font-family:'Playfair Display',serif; font-size:15px; font-weight:700; color:var(--text); }
+.dm-id-sub { font-size:11px; color:var(--muted); text-align:center; }
+.dm-id-btns { display:flex; gap:8px; width:100%; margin-top:2px; }
+.dm-id-btn {
+  flex:1; padding:10px 8px 8px; border-radius:12px;
+  border:1.5px solid var(--border); background:var(--bg); cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:5px;
+  font-family:'DM Sans',sans-serif;
+  transition:transform 0.18s cubic-bezier(.4,2,.55,.9), border-color 0.15s, background 0.15s;
+}
+.dm-id-btn:hover { transform:translateY(-3px); }
+.dm-id-av { width:34px; height:34px; font-size:13px; border:none !important; }
+.dm-id-name { font-size:12px; font-weight:700; color:var(--text); }
+.dm-id-sub2 { font-size:10px; color:var(--muted); margin-top:-3px; }
+.dm-id-girl:hover { border-color:#e879a0; background:rgba(232,121,160,0.08); }
+.dm-id-boy:hover  { border-color:#60a5fa; background:rgba(96,165,250,0.08); }
+.dm-id-btn.selected { border-width:2px; }
+.dm-id-girl.selected { border-color:#c8185e; background:rgba(200,24,94,0.07); }
+.dm-id-boy.selected  { border-color:#3b82f6; background:rgba(59,130,246,0.07); }
+
+/* Chat */
+.dm-messages {
+  flex:1; overflow-y:auto; width:100%;
+  padding:12px 12px 6px;
+  display:flex; flex-direction:column;
+  overscroll-behavior:contain;
+}
+.dm-messages::-webkit-scrollbar { width:3px; }
+.dm-messages::-webkit-scrollbar-thumb { background:var(--s3); border-radius:3px; }
+.dm-loading-msgs { display:flex; align-items:center; justify-content:center; flex:1; opacity:0.4; }
+.dm-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:40px 20px; text-align:center; }
+.dm-empty-icon { font-size:44px; opacity:0.35; }
+.dm-empty-text { font-size:13px; color:var(--muted); line-height:1.5; }
+.dm-day-label {
+  text-align:center; font-size:10px; font-weight:600; color:var(--muted);
+  text-transform:uppercase; letter-spacing:1.5px; padding:10px 0 14px;
+}
+.dm-spacer { height:8px; flex-shrink:0; }
+.dm-msg-wrap {
+  display:flex; align-items:flex-end; gap:6px; margin-bottom:2px;
+  animation:dmMsgIn 0.22s cubic-bezier(.4,0,.2,1);
+}
+@keyframes dmMsgIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+.dm-msg-wrap.mine { flex-direction:row-reverse; }
+.dm-msg-avatar { width:26px; height:26px; font-size:10px; flex-shrink:0; }
+.dm-bubble {
+  max-width:75%; padding:9px 13px; border-radius:20px;
+  font-size:14px; line-height:1.5; word-break:break-word; position:relative;
+}
+.dm-msg-wrap:not(.mine) .dm-bubble { background:var(--s2); color:var(--text); border-radius:20px 20px 20px 4px; }
+.dm-msg-wrap:not(.mine).first-in-group .dm-bubble { border-radius:4px 20px 20px 20px; }
+.dm-msg-wrap.mine .dm-bubble {
+  background:linear-gradient(135deg,#833ab4,#fd1d1d 60%,#fcb045);
+  color:#fff; border-radius:20px 20px 4px 20px;
+}
+body.light .dm-msg-wrap.mine .dm-bubble { background:linear-gradient(135deg,#c8185e,#e879a0); }
+.dm-msg-wrap.mine.first-in-group .dm-bubble { border-radius:20px 4px 20px 20px; }
+.dm-bubble-text { display:block; }
+.dm-bubble-meta { font-size:9px; margin-top:3px; text-align:right; opacity:0.55; display:none; }
+.dm-msg-wrap.last-in-group .dm-bubble-meta { display:block; }
+.dm-msg-wrap.mine .dm-bubble-meta { color:rgba(255,255,255,0.8); }
+.dm-msg-wrap:not(.mine) .dm-bubble-meta { color:var(--muted); }
+.dm-tick { margin-left:2px; }
+.dm-tick.seen { color:#60a5fa; }
+body.light .dm-tick.seen { color:#c8185e; }
+.dm-react {
+  position:absolute; bottom:-10px; font-size:13px;
+  background:var(--s1); border:1px solid var(--border); border-radius:10px;
+  padding:1px 4px; cursor:pointer; user-select:none; transition:transform 0.15s;
+}
+.dm-msg-wrap:not(.mine) .dm-react { right:-6px; }
+.dm-msg-wrap.mine .dm-react { left:-6px; }
+.dm-react:hover { transform:scale(1.25); }
+
+/* Input bar */
+.dm-input-bar {
+  width:100%; flex-shrink:0;
+  padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));
+  background:var(--bg); border-top:1px solid var(--border);
+  position:relative; transition:background 0.3s;
+}
+.dm-input-wrap {
+  display:flex; align-items:center; gap:8px;
+  background:var(--s1); border:1.5px solid var(--border);
+  border-radius:26px; padding:6px 6px 6px 10px;
+  transition:border-color 0.2s,box-shadow 0.2s; position:relative;
+}
+.dm-input-wrap:focus-within { border-color:#833ab4; box-shadow:0 0 0 3px rgba(131,58,180,0.1); }
+body.light .dm-input-wrap:focus-within { border-color:#c8185e; box-shadow:0 0 0 3px rgba(200,24,94,0.08); }
+.dm-emoji-btn {
+  width:32px; height:32px; border:none; background:transparent; color:var(--muted);
+  cursor:pointer; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; transition:color 0.15s,background 0.15s;
+}
+.dm-emoji-btn:hover,.dm-emoji-btn.open { color:var(--text); }
+.dm-input {
+  flex:1; border:none; background:transparent;
+  font-family:'DM Sans',sans-serif; font-size:14px !important;
+  color:var(--text); outline:none; caret-color:#ee2a7b; padding:2px 0;
+}
+.dm-input::placeholder { color:var(--muted); }
+.dm-send-btn {
+  width:36px; height:36px; border-radius:50%; border:none;
+  background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);
+  color:#fff; cursor:pointer; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0.35; transition:opacity 0.15s,transform 0.15s;
+}
+body.light .dm-send-btn { background:linear-gradient(135deg,#c8185e,#e879a0); }
+.dm-send-btn.ready { opacity:1; }
+.dm-send-btn.ready:hover { transform:scale(1.1); }
+.dm-send-btn:active { transform:scale(0.92); }
+.dm-emoji-picker {
+  position:absolute; bottom:calc(100% + 10px); left:0; right:0;
+  background:var(--s1); border:1px solid var(--border); border-radius:16px;
+  padding:12px; display:none; flex-wrap:wrap; gap:6px; justify-content:center;
+  box-shadow:0 8px 32px rgba(0,0,0,0.3); z-index:10;
+}
+.dm-emoji-picker.open { display:flex; }
+.dm-emoji-picker span {
+  font-size:22px; cursor:pointer; padding:4px; border-radius:8px;
+  transition:transform 0.12s,background 0.1s; user-select:none;
+}
+.dm-emoji-picker span:hover { transform:scale(1.35); background:var(--s2); }
+
+body.light .dm-screen { background:var(--bg); }
+body.light #hiddenPage { background:var(--bg); }
+
+/* Loading dots */
+.dm-loading-dots { display:flex; gap:5px; align-items:center; }
+.dm-loading-dots span {
+  width:7px; height:7px; border-radius:50%;
+  background:var(--muted); opacity:0.4;
+  animation:dmDot 1.2s ease-in-out infinite;
+}
+.dm-loading-dots span:nth-child(2) { animation-delay:.2s; }
+.dm-loading-dots span:nth-child(3) { animation-delay:.4s; }
+@keyframes dmDot { 0%,80%,100%{transform:scale(.8);opacity:.4} 40%{transform:scale(1.1);opacity:.9} }
 
 </style>
 </head>
@@ -2890,72 +2807,106 @@ body.light #counterBlock.glowing .c-num-big {
 </div>
 
 <div id="hiddenPage">
-  <div class="dm-topbar">
-    <button class="dm-topbar-back" onclick="closeHiddenPage()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-    <div class="dm-topbar-center">
-      <div class="dm-topbar-avatars">
-        <div class="dm-avatar dm-avatar-girl">Z</div>
-        <div class="dm-avatar dm-avatar-boy">L</div>
-      </div>
-      <div class="dm-topbar-names">
-        <span class="dm-topbar-title">Zelda &amp; Link</span>
-        <span class="dm-topbar-status" id="dmStatus">Messagerie privée</span>
-      </div>
+
+  <!-- TOPBAR -->
+  <div class="dm-topbar" id="dmTopbar">
+    <div class="gv-back" id="dmTopbarBack" onclick="dmHandleBack()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      <span id="dmBackLabel">Retour</span>
     </div>
-    <button class="dm-topbar-theme" onclick="applyThemeToggle()" title="Changer le thème">
-      <svg id="dmThemeIconMoon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
-      <svg id="dmThemeIconSun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-    </button>
-  </div>
-  <div class="dm-identity-screen" id="dmIdentityScreen">
-    <div class="dm-identity-inner">
-      <div class="dm-identity-icon">💬</div>
-      <div class="dm-identity-title">C'est qui ?</div>
-      <div class="dm-identity-sub">Choisis ton identité pour envoyer des messages</div>
-      <div class="dm-identity-btns">
-        <button class="dm-identity-btn dm-btn-girl" onclick="dmSetIdentity('girl')">
-          <div class="dm-identity-avatar dm-avatar-girl">Z</div>
-          <span>Zelda</span>
-        </button>
-        <button class="dm-identity-btn dm-btn-boy" onclick="dmSetIdentity('boy')">
-          <div class="dm-identity-avatar dm-avatar-boy">L</div>
-          <span>Link</span>
-        </button>
-      </div>
+    <div class="dm-topbar-center" id="dmTopbarCenter">
+      <span class="dm-topbar-logo-txt">InstaLove</span>
+    </div>
+    <div class="dm-topbar-right">
+      <button class="dm-topbar-theme" onclick="applyThemeToggle()" title="Thème">
+        <svg id="dmThemeIconMoon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+        <svg id="dmThemeIconSun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
     </div>
   </div>
-  <div class="dm-chat-screen" id="dmChatScreen" style="display:none">
-    <div class="dm-messages" id="dmMessages">
-      <div class="dm-day-label">Aujourd'hui</div>
+
+  <!-- ÉCRAN 1 : ACCUEIL -->
+  <div class="dm-screen" id="dmHomeScreen" style="position:relative;">
+    <!-- Bouton profil flottant en haut à droite -->
+    <div id="dmTopbarProfile" onclick="dmShowIdentityPicker()" title="Changer d'identité" style="position:absolute;top:14px;right:14px;z-index:5;"></div>
+
+    <!-- VUE 1 : juste le logo -->
+    <div class="dm-home-inner" id="dmHomeLogo" style="cursor:pointer;" onclick="dmShowConv()">
+      <div class="dm-home-logo-wrap">
+        <div class="dm-home-logo-bg"></div>
+        <svg class="dm-home-logo-icon" viewBox="0 0 58 58" fill="none">
+          <rect x="6" y="6" width="46" height="46" rx="13" stroke="white" stroke-width="3" fill="none"/>
+          <circle cx="29" cy="29" r="10" stroke="white" stroke-width="3" fill="none"/>
+          <circle cx="42" cy="16" r="3" fill="white"/>
+        </svg>
+      </div>
+      <div class="dm-home-appname">InstaLove</div>
+      <div class="dm-home-tagline">Messagerie privée ✨</div>
     </div>
-    <div class="dm-input-bar" id="dmInputBar">
+
+    <!-- VUE 2 : carte Nous uniquement (cachée par défaut) -->
+    <div class="dm-home-inner" id="dmHomeConv" style="display:none;">
+      <div class="dm-home-conv" onclick="dmOpenMessaging()">
+        <div class="dm-home-conv-avatars">
+          <div class="dm-avatar dm-avatar-girl" style="font-size:16px;background:none;">👧</div>
+          <div class="dm-avatar dm-avatar-boy" style="font-size:16px;background:none;">👦</div>
+        </div>
+        <div class="dm-home-conv-info">
+          <div class="dm-home-conv-name">Nous ❤️</div>
+          <div class="dm-home-conv-preview" id="dmHomePreview">Chargement…</div>
+        </div>
+        <div class="dm-home-conv-meta">
+          <div class="dm-home-conv-time" id="dmHomeTime"></div>
+          <div class="dm-home-conv-badge" id="dmHomeBadge" style="display:none"></div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="dm-home-footer">🔒 Espace privé</div>
+    </div>
+
+  </div>
+
+  <!-- ÉCRAN 2 : CHOIX IDENTITÉ (modal overlay) -->
+  <div class="dm-id-overlay" id="dmIdentityScreen" style="display:none" onclick="dmCloseIdentityIfOutside(event)">
+    <div class="dm-id-modal" id="dmIdModal">
+      <div class="dm-id-title">C&#39;est qui ?</div>
+      <div class="dm-id-sub">Ton identité dans la conversation</div>
+      <div class="dm-id-btns">
+        <button id="dmIdBtnGirl" class="dm-id-btn dm-id-girl" onclick="dmSetIdentity('girl')">
+          <div class="dm-avatar dm-avatar-girl dm-id-av" style="font-size:22px;background:none;">👧</div>
+          <span class="dm-id-name">Zelda</span>
+          <span class="dm-id-sub2">Elle 💕</span>
+        </button>
+        <button id="dmIdBtnBoy" class="dm-id-btn dm-id-boy" onclick="dmSetIdentity('boy')">
+          <div class="dm-avatar dm-avatar-boy dm-id-av" style="font-size:22px;background:none;">👦</div>
+          <span class="dm-id-name">Link</span>
+          <span class="dm-id-sub2">Lui 💙</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÉCRAN 3 : CHAT -->
+  <div class="dm-screen dm-chat-screen" id="dmChatScreen" style="display:none">
+    <div class="dm-messages" id="dmMessages"></div>
+    <div class="dm-input-bar">
       <div class="dm-input-wrap">
-        <button class="dm-emoji-btn" id="dmEmojiBtn" title="Réactions rapides">
+        <button class="dm-emoji-btn" id="dmEmojiBtn">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
         </button>
         <div class="dm-emoji-picker" id="dmEmojiPicker">
-          <span onclick="dmInsertEmoji('❤️')">❤️</span>
-          <span onclick="dmInsertEmoji('😍')">😍</span>
-          <span onclick="dmInsertEmoji('🥺')">🥺</span>
-          <span onclick="dmInsertEmoji('😂')">😂</span>
-          <span onclick="dmInsertEmoji('🔥')">🔥</span>
-          <span onclick="dmInsertEmoji('✨')">✨</span>
-          <span onclick="dmInsertEmoji('💀')">💀</span>
-          <span onclick="dmInsertEmoji('🫶')">🫶</span>
-          <span onclick="dmInsertEmoji('😭')">😭</span>
-          <span onclick="dmInsertEmoji('💅')">💅</span>
-          <span onclick="dmInsertEmoji('🥰')">🥰</span>
-          <span onclick="dmInsertEmoji('😈')">😈</span>
+          <span>❤️</span><span>😍</span><span>🥺</span><span>😂</span>
+          <span>🔥</span><span>✨</span><span>💀</span><span>🫶</span>
+          <span>😭</span><span>💅</span><span>🥰</span><span>😈</span>
         </div>
         <input type="text" class="dm-input" id="dmInput" placeholder="Message…" autocomplete="off" maxlength="500">
-        <button class="dm-send-btn" id="dmSendBtn" onclick="dmSend()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        <button class="dm-send-btn" id="dmSendBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
         </button>
       </div>
     </div>
   </div>
+
 </div>
 
 <div id="gamesView">
@@ -5827,387 +5778,543 @@ loadFavorites();
 
 
 // ══════════════════════════════════════════
-// DM — MESSAGERIE PRIVÉE (Supabase Realtime)
+// DM — INSTALOVE
 // ══════════════════════════════════════════
 (function(){
-  var DM_TABLE = 'dm_messages';
-  var dmIdentity = null;
-  var dmMessages = [];
-  var dmChannel = null;
-  var dmTypingTimeout = null;
-  var dmTypingEl = null;
-  var dmLastSender = null;
-  var dmScrollLocked = false;
+  var TABLE = 'dm_messages';
+  var identity = null;  // 'girl' | 'boy'
+  var cache    = [];
+  var pollId   = null;
+  var attached = false;
 
-  // ── Theme icon sync ──
-  function dmSyncThemeIcon(){
-    var isLight = document.body.classList.contains('light');
-    var moon = document.getElementById('dmThemeIconMoon');
-    var sun  = document.getElementById('dmThemeIconSun');
-    if(moon) moon.style.display = isLight ? 'none' : '';
-    if(sun)  sun.style.display  = isLight ? '' : 'none';
+  function $(id){ return document.getElementById(id); }
+
+  /* ══ PROFIL PILL (haut droite) ══ */
+  function updateProfilePill(screenName){
+    var pill = $('dmTopbarProfile');
+    if(!pill) return;
+
+    // Sur le chat, on cache la pill
+    if(screenName === 'chat'){
+      pill.style.display = 'none';
+      return;
+    }
+
+    // Sur l'accueil (ou par défaut) : toujours visible
+    if(identity){
+      var label = identity === 'girl' ? 'Zelda' : 'Link';
+      var emo   = identity === 'girl' ? '👧' : '👦';
+      pill.innerHTML =
+        '<div class="dm-tp-avatar ' + identity + '" style="font-size:18px;background:none;">' + emo + '</div>' +
+        '<span class="dm-tp-name">' + label + '</span>' +
+        '<svg class="dm-tp-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+    } else {
+      pill.innerHTML =
+        '<div class="dm-tp-avatar" style="background:var(--s3);color:var(--muted);font-size:11px;">?</div>' +
+        '<span class="dm-tp-name" style="color:var(--muted)">Profil</span>' +
+        '<svg class="dm-tp-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+    }
+    pill.style.display = 'flex';
+    pill.style.alignItems = 'center';
   }
-  // Call on load and patch applyThemeToggle
-  dmSyncThemeIcon();
-  var _origTheme = window.applyThemeToggle;
-  if(_origTheme) window.applyThemeToggle = function(){
-    _origTheme.apply(this, arguments);
-    dmSyncThemeIcon();
+
+  /* ══ NAVIGATION ══ */
+  function showScreen(name){
+    // Hide all screens
+    ['dmHomeScreen','dmChatScreen'].forEach(function(id){
+      var el = $(id); if(el) el.style.display = 'none';
+    });
+    // Hide identity overlay
+    var ov = $('dmIdentityScreen');
+    if(ov) ov.style.display = 'none';
+
+    var center  = $('dmTopbarCenter');
+    var backBtn = $('dmTopbarBack');
+
+    if(name === 'home'){
+      var el = $('dmHomeScreen');
+      if(el) el.style.display = 'flex';
+      if(center) center.innerHTML = '';
+      if(backBtn){ backBtn.dataset.dest = 'close'; }
+      var lbl = $('dmBackLabel'); if(lbl) lbl.textContent = 'Playlist';
+      // Réinitialiser : montrer logo, cacher conv
+      var logo = $('dmHomeLogo'), conv = $('dmHomeConv');
+      if(logo) logo.style.display = '';
+      if(conv) conv.style.display = 'none';
+      loadHomePreview();
+    } else if(name === 'chat'){
+      var el = $('dmChatScreen');
+      if(el) el.style.display = 'flex';
+      if(center) center.innerHTML =
+        '<div class="dm-topbar-avatars">' +
+          '<div class="dm-avatar dm-avatar-girl" style="font-size:14px;background:none;">👧</div>' +
+          '<div class="dm-avatar dm-avatar-boy" style="font-size:14px;background:none;">👦</div>' +
+        '</div>' +
+        '<div class="dm-topbar-names">' +
+          '<span class="dm-topbar-title">Nous \u2764\ufe0f</span>' +
+          '<span class="dm-topbar-sub" id="dmStatus">\u2022 En ligne</span>' +
+        '</div>';
+      if(backBtn){ backBtn.dataset.dest = 'home'; }
+      var lbl2 = $('dmBackLabel'); if(lbl2) lbl2.textContent = 'InstaLove';
+    }
+    updateProfilePill(name);
+  }
+
+  window.dmShowConv = function(){
+    var logo = document.getElementById('dmHomeLogo');
+    var conv = document.getElementById('dmHomeConv');
+    if(logo) logo.style.display = 'none';
+    if(conv) conv.style.display = 'flex';
+    var center = document.getElementById('dmTopbarCenter');
+    if(center) center.innerHTML = '';
+    var btn = document.getElementById('dmTopbarBack');
+    if(btn) btn.dataset.dest = 'logo';
+    var lbl = document.getElementById('dmBackLabel');
+    if(lbl) lbl.textContent = 'Mode caché';
+    loadHomePreview();
   };
 
-  // ── Set identity ──
-  window.dmSetIdentity = function(gender){
-    dmIdentity = gender;
-    localStorage.setItem('dm_identity', gender);
-    document.getElementById('dmIdentityScreen').style.display = 'none';
-    document.getElementById('dmChatScreen').style.display = 'flex';
-    dmInit();
+  window.dmHideConv = function(){
+    var logo = document.getElementById('dmHomeLogo');
+    var conv = document.getElementById('dmHomeConv');
+    if(logo) logo.style.display = '';
+    if(conv) conv.style.display = 'none';
+    var btn = document.getElementById('dmTopbarBack');
+    if(btn) btn.dataset.dest = 'close';
+    var lbl = document.getElementById('dmBackLabel');
+    if(lbl) lbl.textContent = 'Playlist';
   };
 
-  // ── Init: load history + subscribe ──
-  function dmInit(){
-    dmLoadMessages();
-    dmSubscribe();
-    dmUpdateSendBtn();
+  /* ══ BOUTON RETOUR ══ */
+  window.dmHandleBack = function(){
+    var btn  = $('dmTopbarBack');
+    var dest = btn ? (btn.dataset.dest || 'close') : 'close';
+    if(dest === 'close')      closeHiddenPage();
+    else if(dest === 'logo')  window.dmHideConv();
+    else                      { stopPoll(); showScreen('home'); }
+  };
 
-    var input = document.getElementById('dmInput');
+  var identityPickerContext = 'profile'; // 'profile' | 'chat'
+
+  /* ══ CLIC LOGO → ouvre le chat ══ */
+  window.dmOpenMessaging = function(){
+    var saved = localStorage.getItem('jayana_profile');
+    if(saved === 'girl' || saved === 'boy'){
+      identity = saved;
+      showScreen('chat');
+      startChat();
+    } else {
+      // Afficher overlay choix identité par-dessus l'accueil, puis aller au chat
+      identityPickerContext = 'chat';
+      showIdentityOverlay();
+    }
+  };
+
+  /* ══ OVERLAY IDENTITÉ ══ */
+  function showIdentityOverlay(){
+    // Garder l'accueil visible en dessous
+    var ov = $('dmIdentityScreen');
+    if(ov) ov.style.display = 'flex';
+    // Highlight bouton actuel
+    updateIdButtons();
+  }
+
+  window.dmShowIdentityPicker = function(){
+    identityPickerContext = 'profile';
+    showIdentityOverlay();
+  };
+
+  window.dmCloseIdentityIfOutside = function(e){
+    if(e.target === $('dmIdentityScreen')) closeIdentityOverlay();
+  };
+
+  function closeIdentityOverlay(){
+    var ov = $('dmIdentityScreen');
+    if(ov) ov.style.display = 'none';
+  }
+
+  function updateIdButtons(){
+    var bg = $('dmIdBtnGirl'), bb = $('dmIdBtnBoy');
+    if(bg) bg.classList.toggle('selected', identity === 'girl');
+    if(bb) bb.classList.toggle('selected', identity === 'boy');
+  }
+
+  window.dmSetIdentity = function(g){
+    identity = g;
+    localStorage.setItem('jayana_profile', g);
+    closeIdentityOverlay();
+    updateIdButtons();
+    var chat = $('dmChatScreen');
+    var chatVisible = chat && chat.style.display !== 'none';
+    if(chatVisible){
+      // Déjà dans le chat → juste update pill (cachée)
+      updateProfilePill('chat');
+    } else if(identityPickerContext === 'chat'){
+      // Ouvert depuis "Nous" → aller au chat
+      showScreen('chat');
+      startChat();
+    } else {
+      // Ouvert depuis le bouton profil → rester sur l'accueil
+      updateProfilePill('home');
+    }
+  };
+
+  /* ══ CHAT ══ */
+  function startChat(){
+    cache = [];
+    var el = $('dmMessages');
+    if(el) el.innerHTML = '<div class="dm-loading-msgs"><div class="dm-loading-dots"><span></span><span></span><span></span></div></div>';
+    if(!attached){ attachListeners(); attached = true; }
+    stopPoll();
+    fetchMsgs();
+    pollId = setInterval(fetchMsgs, 3000);
+  }
+
+  function stopPoll(){ if(pollId){ clearInterval(pollId); pollId = null; } }
+
+  function attachListeners(){
+    var input    = $('dmInput');
+    var sendBtn  = $('dmSendBtn');
+    var emojiBtn = $('dmEmojiBtn');
+    var picker   = $('dmEmojiPicker');
+
     if(input){
-      input.addEventListener('input', dmUpdateSendBtn);
+      input.addEventListener('input', updateSendBtn);
       input.addEventListener('keydown', function(e){
-        if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); dmSend(); }
+        if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); doSend(); }
       });
     }
-    // Emoji picker toggle
-    var emojiBtn = document.getElementById('dmEmojiBtn');
-    var emojiPicker = document.getElementById('dmEmojiPicker');
-    if(emojiBtn && emojiPicker){
-      emojiBtn.addEventListener('click', function(e){
-        e.stopPropagation();
-        emojiPicker.classList.toggle('open');
-        emojiBtn.classList.toggle('open', emojiPicker.classList.contains('open'));
+    if(sendBtn) sendBtn.addEventListener('click', doSend);
+
+    if(emojiBtn && picker){
+      picker.querySelectorAll('span').forEach(function(sp){
+        sp.addEventListener('click', function(ev){
+          ev.stopPropagation();
+          var input = $('dmInput');
+          if(!input) return;
+          var s = input.selectionStart, en = input.selectionEnd;
+          input.value = input.value.slice(0,s) + sp.textContent + input.value.slice(en);
+          input.selectionStart = input.selectionEnd = s + sp.textContent.length;
+          input.focus();
+          updateSendBtn();
+          picker.classList.remove('open');
+          emojiBtn.classList.remove('open');
+        });
+      });
+      emojiBtn.addEventListener('click', function(ev){
+        ev.stopPropagation();
+        picker.classList.toggle('open');
+        emojiBtn.classList.toggle('open', picker.classList.contains('open'));
       });
       document.addEventListener('click', function(){
-        emojiPicker.classList.remove('open');
+        if(picker) picker.classList.remove('open');
         if(emojiBtn) emojiBtn.classList.remove('open');
       });
     }
-    // Status dot
-    dmSetStatus(true);
   }
 
-  window.dmInsertEmoji = function(e){
-    var input = document.getElementById('dmInput');
-    if(input){
-      var start = input.selectionStart, end = input.selectionEnd;
-      input.value = input.value.substring(0,start) + e + input.value.substring(end);
-      input.selectionStart = input.selectionEnd = start + e.length;
-      input.focus();
-      dmUpdateSendBtn();
-    }
-    var picker = document.getElementById('dmEmojiPicker');
-    var btn    = document.getElementById('dmEmojiBtn');
-    if(picker){ picker.classList.remove('open'); }
-    if(btn)   { btn.classList.remove('open'); }
-  };
+  /* ══ FETCH MESSAGES ══ */
+  function fetchMsgs(){
+    fetch(SB_URL + '/rest/v1/' + TABLE + '?order=created_at.asc&limit=300', {
+      headers: sbHeaders()
+    })
+    .then(function(r){
+      if(!r.ok) throw new Error(r.status);
+      return r.json();
+    })
+    .then(function(rows){
+      if(!Array.isArray(rows)) return;
 
-  function dmUpdateSendBtn(){
-    var input = document.getElementById('dmInput');
-    var btn   = document.getElementById('dmSendBtn');
-    if(!input || !btn) return;
-    btn.classList.toggle('ready', input.value.trim().length > 0);
-  }
-
-  // ── Load messages from Supabase ──
-  function dmLoadMessages(){
-    var el = document.getElementById('dmMessages');
-    el.innerHTML = '<div class="dm-day-label">Aujourd\'hui</div>';
-    sbGet(DM_TABLE, 'order=created_at.asc&limit=100').then(function(rows){
-      el.innerHTML = '<div class="dm-day-label">Aujourd\'hui</div>';
-      if(!Array.isArray(rows) || !rows.length){
-        el.innerHTML += '<div class="dm-empty"><div class="dm-empty-icon">💬</div><div class="dm-empty-text">Envoyez le premier message ✨</div></div>';
+      // Premier chargement
+      if(!cache.length){
+        cache = rows;
+        renderAll();
         return;
       }
-      dmMessages = rows;
-      rows.forEach(function(msg, i){ dmAppendBubble(msg, i, rows); });
-      dmScrollBottom(true);
-    }).catch(function(){
-      el.innerHTML = '<div class="dm-empty"><div class="dm-empty-icon">⚠️</div><div class="dm-empty-text">Connexion impossible</div></div>';
-    });
+
+      // Messages nouveaux
+      var knownIds = {};
+      cache.forEach(function(m){ knownIds[m.id] = true; });
+      var added = false;
+      rows.forEach(function(msg){
+        if(!knownIds[msg.id] && String(msg.id).indexOf('tmp_') !== 0){
+          cache.push(msg);
+          appendBubble(msg, cache.length - 1, cache);
+          added = true;
+        }
+      });
+      if(added) scrollBottom();
+
+      // Mettre à jour les ticks "vu"
+      rows.forEach(function(msg){
+        if(msg.sender === identity && msg.seen){
+          var node = document.querySelector('[data-id="'+msg.id+'"] .dm-tick');
+          if(node && !node.classList.contains('seen')){
+            node.textContent = '\u2713\u2713';
+            node.classList.add('seen');
+          }
+        }
+        // Marquer comme lu si c'est de l'autre
+        if(msg.sender !== identity && !msg.seen) markSeen(msg.id);
+      });
+    })
+    .catch(function(){ /* silently ignore */ });
   }
 
-  // ── Append bubble ──
-  function dmAppendBubble(msg, idx, allMsgs){
-    var list = document.getElementById('dmMessages');
-    // Remove empty state if present
-    var empty = list.querySelector('.dm-empty');
-    if(empty) empty.remove();
+  /* ══ RENDU COMPLET ══ */
+  function renderAll(){
+    var el = $('dmMessages');
+    if(!el) return;
+    el.innerHTML = '';
 
-    var isMine = msg.sender === dmIdentity;
-    var prev = allMsgs ? allMsgs[idx-1] : null;
-    var next = allMsgs ? allMsgs[idx+1] : null;
-    var isFirstInGroup = !prev || prev.sender !== msg.sender;
-    var isLastInGroup  = !next || next.sender !== msg.sender;
+    if(!cache.length){
+      el.innerHTML =
+        '<div class="dm-empty">' +
+          '<div class="dm-empty-icon">\ud83d\udcac</div>' +
+          '<div class="dm-empty-text">Envoyez le premier message \u2728<br><small style="opacity:.6">Soyez vous-m\u00eames \u2665</small></div>' +
+        '</div>';
+      return;
+    }
 
-    // Spacer between groups
-    if(isFirstInGroup && idx > 0){
-      var spacer = document.createElement('div');
-      spacer.className = 'dm-spacer';
-      list.appendChild(spacer);
+    var lastDay = '';
+    cache.forEach(function(msg, i){
+      var d   = new Date(msg.created_at);
+      var day = d.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+      day = day.charAt(0).toUpperCase() + day.slice(1);
+      if(day !== lastDay){
+        lastDay = day;
+        var lbl = document.createElement('div');
+        lbl.className   = 'dm-day-label';
+        lbl.textContent = day;
+        el.appendChild(lbl);
+      }
+      appendBubble(msg, i, cache);
+    });
+    scrollBottom();
+    cache.forEach(function(m){ if(m.sender !== identity && !m.seen) markSeen(m.id); });
+  }
+
+  /* ══ BULLE ══ */
+  function appendBubble(msg, idx, all){
+    var el = $('dmMessages');
+    if(!el) return;
+
+    // Retirer état vide
+    var emp = el.querySelector('.dm-empty');
+    if(emp) emp.remove();
+
+    var mine     = (msg.sender === identity);
+    var prev     = all[idx - 1];
+    var next     = all[idx + 1];
+    var samePrev = prev && prev.sender === msg.sender;
+    var sameNext = next && next.sender === msg.sender;
+
+    if(!samePrev && idx > 0){
+      var sp = document.createElement('div');
+      sp.className = 'dm-spacer';
+      el.appendChild(sp);
     }
 
     var wrap = document.createElement('div');
-    wrap.className = 'dm-msg-wrap' +
-      (isMine ? ' mine' : '') +
-      (isFirstInGroup ? ' first-in-group' : '') +
-      (isLastInGroup  ? ' last-in-group'  : '');
+    wrap.className = 'dm-msg-wrap' + (mine ? ' mine' : '');
+    if(!samePrev) wrap.classList.add('first-in-group');
+    if(!sameNext) wrap.classList.add('last-in-group');
     wrap.dataset.id = msg.id;
 
-    // Avatar (only for others, first in group)
-    var avatarEl = document.createElement('div');
-    avatarEl.className = 'dm-avatar ' + (msg.sender === 'girl' ? 'dm-avatar-girl' : 'dm-avatar-boy');
-    avatarEl.textContent = msg.sender === 'girl' ? 'Z' : 'L';
-    avatarEl.classList.add('dm-msg-avatar');
+    // Avatar côté gauche (autre)
+    if(!mine){
+      var av = document.createElement('div');
+      av.className   = 'dm-avatar dm-msg-avatar ' + (msg.sender === 'girl' ? 'dm-avatar-girl' : 'dm-avatar-boy');
+      av.textContent = msg.sender === 'girl' ? '👧' : '👦';
+      av.style.fontSize = '16px';
+      av.style.background = 'none';
+      av.style.visibility = samePrev ? 'hidden' : 'visible';
+      wrap.appendChild(av);
+    }
 
-    // Bubble
-    var bubble = document.createElement('div');
-    bubble.className = 'dm-bubble';
+    // Bulle
+    var bbl  = document.createElement('div');
+    bbl.className = 'dm-bubble';
 
-    var text = document.createTextNode(msg.text);
-    bubble.appendChild(text);
+    var txt  = document.createElement('span');
+    txt.className   = 'dm-bubble-text';
+    txt.textContent = msg.text;
+    bbl.appendChild(txt);
 
-    // Time
-    var timeEl = document.createElement('div');
-    timeEl.className = 'dm-bubble-time';
-    var d = new Date(msg.created_at);
-    var hh = String(d.getHours()).padStart(2,'0');
-    var mm = String(d.getMinutes()).padStart(2,'0');
-    timeEl.innerHTML = hh + ':' + mm + (isMine ? ' <span class="dm-read-tick ' + (msg.seen ? 'seen' : '') + '">' + (msg.seen ? '✓✓' : '✓') + '</span>' : '');
-    bubble.appendChild(timeEl);
+    // Heure + tick
+    var d  = new Date(msg.created_at);
+    var ts = ('0'+d.getHours()).slice(-2) + ':' + ('0'+d.getMinutes()).slice(-2);
+    var meta = document.createElement('div');
+    meta.className = 'dm-bubble-meta';
+    if(mine){
+      meta.innerHTML = ts + ' <span class="dm-tick' + (msg.seen ? ' seen' : '') + '">' + (msg.seen ? '\u2713\u2713' : '\u2713') + '</span>';
+    } else {
+      meta.textContent = ts;
+    }
+    bbl.appendChild(meta);
 
-    // Long press / double-tap for reaction (simple)
-    var tapTimer = null;
-    wrap.addEventListener('touchstart', function(){ tapTimer = setTimeout(function(){ dmToggleReaction(msg, wrap); }, 500); }, {passive:true});
-    wrap.addEventListener('touchend',   function(){ clearTimeout(tapTimer); }, {passive:true});
-    wrap.addEventListener('dblclick',   function(){ dmToggleReaction(msg, wrap); });
+    // Double-tap / long press → réaction coeur
+    var tapT = null;
+    wrap.addEventListener('touchstart', function(){ tapT = setTimeout(function(){ toggleReact(bbl); }, 500); }, {passive:true});
+    wrap.addEventListener('touchend',   function(){ clearTimeout(tapT); }, {passive:true});
+    wrap.addEventListener('dblclick',   function(){ toggleReact(bbl); });
 
-    if(!isMine) wrap.appendChild(avatarEl);
-    wrap.appendChild(bubble);
-    if(isMine)  wrap.appendChild(avatarEl);
-
-    list.appendChild(wrap);
+    wrap.appendChild(bbl);
+    el.appendChild(wrap);
   }
 
-  // ── React to message (heart) ──
-  function dmToggleReaction(msg, wrap){
-    var existing = wrap.querySelector('.dm-bubble-reaction');
-    if(existing){ existing.remove(); return; }
-    var r = document.createElement('div');
-    r.className = 'dm-bubble-reaction';
-    r.textContent = '❤️';
+  function toggleReact(bbl){
+    var r = bbl.querySelector('.dm-react');
+    if(r){ r.remove(); return; }
+    r = document.createElement('div');
+    r.className   = 'dm-react';
+    r.textContent = '\u2764\ufe0f';
     r.addEventListener('click', function(){ r.remove(); });
-    wrap.querySelector('.dm-bubble').appendChild(r);
+    bbl.appendChild(r);
   }
 
-  // ── Send message ──
-  window.dmSend = function(){
-    if(!dmIdentity) return;
-    var input = document.getElementById('dmInput');
+  /* ══ ENVOI ══ */
+  function doSend(){
+    if(!identity){
+      // Pas d'identité → montrer l'overlay
+      showIdentityOverlay();
+      return;
+    }
+    var input = $('dmInput');
     if(!input) return;
     var text = input.value.trim();
     if(!text) return;
     input.value = '';
-    dmUpdateSendBtn();
+    updateSendBtn();
 
-    var payload = { sender: dmIdentity, text: text };
-    fetch(SB_URL + '/rest/v1/' + DM_TABLE, {
+    // Optimistic
+    var tmpId  = 'tmp_' + Date.now();
+    var tmpMsg = { id: tmpId, sender: identity, text: text, seen: false, created_at: new Date().toISOString() };
+    cache.push(tmpMsg);
+    appendBubble(tmpMsg, cache.length - 1, cache);
+    scrollBottom();
+
+    fetch(SB_URL + '/rest/v1/' + TABLE, {
       method: 'POST',
       headers: sbHeaders({'Prefer': 'return=representation'}),
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ sender: identity, text: text })
     })
     .then(function(r){ return r.json(); })
     .then(function(rows){
-      // Realtime will append it, but if not, fallback
+      var real = Array.isArray(rows) ? rows[0] : null;
+      if(real && real.id){
+        for(var i = 0; i < cache.length; i++){
+          if(cache[i].id === tmpId){ cache[i] = real; break; }
+        }
+        var node = document.querySelector('[data-id="'+tmpId+'"]');
+        if(node) node.dataset.id = real.id;
+      }
     })
     .catch(function(){
-      dmShowToast('❌ Erreur d\'envoi');
+      cache = cache.filter(function(m){ return m.id !== tmpId; });
+      var node = document.querySelector('[data-id="'+tmpId+'"]');
+      if(node) node.remove();
     });
-  };
-
-  // ── Supabase Realtime ──
-  function dmSubscribe(){
-    // Use Supabase JS client if available, else polling fallback
-    if(typeof window.supabase !== 'undefined'){
-      dmSubscribeRealtime();
-    } else {
-      // Load Supabase JS v2 dynamically
-      var script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
-      script.onload = function(){ dmSubscribeRealtime(); };
-      script.onerror = function(){ dmPollFallback(); };
-      document.head.appendChild(script);
-    }
   }
+  window.dmSend = doSend;
 
-  var _supaClient = null;
-
-  function dmSubscribeRealtime(){
-    try {
-      var lib = window.supabase || (window.supabaseJs && window.supabaseJs.createClient);
-      if(!_supaClient){
-        if(window.supabase && window.supabase.createClient){
-          _supaClient = window.supabase.createClient(SB_URL, SB_KEY);
-        } else {
-          dmPollFallback(); return;
-        }
-      }
-      dmChannel = _supaClient
-        .channel('dm_live')
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: DM_TABLE
-        }, function(payload){
-          var msg = payload.new;
-          if(!msg) return;
-          dmMessages.push(msg);
-          var idx = dmMessages.length - 1;
-          // Remove typing indicator
-          dmRemoveTyping();
-          dmAppendBubble(msg, idx, dmMessages);
-          dmScrollBottom(false);
-          // Mark as seen if it's from the other
-          if(msg.sender !== dmIdentity) dmMarkSeen(msg.id);
-        })
-        .subscribe(function(status){
-          if(status === 'SUBSCRIBED') dmSetStatus(true);
-          else if(status === 'CLOSED' || status === 'CHANNEL_ERROR') {
-            dmSetStatus(false);
-            setTimeout(dmPollFallback, 3000);
-          }
-        });
-    } catch(e){
-      dmPollFallback();
-    }
-  }
-
-  var _pollInterval = null;
-  var _lastPollId = 0;
-
-  function dmPollFallback(){
-    if(_pollInterval) return;
-    _pollInterval = setInterval(function(){
-      sbGet(DM_TABLE, 'order=created_at.asc&limit=100').then(function(rows){
-        if(!Array.isArray(rows)) return;
-        var newMsgs = rows.filter(function(r){ return !dmMessages.some(function(m){ return m.id === r.id; }); });
-        newMsgs.forEach(function(msg){
-          dmMessages.push(msg);
-          var idx = dmMessages.length - 1;
-          dmRemoveTyping();
-          dmAppendBubble(msg, idx, dmMessages);
-          if(msg.sender !== dmIdentity) dmMarkSeen(msg.id);
-        });
-        if(newMsgs.length) dmScrollBottom(false);
-      }).catch(function(){});
-    }, 2500);
-  }
-
-  function dmMarkSeen(id){
-    fetch(SB_URL + '/rest/v1/' + DM_TABLE + '?id=eq.' + id, {
+  function markSeen(id){
+    if(!id || String(id).indexOf('tmp_') === 0) return;
+    fetch(SB_URL + '/rest/v1/' + TABLE + '?id=eq.' + id, {
       method: 'PATCH',
-      headers: sbHeaders({'Prefer': 'return=representation'}),
+      headers: sbHeaders(),
       body: JSON.stringify({ seen: true })
     }).catch(function(){});
   }
 
-  // ── Typing indicator (visual only, no DB) ──
-  function dmShowTyping(sender){
-    if(dmTypingEl) return;
-    var list = document.getElementById('dmMessages');
-    dmTypingEl = document.createElement('div');
-    dmTypingEl.className = 'dm-typing';
-    var av = document.createElement('div');
-    av.className = 'dm-avatar dm-typing-avatar ' + (sender === 'girl' ? 'dm-avatar-girl' : 'dm-avatar-boy');
-    av.textContent = sender === 'girl' ? 'Z' : 'L';
-    var dots = document.createElement('div');
-    dots.className = 'dm-typing-dots';
-    dots.innerHTML = '<div class="dm-typing-dot"></div><div class="dm-typing-dot"></div><div class="dm-typing-dot"></div>';
-    dmTypingEl.appendChild(av);
-    dmTypingEl.appendChild(dots);
-    list.appendChild(dmTypingEl);
-    dmScrollBottom(false);
-  }
-  function dmRemoveTyping(){
-    if(dmTypingEl){ dmTypingEl.remove(); dmTypingEl = null; }
+  function updateSendBtn(){
+    var v   = $('dmInput') ? $('dmInput').value.trim() : '';
+    var btn = $('dmSendBtn');
+    if(btn) btn.classList.toggle('ready', v.length > 0);
   }
 
-  // ── Scroll to bottom ──
-  function dmScrollBottom(instant){
-    var list = document.getElementById('dmMessages');
-    if(!list) return;
-    if(instant){
-      list.scrollTop = list.scrollHeight;
-    } else {
-      setTimeout(function(){ list.scrollTop = list.scrollHeight; }, 50);
-    }
+  function scrollBottom(){
+    var el = $('dmMessages');
+    if(el) setTimeout(function(){ el.scrollTop = el.scrollHeight; }, 60);
   }
 
-  // ── Status dot ──
-  function dmSetStatus(online){
-    var el = document.getElementById('dmStatus');
-    if(!el) return;
-    if(online){
-      el.textContent = '● En ligne';
-      el.classList.add('online');
-    } else {
-      el.textContent = '○ Hors ligne';
-      el.classList.remove('online');
-    }
+  /* ══ PREVIEW ACCUEIL ══ */
+  function loadHomePreview(){
+    fetch(SB_URL + '/rest/v1/' + TABLE + '?order=created_at.desc&limit=50', {
+      headers: sbHeaders()
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(rows){
+      if(!Array.isArray(rows) || !rows.length){
+        var p = $('dmHomePreview');
+        if(p) p.textContent = 'Aucun message encore \u2728';
+        return;
+      }
+      var last  = rows[0];
+      var unread = rows.filter(function(m){ return !m.seen; }).length;
+
+      var p = $('dmHomePreview');
+      var t = $('dmHomeTime');
+      var b = $('dmHomeBadge');
+
+      if(p){
+        var who = last.sender === 'girl' ? 'Zelda' : 'Link';
+        var txt = last.text; if(txt.length > 34) txt = txt.slice(0,34) + '\u2026';
+        p.textContent = who + ' : ' + txt;
+      }
+      if(t){
+        var d  = new Date(last.created_at);
+        var now = new Date();
+        var diff = (now - d) / 60000;
+        if(diff < 1)       t.textContent = 'maintenant';
+        else if(diff < 60) t.textContent = Math.floor(diff) + 'min';
+        else               t.textContent = ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+      }
+      if(b){
+        if(unread > 0){ b.textContent = unread; b.style.display = 'flex'; }
+        else           { b.style.display = 'none'; }
+      }
+    })
+    .catch(function(){});
   }
 
-  // ── Toast ──
-  window.dmShowToast = function(msg){
-    var t = document.createElement('div');
-    t.className = 'dm-toast';
-    t.textContent = msg;
-    document.body.appendChild(t);
-    requestAnimationFrame(function(){
-      requestAnimationFrame(function(){ t.classList.add('show'); });
-    });
-    setTimeout(function(){ t.classList.remove('show'); setTimeout(function(){ t.remove(); }, 300); }, 2000);
+  /* ══ THÈME ══ */
+  function syncTheme(){
+    var light = document.body.classList.contains('light');
+    var moon  = $('dmThemeIconMoon'), sun = $('dmThemeIconSun');
+    if(moon) moon.style.display = light ? 'none' : '';
+    if(sun)  sun.style.display  = light ? ''     : 'none';
+  }
+  syncTheme();
+  var _origTheme = window.applyThemeToggle;
+  window.applyThemeToggle = function(){
+    if(_origTheme) _origTheme.apply(this, arguments);
+    syncTheme();
   };
 
-  // ── On open hiddenPage: restore identity from localStorage ──
+  /* ══ OPEN / CLOSE ══ */
   var _origOpen = window.openHiddenPage;
   window.openHiddenPage = function(){
     if(_origOpen) _origOpen.apply(this, arguments);
-    dmSyncThemeIcon();
-    var saved = localStorage.getItem('dm_identity');
-    if(saved){
-      dmIdentity = saved;
-      document.getElementById('dmIdentityScreen').style.display = 'none';
-      document.getElementById('dmChatScreen').style.display = 'flex';
-      // Reload messages
-      dmMessages = [];
-      if(_pollInterval){ clearInterval(_pollInterval); _pollInterval = null; }
-      if(dmChannel){ try{ dmChannel.unsubscribe(); }catch(e){} dmChannel = null; }
-      dmInit();
-    } else {
-      document.getElementById('dmIdentityScreen').style.display = 'flex';
-      document.getElementById('dmChatScreen').style.display = 'none';
-    }
+    syncTheme();
+    var fb = document.getElementById('floatingThemeBtn');
+    if(fb){ fb.style.opacity = '0'; fb.style.pointerEvents = 'none'; }
+    var saved = localStorage.getItem('jayana_profile');
+    if(saved === 'girl' || saved === 'boy') identity = saved;
+    attached = false;
+    showScreen('home');
   };
 
-  // ── On close: cleanup ──
   var _origClose = window.closeHiddenPage;
   window.closeHiddenPage = function(){
-    if(_pollInterval){ clearInterval(_pollInterval); _pollInterval = null; }
-    if(dmChannel){ try{ dmChannel.unsubscribe(); }catch(e){} dmChannel = null; }
+    stopPoll();
+    attached = false;
+    var fb = document.getElementById('floatingThemeBtn');
+    if(fb){ fb.style.opacity = ''; fb.style.pointerEvents = ''; }
     if(_origClose) _origClose.apply(this, arguments);
   };
 
 })();
-
-
 </script>
 
 <div id="likeCounterWrap" style="padding:0 16px 12px;display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
@@ -6216,7 +6323,7 @@ loadFavorites();
 </div>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.01.12</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.04.1</span>
 </div>
 
 </body>
