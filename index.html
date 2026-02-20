@@ -6283,26 +6283,39 @@ function filterSongs(q){
       if(!_busy) push({ type:'dm', screen:'chat' });
     };
 
-    // ── closeHiddenPage → efface tous les états DM de la pile ──
-    // On ne pousse PAS un nouvel état : on REMPLACE l'état courant
-    // par 'closed' ET on tronque la pile JS. Ainsi le navigateur
-    // n'a plus aucun état DM devant lui → flèche avant impossible.
+    // ── closeHiddenPage → remonter à l'état de base, effacer la flèche avant ──
+    // replaceState ne peut effacer que l'état courant. Pour bloquer la flèche
+    // avant, on doit remonter jusqu'à l'état closed(0) via history.go(-N),
+    // puis replaceState depuis là. Ainsi plus aucun état DM n'est accessible.
     var rawCloseHP = window.closeHiddenPage;
     window.closeHiddenPage = function(){
       if(rawCloseHP) rawCloseHP.apply(this, arguments);
       if(_busy) return;
-      // Tronquer la pile JS jusqu'à l'état 'closed' le plus récent
-      // (ou jusqu'au début) pour supprimer tous les états DM
-      var closedIdx = 0;
-      for(var i = _cur; i >= 0; i--){
-        if(_stack[i] && _stack[i].type === 'closed'){ closedIdx = i; break; }
+      // Compter combien d'états DM ont été empilés depuis l'état closed de base
+      var dmCount = 0;
+      for(var i = _cur; i > 0; i--){
+        if(_stack[i] && _stack[i].type !== 'closed') dmCount++;
+        else break;
       }
-      _stack = _stack.slice(0, closedIdx + 1);
-      if(_stack[closedIdx] && _stack[closedIdx].type !== 'closed')
-        _stack[closedIdx] = { type:'closed' };
-      _cur = _stack.length - 1;
-      // Remplacer l'état navigateur courant → efface la flèche avant
-      history.replaceState({ jy: _cur }, '');
+      // Remettre la pile JS à l'état initial
+      _stack = [{ type:'closed' }];
+      _cur = 0;
+      if(dmCount > 0){
+        // Remonter dans l'historique navigateur puis replaceState
+        _busy = true;
+        history.go(-dmCount);
+        // replaceState après que history.go ait fini (popstate se déclenche)
+        // On intercepte le prochain popstate pour faire le replaceState
+        var _onPop = function(ev){
+          window.removeEventListener('popstate', _onPop, true);
+          ev.stopImmediatePropagation();
+          history.replaceState({ jy:0 }, '');
+          _busy = false;
+        };
+        window.addEventListener('popstate', _onPop, true);
+      } else {
+        history.replaceState({ jy:0 }, '');
+      }
     };
     window._dmRawClose = rawCloseHP;
 
@@ -8149,7 +8162,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.04.1</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.04.2</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
