@@ -4485,7 +4485,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
   }
   function updateShakeCount(){
     var el = document.getElementById('prankShakeCount');
-    var left = 3 - _shakeTaps;
+    var left = 10 - _shakeTaps;
     if(el) el.textContent = left + ' tap' + (left > 1 ? 's' : '') + ' restant' + (left > 1 ? 's' : '') + ' !';
   }
   function onShakeTap(e){
@@ -4504,7 +4504,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
   function doShakeTap(){
     _shakeTaps++;
     updateShakeCount();
-    if(_shakeTaps >= 3){
+    if(_shakeTaps >= 10){
       document.removeEventListener('touchstart', onShakeTap);
       document.removeEventListener('click', onShakeClick);
       document.body.classList.remove('prank-shake');
@@ -4575,7 +4575,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     _intrusEl = el;
     el.classList.add('show');
     document.getElementById('prankIntrusBanner').classList.add('show');
-    document.getElementById('prankIntrusCount').textContent = 3;
+    document.getElementById('prankIntrusCount').textContent = 10;
     // Premier placement sans transition (l'emoji apparaît direct à sa place)
     el.style.transition = 'none';
     moveIntrus();
@@ -4602,9 +4602,9 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     _intrusHitLock = true;
     setTimeout(function(){ _intrusHitLock = false; }, 400);
     _intrusTouches++;
-    var left = 3 - _intrusTouches;
+    var left = 10 - _intrusTouches;
     document.getElementById('prankIntrusCount').textContent = left;
-    if(_intrusTouches >= 3){
+    if(_intrusTouches >= 10){
       clearInterval(_intrusTimer);
       _intrusEl.classList.remove('show');
       document.getElementById('prankIntrusBanner').classList.remove('show');
