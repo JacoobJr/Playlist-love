@@ -156,6 +156,152 @@ header::before {
 }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
+/* ── BETISES LOCK STYLES ── */
+#betisesBtn {
+  position: relative;
+  overflow: visible !important;
+  background: linear-gradient(135deg, rgba(255,200,60,0.12), rgba(255,165,0,0.07)) !important;
+  border-color: rgba(255,200,60,0.45) !important;
+  color: #f5c518 !important;
+  animation: betisesPulse 2.8s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(245,197,24,0.4);
+}
+#betisesBtn:hover {
+  background: linear-gradient(135deg, rgba(255,200,60,0.22), rgba(255,165,0,0.14)) !important;
+  border-color: rgba(255,200,60,0.8) !important;
+  box-shadow: 0 4px 18px rgba(245,197,24,0.35) !important;
+}
+@keyframes betisesPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(245,197,24,0.35), 0 2px 8px rgba(245,197,24,0.1); border-color: rgba(255,200,60,0.45) !important; }
+  50%     { box-shadow: 0 0 0 6px rgba(245,197,24,0), 0 2px 14px rgba(245,197,24,0.3); border-color: rgba(255,200,60,0.9) !important; }
+}
+#betisesLabel {
+  background: linear-gradient(90deg, #f5c518 0%, #fff4a0 40%, #f5c518 60%, #ffdd55 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: betisesShimmer 2.5s linear infinite;
+  font-weight: 700;
+}
+@keyframes betisesShimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+#betisesLock {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 13px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 4px rgba(245,197,24,0.9));
+  animation: lockBlink 1.6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 10;
+}
+@keyframes lockBlink {
+  0%,100% { opacity: 1;   transform: scale(1); filter: drop-shadow(0 1px 4px rgba(245,197,24,0.9)); }
+  45%     { opacity: 0.25; transform: scale(0.85); filter: drop-shadow(0 1px 2px rgba(245,197,24,0.3)); }
+  55%     { opacity: 0.25; transform: scale(0.85); }
+}
+
+/* ── MODAL CHANTIER ── */
+#chantierModal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.88);
+  z-index: 6000;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  backdrop-filter: blur(10px);
+}
+#chantierModal.show { display: flex; animation: slideUp 0.28s ease; }
+.chantier-box {
+  background: #1a1a0e;
+  border: 1.5px solid rgba(245,197,24,0.4);
+  border-radius: 22px;
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 8px 40px rgba(245,197,24,0.15), 0 0 0 1px rgba(245,197,24,0.08);
+  position: relative;
+  overflow: hidden;
+}
+.chantier-box::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(245,197,24,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+.chantier-icon { font-size: 54px; animation: chantierWobble 1.2s ease-in-out infinite alternate; }
+@keyframes chantierWobble {
+  0%   { transform: rotate(-6deg) scale(1); }
+  100% { transform: rotate(6deg) scale(1.08); }
+}
+.chantier-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: #f5c518;
+  text-align: center;
+  line-height: 1.2;
+}
+.chantier-sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  text-align: center;
+  line-height: 1.6;
+  max-width: 260px;
+}
+.chantier-input {
+  background: rgba(245,197,24,0.07);
+  border: 1.5px solid rgba(245,197,24,0.3);
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 18px;
+  color: #f5c518;
+  font-family: 'DM Sans', sans-serif;
+  text-align: center;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  outline: none;
+  width: 100%;
+  max-width: 220px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.chantier-input::placeholder { color: rgba(245,197,24,0.3); letter-spacing: 2px; font-size: 14px; text-transform: none; }
+.chantier-input:focus { border-color: rgba(245,197,24,0.75); box-shadow: 0 0 0 3px rgba(245,197,24,0.12); }
+.chantier-input.error { border-color: #e05555; box-shadow: 0 0 0 3px rgba(224,85,85,0.15); animation: prankShake 0.4s ease; }
+.chantier-btn {
+  background: linear-gradient(135deg, #d4a800, #f5c518);
+  color: #1a1000;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 800;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.12s;
+  box-shadow: 0 4px 16px rgba(245,197,24,0.35);
+  letter-spacing: 0.5px;
+}
+.chantier-btn:hover { opacity: 0.9; transform: scale(1.03); }
+.chantier-err { font-size: 12px; color: #e05555; min-height: 16px; text-align: center; }
+.chantier-cancel {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  cursor: pointer;
+  padding: 6px 16px;
+  transition: color 0.15s;
+}
+.chantier-cancel:hover { color: rgba(255,255,255,0.7); }
+
 #topBubbleMenu {
   display: flex;
   gap: 7px;
@@ -994,6 +1140,81 @@ body.light #lockNavBtn.has-unread {
 .prank-hint { font-size:13px; color:rgba(255,255,255,0.55); line-height:1.5; }
 .prank-close { margin-top:8px; padding:11px 26px; background:#3d9bd4; color:#fff; border:none; border-radius:50px; font-size:13px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; transition:background 0.15s, transform 0.12s; }
 .prank-close:hover { background:#ff85c2; transform:scale(1.04); }
+
+/* ══ SYSTÈME BÊTISES INTERACTIVES ══ */
+#prankMenu { position:fixed; inset:0; background:rgba(0,0,0,0.82); z-index:4000; display:none; flex-direction:column; align-items:center; justify-content:center; padding:24px; backdrop-filter:blur(8px); overflow-y:auto; }
+#prankMenu.show { display:flex; animation:slideUp 0.25s ease; }
+.prank-menu-title { font-family:'Playfair Display',serif; font-size:22px; color:#fff; margin-bottom:6px; }
+.prank-menu-sub { font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:20px; }
+.prank-menu-list { display:flex; flex-direction:column; gap:10px; width:100%; max-width:340px; }
+.prank-menu-item { display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:13px 16px; cursor:pointer; transition:background 0.15s, transform 0.12s; }
+.prank-menu-item:hover { background:rgba(255,255,255,0.13); transform:translateX(3px); }
+.prank-menu-item-icon { font-size:28px; flex-shrink:0; }
+.prank-menu-item-name { font-size:14px; font-weight:600; color:#fff; }
+.prank-menu-item-desc { font-size:11px; color:rgba(255,255,255,0.5); margin-top:2px; }
+.prank-menu-cancel { margin-top:16px; font-size:12px; color:rgba(255,255,255,0.4); cursor:pointer; padding:8px 20px; transition:color 0.15s; }
+.prank-menu-cancel:hover { color:rgba(255,255,255,0.8); }
+#prankMsgModal { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:4001; display:none; flex-direction:column; align-items:center; justify-content:center; padding:24px; backdrop-filter:blur(8px); }
+#prankMsgModal.show { display:flex; animation:slideUp 0.22s ease; }
+.prank-msg-box { background:#1e1e2e; border:1px solid rgba(255,255,255,0.12); border-radius:20px; padding:24px 20px; width:100%; max-width:340px; display:flex; flex-direction:column; gap:14px; }
+.prank-msg-title { font-family:'Playfair Display',serif; font-size:18px; color:#fff; text-align:center; }
+.prank-msg-preview { font-size:36px; text-align:center; }
+.prank-msg-input { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:11px 14px; font-size:14px; color:#fff; font-family:'DM Sans',sans-serif; resize:none; outline:none; }
+.prank-msg-input::placeholder { color:rgba(255,255,255,0.3); }
+.prank-msg-send { background:linear-gradient(135deg,#e8507a,#c8185e); color:#fff; border:none; border-radius:50px; padding:12px; font-size:14px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; transition:opacity 0.15s, transform 0.12s; }
+.prank-msg-send:hover { opacity:0.9; transform:scale(1.02); }
+.prank-msg-cancel { font-size:12px; color:rgba(255,255,255,0.4); cursor:pointer; text-align:center; padding:4px; }
+.prank-msg-cancel:hover { color:rgba(255,255,255,0.8); }
+#prankGotcha { position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:5000; display:none; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:28px; text-align:center; backdrop-filter:blur(10px); }
+#prankGotcha.show { display:flex; animation:slideUp 0.3s ease; }
+.gotcha-emoji { font-size:80px; animation:wobble 0.6s infinite alternate; }
+.gotcha-title { font-family:'Playfair Display',serif; font-size:clamp(20px,6vw,30px); color:#fff; line-height:1.3; }
+.gotcha-msg { font-size:15px; color:rgba(255,255,255,0.75); line-height:1.6; max-width:300px; font-style:italic; }
+.gotcha-close { margin-top:8px; padding:12px 30px; background:linear-gradient(135deg,#e8507a,#c8185e); color:#fff; border:none; border-radius:50px; font-size:14px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; box-shadow:0 4px 20px rgba(200,24,94,0.4); }
+.gotcha-close:hover { opacity:0.9; transform:scale(1.04); }
+@keyframes prankShake { 0%,100%{transform:translateX(0)} 10%{transform:translateX(-8px) rotate(-1deg)} 20%{transform:translateX(8px) rotate(1deg)} 30%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 50%{transform:translateX(-4px)} 60%{transform:translateX(4px)} }
+body.prank-shake { animation:prankShake 0.4s ease infinite; }
+#prankShakeBanner { position:fixed; top:0; left:0; right:0; z-index:4500; background:linear-gradient(135deg,#e8507a,#c8185e); padding:14px 16px; text-align:center; display:none; box-shadow:0 4px 20px rgba(200,24,94,0.5); }
+#prankShakeBanner.show { display:block; animation:slideDown 0.3s ease; }
+@keyframes slideDown { from{transform:translateY(-100%)} to{transform:translateY(0)} }
+.prank-shake-label { font-size:12px; font-weight:700; color:rgba(255,255,255,0.8); margin-bottom:4px; }
+.prank-shake-count { font-size:32px; font-weight:900; color:#fff; }
+#prankCurtain { position:fixed; inset:0; z-index:4500; pointer-events:none; display:none; }
+#prankCurtain.show { display:block; }
+#prankCurtainBanner { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); z-index:4600; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.15); border-radius:50px; padding:12px 24px; font-size:13px; font-weight:700; color:#fff; display:none; white-space:nowrap; }
+#prankCurtainBanner.show { display:block; }
+.prank-curtain-emoji { position:absolute; font-size:32px; cursor:pointer; user-select:none; pointer-events:all; transition:transform 0.12s; }
+.prank-curtain-emoji:active { transform:scale(1.4); }
+.prank-curtain-emoji.caught { animation:prankCaught 0.3s ease forwards; pointer-events:none; }
+@keyframes prankCaught { 0%{opacity:1;transform:scale(1)} 60%{transform:scale(1.6);opacity:0.4} 100%{transform:scale(0);opacity:0} }
+#prankIntrus { position:fixed; z-index:4500; font-size:48px; cursor:pointer; user-select:none; display:none; filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5)); }
+#prankIntrus.show { display:block; }
+#prankIntrusBanner { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); z-index:4600; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.15); border-radius:50px; padding:12px 24px; font-size:13px; font-weight:700; color:#fff; display:none; white-space:nowrap; }
+#prankIntrusBanner.show { display:block; }
+body.prank-flip { overflow-x:hidden; }
+#prankFlipBanner { position:fixed; top:0; left:0; right:0; z-index:4500; background:linear-gradient(135deg,#7c3aed,#4f46e5); padding:12px 16px; display:none; text-align:center; box-shadow:0 4px 20px rgba(124,58,237,0.5); }
+#prankFlipBanner.show { display:block; animation:slideDown 0.3s ease; }
+.prank-flip-label { font-size:11px; font-weight:700; color:rgba(255,255,255,0.8); margin-bottom:6px; }
+#prankFlipHoldWrap { display:flex; align-items:center; justify-content:center; gap:10px; }
+#prankFlipBtn { font-size:28px; cursor:pointer; user-select:none; -webkit-user-select:none; }
+#prankFlipProgress { width:60px; height:6px; background:rgba(255,255,255,0.25); border-radius:3px; overflow:hidden; }
+#prankFlipProgressBar { height:100%; width:0%; background:#fff; border-radius:3px; transition:width 0.08s linear; }
+#prankSplash { position:fixed; inset:0; z-index:4500; pointer-events:none; display:none; overflow:hidden; }
+#prankSplash.show { display:block; }
+#prankSplashBanner { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); z-index:4600; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.15); border-radius:50px; padding:12px 24px; font-size:13px; font-weight:700; color:#fff; display:none; white-space:nowrap; }
+#prankSplashBanner.show { display:block; }
+.prank-splash-blob { position:fixed; border-radius:42% 58% 60% 40% / 50% 45% 55% 50%; cursor:pointer; pointer-events:all; transition:transform 0.15s; }
+.prank-splash-blob.wiped { animation:prankWipe 0.4s ease forwards; pointer-events:none; }
+@keyframes prankWipe { 0%{opacity:0.88} 100%{opacity:0;transform:scale(0.2)} }
+#prankLock { position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:4500; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:28px; text-align:center; backdrop-filter:blur(10px); }
+#prankLock.show { display:flex; animation:slideUp 0.3s ease; }
+.prank-lock-icon { font-size:72px; animation:wobble 0.7s infinite alternate; }
+.prank-lock-title { font-family:'Playfair Display',serif; font-size:22px; color:#fff; }
+.prank-lock-sub { font-size:13px; color:rgba(255,255,255,0.55); max-width:280px; }
+.prank-lock-input { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:12px 18px; font-size:18px; color:#fff; font-family:'DM Sans',sans-serif; text-align:center; letter-spacing:3px; outline:none; width:100%; max-width:240px; }
+.prank-lock-input.error { border-color:#e05555; animation:prankShake 0.4s ease; }
+.prank-lock-btn { background:linear-gradient(135deg,#e8507a,#c8185e); color:#fff; border:none; border-radius:50px; padding:12px 32px; font-size:14px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; }
+.prank-lock-err { font-size:12px; color:#e05555; min-height:16px; }
 
 /* #hiddenPage — défini dans le bloc InstaLove ci-dessous */
 .hp-header { padding: 28px 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); position: relative; overflow: hidden; }
@@ -2431,7 +2652,10 @@ body.anniv-mode .counter-block-top {
   <div class="bubbleBtn" id="themeToggle">🌙 Thème</div>
   <div class="bubbleBtn" id="quizBtn" style="color:#ff6eb0;border-color:rgba(255,110,176,0.4);background:rgba(255,110,176,0.08);font-weight:600;">Quiz 💖</div>
   <div class="bubbleBtn" id="gamesBtn" style="color:#60a5fa;border-color:rgba(96,165,250,0.4);background:rgba(96,165,250,0.08);font-weight:600;">Jeux 🎮</div>
-  <div class="bubbleBtn" id="betisesBtn">Bêtises 🤡</div>
+  <div class="bubbleBtn" id="betisesBtn" style="position:relative;overflow:visible;">
+    <span id="betisesLabel">Bêtises </span><span style="-webkit-text-fill-color:initial;background:none;">🤡</span>
+    <span id="betisesLock" aria-hidden="true">🔒</span>
+  </div>
 </div>
 
 <script>
@@ -3727,6 +3951,99 @@ body.light #counterBlock.glowing .c-num-big {
   <button class="prank-close" onclick="closePrank()">OK je réessaie 🔁</button>
 </div>
 
+<!-- ══ BÊTISES INTERACTIVES ══ -->
+<!-- Menu de choix -->
+<div id="prankMenu">
+  <div class="prank-menu-title">Choisir une bêtise 🤡</div>
+  <div class="prank-menu-sub">Sélectionne ce que <span id="prankVictimName">l'autre</span> devra subir</div>
+  <div class="prank-menu-list">
+    <div class="prank-menu-item" onclick="prankSelectType('shake')">
+      <div class="prank-menu-item-icon">📳</div>
+      <div><div class="prank-menu-item-name">L'écran qui tremble</div><div class="prank-menu-item-desc">Tape 3 fois vite pour l'arrêter</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('curtain')">
+      <div class="prank-menu-item-icon">🌧️</div>
+      <div><div class="prank-menu-item-name">Le rideau d'emojis</div><div class="prank-menu-item-desc">Attrape-les tous pour retrouver le site</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('intrus')">
+      <div class="prank-menu-item-icon">👾</div>
+      <div><div class="prank-menu-item-name">L'intrus qui esquive</div><div class="prank-menu-item-desc">Touche-le 3 fois pour l'éliminer</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('flip')">
+      <div class="prank-menu-item-icon">🔤</div>
+      <div><div class="prank-menu-item-name">Le texte à l'envers</div><div class="prank-menu-item-desc">Maintiens le bouton 3s pour corriger</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('splash')">
+      <div class="prank-menu-item-icon">🎨</div>
+      <div><div class="prank-menu-item-name">La flaque de peinture</div><div class="prank-menu-item-desc">Nettoie toutes les taches pour libérer le site</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('lock')">
+      <div class="prank-menu-item-icon">🔐</div>
+      <div><div class="prank-menu-item-name">Le cadenas</div><div class="prank-menu-item-desc">Trouve le mot secret pour déverrouiller</div></div>
+    </div>
+  </div>
+  <div class="prank-menu-cancel" onclick="closePrankMenu()">Annuler</div>
+</div>
+
+<!-- Modal message perso + mot secret si lock -->
+<div id="prankMsgModal">
+  <div class="prank-msg-box">
+    <div class="prank-msg-preview" id="prankMsgPreview">📳</div>
+    <div class="prank-msg-title" id="prankMsgTitle">Ton message final</div>
+    <div id="prankLockWordWrap" style="display:none">
+      <input class="prank-msg-input" id="prankLockWord" placeholder="Mot secret à deviner..." autocomplete="off" style="text-align:center;letter-spacing:2px;">
+    </div>
+    <textarea class="prank-msg-input" id="prankMsgText" rows="3" placeholder="Ex : Haha je t'ai eu 😈 tu peux pas m'en vouloir..."></textarea>
+    <button class="prank-msg-send" onclick="prankSend()">💣 Envoyer la bêtise</button>
+    <div class="prank-msg-cancel" onclick="closePrankMsg()">← Retour</div>
+  </div>
+</div>
+
+<!-- Écran "je t'ai eu" -->
+<div id="prankGotcha">
+  <div class="gotcha-emoji">😈</div>
+  <div class="gotcha-title">T'as été eu(e) !</div>
+  <div class="gotcha-msg" id="gotchaMsg"></div>
+  <button class="gotcha-close" onclick="closeGotcha()">OK j'ai compris 😤</button>
+</div>
+
+<!-- Bêtise : tremblement -->
+<div id="prankShakeBanner">
+  <div class="prank-shake-label">🤡 Tape l'écran rapidement pour arrêter ça !</div>
+  <div class="prank-shake-count" id="prankShakeCount">3 taps</div>
+</div>
+
+<!-- Bêtise : rideau -->
+<div id="prankCurtain"></div>
+<div id="prankCurtainBanner">🌧️ <span id="prankCurtainCount">?</span> emojis restants — attrape-les tous !</div>
+
+<!-- Bêtise : intrus -->
+<div id="prankIntrus">👾</div>
+<div id="prankIntrusBanner">👾 <span id="prankIntrusCount">3</span> touches restantes — attrape-le !</div>
+
+<!-- Bêtise : texte à l'envers -->
+<div id="prankFlipBanner">
+  <div class="prank-flip-label">🔤 Maintiens le bouton pour tout remettre à l'endroit</div>
+  <div id="prankFlipHoldWrap">
+    <div id="prankFlipBtn">🔄</div>
+    <div id="prankFlipProgress"><div id="prankFlipProgressBar"></div></div>
+  </div>
+</div>
+
+<!-- Bêtise : flaque de peinture -->
+<div id="prankSplash"></div>
+<div id="prankSplashBanner">🎨 <span id="prankSplashCount">?</span> taches restantes — nettoie tout !</div>
+
+<!-- Bêtise : cadenas -->
+<div id="prankLock">
+  <div class="prank-lock-icon">🔐</div>
+  <div class="prank-lock-title" id="prankLockTitle">Accès bloqué par Link</div>
+  <div class="prank-lock-sub">Trouve le mot secret pour déverrouiller</div>
+  <input class="prank-lock-input" id="prankLockInput" placeholder="••••••" autocomplete="off">
+  <button class="prank-lock-btn" onclick="prankCheckLock()">Valider</button>
+  <div class="prank-lock-err" id="prankLockErr">❌ Non ! Essaie encore…</div>
+</div>
+
 <!-- ══ SUGGESTION MODALS ══ -->
 <div id="sgAuthModal">
   <div class="memo-auth-inner">
@@ -3964,12 +4281,393 @@ _subviewIds.forEach(function(id) {
 });
 
 // ── BETISES ──
+var CHANTIER_CODE = 'chantier';
+var _chantierUnlocked = false;
+
+function chantierOpen(){
+  var modal = document.getElementById('chantierModal');
+  var input = document.getElementById('chantierInput');
+  var err   = document.getElementById('chantierErr');
+  if(err)   err.textContent = '';
+  if(input) input.value = '';
+  modal.classList.add('show');
+  setTimeout(function(){ if(input) input.focus(); }, 200);
+}
+function chantierClose(){
+  document.getElementById('chantierModal').classList.remove('show');
+}
+function chantierValidate(){
+  var input = document.getElementById('chantierInput');
+  var err   = document.getElementById('chantierErr');
+  var val   = input.value.trim().toLowerCase();
+  if(val === CHANTIER_CODE){
+    _chantierUnlocked = true;
+    document.getElementById('chantierModal').classList.remove('show');
+    // Retirer l'apparence "verrouillée" du bouton
+    var btn  = document.getElementById('betisesBtn');
+    var lock = document.getElementById('betisesLock');
+    var lbl  = document.getElementById('betisesLabel');
+    if(lock) lock.style.display = 'none';
+    if(btn)  btn.style.animation = 'none';
+    if(lbl)  lbl.style.animation = 'none';
+    if(btn){ btn.style.background=''; btn.style.borderColor=''; btn.style.color=''; btn.style.boxShadow=''; }
+    setTimeout(function(){ openPrankMenu(); }, 120);
+  } else {
+    input.classList.add('error');
+    if(err) err.textContent = '❌ Mauvais code, réessaie !';
+    setTimeout(function(){ input.classList.remove('error'); input.value=''; input.focus(); }, 700);
+  }
+}
+window.chantierValidate = chantierValidate;
+window.chantierClose    = chantierClose;
+
 document.getElementById('betisesBtn').addEventListener('click', function() {
-  var el = document.createElement('div');
-  el.textContent = 'Noob 👉🤡'; el.className = 'clown-pop';
-  document.body.appendChild(el);
-  setTimeout(function(){ el.remove(); }, 600);
+  if(_chantierUnlocked){
+    openPrankMenu();
+  } else {
+    chantierOpen();
+  }
 });
+
+/* ══════════════════════════════════════════════
+   SYSTÈME BÊTISES INTERACTIVES
+══════════════════════════════════════════════ */
+(function(){
+  var PRANK_TABLE = 'pranks';
+  var _selectedType = null;
+  var _activePrank  = null;
+
+  var PRANK_DEFS = {
+    shake:   { emoji:'📳', label:'L\'écran qui tremble' },
+    curtain: { emoji:'🌧️', label:'Le rideau d\'emojis' },
+    intrus:  { emoji:'👾', label:'L\'intrus qui esquive' },
+    flip:    { emoji:'🔤', label:'Le texte à l\'envers' },
+    splash:  { emoji:'🎨', label:'La flaque de peinture' },
+    lock:    { emoji:'🔐', label:'Le cadenas' }
+  };
+
+  /* ── Ouverture menu auteur ── */
+  window.openPrankMenu = function(){
+    var profile = localStorage.getItem('jayana_profile');
+    if(!profile){ alert('Connecte-toi d\'abord !'); return; }
+    var victim = profile === 'boy' ? 'Zelda' : 'Link';
+    var el = document.getElementById('prankVictimName');
+    if(el) el.textContent = victim;
+    document.getElementById('prankMenu').classList.add('show');
+  };
+  window.closePrankMenu = function(){
+    document.getElementById('prankMenu').classList.remove('show');
+  };
+
+  /* ── Sélection type → modal message ── */
+  window.prankSelectType = function(type){
+    _selectedType = type;
+    document.getElementById('prankMenu').classList.remove('show');
+    var def = PRANK_DEFS[type];
+    document.getElementById('prankMsgPreview').textContent = def.emoji;
+    document.getElementById('prankMsgTitle').textContent   = 'Ton message final 😈';
+    document.getElementById('prankMsgText').value          = '';
+    var lockWrap = document.getElementById('prankLockWordWrap');
+    var lockInput = document.getElementById('prankLockWord');
+    if(type === 'lock'){
+      lockWrap.style.display = 'block';
+      if(lockInput) lockInput.value = '';
+    } else {
+      lockWrap.style.display = 'none';
+    }
+    document.getElementById('prankMsgModal').classList.add('show');
+  };
+  window.closePrankMsg = function(){
+    document.getElementById('prankMsgModal').classList.remove('show');
+    document.getElementById('prankMenu').classList.add('show');
+  };
+
+  /* ── Envoi de la bêtise en base ── */
+  window.prankSend = function(){
+    var profile = localStorage.getItem('jayana_profile');
+    if(!profile) return;
+    var victim   = profile === 'boy' ? 'girl' : 'boy';
+    var msg      = document.getElementById('prankMsgText').value.trim();
+    var lockWord = (_selectedType === 'lock') ? (document.getElementById('prankLockWord').value.trim().toLowerCase()) : null;
+    if(!msg){ document.getElementById('prankMsgText').focus(); return; }
+    if(_selectedType === 'lock' && !lockWord){ document.getElementById('prankLockWord').focus(); return; }
+    var body = { type: _selectedType, author: profile, victim: victim, message: msg, active: true };
+    if(lockWord) body.lock_word = lockWord;
+    // Supprimer l'ancienne bêtise active de ce victim d'abord
+    fetch(SB_URL+'/rest/v1/'+PRANK_TABLE+'?victim=eq.'+victim+'&active=eq.true', {
+      method:'DELETE', headers: sbHeaders()
+    }).then(function(){
+      return fetch(SB_URL+'/rest/v1/'+PRANK_TABLE, {
+        method:'POST', headers: sbHeaders({'Prefer':'return=minimal'}),
+        body: JSON.stringify(body)
+      });
+    }).then(function(){
+      document.getElementById('prankMsgModal').classList.remove('show');
+      // Feedback auteur
+      var fb = document.createElement('div');
+      fb.className = 'clown-pop'; fb.textContent = '😈 Bêtise envoyée !';
+      fb.style.fontSize = '18px'; fb.style.fontWeight = '700'; fb.style.color = '#e8507a';
+      document.body.appendChild(fb);
+      setTimeout(function(){ fb.remove(); }, 1200);
+    }).catch(function(){ alert('Erreur réseau, réessaie !'); });
+  };
+
+  /* ── Vérification au login de la victime ── */
+  window.checkActivePrank = function(profile){
+    fetch(SB_URL+'/rest/v1/'+PRANK_TABLE+'?victim=eq.'+profile+'&active=eq.true&limit=1', {
+      headers: sbHeaders()
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(rows){
+      if(!rows || !rows.length) return;
+      _activePrank = rows[0];
+      setTimeout(function(){ triggerPrank(_activePrank); }, 800);
+    }).catch(function(){});
+  };
+
+  /* ── Déclenchement bêtise ── */
+  function triggerPrank(p){
+    if(!p) return;
+    switch(p.type){
+      case 'shake':   startShake(p); break;
+      case 'curtain': startCurtain(p); break;
+      case 'intrus':  startIntrus(p); break;
+      case 'flip':    startFlip(p); break;
+      case 'splash':  startSplash(p); break;
+      case 'lock':    startLock(p); break;
+    }
+  }
+
+  /* ── Marquer la bêtise comme terminée ── */
+  function prankDone(){
+    if(!_activePrank) return;
+    fetch(SB_URL+'/rest/v1/'+PRANK_TABLE+'?id=eq.'+_activePrank.id, {
+      method:'PATCH', headers: sbHeaders(),
+      body: JSON.stringify({ active: false })
+    }).catch(function(){});
+    showGotcha(_activePrank);
+    _activePrank = null;
+  }
+
+  /* ── Écran gotcha ── */
+  function showGotcha(p){
+    var authorName = p.author === 'boy' ? 'Link' : 'Zelda';
+    document.getElementById('gotchaMsg').textContent = p.message || '😈';
+    document.getElementById('prankGotcha').classList.add('show');
+  }
+  window.closeGotcha = function(){
+    document.getElementById('prankGotcha').classList.remove('show');
+  };
+
+  /* ════ BÊTISE 1 : TREMBLEMENT ════ */
+  var _shakeTaps = 0; var _shakeTimer = null;
+  function startShake(p){
+    _shakeTaps = 0;
+    document.body.classList.add('prank-shake');
+    var banner = document.getElementById('prankShakeBanner');
+    banner.classList.add('show');
+    updateShakeCount();
+    document.addEventListener('click', onShakeTap);
+    document.addEventListener('touchstart', onShakeTap);
+  }
+  function updateShakeCount(){
+    var el = document.getElementById('prankShakeCount');
+    var left = 3 - _shakeTaps;
+    if(el) el.textContent = left + ' tap' + (left > 1 ? 's' : '') + ' restant' + (left > 1 ? 's' : '') + ' !';
+  }
+  function onShakeTap(){
+    _shakeTaps++;
+    updateShakeCount();
+    if(_shakeTaps >= 3){
+      document.removeEventListener('click', onShakeTap);
+      document.removeEventListener('touchstart', onShakeTap);
+      document.body.classList.remove('prank-shake');
+      document.getElementById('prankShakeBanner').classList.remove('show');
+      prankDone();
+    }
+  }
+
+  /* ════ BÊTISE 2 : RIDEAU D'EMOJIS ════ */
+  var _curtainTotal = 0; var _curtainCaught = 0;
+  var CURTAIN_EMOJIS = ['🤡','😈','💀','👻','🕷️','🦇','🎃','🤪','😜'];
+  function startCurtain(p){
+    _curtainCaught = 0;
+    var container = document.getElementById('prankCurtain');
+    container.innerHTML = '';
+    container.classList.add('show');
+    _curtainTotal = 18;
+    document.getElementById('prankCurtainCount').textContent = _curtainTotal;
+    document.getElementById('prankCurtainBanner').classList.add('show');
+    for(var i = 0; i < _curtainTotal; i++){
+      (function(idx){
+        setTimeout(function(){
+          var el = document.createElement('div');
+          el.className = 'prank-curtain-emoji';
+          el.textContent = CURTAIN_EMOJIS[Math.floor(Math.random()*CURTAIN_EMOJIS.length)];
+          el.style.left = (Math.random()*88+1) + 'vw';
+          el.style.top  = (Math.random()*85+5) + 'vh';
+          el.addEventListener('click', function(){ catchCurtainEmoji(el); });
+          el.addEventListener('touchstart', function(e){ e.preventDefault(); catchCurtainEmoji(el); });
+          container.appendChild(el);
+        }, idx * 120);
+      })(i);
+    }
+  }
+  function catchCurtainEmoji(el){
+    if(el.classList.contains('caught')) return;
+    el.classList.add('caught');
+    _curtainCaught++;
+    var left = _curtainTotal - _curtainCaught;
+    document.getElementById('prankCurtainCount').textContent = left;
+    setTimeout(function(){ el.remove(); }, 350);
+    if(_curtainCaught >= _curtainTotal){
+      document.getElementById('prankCurtain').classList.remove('show');
+      document.getElementById('prankCurtainBanner').classList.remove('show');
+      prankDone();
+    }
+  }
+
+  /* ════ BÊTISE 3 : L'INTRUS QUI ESQUIVE ════ */
+  var _intrusTouches = 0; var _intrusTimer = null; var _intrusEl = null;
+  function startIntrus(p){
+    _intrusTouches = 0;
+    var el = document.getElementById('prankIntrus');
+    _intrusEl = el;
+    el.classList.add('show');
+    document.getElementById('prankIntrusBanner').classList.add('show');
+    document.getElementById('prankIntrusCount').textContent = 3;
+    moveIntrus();
+    _intrusTimer = setInterval(moveIntrus, 1800);
+    el.addEventListener('click', hitIntrus);
+    el.addEventListener('touchstart', function(e){ e.preventDefault(); hitIntrus(); });
+  }
+  function moveIntrus(){
+    var el = _intrusEl; if(!el) return;
+    var x = Math.random() * (window.innerWidth - 80);
+    var y = Math.random() * (window.innerHeight - 120) + 40;
+    el.style.left = x + 'px';
+    el.style.top  = y + 'px';
+  }
+  function hitIntrus(){
+    _intrusTouches++;
+    var left = 3 - _intrusTouches;
+    document.getElementById('prankIntrusCount').textContent = left;
+    if(_intrusTouches >= 3){
+      clearInterval(_intrusTimer);
+      _intrusEl.classList.remove('show');
+      document.getElementById('prankIntrusBanner').classList.remove('show');
+      prankDone();
+    } else {
+      // L'intrus esquive immédiatement après qu'on l'a touché
+      moveIntrus();
+    }
+  }
+
+  /* ════ BÊTISE 4 : TEXTE À L'ENVERS ════ */
+  var _flipHolding = false; var _flipTimer = null; var _flipProgress = 0;
+  function startFlip(p){
+    document.body.classList.add('prank-flip');
+    document.getElementById('prankFlipBanner').classList.add('show');
+    var btn = document.getElementById('prankFlipBtn');
+    document.getElementById('prankFlipProgressBar').style.width = '0%';
+    function startHold(){ _flipHolding = true; _flipProgress = 0; runFlipProgress(); }
+    function stopHold(){ _flipHolding = false; clearTimeout(_flipTimer); document.getElementById('prankFlipProgressBar').style.width='0%'; }
+    btn.addEventListener('mousedown', startHold);
+    btn.addEventListener('touchstart', function(e){ e.preventDefault(); startHold(); });
+    btn.addEventListener('mouseup', stopHold);
+    btn.addEventListener('mouseleave', stopHold);
+    btn.addEventListener('touchend', stopHold);
+  }
+  function runFlipProgress(){
+    if(!_flipHolding) return;
+    _flipProgress += 4;
+    document.getElementById('prankFlipProgressBar').style.width = Math.min(_flipProgress, 100) + '%';
+    if(_flipProgress >= 100){
+      document.body.classList.remove('prank-flip');
+      document.getElementById('prankFlipBanner').classList.remove('show');
+      prankDone();
+    } else {
+      _flipTimer = setTimeout(runFlipProgress, 80);
+    }
+  }
+
+  /* ════ BÊTISE 5 : FLAQUE DE PEINTURE ════ */
+  var _splashTotal = 0; var _splashWiped = 0;
+  var SPLASH_COLORS = ['#e8507a','#a78bfa','#60a5fa','#34d399','#fb923c','#f59e0b','#ec4899','#06b6d4'];
+  function startSplash(p){
+    _splashWiped = 0;
+    var container = document.getElementById('prankSplash');
+    container.innerHTML = '';
+    container.classList.add('show');
+    _splashTotal = 10;
+    document.getElementById('prankSplashCount').textContent = _splashTotal;
+    document.getElementById('prankSplashBanner').classList.add('show');
+    for(var i = 0; i < _splashTotal; i++){
+      var blob = document.createElement('div');
+      blob.className = 'prank-splash-blob';
+      var w = 80 + Math.random()*120; var h = 60 + Math.random()*100;
+      var x = Math.random()*(window.innerWidth - w);
+      var y = Math.random()*(window.innerHeight - h - 80) + 40;
+      var color = SPLASH_COLORS[i % SPLASH_COLORS.length];
+      blob.style.cssText = 'width:'+w+'px;height:'+h+'px;left:'+x+'px;top:'+y+'px;background:'+color+';opacity:0.88;transform:rotate('+((Math.random()-0.5)*30)+'deg);';
+      blob.addEventListener('click', function(){ wipeSplash(this); });
+      blob.addEventListener('touchstart', function(e){ e.preventDefault(); wipeSplash(this); });
+      container.appendChild(blob);
+    }
+  }
+  function wipeSplash(el){
+    if(el.classList.contains('wiped')) return;
+    el.classList.add('wiped');
+    _splashWiped++;
+    var left = _splashTotal - _splashWiped;
+    document.getElementById('prankSplashCount').textContent = left;
+    setTimeout(function(){ el.remove(); }, 400);
+    if(_splashWiped >= _splashTotal){
+      document.getElementById('prankSplash').classList.remove('show');
+      document.getElementById('prankSplashBanner').classList.remove('show');
+      prankDone();
+    }
+  }
+
+  /* ════ BÊTISE 6 : CADENAS ════ */
+  var _lockPrank = null;
+  function startLock(p){
+    _lockPrank = p;
+    var authorName = p.author === 'boy' ? 'Link' : 'Zelda';
+    document.getElementById('prankLockTitle').textContent = '🔐 Accès bloqué par ' + authorName;
+    document.getElementById('prankLockInput').value = '';
+    document.getElementById('prankLockErr').textContent = '';
+    document.getElementById('prankLock').classList.add('show');
+  }
+  window.prankCheckLock = function(){
+    var input = document.getElementById('prankLockInput').value.trim().toLowerCase();
+    var expected = (_lockPrank && _lockPrank.lock_word) ? _lockPrank.lock_word.toLowerCase() : '';
+    if(input === expected){
+      document.getElementById('prankLock').classList.remove('show');
+      prankDone();
+    } else {
+      var inp = document.getElementById('prankLockInput');
+      inp.classList.add('error');
+      document.getElementById('prankLockErr').textContent = '❌ Non ! Essaie encore…';
+      setTimeout(function(){ inp.classList.remove('error'); }, 500);
+    }
+  };
+  // Valider avec Entrée
+  document.getElementById('prankLockInput').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') window.prankCheckLock();
+  });
+
+  /* ── Hook sur setProfile : vérifier bêtise active ── */
+  var _origSetProfile = window.setProfile;
+  window.setProfile = function(gender){
+    _origSetProfile(gender);
+    setTimeout(function(){ window.checkActivePrank(gender); }, 1500);
+  };
+  // Vérifier aussi au démarrage si déjà connecté
+  var _savedProfile = localStorage.getItem('jayana_profile');
+  if(_savedProfile) setTimeout(function(){ window.checkActivePrank(_savedProfile); }, 2000);
+
+})();
 
 // ── FADE-IN ──
 var fadeObs = new IntersectionObserver(function(entries) {
@@ -8207,5 +8905,28 @@ loadFavorites();
 </div>
 
 <div id="dmKeyboardBg"></div>
+
+<!-- ══ MODAL BÊTISES EN CHANTIER ══ -->
+<div id="chantierModal">
+  <div class="chantier-box">
+    <div class="chantier-icon">🚧</div>
+    <div class="chantier-title">Section en travaux&nbsp;!</div>
+    <div class="chantier-sub">Cette fonctionnalité est en cours de construction 🔨<br>Entre le code secret pour y accéder quand même.</div>
+    <input
+      class="chantier-input"
+      id="chantierInput"
+      type="text"
+      placeholder="code secret…"
+      autocomplete="off"
+      autocorrect="off"
+      spellcheck="false"
+      maxlength="20"
+      onkeydown="if(event.key==='Enter')chantierValidate()"
+    />
+    <div class="chantier-err" id="chantierErr"></div>
+    <button class="chantier-btn" onclick="chantierValidate()">🔓 Débloquer</button>
+    <div class="chantier-cancel" onclick="chantierClose()">Fermer</div>
+  </div>
+</div>
 </body>
 </html>
