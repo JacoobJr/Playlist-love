@@ -4421,18 +4421,35 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     }).catch(function(){ alert('Erreur réseau, réessaie !'); });
   };
 
+  /* ── File d'attente des bêtises ── */
+  var _prankQueue = [];
+
   /* ── Vérification au login de la victime ── */
   window.checkActivePrank = function(profile){
-    fetch(SB_URL+'/rest/v1/'+PRANK_TABLE+'?victim=eq.'+profile+'&active=eq.true&limit=1', {
+    fetch(SB_URL+'/rest/v1/'+PRANK_TABLE+'?victim=eq.'+profile+'&active=eq.true&order=created_at.asc', {
       headers: sbHeaders()
     })
     .then(function(r){ return r.json(); })
     .then(function(rows){
       if(!rows || !rows.length) return;
-      _activePrank = rows[0];
-      setTimeout(function(){ triggerPrank(_activePrank); }, 800);
+      rows.forEach(function(row){
+        // N'ajouter que si pas déjà dans la queue ni déjà active
+        var alreadyQueued = _prankQueue.some(function(q){ return q.id === row.id; });
+        var isActive = _activePrank && _activePrank.id === row.id;
+        if(!alreadyQueued && !isActive) _prankQueue.push(row);
+      });
+      dequeueNextPrank();
     }).catch(function(){});
   };
+
+  function dequeueNextPrank(){
+    // Si une bêtise tourne déjà, on attend
+    if(_activePrank) return;
+    if(!_prankQueue.length) return;
+    var next = _prankQueue.shift();
+    _activePrank = next;
+    setTimeout(function(){ triggerPrank(_activePrank); }, 800);
+  }
 
   /* ── Déclenchement bêtise ── */
   function triggerPrank(p){
@@ -4457,6 +4474,8 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     }).catch(function(){});
     showGotcha(_activePrank);
     _activePrank = null;
+    // Déclencher la suivante en attente après le gotcha
+    setTimeout(function(){ dequeueNextPrank(); }, 2000);
   }
 
   /* ── Écran gotcha ── */
@@ -9004,7 +9023,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.04.2</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.04.3</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
