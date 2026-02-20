@@ -6158,23 +6158,35 @@ function filterSongs(q){
   });
 })();
 
-// ── History API — bouton retour ET avant navigateur ────────────────────────
-// Ce bloc est placé APRÈS le patch mpCheckGameState pour capturer les versions finales
-// des fonctions openGames, openMemoryGame, etc.
+// ══════════════════════════════════════════════════════════════════
+//  NAVIGATION NAVIGATEUR — retour & avant (iOS Chrome)
+//
+//  Principe : on maintient une PILE JS (_stack) en parallèle de
+//  l'historique du navigateur. Chaque entrée de la pile correspond
+//  à un état pushState. Le popstate lit l'index dans l'état pour
+//  savoir vers quel écran aller — sans jamais deviner la direction.
+//
+//  Structure d'un état : { jy: <index dans _stack> }
+//  _stack[index] : { type, view/screen }
+//
+//  Types :
+//    'games'   → view = 'quiz'|'games'|'memory'|'pendu'|'puzzle'|'snake'
+//    'dm'      → screen = 'home'|'conv'|'chat'
+//    'closed'  → page principale (aucun overlay)
+// ══════════════════════════════════════════════════════════════════
 (function(){
-  var _nav = false; // flag anti-boucle
+  var _busy  = false;    // anti-boucle
+  var _stack = [];       // pile des états
+  var _cur   = -1;       // index courant dans _stack
 
-  // ── Profondeur des écrans DM ──
-  var DM_DEPTH = { entry: 0, home: 1, conv: 2, chat: 3 };
-
-  // ── Config jeux/quiz ──
-  var VIEWS = {
-    quiz:   { el: 'quizView',   close: 'closeQuiz',      depth: 1 },
-    games:  { el: 'gamesView',  close: 'closeGames',      depth: 1 },
-    memory: { el: 'memoryView', close: 'closeMemoryGame', depth: 2 },
-    pendu:  { el: 'penduView',  close: 'closePenduGame',  depth: 2 },
-    puzzle: { el: 'puzzleView', close: 'closePuzzleGame', depth: 2 },
-    snake:  { el: 'snakeView',  close: 'closeSnakeGame',  depth: 2 },
+  // ── Éléments et vues ──
+  var GAME_VIEWS = {
+    quiz:   { el: 'quizView',   open: 'openQuiz',       close: 'closeQuiz'      },
+    games:  { el: 'gamesView',  open: 'openGames',      close: 'closeGames'     },
+    memory: { el: 'memoryView', open: 'openMemoryGame', close: 'closeMemoryGame'},
+    pendu:  { el: 'penduView',  open: 'openPenduGame',  close: 'closePenduGame' },
+    puzzle: { el: 'puzzleView', open: 'openPuzzleGame', close: 'closePuzzleGame'},
+    snake:  { el: 'snakeView',  open: 'openSnakeGame',  close: 'closeSnakeGame' },
   };
   var FN_TO_VIEW = {
     openQuiz:'quiz', openGames:'games',
@@ -6182,144 +6194,128 @@ function filterSongs(q){
     openPuzzleGame:'puzzle', openSnakeGame:'snake'
   };
 
-  // Capture les versions FINALES (après tous les patches précédents)
-  var _finals = {};
-  ['openQuiz','openGames','openMemoryGame','openPenduGame','openPuzzleGame','openSnakeGame'].forEach(function(fn){
-    _finals[fn] = window[fn];
+  // ── Capture les versions finales des open* (après tous patches précédents) ──
+  var _rawOpen = {};
+  Object.keys(GAME_VIEWS).forEach(function(k){
+    _rawOpen[k] = window[GAME_VIEWS[k].open];
+  });
+  var _rawCloseHP  = window.closeHiddenPage;
+  var _rawOpenHP   = window.openHiddenPage;
+
+  // ── push un état dans la pile et dans History ──
+  function push(entry){
+    // Tronquer la pile si on est pas au bout (navigation avant existante effacée)
+    _stack = _stack.slice(0, _cur + 1);
+    _stack.push(entry);
+    _cur = _stack.length - 1;
+    history.pushState({ jy: _cur }, '');
+  }
+
+  // ── Aller à l'état d'index idx sans toucher à History ──
+  function applyState(idx){
+    if(idx < 0 || idx >= _stack.length) return;
+    var entry = _stack[idx];
+
+    if(entry.type === 'closed'){
+      // Fermer tout
+      var hp = document.getElementById('hiddenPage');
+      if(hp && hp.classList.contains('active')){
+        if(window.closeHiddenPage) window.closeHiddenPage();
+      }
+      Object.keys(GAME_VIEWS).forEach(function(k){
+        var el = document.getElementById(GAME_VIEWS[k].el);
+        if(el && el.classList.contains('active') && window[GAME_VIEWS[k].close])
+          window[GAME_VIEWS[k].close]();
+      });
+
+    } else if(entry.type === 'games'){
+      var v = entry.view;
+      // Fermer les autres vues de jeux sauf games (qui doit rester ouvert pour memory/pendu/etc.)
+      Object.keys(GAME_VIEWS).forEach(function(k){
+        if(k === v) return;
+        if(k === 'games' && ['memory','pendu','puzzle','snake'].indexOf(v) !== -1) return; // garder gamesView ouvert
+        var el = document.getElementById(GAME_VIEWS[k].el);
+        if(el && el.classList.contains('active') && window[GAME_VIEWS[k].close])
+          window[GAME_VIEWS[k].close]();
+      });
+      // S'assurer que la cible est ouverte
+      var targetEl = document.getElementById(GAME_VIEWS[v].el);
+      if(!targetEl || !targetEl.classList.contains('active')){
+        if(_rawOpen[v]) _rawOpen[v]();
+      }
+
+    } else if(entry.type === 'dm'){
+      var hp2 = document.getElementById('hiddenPage');
+      var scr = entry.screen;
+      // Ouvrir hiddenPage si pas actif
+      if(!hp2 || !hp2.classList.contains('active')){
+        if(_rawOpenHP) _rawOpenHP();
+      }
+      // Naviguer vers le bon écran DM
+      if(scr === 'home'){
+        if(window.showScreen) window.showScreen('home');
+      } else if(scr === 'conv'){
+        if(window.showScreen) window.showScreen('home');   // reset d'abord
+        if(window.dmShowConv) window.dmShowConv();
+      } else if(scr === 'chat'){
+        var saved = localStorage.getItem('jayana_profile');
+        if(saved === 'girl' || saved === 'boy'){
+          if(window.showScreen) window.showScreen('chat');
+          if(window.startChat)  window.startChat();
+        }
+      }
+    }
+  }
+
+  // ── Patch open* jeux/quiz ──
+  Object.keys(GAME_VIEWS).forEach(function(k){
+    var fn = GAME_VIEWS[k].open;
+    var raw = _rawOpen[k];
     window[fn] = function(){
-      _finals[fn].apply(this, arguments);
-      if(!_nav) history.pushState({ jayana: fn }, '');
+      raw.apply(this, arguments);
+      if(!_busy) push({ type: 'games', view: k });
     };
   });
 
   // ── Patch openHiddenPage ──
-  var _origHP = window.openHiddenPage;
+  // On ne pousse PAS ici : showScreen('home') appelé dans le DM IIFE le fera via _historyPushDM
   window.openHiddenPage = function(){
-    if(_origHP) _origHP.apply(this, arguments);
-    // On pousse UN état sentinelle pour la page principale ("avant le mode caché")
-    // puis l'état du mode caché lui-même
-    if(!_nav){
-      history.pushState({ jayana: 'playlist' }, ''); // état "page principale"
-      history.pushState({ jayana: 'hiddenPage', dmScreen: 'home' }, '');
-    }
+    if(_rawOpenHP) _rawOpenHP.apply(this, arguments);
+    // pas de push ici
   };
 
-  // Hook pour transitions DM internes
+  // ── Hook pour transitions DM internes (appelé depuis showScreen/dmShowConv) ──
   window._historyPushDM = function(screen){
-    if(_nav) return;
-    history.pushState({ jayana: 'hiddenPage', dmScreen: screen }, '');
+    if(!_busy) push({ type: 'dm', screen: screen });
   };
 
-  // ── Fonctions directes sans pushState (flèche avant) ──
-  var _directOpen = {};
-  ['openQuiz','openGames','openMemoryGame','openPenduGame','openPuzzleGame','openSnakeGame'].forEach(function(fn){
-    _directOpen[fn] = _finals[fn]; // version finale sans notre pushState
-  });
+  // ── Patch closeHiddenPage : push un état 'closed' ──
+  window.closeHiddenPage = function(){
+    if(_rawCloseHP) _rawCloseHP.apply(this, arguments);
+    if(!_busy) push({ type: 'closed' });
+  };
 
-  function goToDMScreen(screen){
-    var hp = document.getElementById('hiddenPage');
-    if(!hp) return;
-    if(!hp.classList.contains('active')){
-      if(window._origOpenHPBase) window._origOpenHPBase();
-      else hp.classList.add('active');
-    }
-    if(screen === 'home' || screen === 'entry'){
-      if(window.showScreenDirect) window.showScreenDirect('home');
-    } else if(screen === 'conv'){
-      if(window.dmShowConvDirect) window.dmShowConvDirect();
-    } else if(screen === 'chat'){
-      if(window.dmOpenMessagingDirect) window.dmOpenMessagingDirect();
-    }
-  }
-
-  function getCurrentDMDepth(){
-    var btn = document.getElementById('dmTopbarBack');
-    var dest = btn ? (btn.dataset.dest || 'close') : 'close';
-    if(dest === 'close') return 1;
-    if(dest === 'logo')  return 2;
-    return 3;
-  }
-
-  function getActiveView(){
-    var order = ['memory','pendu','puzzle','snake','quiz','games'];
-    for(var i=0; i<order.length; i++){
-      var el = document.getElementById(VIEWS[order[i]].el);
-      if(el && el.classList.contains('active')) return order[i];
-    }
-    return null;
-  }
-
+  // ── popstate ──
   window.addEventListener('popstate', function(e){
-    if(_nav) return;
+    if(_busy) return;
     var state = e.state;
+    // Ignorer les états sans notre marqueur (chargement initial, etc.)
+    if(!state || state.jy === undefined) return;
 
-    // ════ RETOUR vers "playlist" (état sentinelle) depuis mode caché ════
-    if(state && state.jayana === 'playlist'){
-      var hp = document.getElementById('hiddenPage');
-      if(hp && hp.classList.contains('active')){
-        _nav = true;
-        if(window.closeHiddenPage) window.closeHiddenPage();
-        setTimeout(function(){ _nav = false; }, 100);
-      }
-      return;
-    }
+    var idx = state.jy;
+    if(idx === _cur) return; // même position, rien à faire
 
-    // ════ MODE CACHÉ ════
-    if(state && state.jayana === 'hiddenPage'){
-      var hp2 = document.getElementById('hiddenPage');
-      var hpActive = hp2 && hp2.classList.contains('active');
-      _nav = true;
-      var targetScreen = state.dmScreen || 'home';
-      var targetDepth = DM_DEPTH[targetScreen] !== undefined ? DM_DEPTH[targetScreen] : 1;
-
-      if(!hpActive){
-        // Flèche AVANT : rouvrir le mode caché
-        if(window._origOpenHPBase) window._origOpenHPBase();
-        else if(hp2) hp2.classList.add('active');
-        setTimeout(function(){ goToDMScreen(targetScreen); _nav = false; }, 80);
-        return;
-      }
-
-      var currentDepth = getCurrentDMDepth();
-      if(targetDepth < currentDepth){
-        if(window.dmHandleBack) window.dmHandleBack(true);
-      } else if(targetDepth > currentDepth){
-        goToDMScreen(targetScreen);
-      }
-      setTimeout(function(){ _nav = false; }, 80);
-      return;
-    }
-
-    // ════ JEUX / QUIZ ════
-    var active = getActiveView();
-
-    // Flèche AVANT vers un jeu/quiz
-    if(state && state.jayana && FN_TO_VIEW[state.jayana]){
-      var viewKey = FN_TO_VIEW[state.jayana];
-      if(active !== viewKey){
-        _nav = true;
-        _directOpen[state.jayana]();
-        setTimeout(function(){ _nav = false; }, 80);
-        return;
-      }
-    }
-
-    if(!active) return;
-
-    // Flèche RETOUR depuis un jeu/quiz
-    _nav = true;
-    if(window[VIEWS[active].close]) window[VIEWS[active].close]();
-
-    if(['memory','pendu','puzzle','snake'].indexOf(active) !== -1){
-      // Repousser l'état "menu jeux" pour que la flèche avant fonctionne ensuite
-      setTimeout(function(){
-        history.pushState({ jayana: 'openGames' }, '');
-        _nav = false;
-      }, 50);
-    } else {
-      setTimeout(function(){ _nav = false; }, 50);
-    }
+    _busy = true;
+    _cur  = idx;
+    applyState(idx);
+    setTimeout(function(){ _busy = false; }, 120);
   });
+
+  // ── État initial : on enregistre "closed" comme base ──
+  _stack.push({ type: 'closed' });
+  _cur = 0;
+  history.replaceState({ jy: 0 }, '');
+
 })();
 (function(){
   var _SG_HASH = 'a586ffe3acf28484d17760d1ddaa2af699666c870aaaa66f8cfc826a528429ce';
@@ -7137,12 +7133,10 @@ loadFavorites();
   }
 
   /* ══ NAVIGATION ══ */
-  function showScreen(name, _fromHistory){
-    // Hide all screens
+  function showScreen(name){
     ['dmHomeScreen','dmChatScreen'].forEach(function(id){
       var el = $(id); if(el) el.style.display = 'none';
     });
-    // Hide identity overlay
     var ov = $('dmIdentityScreen');
     if(ov) ov.style.display = 'none';
 
@@ -7155,13 +7149,10 @@ loadFavorites();
       if(center) center.innerHTML = '';
       if(backBtn){ backBtn.dataset.dest = 'close'; }
       var lbl = $('dmBackLabel'); if(lbl) lbl.textContent = 'Playlist';
-      // Réinitialiser : montrer logo, cacher conv
       var logo = $('dmHomeLogo'), conv = $('dmHomeConv');
       if(logo) logo.style.display = '';
       if(conv) conv.style.display = 'none';
       loadHomePreview();
-      // Pousser un état History pour que le retour fonctionne depuis home
-      if(!_fromHistory && window._historyPushDM) window._historyPushDM('home');
     } else if(name === 'chat'){
       var el = $('dmChatScreen');
       if(el) el.style.display = 'flex';
@@ -7176,18 +7167,15 @@ loadFavorites();
         '</div>';
       if(backBtn){ backBtn.dataset.dest = 'home'; }
       var lbl2 = $('dmBackLabel'); if(lbl2) lbl2.textContent = 'InstaLove';
-      // On entre dans le chat → effacer le badge sur le cadenas
       var lockBadge = document.getElementById('lockUnreadBadge');
       var lockBtn   = document.getElementById('lockNavBtn');
       if(lockBadge) lockBadge.classList.remove('visible');
       if(lockBtn)   lockBtn.classList.remove('has-unread');
-      // Pousser un état History pour que le retour fonctionne depuis le chat
-      if(!_fromHistory && window._historyPushDM) window._historyPushDM('chat');
     }
     updateProfilePill(name);
   }
 
-  window.dmShowConv = function(_fromHistory){
+  window.dmShowConv = function(){
     var logo = document.getElementById('dmHomeLogo');
     var conv = document.getElementById('dmHomeConv');
     if(logo) logo.style.display = 'none';
@@ -7199,11 +7187,22 @@ loadFavorites();
     var lbl = document.getElementById('dmBackLabel');
     if(lbl) lbl.textContent = 'Mode caché';
     loadHomePreview();
-    // Pousser un état History pour le retour depuis l'écran conv intermédiaire
-    if(!_fromHistory && window._historyPushDM) window._historyPushDM('conv');
   };
 
-  window.dmHideConv = function(){
+  // ── Hooks History pour les transitions DM ──
+  // showScreen et dmShowConv appellent _historyPushDM après leur logique UI
+  var _origShowScreen = showScreen;
+  showScreen = function(name){
+    _origShowScreen(name);
+    if(window._historyPushDM) window._historyPushDM(name);
+  };
+  var _origDmShowConv = window.dmShowConv;
+  window.dmShowConv = function(){
+    _origDmShowConv();
+    if(window._historyPushDM) window._historyPushDM('conv');
+  };
+  // Exposer startChat pour applyState
+  window.startChat = startChat;
     var logo = document.getElementById('dmHomeLogo');
     var conv = document.getElementById('dmHomeConv');
     if(logo) logo.style.display = '';
@@ -7215,17 +7214,12 @@ loadFavorites();
   };
 
   /* ══ BOUTON RETOUR ══ */
-  window.dmHandleBack = function(_fromHistory){
+  window.dmHandleBack = function(){
     var btn  = $('dmTopbarBack');
     var dest = btn ? (btn.dataset.dest || 'close') : 'close';
-    if(dest === 'close'){
-      // Si appelé depuis popstate, ne pas fermer directement : laisser le popstate gérer
-      // (l'état sentinelle 'playlist' déclenchera closeHiddenPage)
-      if(!_fromHistory) closeHiddenPage();
-      else history.back(); // remonte d'un cran vers l'état sentinelle 'playlist'
-    }
-    else if(dest === 'logo')  window.dmHideConv(_fromHistory);
-    else                      { stopPoll(); showScreen('home', _fromHistory); }
+    if(dest === 'close')      closeHiddenPage();
+    else if(dest === 'logo')  window.dmHideConv();
+    else                      { stopPoll(); showScreen('home'); }
   };
 
   var identityPickerContext = 'profile'; // 'profile' | 'chat'
@@ -7970,23 +7964,6 @@ loadFavorites();
 
   /* ══ OPEN / CLOSE ══ */
   var _origOpen = window.openHiddenPage;
-
-  // Exposer la fonction de base (ouvre hiddenPage sans pushState) pour la navigation avant
-  window._origOpenHPBase = function(){
-    var hp = document.getElementById('hiddenPage');
-    if(hp) hp.classList.add('active');
-    syncTheme();
-    var fb = document.getElementById('floatingThemeBtn');
-    if(fb){ fb.style.opacity = '0'; fb.style.pointerEvents = 'none'; }
-    var saved = localStorage.getItem('jayana_profile');
-    if(saved === 'girl' || saved === 'boy') identity = saved;
-    attached = false;
-    if(window._dmUpdateVP) window._dmUpdateVP();
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
-  };
-
   window.openHiddenPage = function(){
     if(_origOpen) _origOpen.apply(this, arguments);
     syncTheme();
@@ -7997,26 +7974,9 @@ loadFavorites();
     attached = false;
     showScreen('home');
     if(window._dmUpdateVP) window._dmUpdateVP();
-    // Bloquer le scroll du body
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
-  };
-
-  // ── Fonctions directes (sans pushState) pour la navigation avant du navigateur ──
-  window.showScreenDirect = function(name){
-    showScreen(name, true); // _fromHistory=true → pas de pushState
-  };
-  window.dmShowConvDirect = function(){
-    window.dmShowConv(true); // _fromHistory=true → pas de pushState
-  };
-  window.dmOpenMessagingDirect = function(){
-    var saved = localStorage.getItem('jayana_profile');
-    if(saved === 'girl' || saved === 'boy'){
-      identity = saved;
-      showScreen('chat', true);
-      startChat();
-    }
   };
 
   var _origClose = window.closeHiddenPage;
@@ -8154,7 +8114,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.02.25</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.02.28</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
