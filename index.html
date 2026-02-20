@@ -7182,10 +7182,6 @@ loadFavorites();
     loadHomePreview();
   };
 
-  // ── Exposer sur window pour applyState (History IIFE) ──
-  window.showScreen = function(name){ showScreen(name); };
-  window.startChat  = startChat;
-
   // ── Hooks History : pushState après chaque transition DM ──
   var _origShowScreen = showScreen;
   showScreen = function(name){
@@ -7197,6 +7193,10 @@ loadFavorites();
     _origDmShowConv();
     if(window._historyPushDM) window._historyPushDM('conv');
   };
+
+  // ── Exposer sur window APRÈS le wrapper (pour que applyState utilise la bonne version) ──
+  window.showScreen = function(name){ showScreen(name); };
+  window.startChat  = startChat;
 
   window.dmHideConv = function(){
     var logo = document.getElementById('dmHomeLogo');
@@ -8110,7 +8110,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.02.29</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.03.1</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
