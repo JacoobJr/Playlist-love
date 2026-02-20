@@ -4600,9 +4600,28 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
   };
 
   /* ── Sélection type → modal message ── */
+  // Bêtises qui n'ont pas besoin de message personnalisé
+  var NO_MSG_PRANKS = ['eyes', 'target', 'fog', 'memory', 'colors', 'shake', 'curtain', 'intrus', 'flip', 'splash'];
+
   window.prankSelectType = function(type){
     _selectedType = type;
+    // Fermer le menu
     document.getElementById('prankMenu').classList.remove('show');
+    var scrollY = parseInt(document.body.dataset.scrollY || '0');
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.overflow = '';
+    window.scrollTo(0, scrollY);
+
+    // Bêtises sans message → envoyer directement
+    if(NO_MSG_PRANKS.indexOf(type) !== -1){
+      sendPrankDirect(type);
+      return;
+    }
+
+    // Bêtises avec message → ouvrir le modal
     var def = PRANK_DEFS[type];
     document.getElementById('prankMsgPreview').textContent = def.emoji;
     document.getElementById('prankMsgTitle').textContent   = 'Ton message final 😈';
@@ -4617,8 +4636,34 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     }
     document.getElementById('prankMsgModal').classList.add('show');
   };
+
+  function sendPrankDirect(type){
+    var profile = localStorage.getItem('jayana_profile');
+    if(!profile) return;
+    var victim = profile === 'boy' ? 'girl' : 'boy';
+    var body = { type: type, author: profile, victim: victim, message: '', active: true };
+    fetch(SB_URL+'/rest/v1/'+PRANK_TABLE, {
+      method:'POST', headers: sbHeaders({'Prefer':'return=minimal'}),
+      body: JSON.stringify(body)
+    }).then(function(){
+      var fb = document.createElement('div');
+      fb.className = 'clown-pop'; fb.textContent = '😈 Bêtise envoyée !';
+      fb.style.fontSize = '18px'; fb.style.fontWeight = '700'; fb.style.color = '#e8507a';
+      document.body.appendChild(fb);
+      setTimeout(function(){ fb.remove(); }, 1200);
+    }).catch(function(){ alert('Erreur réseau, réessaie !'); });
+  }
+
   window.closePrankMsg = function(){
     document.getElementById('prankMsgModal').classList.remove('show');
+    // Rouvrir le menu avec scroll bloqué
+    var scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = '-' + scrollY + 'px';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.overflow = 'hidden';
+    document.body.dataset.scrollY = scrollY;
     document.getElementById('prankMenu').classList.add('show');
   };
 
@@ -4814,18 +4859,18 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
 
   function kbShowHints(){
     _kbHintActive = true;
-    var hintIdx = 0;
-    var wordLetters = _kbWord.split('').filter(function(c,i,arr){ return arr.indexOf(c)===i; }); // lettres uniques
+    // Toutes les bonnes touches du mot clignotent ensemble en boucle
+    var wordLetters = _kbWord.split('').filter(function(c,i,arr){ return arr.indexOf(c)===i; });
+    var visible = true;
     _kbHintInterval = setInterval(function(){
-      // Retirer l'ancienne surbrillance
-      document.querySelectorAll('.pkb-key.hint').forEach(function(k){ k.classList.remove('hint'); });
-      var letter = wordLetters[hintIdx % wordLetters.length];
-      // Trouver la touche correspondante et la faire briller
+      visible = !visible;
       document.querySelectorAll('.pkb-key').forEach(function(k){
-        if(k.dataset.real === letter) k.classList.add('hint');
+        if(wordLetters.indexOf(k.dataset.real) !== -1){
+          if(visible) k.classList.add('hint');
+          else k.classList.remove('hint');
+        }
       });
-      hintIdx++;
-    }, 1200);
+    }, 600);
   }
 
   function kbPress(letter){
@@ -4835,17 +4880,31 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     document.querySelectorAll('.pkb-key.hint').forEach(function(k){ k.classList.remove('hint'); });
     _kbHintTimer = setTimeout(kbShowHints, 8000);
     _kbTyped += letter;
-    document.getElementById('pkbTyped').textContent = _kbTyped;
+    var el = document.getElementById('pkbTyped');
+    el.textContent = _kbTyped;
+    el.style.color = '';
+    document.getElementById('pkbErr').textContent = '';
+    // Vérifier lettre par lettre si on a atteint la longueur du mot
     if(_kbTyped.length === _kbWord.length){
       if(_kbTyped === _kbWord){
         clearTimeout(_kbHintTimer); clearInterval(_kbHintInterval);
         document.getElementById('prankKeyboard').classList.remove('show');
         prankDone();
       } else {
-        var el = document.getElementById('pkbTyped');
+        // Trouver la première lettre fausse et effacer à partir de là
+        var firstBad = -1;
+        for(var i=0; i<_kbTyped.length; i++){
+          if(_kbTyped[i] !== _kbWord[i]){ firstBad = i; break; }
+        }
         el.style.color = '#e05555';
-        document.getElementById('pkbErr').textContent = '❌ Raté ! Recommence…';
-        setTimeout(function(){ _kbTyped=''; el.textContent=''; el.style.color=''; document.getElementById('pkbErr').textContent=''; }, 800);
+        document.getElementById('pkbErr').textContent = '❌ Lettre '+(firstBad+1)+' incorrecte !';
+        // Effacer seulement à partir de la mauvaise lettre
+        setTimeout(function(){
+          _kbTyped = _kbTyped.slice(0, firstBad);
+          el.textContent = _kbTyped;
+          el.style.color = '';
+          document.getElementById('pkbErr').textContent = '';
+        }, 700);
       }
     }
   }
@@ -4989,7 +5048,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
 
   function showNextEyePair(overlay){
     var idx = _eyesPairs.length;
-    if(idx >= 3){ return; } // ne pas créer plus de 3
+    if(idx >= 4){ return; } // ne pas créer plus de 4
     var pos = randomEyePos(_eyesPairs.map(function(p){ return {x:parseInt(p.el.style.left),y:parseInt(p.el.style.top)}; }));
     var pair = createEyePair(idx, pos.x, pos.y);
     // Apparition en fondu
@@ -5056,7 +5115,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
   }
 
   function startEyePair(idx){
-    if(idx >= 3){ eyesDone(); return; }
+    if(idx >= 4){ eyesDone(); return; }
     var pair = _eyesPairs[idx];
     var rings = pair.el.querySelectorAll('.prank-eye-ring');
     rings.forEach(function(r){ r.classList.add('active'); });
@@ -5076,7 +5135,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
         setTimeout(function(){
           pair.el.remove();
           var overlay = document.getElementById('prankEyesOverlay');
-          if(idx + 1 < 3){
+          if(idx + 1 < 4){
             showNextEyePair(overlay);
           } else {
             eyesDone();
@@ -9749,7 +9808,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.05.9</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.1</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
