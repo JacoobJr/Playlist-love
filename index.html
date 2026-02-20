@@ -4374,11 +4374,25 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     var el = document.getElementById('prankVictimName');
     if(el) el.textContent = victim;
     document.getElementById('prankMenu').classList.add('show');
+    // Bloquer le scroll body (iOS compatible)
+    var scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = '-' + scrollY + 'px';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
     document.body.style.overflow = 'hidden';
+    document.body.dataset.scrollY = scrollY;
   };
   window.closePrankMenu = function(){
     document.getElementById('prankMenu').classList.remove('show');
+    // Restaurer le scroll à la position d'avant
+    var scrollY = parseInt(document.body.dataset.scrollY || '0');
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
     document.body.style.overflow = '';
+    window.scrollTo(0, scrollY);
   };
 
   /* ── Annuler toutes les bêtises en attente ── */
@@ -4398,7 +4412,13 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
       setTimeout(function(){
         if(btn) btn.textContent = '🗑️ Annuler toutes mes bêtises en attente';
         document.getElementById('prankMenu').classList.remove('show');
+        var scrollY = parseInt(document.body.dataset.scrollY || '0');
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
         document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
       }, 1200);
     }).catch(function(){
       if(btn) btn.textContent = '🗑️ Annuler toutes mes bêtises en attente';
@@ -9095,7 +9115,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.05.2</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.04.2</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
