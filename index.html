@@ -6159,48 +6159,38 @@ function filterSongs(q){
 })();
 
 // ══════════════════════════════════════════════════════════════════
-//  NAVIGATION NAVIGATEUR — retour & avant (iOS Chrome)
+//  NAVIGATION NAVIGATEUR — boutons retour & avant (iOS Chrome)
 //
-//  Principe : on maintient une PILE JS (_stack) en parallèle de
-//  l'historique du navigateur. Chaque entrée de la pile correspond
-//  à un état pushState. Le popstate lit l'index dans l'état pour
-//  savoir vers quel écran aller — sans jamais deviner la direction.
+//  Même principe que jeux/quiz : on patch chaque fonction open/close
+//  pour push/pop dans l'historique. Une pile JS (_stack) garde la
+//  correspondance index → état visuel exact.
 //
-//  Structure d'un état : { jy: <index dans _stack> }
-//  _stack[index] : { type, view/screen }
-//
-//  Types :
-//    'games'   → view = 'quiz'|'games'|'memory'|'pendu'|'puzzle'|'snake'
-//    'dm'      → screen = 'home'|'conv'|'chat'
-//    'closed'  → page principale (aucun overlay)
+//  Mode caché : flèche avant IMPOSSIBLE depuis playlist (closeHiddenPage
+//  pousse un état 'closed' qui tronque la pile → pas d'état DM devant).
 // ══════════════════════════════════════════════════════════════════
 (function(){
-  var _busy  = false;    // anti-boucle
-  var _stack = [];       // pile des états
-  var _cur   = -1;       // index courant dans _stack
+  var _busy = false;
+  var _stack = [];
+  var _cur   = -1;
 
-  // ── Éléments et vues ──
+  // ─── Définition des vues ───────────────────────────────────────
+  // jeux/quiz
   var GAME_VIEWS = {
-    quiz:   { el: 'quizView',   open: 'openQuiz',       close: 'closeQuiz'      },
-    games:  { el: 'gamesView',  open: 'openGames',      close: 'closeGames'     },
-    memory: { el: 'memoryView', open: 'openMemoryGame', close: 'closeMemoryGame'},
-    pendu:  { el: 'penduView',  open: 'openPenduGame',  close: 'closePenduGame' },
-    puzzle: { el: 'puzzleView', open: 'openPuzzleGame', close: 'closePuzzleGame'},
-    snake:  { el: 'snakeView',  open: 'openSnakeGame',  close: 'closeSnakeGame' },
+    quiz:   { el:'quizView',   open:'openQuiz',       close:'closeQuiz'       },
+    games:  { el:'gamesView',  open:'openGames',      close:'closeGames'      },
+    memory: { el:'memoryView', open:'openMemoryGame', close:'closeMemoryGame' },
+    pendu:  { el:'penduView',  open:'openPenduGame',  close:'closePenduGame'  },
+    puzzle: { el:'puzzleView', open:'openPuzzleGame', close:'closePuzzleGame' },
+    snake:  { el:'snakeView',  open:'openSnakeGame',  close:'closeSnakeGame'  },
   };
-  var FN_TO_VIEW = {
-    openQuiz:'quiz', openGames:'games',
-    openMemoryGame:'memory', openPenduGame:'pendu',
-    openPuzzleGame:'puzzle', openSnakeGame:'snake'
+  // mode caché — 3 sous-écrans
+  var DM_SCREENS = {
+    home: { open:'_dmOpenHome', close:'_dmCloseHome' },
+    conv: { open:'_dmOpenConv', close:'_dmCloseConv' },
+    chat: { open:'_dmOpenChat', close:'_dmCloseChat' },
   };
 
-  // ── Capture les versions finales des open* jeux (avant notre re-patch) ──
-  var _rawOpen = {};
-  Object.keys(GAME_VIEWS).forEach(function(k){
-    _rawOpen[k] = window[GAME_VIEWS[k].open];
-  });
-
-  // ── push un état dans la pile et dans History ──
+  // ─── pile ──────────────────────────────────────────────────────
   function push(entry){
     _stack = _stack.slice(0, _cur + 1);
     _stack.push(entry);
@@ -6208,13 +6198,13 @@ function filterSongs(q){
     history.pushState({ jy: _cur }, '');
   }
 
-  // ── Restaurer l'état visuel correspondant à _stack[idx] ──
-  // Appelé depuis popstate — _busy=true donc aucun push parasite
+  // ─── restaurer l'état visuel (appelé depuis popstate, _busy=true) ───
   function applyState(idx){
     if(idx < 0 || idx >= _stack.length) return;
-    var entry = _stack[idx];
+    var e = _stack[idx];
 
-    if(entry.type === 'closed'){
+    if(e.type === 'closed'){
+      // Fermer tout ce qui est ouvert
       var hp = document.getElementById('hiddenPage');
       if(hp && hp.classList.contains('active') && window.closeHiddenPage)
         window.closeHiddenPage();
@@ -6224,90 +6214,103 @@ function filterSongs(q){
           window[GAME_VIEWS[k].close]();
       });
 
-    } else if(entry.type === 'games'){
-      var v = entry.view;
-      // Fermer les vues qui ne doivent pas être visibles
+    } else if(e.type === 'game'){
+      var v = e.view;
       Object.keys(GAME_VIEWS).forEach(function(k){
-        // Garder gamesView si on affiche un jeu enfant
-        if(k === 'games' && ['memory','pendu','puzzle','snake'].indexOf(v) !== -1) return;
         if(k === v) return;
+        if(k === 'games' && ['memory','pendu','puzzle','snake'].indexOf(v) !== -1) return;
         var el = document.getElementById(GAME_VIEWS[k].el);
         if(el && el.classList.contains('active') && window[GAME_VIEWS[k].close])
           window[GAME_VIEWS[k].close]();
       });
-      // Ouvrir la vue cible si pas encore active
-      var targetEl = document.getElementById(GAME_VIEWS[v].el);
-      if(!targetEl || !targetEl.classList.contains('active')){
-        if(_rawOpen[v]) _rawOpen[v]();
-      }
+      var tel = document.getElementById(GAME_VIEWS[v].el);
+      if(!tel || !tel.classList.contains('active'))
+        if(window[GAME_VIEWS[v].open]) window[GAME_VIEWS[v].open]();
 
-    } else if(entry.type === 'dm'){
+    } else if(e.type === 'dm'){
+      var s = e.screen;
+      // Ouvrir hiddenPage si fermé (version brute, sans push)
       var hp2 = document.getElementById('hiddenPage');
-      var scr  = entry.screen;
-      // Si hiddenPage fermé : ouvrir via window.openHiddenPage (version finale complète)
-      // Ça appellera showScreen('home') qui appellera _historyPushDM — mais _busy=true → pas de push
-      if(!hp2 || !hp2.classList.contains('active')){
-        if(window.openHiddenPage) window.openHiddenPage();
-        // openHiddenPage affiche toujours 'home', si on veut 'conv' ou 'chat' on continue
-      }
-      // Naviguer vers le bon sous-écran
-      if(scr === 'conv'){
-        if(window.dmShowConv) window.dmShowConv();
-      } else if(scr === 'chat'){
-        var saved = localStorage.getItem('jayana_profile');
-        if((saved === 'girl' || saved === 'boy') && window.showScreen){
-          window.showScreen('chat');
-          if(window.startChat) window.startChat();
-        }
-      }
-      // scr === 'home' : openHiddenPage a déjà affiché home
+      if(!hp2 || !hp2.classList.contains('active'))
+        if(window._dmRawOpen) window._dmRawOpen();
+      // Afficher le bon sous-écran (fonctions brutes, sans push)
+      if(s === 'home')      { if(window._dmRawShowHome) window._dmRawShowHome(); }
+      else if(s === 'conv') { if(window._dmRawShowHome) window._dmRawShowHome(); if(window._dmRawShowConv) window._dmRawShowConv(); }
+      else if(s === 'chat') { if(window._dmRawShowHome) window._dmRawShowHome(); if(window._dmRawShowChat) window._dmRawShowChat(); }
     }
   }
 
-  // ── Patch open* jeux/quiz : ajouter pushState après l'ouverture ──
+  // ─── Patch jeux/quiz (identique à avant) ───────────────────────
+  // Capturer les versions finales AVANT notre re-patch
+  var _rawGameOpen = {};
   Object.keys(GAME_VIEWS).forEach(function(k){
+    _rawGameOpen[k] = window[GAME_VIEWS[k].open];
+  });
+  Object.keys(GAME_VIEWS).forEach(function(k){
+    var raw = _rawGameOpen[k];
     var fn  = GAME_VIEWS[k].open;
-    var raw = _rawOpen[k];
     window[fn] = function(){
       raw.apply(this, arguments);
-      if(!_busy) push({ type: 'games', view: k });
+      if(!_busy) push({ type:'game', view:k });
     };
   });
 
-  // ── _historyPushDM : hook appelé par showScreen et dmShowConv ──
-  window._historyPushDM = function(screen){
-    if(!_busy) push({ type: 'dm', screen: screen });
-  };
+  // ─── Patch mode caché ──────────────────────────────────────────
+  // Les fonctions _dmRaw* seront définies par le DM IIFE (plus bas).
+  // On patche openHiddenPage, dmShowConv, showScreen('chat'), closeHiddenPage
+  // APRÈS que le DM IIFE les aura définies — via un setTimeout(0) pour
+  // s'exécuter après tous les scripts de la page.
+  setTimeout(function(){
 
-  // ── Patch closeHiddenPage : push 'closed' pour bloquer la flèche avant ──
-  var _rawCloseHP = window.closeHiddenPage;
-  window.closeHiddenPage = function(){
-    if(_rawCloseHP) _rawCloseHP.apply(this, arguments);
-    if(!_busy) push({ type: 'closed' });
-  };
-  // Note : openHiddenPage n'est PAS patché ici.
-  // Le push 'dm' est déclenché par showScreen via _historyPushDM (dans le DM IIFE).
+    // ── openHiddenPage → push dm:home ──
+    var rawOpenHP = window.openHiddenPage;
+    window.openHiddenPage = function(){
+      if(rawOpenHP) rawOpenHP.apply(this, arguments);
+      if(!_busy) push({ type:'dm', screen:'home' });
+    };
 
-  // ── popstate ──
+    // ── dmShowConv → push dm:conv ──
+    var rawDmShowConv = window.dmShowConv;
+    window.dmShowConv = function(){
+      if(rawDmShowConv) rawDmShowConv.apply(this, arguments);
+      if(!_busy) push({ type:'dm', screen:'conv' });
+    };
+
+    // ── dmOpenMessaging (ouverture du chat) → push dm:chat ──
+    var rawDmOpenMessaging = window.dmOpenMessaging;
+    window.dmOpenMessaging = function(){
+      if(rawDmOpenMessaging) rawDmOpenMessaging.apply(this, arguments);
+      if(!_busy) push({ type:'dm', screen:'chat' });
+    };
+
+    // ── closeHiddenPage → push closed (bloque flèche avant) ──
+    var rawCloseHP = window.closeHiddenPage;
+    window.closeHiddenPage = function(){
+      if(rawCloseHP) rawCloseHP.apply(this, arguments);
+      if(!_busy) push({ type:'closed' });
+    };
+    // Exposer la version brute pour applyState (fermeture sans push)
+    window._dmRawClose = rawCloseHP;
+
+  }, 0);
+
+  // ─── popstate ──────────────────────────────────────────────────
   window.addEventListener('popstate', function(e){
     if(_busy) return;
     var state = e.state;
-    // Ignorer les états sans notre marqueur (chargement initial, etc.)
     if(!state || state.jy === undefined) return;
-
     var idx = state.jy;
-    if(idx === _cur) return; // même position, rien à faire
-
+    if(idx === _cur) return;
     _busy = true;
     _cur  = idx;
     applyState(idx);
-    setTimeout(function(){ _busy = false; }, 120);
+    setTimeout(function(){ _busy = false; }, 150);
   });
 
-  // ── État initial : on enregistre "closed" comme base ──
-  _stack.push({ type: 'closed' });
+  // ─── État initial ───────────────────────────────────────────────
+  _stack.push({ type:'closed' });
   _cur = 0;
-  history.replaceState({ jy: 0 }, '');
+  history.replaceState({ jy:0 }, '');
 
 })();
 (function(){
@@ -7182,22 +7185,6 @@ loadFavorites();
     loadHomePreview();
   };
 
-  // ── Hooks History : pushState après chaque transition DM ──
-  var _origShowScreen = showScreen;
-  showScreen = function(name){
-    _origShowScreen(name);
-    if(window._historyPushDM) window._historyPushDM(name);
-  };
-  var _origDmShowConv = window.dmShowConv;
-  window.dmShowConv = function(){
-    _origDmShowConv();
-    if(window._historyPushDM) window._historyPushDM('conv');
-  };
-
-  // ── Exposer sur window APRÈS le wrapper (pour que applyState utilise la bonne version) ──
-  window.showScreen = function(name){ showScreen(name); };
-  window.startChat  = startChat;
-
   window.dmHideConv = function(){
     var logo = document.getElementById('dmHomeLogo');
     var conv = document.getElementById('dmHomeConv');
@@ -7988,6 +7975,44 @@ loadFavorites();
     if(_origClose) _origClose.apply(this, arguments);
   };
 
+  // ── Fonctions brutes exposées pour applyState (History IIFE) ──
+  // Ces versions font le travail visuel SANS pousser dans l'historique.
+  window._dmRawOpen = function(){
+    // Ouvre hiddenPage + setup de base, sans push
+    var hp = document.getElementById('hiddenPage');
+    if(hp) hp.classList.add('active');
+    syncTheme();
+    var fb = document.getElementById('floatingThemeBtn');
+    if(fb){ fb.style.opacity = '0'; fb.style.pointerEvents = 'none'; }
+    var saved = localStorage.getItem('jayana_profile');
+    if(saved === 'girl' || saved === 'boy') identity = saved;
+    attached = false;
+    if(window._dmUpdateVP) window._dmUpdateVP();
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+  };
+  window._dmRawShowHome = function(){ showScreen('home'); };
+  window._dmRawShowConv = function(){
+    var logo = document.getElementById('dmHomeLogo');
+    var conv = document.getElementById('dmHomeConv');
+    if(logo) logo.style.display = 'none';
+    if(conv) conv.style.display = 'flex';
+    var btn = document.getElementById('dmTopbarBack');
+    if(btn) btn.dataset.dest = 'logo';
+    var lbl = document.getElementById('dmBackLabel');
+    if(lbl) lbl.textContent = 'Mode caché';
+    loadHomePreview();
+  };
+  window._dmRawShowChat = function(){
+    var saved = localStorage.getItem('jayana_profile');
+    if(saved === 'girl' || saved === 'boy'){
+      identity = saved;
+      showScreen('chat');
+      startChat();
+    }
+  };
+
 })();
 </script>
 
@@ -8110,7 +8135,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.03.1</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.03.2</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
