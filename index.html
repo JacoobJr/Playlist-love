@@ -4242,13 +4242,17 @@ buildStack();
   function checkUnread(){
     // Ne pas vérifier si InstaLove est ouvert (il gère lui-même)
     if(document.getElementById('hiddenPage').classList.contains('active')) return;
-    fetch(SB_URL + '/rest/v1/messages?order=created_at.desc&limit=50', {
+    var profile = localStorage.getItem('jayana_profile');
+    if(!profile) return; // pas connecté, rien à vérifier
+    var other = profile === 'girl' ? 'boy' : 'girl';
+    // Récupérer les messages non lus envoyés par l'autre
+    fetch(SB_URL + '/rest/v1/dm_messages?sender=eq.' + other + '&seen=eq.false&order=created_at.desc&limit=99', {
       headers: sbHeaders()
     })
     .then(function(r){ return r.json(); })
     .then(function(rows){
       if(!Array.isArray(rows)) return;
-      var unread = rows.filter(function(m){ return !m.seen; }).length;
+      var unread = rows.length;
       var lockBtn   = document.getElementById('lockNavBtn');
       var lockBadge = document.getElementById('lockUnreadBadge');
       if(!lockBtn || !lockBadge) return;
@@ -4263,6 +4267,7 @@ buildStack();
     })
     .catch(function(){});
   }
+  window._checkUnread = checkUnread;
   checkUnread(); // Vérification immédiate au chargement
   setInterval(checkUnread, 30000); // Puis toutes les 30 secondes
 })();
@@ -6570,6 +6575,7 @@ loadFavorites();
   window._profileSave = save;
   window._profileApply = function(g){ apply(g); };
   window._profileLoadMoods = function(){ loadMoods(); };
+  window._profileCheckUnread = function(){ if(window._checkUnread) window._checkUnread(); };
 
   // ── Humeur Supabase ──
   function getTodayStr(){
@@ -6843,6 +6849,7 @@ loadFavorites();
       save(gender);
       apply(gender);
       loadMoods();
+      if(window._checkUnread) window._checkUnread();
     });
   };
 
