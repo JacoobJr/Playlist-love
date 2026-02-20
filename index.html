@@ -2365,9 +2365,6 @@ body.anniv-mode .counter-block-top {
 <div id="floatingThemeBtn" title="Changer le thème">🌙 Thème</div>
 
 <header style="position:relative;">
-  <div id="previewBtn" onclick="previewTrigger()" title="Aperçu 30s">
-    <span class="pbdot"></span> Aperçu
-  </div>
 
   <!-- Système double avatar profil + humeur -->
   <div id="profileAvatarWrap">
@@ -2550,39 +2547,6 @@ async function nativeLogout(){
 .sp-song.playing .sp-heart:hover { opacity: 0.9; }
 .sp-heart.heart-girl { opacity: 1 !important; color: #e879a0; }
 .sp-heart.heart-boy  { opacity: 1 !important; color: #5b9cf6; }
-
-#previewBtn {
-  position: absolute;
-  top: 14px; right: 16px;
-  display: flex; align-items: center; gap: 4px;
-  padding: 3px 8px;
-  border-radius: 20px;
-  background: transparent;
-  border: 1px solid color-mix(in srgb, var(--green) 18%, transparent);
-  color: var(--muted);
-  font-size: 8px; font-weight: 600;
-  letter-spacing: 0.8px; text-transform: uppercase;
-  cursor: pointer; user-select: none;
-  opacity: 0.65;
-  transition: opacity 0.2s, background 0.15s, color 0.15s, border-color 0.15s;
-  z-index: 10;
-}
-#previewBtn:hover {
-  opacity: 1;
-  background: color-mix(in srgb, var(--green) 10%, transparent);
-  border-color: color-mix(in srgb, var(--green) 40%, transparent);
-  color: var(--green);
-}
-#previewBtn.running {
-  background: rgba(220,30,60,0.12);
-  border-color: rgba(220,30,60,0.35);
-  color: #e03060;
-}
-#previewBtn .pbdot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: currentColor;
-  animation: blink 1s ease-in-out infinite;
-}
 
 /* ── Avatar Profil ── */
 /* ── Double avatar profil ── */
@@ -3030,9 +2994,6 @@ body.light #counterBlock.glowing .c-num-big {
   var storyHeart   = document.getElementById('storyHeart');
 
   function applyState() {
-    // Ne pas interrompre un preview en cours
-    if (typeof previewTimeout !== 'undefined' && previewTimeout) return;
-
     if (isInVideoWindow()) {
       // Cacher la timeline, montrer la vidéo en boucle
       tlContent.style.display  = 'none';
@@ -3055,55 +3016,6 @@ body.light #counterBlock.glowing .c-num-big {
       if (storyHeart) storyHeart.style.display = 'none';
     }
   }
-
-  // ── Bouton preview 30s ────────────────────────────────────────────────────
-  var previewTimeout = null;
-  var previewTick    = null;
-  var previewSecsLeft = 0;
-
-  window.previewTrigger = function() {
-    var btn = document.getElementById('previewBtn');
-    if (previewTimeout) {
-      // Annuler
-      clearTimeout(previewTimeout);
-      clearInterval(previewTick);
-      previewTimeout = null;
-      previewTick    = null;
-      previewSecsLeft = 0;
-      btn.classList.remove('running');
-      btn.innerHTML = '<span class="pbdot"></span> Aperçu';
-      applyState();
-      return;
-    }
-    // Forcer l'activation
-    tlContent.style.display = 'none';
-    videoWrap.style.display = 'block';
-    video.play().catch(function(){});
-    counterBlock.classList.add('glowing');
-    if (storyHeart) storyHeart.style.display = 'block';
-    btn.classList.add('running');
-
-    // Countdown visuel dans le bouton — seconde par seconde
-    previewSecsLeft = 30;
-    btn.innerHTML = '<span class="pbdot"></span> ' + previewSecsLeft + 's';
-    previewTick = setInterval(function(){
-      previewSecsLeft--;
-      if (previewSecsLeft > 0) {
-        btn.innerHTML = '<span class="pbdot"></span> ' + previewSecsLeft + 's';
-      }
-    }, 1000);
-
-    // Fin exacte après 30 000ms
-    previewTimeout = setTimeout(function(){
-      clearInterval(previewTick);
-      previewTimeout  = null;
-      previewTick     = null;
-      previewSecsLeft = 0;
-      btn.classList.remove('running');
-      btn.innerHTML = '<span class="pbdot"></span> Aperçu';
-      applyState();
-    }, 30000);
-  };
 
   // Appliquer immédiatement au chargement
   applyState();
