@@ -2411,7 +2411,7 @@ body.anniv-mode .counter-block-top {
     <div class="mood-picker-label">Comment tu te sens ?</div>
     <div class="mood-picker-grid" id="moodPickerGrid"></div>
     <div id="moodPickerDesc"></div>
-    <div class="mood-picker-cancel" onclick="closeMoodPicker()">Annuler</div>
+    <div class="mood-picker-cancel" onclick="closeMoodPicker()">Fermer</div>
   </div>
 
   <div class="hdr-tag">Playlist</div>
@@ -6887,7 +6887,14 @@ loadFavorites();
         updateMoodBadge('self', emoji);
         var ppIcon = document.getElementById('ppMoodIcon');
         if(ppIcon) ppIcon.textContent = emoji;
-        closeMoodPicker();
+        // Mettre à jour la sélection visuelle
+        grid.querySelectorAll('.mood-emoji-btn').forEach(function(b){ b.classList.remove('selected'); });
+        btn.classList.add('selected');
+        // Mettre à jour la description
+        if(descEl) descEl.textContent = moodLabels[emoji] || '';
+        // Afficher le bouton effacer
+        var cb = picker.querySelector('.mood-clear-btn');
+        if(cb) cb.style.display = 'flex';
       };
       grid.appendChild(btn);
     });
@@ -6918,12 +6925,31 @@ loadFavorites();
     if(descEl2) descEl2.after(clearBtn);
     else grid.after(clearBtn);
     picker.classList.add('open');
+    picker.onclick = function(ev){ ev.stopPropagation(); };
   };
 
   window.closeMoodPicker = function(){
     var picker = document.getElementById('moodPicker');
     if(picker) picker.classList.remove('open');
+    document.removeEventListener('click', window._moodPickerOutsideClick);
   };
+
+  // Fermeture au clic extérieur
+  window._moodPickerOutsideClick = function(ev){
+    var picker = document.getElementById('moodPicker');
+    if(picker && picker.classList.contains('open') && !picker.contains(ev.target)){
+      window.closeMoodPicker();
+    }
+  };
+
+  // Empêcher la propagation des clics à l'intérieur du picker
+  document.addEventListener('click', function(ev){
+    var picker = document.getElementById('moodPicker');
+    if(picker && picker.contains(ev.target)) return;
+    if(picker && picker.classList.contains('open')){
+      window.closeMoodPicker();
+    }
+  });
 
   // Modal de code profil
   window.showProfileCodeModal = function showProfileCodeModal(gender, onSuccess){
