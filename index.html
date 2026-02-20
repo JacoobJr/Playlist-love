@@ -6194,34 +6194,30 @@ function filterSongs(q){
     openPuzzleGame:'puzzle', openSnakeGame:'snake'
   };
 
-  // ── Capture les versions finales des open* (après tous patches précédents) ──
+  // ── Capture les versions finales des open* jeux (avant notre re-patch) ──
   var _rawOpen = {};
   Object.keys(GAME_VIEWS).forEach(function(k){
     _rawOpen[k] = window[GAME_VIEWS[k].open];
   });
-  var _rawCloseHP  = window.closeHiddenPage;
-  var _rawOpenHP   = window.openHiddenPage;
 
   // ── push un état dans la pile et dans History ──
   function push(entry){
-    // Tronquer la pile si on est pas au bout (navigation avant existante effacée)
     _stack = _stack.slice(0, _cur + 1);
     _stack.push(entry);
     _cur = _stack.length - 1;
     history.pushState({ jy: _cur }, '');
   }
 
-  // ── Aller à l'état d'index idx sans toucher à History ──
+  // ── Restaurer l'état visuel correspondant à _stack[idx] ──
+  // Appelé depuis popstate — _busy=true donc aucun push parasite
   function applyState(idx){
     if(idx < 0 || idx >= _stack.length) return;
     var entry = _stack[idx];
 
     if(entry.type === 'closed'){
-      // Fermer tout
       var hp = document.getElementById('hiddenPage');
-      if(hp && hp.classList.contains('active')){
-        if(window.closeHiddenPage) window.closeHiddenPage();
-      }
+      if(hp && hp.classList.contains('active') && window.closeHiddenPage)
+        window.closeHiddenPage();
       Object.keys(GAME_VIEWS).forEach(function(k){
         var el = document.getElementById(GAME_VIEWS[k].el);
         if(el && el.classList.contains('active') && window[GAME_VIEWS[k].close])
@@ -6230,15 +6226,16 @@ function filterSongs(q){
 
     } else if(entry.type === 'games'){
       var v = entry.view;
-      // Fermer les autres vues de jeux sauf games (qui doit rester ouvert pour memory/pendu/etc.)
+      // Fermer les vues qui ne doivent pas être visibles
       Object.keys(GAME_VIEWS).forEach(function(k){
+        // Garder gamesView si on affiche un jeu enfant
+        if(k === 'games' && ['memory','pendu','puzzle','snake'].indexOf(v) !== -1) return;
         if(k === v) return;
-        if(k === 'games' && ['memory','pendu','puzzle','snake'].indexOf(v) !== -1) return; // garder gamesView ouvert
         var el = document.getElementById(GAME_VIEWS[k].el);
         if(el && el.classList.contains('active') && window[GAME_VIEWS[k].close])
           window[GAME_VIEWS[k].close]();
       });
-      // S'assurer que la cible est ouverte
+      // Ouvrir la vue cible si pas encore active
       var targetEl = document.getElementById(GAME_VIEWS[v].el);
       if(!targetEl || !targetEl.classList.contains('active')){
         if(_rawOpen[v]) _rawOpen[v]();
@@ -6246,30 +6243,30 @@ function filterSongs(q){
 
     } else if(entry.type === 'dm'){
       var hp2 = document.getElementById('hiddenPage');
-      var scr = entry.screen;
-      // Ouvrir hiddenPage si pas actif
+      var scr  = entry.screen;
+      // Si hiddenPage fermé : ouvrir via window.openHiddenPage (version finale complète)
+      // Ça appellera showScreen('home') qui appellera _historyPushDM — mais _busy=true → pas de push
       if(!hp2 || !hp2.classList.contains('active')){
-        if(_rawOpenHP) _rawOpenHP();
+        if(window.openHiddenPage) window.openHiddenPage();
+        // openHiddenPage affiche toujours 'home', si on veut 'conv' ou 'chat' on continue
       }
-      // Naviguer vers le bon écran DM
-      if(scr === 'home'){
-        if(window.showScreen) window.showScreen('home');
-      } else if(scr === 'conv'){
-        if(window.showScreen) window.showScreen('home');   // reset d'abord
+      // Naviguer vers le bon sous-écran
+      if(scr === 'conv'){
         if(window.dmShowConv) window.dmShowConv();
       } else if(scr === 'chat'){
         var saved = localStorage.getItem('jayana_profile');
-        if(saved === 'girl' || saved === 'boy'){
-          if(window.showScreen) window.showScreen('chat');
-          if(window.startChat)  window.startChat();
+        if((saved === 'girl' || saved === 'boy') && window.showScreen){
+          window.showScreen('chat');
+          if(window.startChat) window.startChat();
         }
       }
+      // scr === 'home' : openHiddenPage a déjà affiché home
     }
   }
 
-  // ── Patch open* jeux/quiz ──
+  // ── Patch open* jeux/quiz : ajouter pushState après l'ouverture ──
   Object.keys(GAME_VIEWS).forEach(function(k){
-    var fn = GAME_VIEWS[k].open;
+    var fn  = GAME_VIEWS[k].open;
     var raw = _rawOpen[k];
     window[fn] = function(){
       raw.apply(this, arguments);
@@ -6277,23 +6274,19 @@ function filterSongs(q){
     };
   });
 
-  // ── Patch openHiddenPage ──
-  // On ne pousse PAS ici : showScreen('home') appelé dans le DM IIFE le fera via _historyPushDM
-  window.openHiddenPage = function(){
-    if(_rawOpenHP) _rawOpenHP.apply(this, arguments);
-    // pas de push ici
-  };
-
-  // ── Hook pour transitions DM internes (appelé depuis showScreen/dmShowConv) ──
+  // ── _historyPushDM : hook appelé par showScreen et dmShowConv ──
   window._historyPushDM = function(screen){
     if(!_busy) push({ type: 'dm', screen: screen });
   };
 
-  // ── Patch closeHiddenPage : push un état 'closed' ──
+  // ── Patch closeHiddenPage : push 'closed' pour bloquer la flèche avant ──
+  var _rawCloseHP = window.closeHiddenPage;
   window.closeHiddenPage = function(){
     if(_rawCloseHP) _rawCloseHP.apply(this, arguments);
     if(!_busy) push({ type: 'closed' });
   };
+  // Note : openHiddenPage n'est PAS patché ici.
+  // Le push 'dm' est déclenché par showScreen via _historyPushDM (dans le DM IIFE).
 
   // ── popstate ──
   window.addEventListener('popstate', function(e){
@@ -7189,8 +7182,11 @@ loadFavorites();
     loadHomePreview();
   };
 
-  // ── Hooks History pour les transitions DM ──
-  // showScreen et dmShowConv appellent _historyPushDM après leur logique UI
+  // ── Exposer sur window pour applyState (History IIFE) ──
+  window.showScreen = function(name){ showScreen(name); };
+  window.startChat  = startChat;
+
+  // ── Hooks History : pushState après chaque transition DM ──
   var _origShowScreen = showScreen;
   showScreen = function(name){
     _origShowScreen(name);
@@ -7201,10 +7197,9 @@ loadFavorites();
     _origDmShowConv();
     if(window._historyPushDM) window._historyPushDM('conv');
   };
-  // Exposer startChat pour applyState
-  window.startChat = startChat;
 
   window.dmHideConv = function(){
+    var logo = document.getElementById('dmHomeLogo');
     var conv = document.getElementById('dmHomeConv');
     if(logo) logo.style.display = '';
     if(conv) conv.style.display = 'none';
@@ -8115,7 +8110,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.02.25</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.02.29</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
