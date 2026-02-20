@@ -6283,13 +6283,27 @@ function filterSongs(q){
       if(!_busy) push({ type:'dm', screen:'chat' });
     };
 
-    // ── closeHiddenPage → push closed (bloque flèche avant) ──
+    // ── closeHiddenPage → efface tous les états DM de la pile ──
+    // On ne pousse PAS un nouvel état : on REMPLACE l'état courant
+    // par 'closed' ET on tronque la pile JS. Ainsi le navigateur
+    // n'a plus aucun état DM devant lui → flèche avant impossible.
     var rawCloseHP = window.closeHiddenPage;
     window.closeHiddenPage = function(){
       if(rawCloseHP) rawCloseHP.apply(this, arguments);
-      if(!_busy) push({ type:'closed' });
+      if(_busy) return;
+      // Tronquer la pile JS jusqu'à l'état 'closed' le plus récent
+      // (ou jusqu'au début) pour supprimer tous les états DM
+      var closedIdx = 0;
+      for(var i = _cur; i >= 0; i--){
+        if(_stack[i] && _stack[i].type === 'closed'){ closedIdx = i; break; }
+      }
+      _stack = _stack.slice(0, closedIdx + 1);
+      if(_stack[closedIdx] && _stack[closedIdx].type !== 'closed')
+        _stack[closedIdx] = { type:'closed' };
+      _cur = _stack.length - 1;
+      // Remplacer l'état navigateur courant → efface la flèche avant
+      history.replaceState({ jy: _cur }, '');
     };
-    // Exposer la version brute pour applyState (fermeture sans push)
     window._dmRawClose = rawCloseHP;
 
   }, 0);
@@ -8135,7 +8149,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.03.2</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.04.1</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
