@@ -4,20 +4,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script>
-// Fix clavier iOS — cache la page principale derrière
+// Fix clavier iOS — couvre la page principale derrière InstaLove
 (function(){
-  var initialH = window.innerHeight;
-  var hp = document.getElementById('hiddenPage');
-  function onResize(){
-    if(!hp) return;
-    if(window.innerHeight < initialH - 100){
-      hp.classList.add('keyboard-open');
+  var NAV_H = 64;
+  function update(){
+    var hp  = document.getElementById('hiddenPage');
+    var kbg = document.getElementById('dmKeyboardBg');
+    if(!hp || !hp.classList.contains('active')) return;
+    if(!window.visualViewport) return;
+    var vv      = window.visualViewport;
+    var kbH     = window.innerHeight - vv.height; // hauteur clavier
+    if(kbH > 80){
+      // Clavier ouvert : hiddenPage monte pour rester visible, bg bouche le trou
+      hp.style.bottom  = kbH + 'px';
+      if(kbg){ kbg.style.height = (kbH + NAV_H) + 'px'; kbg.classList.add('on'); }
     } else {
-      hp.classList.remove('keyboard-open');
-      initialH = window.innerHeight;
+      // Clavier fermé : reset
+      hp.style.bottom  = '';
+      if(kbg){ kbg.style.height = ''; kbg.classList.remove('on'); }
     }
   }
-  window.addEventListener('resize', onResize);
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize', update);
+    window.visualViewport.addEventListener('scroll', update);
+  }
+  window._dmUpdateVP = update;
 })();
 (function(){
   function setScale(s){
@@ -1791,20 +1802,22 @@ body.light .pendu-theme {
 
 #hiddenPage {
   display: none; position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0; left: 0; right: 0;
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px));
   z-index: 1100;
   overflow: hidden; background: var(--bg);
   flex-direction: column; transition: background 0.3s;
 }
 #hiddenPage.active { display: flex; animation: slideUp 0.3s ease; }
-/* Espace pour la nav du bas quand le clavier est fermé */
-#hiddenPage .dm-input-bar {
-  padding-bottom: calc(10px + 64px + env(safe-area-inset-bottom, 0px));
+
+/* Fond opaque sous hiddenPage pour couvrir la nav quand le clavier est ouvert */
+#dmKeyboardBg {
+  display: none; position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: calc(64px + env(safe-area-inset-bottom, 0px));
+  background: var(--bg); z-index: 1099;
 }
-/* Quand le clavier est ouvert (classe ajoutée par JS) */
-#hiddenPage.keyboard-open .dm-input-bar {
-  padding-bottom: 10px;
-}
+#dmKeyboardBg.on { display: block; }
 
 /* Topbar */
 .dm-topbar {
@@ -6539,6 +6552,7 @@ loadFavorites();
     if(saved === 'girl' || saved === 'boy') identity = saved;
     attached = false;
     showScreen('home');
+    if(window._dmUpdateVP) window._dmUpdateVP();
   };
 
   var _origClose = window.closeHiddenPage;
@@ -6559,8 +6573,9 @@ loadFavorites();
 </div>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.04.6</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.05.1</span>
 </div>
 
+<div id="dmKeyboardBg"></div>
 </body>
 </html>
