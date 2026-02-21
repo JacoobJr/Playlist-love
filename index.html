@@ -3421,15 +3421,91 @@ body.light #counterBlock.glowing .c-num-big {
   </div>
 </div>
 
-<div class="section fade-in">
+<div class="section fade-in" id="elleSection">
   <div class="section-label">Elle</div>
-  <div class="slider">
-    <div class="album-card"><div class="album-image"><span class="album-heart">🤍</span><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-1.jpg" onerror="this.onerror=null;this.src='image-1.jpg'"><div class="album-banner">Animal</div></div><div class="album-desc">Un regard doux 💫</div></div>
-    <div class="album-card"><div class="album-image"><span class="album-heart">🤍</span><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-2.jpg" onerror="this.onerror=null;this.src='image-2.jpg'"><div class="album-banner">Fleurs</div></div><div class="album-desc">Pleine de couleurs 💕</div></div>
-    <div class="album-card"><div class="album-image"><span class="album-heart">🤍</span><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-3.jpg" onerror="this.onerror=null;this.src='image-3.jpg'"><div class="album-banner">Personnage</div></div><div class="album-desc">Attachante 💍</div></div>
-    <div class="album-card"><div class="album-image"><span class="album-heart">🤍</span><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-4.jpg" onerror="this.onerror=null;this.src='image-4.jpg'"><div class="album-banner">Saison</div></div><div class="album-desc">Un rayon de soleil ☀️</div></div>
-    <div class="album-card"><div class="album-image"><span class="album-heart">🤍</span><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-5.jpg" onerror="this.onerror=null;this.src='image-5.jpg'"><div class="album-banner">Repas</div></div><div class="album-desc">N'aime que les pattes 🤝</div></div>
+  <div class="slider" id="elleSlider">
+    <div class="album-card lui-card-wrap" data-slot="elle-animal">
+      <div class="album-image">
+        <span class="album-heart">🤍</span>
+        <img id="elle-img-animal" src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-1.jpg" onerror="this.onerror=null;this.src='image-1.jpg'">
+        <div class="album-banner">Animal</div>
+        <div class="lui-upload-btn" id="elle-btn-animal" onclick="elleUploadClick('animal')">
+          <div class="lui-upload-icon">📷</div>
+          <div class="lui-upload-lbl">Modifier</div>
+        </div>
+        <div class="lui-uploading" id="elle-loading-animal">
+          <div class="lui-upload-progress"><div class="lui-upload-bar" id="elle-bar-animal"></div></div>
+          <div class="lui-upload-status">Envoi...</div>
+        </div>
+      </div>
+      <div class="album-desc lui-desc-editable" id="elle-desc-animal" onclick="elleEditDesc('animal')">Un regard doux 💫</div>
+    </div>
+    <div class="album-card lui-card-wrap" data-slot="elle-fleurs">
+      <div class="album-image">
+        <span class="album-heart">🤍</span>
+        <img id="elle-img-fleurs" src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-2.jpg" onerror="this.onerror=null;this.src='image-2.jpg'">
+        <div class="album-banner">Fleurs</div>
+        <div class="lui-upload-btn" id="elle-btn-fleurs" onclick="elleUploadClick('fleurs')">
+          <div class="lui-upload-icon">📷</div>
+          <div class="lui-upload-lbl">Modifier</div>
+        </div>
+        <div class="lui-uploading" id="elle-loading-fleurs">
+          <div class="lui-upload-progress"><div class="lui-upload-bar" id="elle-bar-fleurs"></div></div>
+          <div class="lui-upload-status">Envoi...</div>
+        </div>
+      </div>
+      <div class="album-desc lui-desc-editable" id="elle-desc-fleurs" onclick="elleEditDesc('fleurs')">Pleine de couleurs 💕</div>
+    </div>
+    <div class="album-card lui-card-wrap" data-slot="elle-personnage">
+      <div class="album-image">
+        <span class="album-heart">🤍</span>
+        <img id="elle-img-personnage" src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-3.jpg" onerror="this.onerror=null;this.src='image-3.jpg'">
+        <div class="album-banner">Personnage</div>
+        <div class="lui-upload-btn" id="elle-btn-personnage" onclick="elleUploadClick('personnage')">
+          <div class="lui-upload-icon">📷</div>
+          <div class="lui-upload-lbl">Modifier</div>
+        </div>
+        <div class="lui-uploading" id="elle-loading-personnage">
+          <div class="lui-upload-progress"><div class="lui-upload-bar" id="elle-bar-personnage"></div></div>
+          <div class="lui-upload-status">Envoi...</div>
+        </div>
+      </div>
+      <div class="album-desc lui-desc-editable" id="elle-desc-personnage" onclick="elleEditDesc('personnage')">Attachante 💍</div>
+    </div>
+    <div class="album-card lui-card-wrap" data-slot="elle-saison">
+      <div class="album-image">
+        <span class="album-heart">🤍</span>
+        <img id="elle-img-saison" src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-4.jpg" onerror="this.onerror=null;this.src='image-4.jpg'">
+        <div class="album-banner">Saison</div>
+        <div class="lui-upload-btn" id="elle-btn-saison" onclick="elleUploadClick('saison')">
+          <div class="lui-upload-icon">📷</div>
+          <div class="lui-upload-lbl">Modifier</div>
+        </div>
+        <div class="lui-uploading" id="elle-loading-saison">
+          <div class="lui-upload-progress"><div class="lui-upload-bar" id="elle-bar-saison"></div></div>
+          <div class="lui-upload-status">Envoi...</div>
+        </div>
+      </div>
+      <div class="album-desc lui-desc-editable" id="elle-desc-saison" onclick="elleEditDesc('saison')">Un rayon de soleil ☀️</div>
+    </div>
+    <div class="album-card lui-card-wrap" data-slot="elle-repas">
+      <div class="album-image">
+        <span class="album-heart">🤍</span>
+        <img id="elle-img-repas" src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-5.jpg" onerror="this.onerror=null;this.src='image-5.jpg'">
+        <div class="album-banner">Repas</div>
+        <div class="lui-upload-btn" id="elle-btn-repas" onclick="elleUploadClick('repas')">
+          <div class="lui-upload-icon">📷</div>
+          <div class="lui-upload-lbl">Modifier</div>
+        </div>
+        <div class="lui-uploading" id="elle-loading-repas">
+          <div class="lui-upload-progress"><div class="lui-upload-bar" id="elle-bar-repas"></div></div>
+          <div class="lui-upload-status">Envoi...</div>
+        </div>
+      </div>
+      <div class="album-desc lui-desc-editable" id="elle-desc-repas" onclick="elleEditDesc('repas')">N'aime que les pattes 🤝</div>
+    </div>
   </div>
+  <input type="file" id="elleFileInput" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="elleHandleFile(this)">
 </div>
 
 <div class="section fade-in" id="luiSection">
@@ -5740,6 +5816,143 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
 
 })();
 
+
+// ════════════════════════════════════════════
+// SECTION ELLE — Upload Supabase Storage (Link only)
+// ════════════════════════════════════════════
+(function(){
+  var SB_BUCKET = 'images';
+  var SB_FOLDER = 'elle';
+  var SLOTS = ['animal','fleurs','personnage','saison','repas'];
+  var SB_DEFAULTS = {
+    animal:     'https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-1.jpg',
+    fleurs:     'https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-2.jpg',
+    personnage: 'https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-3.jpg',
+    saison:     'https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-4.jpg',
+    repas:      'https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-5.jpg'
+  };
+  var ELLE_DESC_DEFAULTS = {
+    animal:     'Un regard doux 💫',
+    fleurs:     'Pleine de couleurs 💕',
+    personnage: 'Attachante 💍',
+    saison:     'Un rayon de soleil ☀️',
+    repas:      "N'aime que les pattes 🤝"
+  };
+  var _currentSlot = null;
+
+  // ── Charger les images depuis Supabase (dossier elle/) si uploadées ──
+  function elleLoadImages(){
+    SLOTS.forEach(function(slot){
+      var url = SB_URL + '/storage/v1/object/public/' + SB_BUCKET + '/' + SB_FOLDER + '/' + slot + '.jpg?t=' + Date.now();
+      var img = document.getElementById('elle-img-' + slot);
+      if(!img) return;
+      var probe = new Image();
+      probe.onload = function(){ img.src = url; };
+      // Si pas d'image custom, garder l'image par défaut déjà dans le src
+      probe.src = url;
+    });
+  }
+
+  // ── Afficher/masquer les boutons selon profil ──
+  function elleSyncEditMode(){
+    var profile = localStorage.getItem('jayana_profile');
+    var isLink = (profile === 'boy');
+    SLOTS.forEach(function(slot){
+      var btn = document.getElementById('elle-btn-' + slot);
+      if(btn) btn.style.display = isLink ? '' : 'none';
+      var desc = document.getElementById('elle-desc-' + slot);
+      if(desc){
+        if(isLink) desc.classList.add('lui-desc-editable');
+        else desc.classList.remove('lui-desc-editable');
+      }
+    });
+  }
+
+  // ── Clic upload ──
+  window.elleUploadClick = function(slot){
+    if(localStorage.getItem('jayana_profile') !== 'boy') return;
+    _currentSlot = slot;
+    var input = document.getElementById('elleFileInput');
+    input.value = '';
+    input.click();
+  };
+
+  // ── Traitement fichier ──
+  window.elleHandleFile = function(input){
+    if(!input.files || !input.files[0]) return;
+    var file = input.files[0];
+    var slot = _currentSlot;
+    if(!slot) return;
+    if(file.size > 5 * 1024 * 1024){ alert('Image trop lourde (max 5 Mo)'); return; }
+
+    var loading = document.getElementById('elle-loading-' + slot);
+    var bar = document.getElementById('elle-bar-' + slot);
+    if(loading) loading.classList.add('show');
+    if(bar){ bar.style.width = '0%'; setTimeout(function(){ bar.style.width = '60%'; }, 100); }
+
+    var path = SB_FOLDER + '/' + slot + '.jpg';
+    fetch(SB_URL + '/storage/v1/object/' + SB_BUCKET + '/' + path, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + (_sbAccessToken || SB_KEY),
+        'Content-Type': file.type,
+        'x-upsert': 'true'
+      },
+      body: file
+    })
+    .then(function(r){
+      if(bar) bar.style.width = '100%';
+      return r.text().then(function(body){
+        if(loading) loading.classList.remove('show');
+        if(r.ok){
+          var img = document.getElementById('elle-img-' + slot);
+          if(img) img.src = SB_URL + '/storage/v1/object/public/' + SB_BUCKET + '/' + SB_FOLDER + '/' + slot + '.jpg?t=' + Date.now();
+        } else {
+          alert('Erreur ' + r.status + ' : ' + body);
+        }
+      });
+    })
+    .catch(function(err){
+      if(loading) loading.classList.remove('show');
+      alert('Erreur réseau : ' + err);
+    });
+  };
+
+  // ── Descriptions éditables ──
+  function elleLoadDescs(){
+    SLOTS.forEach(function(slot){
+      var saved = localStorage.getItem('elle_desc_' + slot);
+      var el = document.getElementById('elle-desc-' + slot);
+      if(el && saved) el.textContent = saved;
+    });
+  }
+
+  window.elleEditDesc = function(slot){
+    if(localStorage.getItem('jayana_profile') !== 'boy') return;
+    var el = document.getElementById('elle-desc-' + slot);
+    if(!el) return;
+    var current = el.textContent.trim();
+    var newVal = prompt('Modifier la description :', current);
+    if(newVal === null) return;
+    newVal = newVal.trim() || ELLE_DESC_DEFAULTS[slot];
+    el.textContent = newVal;
+    localStorage.setItem('elle_desc_' + slot, newVal);
+  };
+
+  // ── Init ──
+  elleLoadImages();
+  elleLoadDescs();
+  elleSyncEditMode();
+
+  // ── Resync si profil change ──
+  var _origSetProfileElle = window.setProfile;
+  window.setProfile = function(gender){
+    if(_origSetProfileElle) _origSetProfileElle.apply(this, arguments);
+    setTimeout(elleSyncEditMode, 300);
+  };
+
+})();
 // ════════════════════════════════════════════
 // SECTION LUI — Upload Supabase Storage
 // ════════════════════════════════════════════
@@ -8935,6 +9148,7 @@ loadFavorites();
       var pp = document.getElementById('profilePopup');
       if(pp) pp.classList.remove('open');
       loadMoods();
+      setTimeout(function(){ location.reload(); }, 300);
       return;
     }
     // Sinon, demander le code une fois
@@ -8945,6 +9159,7 @@ loadFavorites();
       apply(gender);
       loadMoods();
       if(window._checkUnread) window._checkUnread();
+      setTimeout(function(){ location.reload(); }, 300);
     });
   };
 
