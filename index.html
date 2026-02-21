@@ -1101,6 +1101,17 @@ body.light #lockNavBtn.has-unread {
 /* nlBox masqué (plus utilisé visuellement) */
 #nlBox { display: none !important; }
 
+/* ── Indicateur bandeau ── */
+@keyframes nlIndPulse {
+  0%,100% { opacity: 0.5; transform: scale(1); }
+  50%     { opacity: 1;   transform: scale(1.3); }
+}
+#nlOtherIndicator.nl-ind-boy   { --ind-color: #5b9cf6; }
+#nlOtherIndicator.nl-ind-girl  { --ind-color: #e879a0; }
+#nlOtherIndicator.nl-ind-together { --ind-color: #f5c518; }
+#nlOtherDot { background: var(--ind-color, #fff); box-shadow: 0 0 6px var(--ind-color, #fff); }
+#nlOtherLabel { color: var(--ind-color, var(--sub)); }
+
 /* ── Glow sur la ligne de chanson ── */
 .sp-song.nl-other-playing {
   position: relative;
@@ -3826,6 +3837,11 @@ body.light #counterBlock.glowing .c-num-big {
         <svg id="modeIconRepeat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/><text x="9" y="19" font-size="7" fill="currentColor" stroke="none" font-weight="700" font-family="sans-serif">1</text></svg>
       </button>
       <div class="top50-stats"><span id="top50Count">13</span> titres</div>
+      <div id="nlOtherIndicator" style="display:none;margin-left:auto;align-items:center;gap:6px;">
+        <span id="nlOtherDot" style="width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0;animation:nlIndPulse 1.6s ease-in-out infinite;"></span>
+        <span id="nlOtherLabel" style="font-size:11px;font-weight:600;letter-spacing:0.2px;"></span>
+        <span style="font-size:11px;">🎵</span>
+      </div>
     </div>
   </div>
   <div class="top50-col-header">
@@ -11055,6 +11071,25 @@ loadFavorites();
     document.querySelectorAll('.nl-other-playing').forEach(function(el){
       el.classList.remove('nl-other-playing','nl-glow-boy','nl-glow-girl','nl-glow-together');
     });
+
+    // Indicateur bandeau
+    var ind = document.getElementById('nlOtherIndicator');
+    var dot = document.getElementById('nlOtherDot');
+    var lbl = document.getElementById('nlOtherLabel');
+    if(ind){
+      if(!otherBase){
+        ind.style.display = 'none';
+        ind.className = '';
+      } else {
+        ind.style.display = 'flex';
+        ind.className = sameSong ? 'nl-ind-together' : ('nl-ind-' + otherWho);
+        if(lbl){
+          if(sameSong)       lbl.textContent = 'On écoute ensemble';
+          else if(otherWho === 'girl') lbl.textContent = 'Zelda écoute';
+          else               lbl.textContent = 'Link écoute';
+        }
+      }
+    }
 
     if(!otherBase) return; // l'autre n'écoute rien → rien à afficher
 
