@@ -11141,33 +11141,37 @@ loadFavorites();
   }
 
   /* ── Construit le HTML du contenu selon le mode ── */
-  function buildContent(mode, fileA, fileB){
+  function buildContent(mode, fileA){
     var info, label, avi;
+
     if(mode === 'together'){
       info = songInfo(fileA);
-      var title  = info ? info.title  : (fileA ? fileA.split('/').pop().replace(/\.mp3$/i,'').replace(/_/g,' ') : '');
-      var artist = info ? info.artist : '';
+      var ttog  = info ? info.title  : (fileA ? fileA.split('/').pop().replace(/\.mp3$/i,'').replace(/_/g,' ') : '');
+      var artog = info ? info.artist : '';
       return '<div class="nl-avi-duo">'
            + '<span class="nl-avi nl-avi-left">🧑‍🎧</span>'
            + '<span class="nl-avi nl-avi-right">👧‍🎧</span>'
            + '</div>'
            + '<div class="nl-text">'
            + '<div class="nl-label">✨ On écoute ensemble</div>'
-           + '<div class="nl-title">' + title + '</div>'
-           + (artist ? '<div class="nl-artist">' + artist + '</div>' : '')
+           + '<div class="nl-title">' + ttog + '</div>'
+           + (artog ? '<div class="nl-artist">' + artog + '</div>' : '')
            + '</div>'
            + EQ_HTML;
     }
+
     if(mode === 'boy'){
-      info   = songInfo(fileA);
-      label  = '🎧 Link écoute';
-      avi    = '🧑‍🎧';
+      label = '🎧 Link écoute';
+      avi   = '🧑‍🎧';
+    } else if(mode === 'girl'){
+      label = '🎧 Zelda écoute';
+      avi   = '👧‍🎧';
     } else {
-      info   = songInfo(fileA);
-      label  = '🎧 Zelda écoute';
-      avi    = '👧‍🎧';
+      return '';
     }
-    var title  = info ? info.title  : (fileA ? fileA.split('/').pop().replace(/\.mp3$/i,'').replace(/_/g,' ') : '');
+
+    info = songInfo(fileA);
+    var title  = info ? info.title  : (fileA ? fileA.split('/').pop().replace(/\.mp3$/i,'').replace(/_/g,' ') : '—');
     var artist = info ? info.artist : '';
     return '<span class="nl-avi">' + avi + '</span>'
          + '<div class="nl-text">'
