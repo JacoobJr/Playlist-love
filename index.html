@@ -6268,12 +6268,31 @@ var reasons = [
   "Le fait que tu sois ma meilleure amie autant que mon amour 👫",
   "Le fait d'être toi, sans faire semblant. Juste toi. Et c'est tout ce qu'il faut ✨"
 ];
-var lastRIdx = -1;
+// ── Deck shufflé sans remise : toutes les raisons passent avant de recommencer ──
+var _reasonDeck = [];
+var _reasonDeckPos = 0;
+
+function _buildDeck(excludeFirst) {
+  var deck = [];
+  for (var k = 0; k < reasons.length; k++) deck.push(k);
+  // Fisher-Yates shuffle
+  for (var j = deck.length - 1; j > 0; j--) {
+    var r = Math.floor(Math.random() * (j + 1));
+    var tmp = deck[j]; deck[j] = deck[r]; deck[r] = tmp;
+  }
+  // Garantir que la première carte du nouveau deck ≠ la dernière montrée
+  if (excludeFirst !== undefined && deck[0] === excludeFirst && deck.length > 1) {
+    var swap = 1 + Math.floor(Math.random() * (deck.length - 1));
+    var t = deck[0]; deck[0] = deck[swap]; deck[swap] = t;
+  }
+  return deck;
+}
 
 // Init : afficher une raison aléatoire dès le chargement (pas toujours la même)
 (function(){
-  var i = Math.floor(Math.random() * reasons.length);
-  lastRIdx = i;
+  _reasonDeck = _buildDeck();
+  _reasonDeckPos = 0;
+  var i = _reasonDeck[_reasonDeckPos++];
   var rText = document.getElementById('reasonText');
   if(rText) rText.textContent = reasons[i];
 })();
@@ -6281,23 +6300,24 @@ var lastRIdx = -1;
 function showReason(idx) {
   var rText = document.getElementById('reasonText');
   if(!rText) return;
-
-  // Phase 1 : sortie vers le haut avec blur
   rText.classList.remove('reason-in-down');
   rText.classList.add('reason-out-up');
-
   setTimeout(function(){
     rText.textContent = reasons[idx];
     rText.classList.remove('reason-out-up');
-    // Force reflow pour relancer l'animation
     void rText.offsetWidth;
     rText.classList.add('reason-in-down');
   }, 200);
 }
 
 document.getElementById('reasonBox').addEventListener('click', function() {
-  var i; do { i = Math.floor(Math.random() * reasons.length); } while (i === lastRIdx);
-  lastRIdx = i;
+  // Si le deck est épuisé, en construire un nouveau
+  if (_reasonDeckPos >= _reasonDeck.length) {
+    var lastShown = _reasonDeck[_reasonDeck.length - 1];
+    _reasonDeck = _buildDeck(lastShown);
+    _reasonDeckPos = 0;
+  }
+  var i = _reasonDeck[_reasonDeckPos++];
   showReason(i);
 });
 
@@ -6844,17 +6864,37 @@ animP();
 
 // ── LOVE BOX ──
 var loveWords=["Je t'aime Anaelle 💘","Mon cœur ❤️","Mon amour 💕","Mon ange ☀️","Ma madame ✨","Ma chérie 💓","Mon petit bonheur 🥰","Love you biloute 🤡💖","Ma vieille dame préférée 👵💕","Mon équilibre 🌙","Ma meilleure amie 💞","Mon monde 🌍","T'es tout ce qu'il me faut 💎"];
-var lastLI=-1;
+
+var _loveDeck = [], _loveDeckPos = 0;
+function _buildLoveDeck(excludeFirst) {
+  var deck = [];
+  for (var k = 0; k < loveWords.length; k++) deck.push(k);
+  for (var j = deck.length - 1; j > 0; j--) {
+    var r = Math.floor(Math.random() * (j + 1));
+    var tmp = deck[j]; deck[j] = deck[r]; deck[r] = tmp;
+  }
+  if (excludeFirst !== undefined && deck[0] === excludeFirst && deck.length > 1) {
+    var swap = 1 + Math.floor(Math.random() * (deck.length - 1));
+    var t = deck[0]; deck[0] = deck[swap]; deck[swap] = t;
+  }
+  return deck;
+}
+_loveDeck = _buildLoveDeck();
+_loveDeckPos = 0;
+
 var loveBoxTimeout=null, loveBoxBusy=false;
 document.getElementById('loveBox').addEventListener('click',function(e){
-  var i;do{i=Math.floor(Math.random()*loveWords.length);}while(i===lastLI);lastLI=i;
+  if (_loveDeckPos >= _loveDeck.length) {
+    var lastShown = _loveDeck[_loveDeck.length - 1];
+    _loveDeck = _buildLoveDeck(lastShown);
+    _loveDeckPos = 0;
+  }
+  var i = _loveDeck[_loveDeckPos++];
   var textEl=document.getElementById('loveBoxText');
   if(!textEl) return;
-  // Annuler tout timeout en cours et forcer la mise à jour immédiate
   if(loveBoxTimeout){ clearTimeout(loveBoxTimeout); loveBoxTimeout=null; }
   textEl.style.transition='none';
   textEl.style.opacity='0';
-  // Forcer un reflow pour que le navigateur applique opacity:0 avant de continuer
   void textEl.offsetHeight;
   textEl.style.transition='opacity 0.2s';
   loveBoxTimeout=setTimeout(function(){
