@@ -7716,8 +7716,6 @@ var ALL_QUIZ_QUESTIONS=[
 ];
 
 var QUIZ_TOTAL=10,qzCurrent=0,qzScore=0,qzAnswered=false,qzSession=[];
-document.getElementById('quizBtn').addEventListener('click',function(){_openQuiz();});
-document.getElementById('gamesBtn').addEventListener('click',function(){openGames();});
 function _openQuiz(){resetZoom();isQuizOpen=true;document.getElementById('quizView').classList.add('active');particleActive=false;hideDance();document.getElementById('navSearch').style.display='none';_startQuiz();window.scrollTo(0,0);}
 function _closeQuiz(){isQuizOpen=false;document.getElementById('quizView').classList.remove('active');document.getElementById('navSearch').style.display='';}
 function getHints(){try{return JSON.parse(localStorage.getItem('qz_hints')||'{}');}catch(e){return{};}}
@@ -8550,6 +8548,10 @@ function openPuzzleGame()  { _loadGames(); _openPuzzleGame(); }
 function closePuzzleGame() { _loadGames(); _closePuzzleGame(); }
 function openSnakeGame()   { _loadGames(); _openSnakeGame(); }
 function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
+
+// Listeners boutons quiz et jeux
+document.getElementById('quizBtn').addEventListener('click', function(){ openQuiz(); });
+document.getElementById('gamesBtn').addEventListener('click', function(){ openGames(); });
 
 
 // ── NAV : closeAllViews étendu ──
