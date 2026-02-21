@@ -2689,8 +2689,126 @@ body.light .dm-send-btn { background:linear-gradient(135deg,#c8185e,#e879a0); }
 }
 .dm-emoji-picker span:hover { transform:scale(1.35); background:var(--s2); }
 
-body.light .dm-screen { background:var(--bg); }
-body.light #hiddenPage { background:var(--bg); }
+/* ══ NOUVELLES FEATURES INSTALOVE ══ */
+
+/* Flash nouveau message */
+@keyframes dmFlash {
+  0%   { background: rgba(238,42,123,0.12); }
+  100% { background: transparent; }
+}
+.dm-flash { animation: dmFlash 0.6s ease-out; }
+
+/* Indicateur typing */
+.dm-typing-wrap {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 12px 4px; animation: dmMsgIn 0.2s ease;
+}
+.dm-typing-avatar { width: 26px; height: 26px; font-size: 14px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.dm-typing-bubble {
+  background: var(--s2); border-radius: 20px 20px 20px 4px;
+  padding: 10px 14px; display: flex; align-items: center; gap: 4px;
+}
+.dm-typing-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--muted); opacity: 0.6;
+  animation: dmTypingDot 1.2s ease-in-out infinite;
+}
+.dm-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.dm-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dmTypingDot {
+  0%,60%,100% { transform: translateY(0); opacity: 0.4; }
+  30%         { transform: translateY(-5px); opacity: 1; }
+}
+
+/* Reply preview dans la bulle */
+.dm-reply-preview {
+  border-left: 3px solid rgba(255,255,255,0.5);
+  padding: 4px 8px; margin-bottom: 5px;
+  border-radius: 4px; background: rgba(0,0,0,0.15);
+  font-size: 11px; opacity: 0.85; line-height: 1.3;
+  max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dm-msg-wrap:not(.mine) .dm-reply-preview {
+  border-left-color: rgba(131,58,180,0.7);
+  background: rgba(131,58,180,0.08);
+}
+
+/* Bandeau reply en cours de saisie */
+#dmReplyBar {
+  display: none; align-items: center; gap: 8px;
+  padding: 7px 14px; background: var(--s2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  font-size: 12px; color: var(--sub);
+}
+#dmReplyBar.show { display: flex; }
+#dmReplyBar .reply-bar-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#dmReplyBar .reply-bar-icon { font-size: 14px; opacity: 0.6; flex-shrink: 0; }
+#dmReplyBar .reply-bar-close {
+  width: 22px; height: 22px; border-radius: 50%; border: none;
+  background: var(--s3); color: var(--muted);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; flex-shrink: 0; transition: background 0.15s;
+}
+#dmReplyBar .reply-bar-close:hover { background: var(--border); color: var(--text); }
+
+/* Message édité */
+.dm-edited-label {
+  font-size: 9px; opacity: 0.55; font-style: italic;
+  display: inline-block; margin-left: 4px;
+}
+
+/* Inline edit input */
+.dm-edit-input {
+  background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.4);
+  border-radius: 12px; padding: 6px 10px; font-size: 14px; color: #fff;
+  font-family: 'DM Sans', sans-serif; outline: none; width: 100%;
+  transition: border-color 0.2s;
+}
+.dm-msg-wrap:not(.mine) .dm-edit-input {
+  background: var(--s3); border-color: rgba(131,58,180,0.5); color: var(--text);
+}
+.dm-edit-input:focus { border-color: rgba(255,255,255,0.8); }
+.dm-edit-actions { display: flex; gap: 6px; margin-top: 5px; justify-content: flex-end; }
+.dm-edit-btn {
+  font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 8px;
+  border: none; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.dm-edit-btn:active { transform: scale(0.95); }
+.dm-edit-confirm { background: var(--green); color: #000; }
+.dm-edit-cancel-btn { background: var(--s3); color: var(--sub); }
+
+/* Fonds de chat */
+#dmMessages.bg-hearts  { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-size='18' opacity='0.06'%3E%E2%9D%A4%EF%B8%8F%3C/text%3E%3C/svg%3E"); }
+#dmMessages.bg-gradient { background: linear-gradient(160deg, rgba(238,42,123,0.07) 0%, rgba(131,58,180,0.07) 100%); }
+#dmMessages.bg-bubbles  { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='18' stroke='rgba(238,42,123,0.06)' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); }
+body.light #dmMessages.bg-hearts   { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-size='18' opacity='0.09'%3E%E2%9D%A4%EF%B8%8F%3C/text%3E%3C/svg%3E"); }
+body.light #dmMessages.bg-gradient { background: linear-gradient(160deg, rgba(200,24,94,0.06) 0%, rgba(131,58,180,0.06) 100%); }
+
+/* Bouton fond chat */
+.dm-bg-btn {
+  width: 32px; height: 32px; border-radius: 50%; border: none;
+  background: transparent; color: var(--muted);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s; flex-shrink: 0;
+}
+.dm-bg-btn:hover { background: var(--s2); color: var(--text); }
+.dm-bg-picker {
+  position: absolute; bottom: calc(100% + 8px); right: 0;
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 14px; padding: 10px 12px;
+  display: none; gap: 8px; align-items: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3); z-index: 20; white-space: nowrap;
+}
+.dm-bg-picker.open { display: flex; }
+.dm-bg-opt {
+  width: 34px; height: 34px; border-radius: 10px; cursor: pointer;
+  border: 2px solid transparent; transition: border-color 0.15s, transform 0.15s;
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.dm-bg-opt:hover { transform: scale(1.12); }
+.dm-bg-opt.active { border-color: var(--green); }
 
 /* Loading dots */
 .dm-loading-dots { display:flex; gap:5px; align-items:center; }
@@ -4016,6 +4134,11 @@ body.light #counterBlock.glowing .c-num-big {
   <!-- ÉCRAN 3 : CHAT -->
   <div class="dm-screen dm-chat-screen" id="dmChatScreen" style="display:none">
     <div class="dm-messages" id="dmMessages"></div>
+    <div id="dmReplyBar">
+      <span class="reply-bar-icon">↩️</span>
+      <span class="reply-bar-text" id="dmReplyBarText">Répondre à…</span>
+      <button class="reply-bar-close" onclick="dmCancelReply()">✕</button>
+    </div>
     <div class="dm-input-bar">
       <div class="dm-input-wrap">
         <button class="dm-emoji-btn" id="dmEmojiBtn">
@@ -4036,6 +4159,17 @@ body.light #counterBlock.glowing .c-num-big {
         <button class="dm-send-btn" id="dmSendBtn">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
         </button>
+      </div>
+      <div style="position:relative;display:flex;justify-content:flex-end;margin-top:4px;">
+        <button class="dm-bg-btn" id="dmBgBtn" title="Fond du chat">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </button>
+        <div class="dm-bg-picker" id="dmBgPicker">
+          <div class="dm-bg-opt active" data-bg="" title="Aucun" style="background:var(--s2);">✕</div>
+          <div class="dm-bg-opt" data-bg="bg-hearts"   title="Cœurs"   style="background:linear-gradient(135deg,#2a1520,#1a1a2a);">❤️</div>
+          <div class="dm-bg-opt" data-bg="bg-gradient" title="Dégradé" style="background:linear-gradient(135deg,rgba(238,42,123,0.3),rgba(131,58,180,0.3));">🌸</div>
+          <div class="dm-bg-opt" data-bg="bg-bubbles"  title="Bulles"  style="background:radial-gradient(circle at 50% 50%,rgba(238,42,123,0.2),transparent 70%);">🫧</div>
+        </div>
       </div>
     </div>
   </div>
@@ -9689,8 +9823,9 @@ loadFavorites();
     if(el) el.innerHTML = '<div class="dm-loading-msgs"><div class="dm-loading-dots"><span></span><span></span><span></span></div></div>';
     if(!attached){ attachListeners(); attached = true; }
     stopPoll();
+    applyChatBg();
     fetchMsgs();
-    pollId = setInterval(fetchMsgs, 3000);
+    pollId = setInterval(function(){ fetchMsgs(); pollTyping(); }, 3000);
   }
 
   function stopPoll(){ if(pollId){ clearInterval(pollId); pollId = null; } }
@@ -9702,7 +9837,7 @@ loadFavorites();
     var picker   = $('dmEmojiPicker');
 
     if(input){
-      input.addEventListener('input', updateSendBtn);
+      input.addEventListener('input', function(){ updateSendBtn(); sendTypingPing(); });
       input.addEventListener('keydown', function(e){
         if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); doSend(); }
       });
@@ -9736,7 +9871,212 @@ loadFavorites();
     }
   }
 
-  /* ══ FETCH MESSAGES ══ */
+  /* ══ FLASH NOUVEAU MESSAGE ══ */
+  function flashNewMsg(){
+    var el = $('dmMessages');
+    if(!el) return;
+    el.classList.remove('dm-flash');
+    void el.offsetWidth;
+    el.classList.add('dm-flash');
+    setTimeout(function(){ el.classList.remove('dm-flash'); }, 700);
+  }
+
+  /* ══ TYPING INDICATOR ══ */
+  var TYPING_TABLE = 'dm_typing';
+  var typingEl     = null;
+  var typingTimer  = null;
+  var myTypingTs   = 0;
+
+  function showTyping(who){
+    if(typingEl) return;
+    var el = $('dmMessages');
+    if(!el) return;
+    typingEl = document.createElement('div');
+    typingEl.className = 'dm-typing-wrap';
+    typingEl.id = 'dmTypingWrap';
+    var emo = who === 'girl' ? '👧' : '👦';
+    typingEl.innerHTML =
+      '<div class="dm-typing-avatar">' + emo + '</div>' +
+      '<div class="dm-typing-bubble">' +
+        '<div class="dm-typing-dot"></div>' +
+        '<div class="dm-typing-dot"></div>' +
+        '<div class="dm-typing-dot"></div>' +
+      '</div>';
+    el.appendChild(typingEl);
+    scrollBottom();
+  }
+
+  function hideTyping(){
+    if(typingEl){ typingEl.remove(); typingEl = null; }
+  }
+
+  function sendTypingPing(){
+    var now = Date.now();
+    if(now - myTypingTs < 2000) return; // debounce 2s
+    myTypingTs = now;
+    fetch(SB_URL + '/rest/v1/' + TYPING_TABLE + '?sender=eq.' + identity, {
+      method: 'GET', headers: sbHeaders()
+    }).then(function(r){ return r.json(); }).then(function(rows){
+      var body = { sender: identity, updated_at: new Date().toISOString() };
+      if(Array.isArray(rows) && rows.length){
+        fetch(SB_URL + '/rest/v1/' + TYPING_TABLE + '?sender=eq.' + identity, {
+          method: 'PATCH', headers: sbHeaders(), body: JSON.stringify(body)
+        }).catch(function(){});
+      } else {
+        fetch(SB_URL + '/rest/v1/' + TYPING_TABLE, {
+          method: 'POST', headers: sbHeaders({'Prefer':'return=minimal'}), body: JSON.stringify(body)
+        }).catch(function(){});
+      }
+    }).catch(function(){});
+  }
+
+  function pollTyping(){
+    var other = identity === 'girl' ? 'boy' : 'girl';
+    fetch(SB_URL + '/rest/v1/' + TYPING_TABLE + '?sender=eq.' + other, {
+      headers: sbHeaders()
+    }).then(function(r){ return r.json(); }).then(function(rows){
+      if(!Array.isArray(rows) || !rows.length){ hideTyping(); return; }
+      var ts = new Date(rows[0].updated_at).getTime();
+      var age = Date.now() - ts;
+      if(age < 4000){ showTyping(other); } else { hideTyping(); }
+    }).catch(function(){ hideTyping(); });
+  }
+
+  /* ══ REPLY ══ */
+  var _replyMsg = null;
+
+  window.dmCancelReply = function(){
+    _replyMsg = null;
+    var bar = $('dmReplyBar');
+    if(bar) bar.classList.remove('show');
+    var inp = $('dmInput');
+    if(inp) inp.focus();
+  };
+
+  function startReply(msg){
+    _replyMsg = msg;
+    var bar  = $('dmReplyBar');
+    var txt  = $('dmReplyBarText');
+    if(!bar || !txt) return;
+    var who  = msg.sender === 'girl' ? 'Zelda' : 'Link';
+    var preview = msg.message_type === 'audio' ? '🎤 Vocal' : (msg.text || '');
+    if(preview.length > 40) preview = preview.slice(0,40) + '…';
+    txt.textContent = who + ' : ' + preview;
+    bar.classList.add('show');
+    var inp = $('dmInput');
+    if(inp) inp.focus();
+  }
+
+  /* ══ ÉDITION MESSAGE ══ */
+  function startEdit(msg, wrap){
+    var bbl = wrap.querySelector('.dm-bubble');
+    var txt = wrap.querySelector('.dm-bubble-text');
+    if(!bbl || !txt) return;
+
+    var oldText = msg.text || '';
+    txt.style.display = 'none';
+    var meta = wrap.querySelector('.dm-bubble-meta');
+    if(meta) meta.style.display = 'none';
+
+    var editInput = document.createElement('input');
+    editInput.type = 'text';
+    editInput.className = 'dm-edit-input';
+    editInput.value = oldText;
+    editInput.maxLength = 500;
+
+    var actions = document.createElement('div');
+    actions.className = 'dm-edit-actions';
+
+    var cancelBtn = document.createElement('button');
+    cancelBtn.className = 'dm-edit-btn dm-edit-cancel-btn';
+    cancelBtn.textContent = 'Annuler';
+
+    var confirmBtn = document.createElement('button');
+    confirmBtn.className = 'dm-edit-btn dm-edit-confirm';
+    confirmBtn.textContent = 'Modifier ✓';
+
+    actions.appendChild(cancelBtn);
+    actions.appendChild(confirmBtn);
+    bbl.appendChild(editInput);
+    bbl.appendChild(actions);
+    editInput.focus();
+    editInput.select();
+
+    function cancelEdit(){
+      editInput.remove(); actions.remove();
+      txt.style.display = ''; if(meta) meta.style.display = '';
+    }
+
+    function confirmEdit(){
+      var newText = editInput.value.trim();
+      if(!newText || newText === oldText){ cancelEdit(); return; }
+      editInput.remove(); actions.remove();
+      txt.style.display = '';
+      txt.textContent = newText;
+      msg.text = newText;
+      // Ajouter label "(modifié)"
+      var edited = wrap.querySelector('.dm-edited-label');
+      if(!edited){
+        edited = document.createElement('span');
+        edited.className = 'dm-edited-label';
+        edited.textContent = '(modifié)';
+        txt.after(edited);
+      }
+      if(meta) meta.style.display = '';
+      if(String(msg.id).indexOf('tmp_') === 0) return;
+      fetch(SB_URL + '/rest/v1/' + TABLE + '?id=eq.' + msg.id, {
+        method: 'PATCH', headers: sbHeaders(),
+        body: JSON.stringify({ text: newText, edited: true })
+      }).catch(function(err){ console.error('[DM] edit err:', err); });
+    }
+
+    cancelBtn.addEventListener('click', cancelEdit);
+    confirmBtn.addEventListener('click', confirmEdit);
+    editInput.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){ e.preventDefault(); confirmEdit(); }
+      if(e.key === 'Escape'){ cancelEdit(); }
+    });
+  }
+
+  /* ══ FOND DU CHAT ══ */
+  var _chatBg = localStorage.getItem('dm_chat_bg') || '';
+  function applyChatBg(){
+    var el = $('dmMessages');
+    if(!el) return;
+    el.classList.remove('bg-hearts','bg-gradient','bg-bubbles');
+    if(_chatBg) el.classList.add(_chatBg);
+    // Sync opts
+    var picker = $('dmBgPicker');
+    if(!picker) return;
+    picker.querySelectorAll('.dm-bg-opt').forEach(function(o){
+      o.classList.toggle('active', o.dataset.bg === _chatBg);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var bgBtn    = $('dmBgBtn');
+    var bgPicker = $('dmBgPicker');
+    if(bgBtn && bgPicker){
+      bgBtn.addEventListener('click', function(e){
+        e.stopPropagation();
+        bgPicker.classList.toggle('open');
+      });
+      bgPicker.querySelectorAll('.dm-bg-opt').forEach(function(opt){
+        opt.addEventListener('click', function(e){
+          e.stopPropagation();
+          _chatBg = opt.dataset.bg;
+          localStorage.setItem('dm_chat_bg', _chatBg);
+          applyChatBg();
+          bgPicker.classList.remove('open');
+        });
+      });
+      document.addEventListener('click', function(){
+        bgPicker.classList.remove('open');
+      });
+    }
+  });
+
+
   function fetchMsgs(){
     fetch(SB_URL + '/rest/v1/' + TABLE + '?order=created_at.asc&limit=300&select=*', {
       headers: sbHeaders()
@@ -9764,6 +10104,11 @@ loadFavorites();
           cache.push(msg);
           appendBubble(msg, cache.length - 1, cache);
           added = true;
+          // Notification visuelle + vibration si message de l'autre
+          if(msg.sender !== identity){
+            if(navigator.vibrate) navigator.vibrate([40, 30, 40]);
+            flashNewMsg();
+          }
         }
       });
       if(added) scrollBottom();
@@ -9819,15 +10164,22 @@ loadFavorites();
     }
 
     var lastDay = '';
+    var todayStr = new Date().toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+    todayStr = todayStr.charAt(0).toUpperCase() + todayStr.slice(1);
+    var yesterdayDate = new Date(); yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    var yesterdayStr = yesterdayDate.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+    yesterdayStr = yesterdayStr.charAt(0).toUpperCase() + yesterdayStr.slice(1);
+
     cache.forEach(function(msg, i){
       var d   = new Date(msg.created_at);
       var day = d.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
       day = day.charAt(0).toUpperCase() + day.slice(1);
-      if(day !== lastDay){
-        lastDay = day;
+      var dayLabel = day === todayStr ? 'Aujourd\'hui' : (day === yesterdayStr ? 'Hier' : day);
+      if(dayLabel !== lastDay){
+        lastDay = dayLabel;
         var lbl = document.createElement('div');
         lbl.className   = 'dm-day-label';
-        lbl.textContent = day;
+        lbl.textContent = dayLabel;
         el.appendChild(lbl);
       }
       appendBubble(msg, i, cache);
@@ -9876,6 +10228,28 @@ loadFavorites();
       reactRow.appendChild(btn);
     });
     ctxMenu.appendChild(reactRow);
+
+    // Répondre
+    var replyItem = document.createElement('div');
+    replyItem.className = 'dm-ctx-item';
+    replyItem.innerHTML = '<span>↩️</span> Répondre';
+    replyItem.addEventListener('click', function(){
+      startReply(msg);
+      closeCtxMenu();
+    });
+    ctxMenu.appendChild(replyItem);
+
+    // Modifier (seulement ses propres messages texte non supprimés)
+    if(mine && !msg.deleted && msg.message_type !== 'audio'){
+      var editItem = document.createElement('div');
+      editItem.className = 'dm-ctx-item';
+      editItem.innerHTML = '<span>✏️</span> Modifier';
+      editItem.addEventListener('click', function(){
+        startEdit(msg, wrap);
+        closeCtxMenu();
+      });
+      ctxMenu.appendChild(editItem);
+    }
 
     // Copier
     var copyItem = document.createElement('div');
@@ -9997,6 +10371,16 @@ loadFavorites();
     var bbl = document.createElement('div');
     bbl.className = 'dm-bubble' + (msg.deleted ? ' deleted' : '');
 
+    // Reply preview
+    if(msg.reply_to_text && !msg.deleted){
+      var rp = document.createElement('div');
+      rp.className = 'dm-reply-preview';
+      var rpWho = msg.reply_to_sender === 'girl' ? 'Zelda' : 'Link';
+      var rpTxt = msg.reply_to_text.length > 45 ? msg.reply_to_text.slice(0,45)+'…' : msg.reply_to_text;
+      rp.textContent = rpWho + ' : ' + rpTxt;
+      bbl.appendChild(rp);
+    }
+
     if(msg.message_type === 'audio' && msg.audio_data && !msg.deleted){
       // Bulle vocale
       var audioBubble = document.createElement('div');
@@ -10047,6 +10431,13 @@ loadFavorites();
       txt.className   = 'dm-bubble-text';
       txt.textContent = msg.deleted ? '🚫 Message supprimé' : (msg.text || '');
       bbl.appendChild(txt);
+      // Label modifié
+      if(msg.edited && !msg.deleted){
+        var editedLbl = document.createElement('span');
+        editedLbl.className = 'dm-edited-label';
+        editedLbl.textContent = '(modifié)';
+        bbl.appendChild(editedLbl);
+      }
     }
 
     // Heure + tick
@@ -10093,7 +10484,6 @@ loadFavorites();
   /* ══ ENVOI ══ */
   function doSend(){
     if(!identity){
-      // Pas d'identité → montrer l'overlay
       showIdentityOverlay();
       return;
     }
@@ -10104,17 +10494,29 @@ loadFavorites();
     input.value = '';
     updateSendBtn();
 
+    // Capture reply avant de le cancel
+    var replyId   = _replyMsg ? _replyMsg.id   : null;
+    var replyText = _replyMsg ? (_replyMsg.message_type === 'audio' ? '🎤 Vocal' : (_replyMsg.text || '')) : null;
+    var replySender = _replyMsg ? _replyMsg.sender : null;
+    window.dmCancelReply();
+
     // Optimistic
     var tmpId  = 'tmp_' + Date.now();
-    var tmpMsg = { id: tmpId, sender: identity, text: text, seen: false, created_at: new Date().toISOString() };
+    var tmpMsg = { id: tmpId, sender: identity, text: text, seen: false, created_at: new Date().toISOString(),
+                   reply_to_id: replyId, reply_to_text: replyText, reply_to_sender: replySender };
     cache.push(tmpMsg);
     appendBubble(tmpMsg, cache.length - 1, cache);
     scrollBottom();
 
+    var body = { sender: identity, text: text };
+    if(replyId)   body.reply_to_id     = replyId;
+    if(replyText) body.reply_to_text   = replyText;
+    if(replySender) body.reply_to_sender = replySender;
+
     fetch(SB_URL + '/rest/v1/' + TABLE, {
       method: 'POST',
       headers: sbHeaders({'Prefer': 'return=representation'}),
-      body: JSON.stringify({ sender: identity, text: text })
+      body: JSON.stringify(body)
     })
     .then(function(r){
       if(!r.ok) return r.text().then(function(t){ throw new Error(r.status + ' ' + t); });
@@ -10361,6 +10763,7 @@ loadFavorites();
     if(saved === 'girl' || saved === 'boy') identity = saved;
     attached = false;
     showScreen('home');
+    applyChatBg();
     if(window._dmUpdateVP) window._dmUpdateVP();
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
