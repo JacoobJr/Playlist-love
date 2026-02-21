@@ -600,13 +600,37 @@ header::before {
 .lui-upload-progress { width:80%; height:4px; background:rgba(255,255,255,0.2); border-radius:2px; overflow:hidden; }
 .lui-upload-bar { height:100%; background:#e879a0; width:0%; transition:width 0.3s; border-radius:2px; }
 .lui-upload-status { font-size:10px; color:#fff; font-weight:600; }
-.lui-img-empty { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; background:var(--s2); }
-.lui-img-empty-icon { font-size:30px; opacity:0.35; }
-.lui-img-empty-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:0.3px; }
-.lui-desc-editable { cursor:pointer; position:relative; transition:color 0.2s; }
-.lui-desc-editable::after { content:'✏️'; font-size:9px; margin-left:4px; opacity:0; transition:opacity 0.2s; vertical-align:middle; }
-.lui-desc-editable:hover { color:#e879a0; }
-.lui-desc-editable:hover::after { opacity:1; }
+.lui-img-empty { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; background:var(--s2); border:2px dashed rgba(232,121,160,0.25); border-radius:8px; transition: border-color 0.2s, background 0.2s; }
+.lui-img-empty:hover { background: var(--s3); border-color: rgba(232,121,160,0.5); }
+.lui-img-empty-icon { font-size:28px; opacity:0.45; }
+.lui-img-empty-lbl { font-size:9px; color:var(--muted); font-weight:700; letter-spacing:0.8px; text-transform: uppercase; opacity: 0.7; }
+.lui-desc-editable {
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s, background 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 6px;
+  padding: 3px 5px 3px 3px;
+  margin-top: 5px;
+  margin-left: -3px;
+  max-width: 140px;
+}
+.lui-desc-editable::after {
+  content: '✏️';
+  font-size: 9px;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.lui-desc-editable:hover {
+  color: #e879a0;
+  background: rgba(232,121,160,0.10);
+}
+.lui-desc-editable:hover::after { opacity: 1; }
+.lui-desc-editable:active { background: rgba(232,121,160,0.18); transform: scale(0.97); }
 /* Modal édition description */
 #descEditModal {
   position:fixed; inset:0; z-index:7000;
@@ -617,22 +641,33 @@ header::before {
 #descEditModal.open { display:flex; }
 .desc-edit-sheet {
   background:var(--s1); border:1px solid var(--border);
-  border-radius:22px 22px 0 0; padding:20px 20px 28px;
+  border-radius:22px 22px 0 0; padding:12px 20px 28px;
   width:100%; max-width:480px;
-  animation: slideUpSheet 0.28s cubic-bezier(.34,1.56,.64,1);
+  animation: slideUpSheet 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
-@keyframes slideUpSheet { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
-.desc-edit-label { font-size:9px; font-weight:700; color:var(--green); text-transform:uppercase; letter-spacing:2.5px; margin-bottom:10px; display:block; }
+.desc-edit-handle {
+  width: 36px; height: 4px;
+  background: rgba(255,255,255,0.18);
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+body.light .desc-edit-handle { background: rgba(0,0,0,0.15); }
+@keyframes slideUpSheet { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.desc-edit-label { font-size:13px; font-weight:700; color:var(--text); margin-bottom:12px; display:block; text-align: center; }
 .desc-edit-input {
-  width:100%; padding:12px 14px; font-size:15px;
-  background:var(--s2); border:1px solid var(--border);
-  border-radius:10px; color:var(--text); font-family:'DM Sans',sans-serif;
-  outline:none; transition:border-color 0.2s;
+  width:100%; padding:14px 16px; font-size:15px;
+  background:var(--s2); border:1.5px solid var(--border);
+  border-radius:12px; color:var(--text); font-family:'DM Sans',sans-serif;
+  outline:none; transition:border-color 0.2s, box-shadow 0.2s;
 }
-.desc-edit-input:focus { border-color:var(--green); }
-.desc-edit-actions { display:flex; gap:8px; margin-top:12px; }
-.desc-edit-save { flex:1; padding:13px; background:var(--green); color:#000; font-weight:700; font-size:14px; font-family:'DM Sans',sans-serif; border:none; border-radius:10px; cursor:pointer; }
-.desc-edit-cancel { padding:13px 18px; background:var(--s2); color:var(--sub); font-size:14px; font-family:'DM Sans',sans-serif; border:1px solid var(--border); border-radius:10px; cursor:pointer; }
+.desc-edit-input::placeholder { color: var(--muted); font-size: 13px; }
+.desc-edit-input:focus { border-color:var(--green); box-shadow: 0 0 0 3px rgba(0,201,167,0.1); }
+.desc-edit-actions { display:flex; gap:8px; margin-top:14px; }
+.desc-edit-save { flex:1; padding:14px; background:var(--green); color:#000; font-weight:700; font-size:14px; font-family:'DM Sans',sans-serif; border:none; border-radius:12px; cursor:pointer; transition: background 0.15s, transform 0.1s; }
+.desc-edit-save:hover { background: var(--green2); }
+.desc-edit-save:active { transform: scale(0.97); }
+.desc-edit-cancel { padding:14px 18px; background:var(--s2); color:var(--sub); font-size:14px; font-family:'DM Sans',sans-serif; border:1px solid var(--border); border-radius:12px; cursor:pointer; transition: background 0.15s; }
+.desc-edit-cancel:hover { background: var(--s3); }
 
 .song-list { display: flex; flex-direction: column; gap: 2px; }
 .song { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; cursor:pointer; transition:background 0.15s; position:relative; border:1px solid transparent; }
@@ -5986,11 +6021,12 @@ document.addEventListener('DOMContentLoaded', function(){
     });
   }
 
+  var SLOT_LABELS = { animal:'Son animal', fleurs:'Ses fleurs', personnage:'Son personnage', saison:'Sa saison', repas:'Son repas' };
   window.elleEditDesc = function(slot){
     if(localStorage.getItem('jayana_profile') !== 'boy') return;
     var el = document.getElementById('elle-desc-' + slot);
     if(!el) return;
-    descEditOpen(el.textContent.trim(), 'Description — ' + slot, function(val){
+    descEditOpen(el.textContent.trim(), 'Légende · ' + (SLOT_LABELS[slot] || slot), function(val){
       val = val || ELLE_DESC_DEFAULTS[slot];
       el.textContent = val;
       localStorage.setItem('elle_desc_' + slot, val);
@@ -6144,7 +6180,8 @@ document.addEventListener('DOMContentLoaded', function(){
     if(localStorage.getItem('jayana_profile') !== 'girl') return;
     var el = document.getElementById('lui-desc-' + slot);
     if(!el) return;
-    descEditOpen(el.textContent.trim(), 'Description — ' + slot, function(val){
+    var SLOT_LABELS_LUI = { animal:'Son animal', fleurs:'Ses fleurs', personnage:'Son personnage', saison:'Sa saison', repas:'Son repas' };
+    descEditOpen(el.textContent.trim(), 'Légende · ' + (SLOT_LABELS_LUI[slot] || slot), function(val){
       val = val || LUI_DESC_DEFAULTS[slot];
       el.textContent = val;
       localStorage.setItem('lui_desc_' + slot, val);
@@ -10445,8 +10482,9 @@ loadFavorites();
 <!-- Modal édition description pochette -->
 <div id="descEditModal">
   <div class="desc-edit-sheet">
+    <div class="desc-edit-handle"></div>
     <span class="desc-edit-label" id="descEditLabel">Modifier la description</span>
-    <input type="text" class="desc-edit-input" id="descEditInput" maxlength="40" autocomplete="off" autocorrect="off" spellcheck="false">
+    <input type="text" class="desc-edit-input" id="descEditInput" maxlength="40" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Ex : Mon coin préféré 🌿">
     <div class="desc-edit-actions">
       <button class="desc-edit-cancel" onclick="descEditClose()">Annuler</button>
       <button class="desc-edit-save" onclick="descEditSave()">Sauvegarder ✓</button>
