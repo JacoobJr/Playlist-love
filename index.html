@@ -1100,6 +1100,7 @@ body.light #lockNavBtn.has-unread {
   width:230px; border:1px solid var(--border);
   box-shadow: var(--shadow);
   animation: popIn2 0.2s cubic-bezier(.4,2,.55,.9);
+  transition: bottom 0.15s ease;
 }
 @keyframes popIn2 { from{transform:scale(0.9);opacity:0} to{transform:scale(1);opacity:1} }
 #lockInput { flex:1; padding:9px 11px; font-size:13px; border:1px solid var(--border); border-radius:6px; background:var(--s3); color:var(--text); font-family:'DM Sans',sans-serif; outline:none; width:100%; transition:border-color 0.2s; }
@@ -6988,7 +6989,28 @@ document.getElementById('spinBtn').addEventListener('click',function(){
 
 // ── LOCK ──
 var lockPopup=document.getElementById('lockPopup'),lockInput=document.getElementById('lockInput'),lockError=document.getElementById('lockError');
-function toggleLockPopup(){resetZoom();var isOpen=lockPopup.style.display==='block';document.getElementById('libraryPopup').style.display='none';lockPopup.style.display=isOpen?'none':'block';if(!isOpen){lockError.style.display='none';lockInput.value='';}}
+
+/* ── Repositionne le lockPopup quand le clavier iOS s'ouvre ── */
+(function(){
+  function updateLockPopupPos(){
+    if(!lockPopup || lockPopup.style.display !== 'block') return;
+    if(!window.visualViewport) return;
+    var vv = window.visualViewport;
+    var kbH = window.innerHeight - vv.height;
+    if(kbH > 80){
+      lockPopup.style.bottom = (kbH + 8) + 'px';
+    } else {
+      lockPopup.style.bottom = '72px';
+    }
+  }
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize', updateLockPopupPos);
+    window.visualViewport.addEventListener('scroll', updateLockPopupPos);
+  }
+  window._updateLockPopupPos = updateLockPopupPos;
+})();
+
+function toggleLockPopup(){resetZoom();var isOpen=lockPopup.style.display==='block';document.getElementById('libraryPopup').style.display='none';lockPopup.style.display=isOpen?'none':'block';if(!isOpen){lockError.style.display='none';lockInput.value='';setTimeout(function(){ if(window._updateLockPopupPos) window._updateLockPopupPos(); },50);}}
 var _HASH_NEMO='eb38eebd7bef45d49aef46835c8460fc98c9af3f68f6af759a08173709cd76ea';
 var _HASH_KEVIN='9e1822c2d03202bc1cf8dfb8b858c5f679302f17db901abb111a9f8eecaae8db';
 var _S=atob('UGxAeWxpc3RfSjR5YW5hXzIwMjUheEs5');
