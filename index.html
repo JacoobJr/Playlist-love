@@ -5874,7 +5874,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
 
   /* ════ BÊTISE 1 : TREMBLEMENT ════ */
   var _shakeTaps = 0; var _shakeTimer = null; var _shakeLock = false;
-  var _shakeMaxTimer = null; // sécurité : arrêt automatique après 4s max
+  var _shakeMaxTimer = null; // sécurité : arrêt automatique après 20s max
   function startShake(p){
     _shakeTaps = 0;
     _shakeLock = false;
@@ -5897,7 +5897,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
       var b = document.getElementById('prankShakeBanner');
       if(b) b.classList.remove('show');
       prankDone();
-    }, 4000);
+    }, 20000);
   }
   function updateShakeCount(){
     var el = document.getElementById('prankShakeCount');
@@ -7494,12 +7494,6 @@ function toggleLockPopup(){
     document.body.style.position   = '';
     document.body.style.width      = '';
   } else {
-    // Si un profil est déjà connecté, accès direct sans mot de passe
-    var _prof = localStorage.getItem('jayana_profile');
-    if(_prof === 'girl' || _prof === 'boy'){
-      openHiddenPage();
-      return;
-    }
     lockError.style.display = 'none';
     lockInput.value = '';
     lockPopup.style.display = 'block';
