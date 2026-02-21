@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://zjmbyjpxqrojnuymnpcf.supabase.co; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src * data: blob:; media-src * blob: data:; connect-src https://zjmbyjpxqrojnuymnpcf.supabase.co; frame-ancestors 'none';">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
 <script>
 // Fix clavier iOS — couvre la page principale derrière InstaLove
 (function(){
@@ -3059,12 +3061,15 @@ body.anniv-mode .counter-block-top {
 
 <script>
 async function nativeLogout(){
+  // Invalide le token côté serveur si une session active existe
+  if(_sbAccessToken){
+    await fetch(SB_URL+'/auth/v1/logout', {
+      method:'POST', headers:{'apikey':SB_KEY,'Authorization':'Bearer '+_sbAccessToken}
+    }).catch(function(){});
+  }
   sessionStorage.removeItem('jayana_sb_session');
   localStorage.removeItem('jayana_profile');
   _sbAccessToken = null;
-  await fetch(SB_URL+'/auth/v1/logout', {
-    method:'POST', headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
-  }).catch(function(){});
   location.reload();
 }
 
@@ -3930,7 +3935,7 @@ body.light #counterBlock.glowing .c-num-big {
     <div class="memo-auth-icon">🔐</div>
     <div class="memo-auth-title">Mode édition</div>
     <div class="memo-auth-sub">Entre le code pour modifier</div>
-    <input type="text" class="memo-auth-input" id="memoAuthInput" placeholder="Code..." autocomplete="off">
+    <input type="password" class="memo-auth-input" id="memoAuthInput" placeholder="Code..." autocomplete="off">
     <button class="memo-auth-btn" onclick="memoCheckAuth()">Valider</button>
     <div class="memo-auth-err" id="memoAuthErr">❌ Code incorrect, réessaie !</div>
     <span class="memo-auth-cancel" onclick="closeMemoAuth()">Annuler</span>
@@ -4034,11 +4039,11 @@ body.light #counterBlock.glowing .c-num-big {
 <div class="section fade-in" id="Books">
   <div class="section-label">Idées livre 📚</div>
   <div class="slider">
-    <div class="album-card"><div class="album-image"><a href="https://booknode.com/la_saga_des_impossibles_tome_1_adam_03666756" target="_blank"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-6.jpg" onerror="this.onerror=null;this.src='image-6.jpg'"></a><div class="album-banner">Adam</div></div><div class="album-desc">Une romance qui touche l'âme ✨</div></div>
-    <div class="album-card"><div class="album-image"><a href="https://www.fnac.com/a18261401/Emma-Green-Ce-qui-nous-rend-vivants" target="_blank"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-7.jpg" onerror="this.onerror=null;this.src='image-7.jpg'"></a><div class="album-banner">Ce qui nous rend vivants</div></div><div class="album-desc">Quand l'amour révèle tout 💖</div></div>
-    <div class="album-card"><div class="album-image"><a href="https://www.fnac.com/a17088484/Captive-Tome-1-Captive-Sarah-Rivens" target="_blank"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-8.jpg" onerror="this.onerror=null;this.src='image-8.jpg'"></a><div class="album-banner">Captive</div></div><div class="album-desc">Passion et suspense 🔥</div></div>
-    <div class="album-card"><div class="album-image"><a href="https://booknode.com/avant_toi_0690393" target="_blank"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-9.jpg" onerror="this.onerror=null;this.src='image-9.jpg'"></a><div class="album-banner">Avant toi</div></div><div class="album-desc">Un amour impossible 💔</div></div>
-    <div class="album-card"><div class="album-image"><a href="https://www.fnac.com/a7792857/Katarina-Bivald-La-Bibliotheque-des-coeurs-cabosses" target="_blank"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-10.jpg" onerror="this.onerror=null;this.src='image-10.jpg'"></a><div class="album-banner">La bibliothèque des cœurs cabossés</div></div><div class="album-desc">Émotions à chaque page 📚</div></div>
+    <div class="album-card"><div class="album-image"><a href="https://booknode.com/la_saga_des_impossibles_tome_1_adam_03666756" target="_blank" rel="noopener noreferrer"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-6.jpg" onerror="this.onerror=null;this.src='image-6.jpg'"></a><div class="album-banner">Adam</div></div><div class="album-desc">Une romance qui touche l'âme ✨</div></div>
+    <div class="album-card"><div class="album-image"><a href="https://www.fnac.com/a18261401/Emma-Green-Ce-qui-nous-rend-vivants" target="_blank" rel="noopener noreferrer"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-7.jpg" onerror="this.onerror=null;this.src='image-7.jpg'"></a><div class="album-banner">Ce qui nous rend vivants</div></div><div class="album-desc">Quand l'amour révèle tout 💖</div></div>
+    <div class="album-card"><div class="album-image"><a href="https://www.fnac.com/a17088484/Captive-Tome-1-Captive-Sarah-Rivens" target="_blank" rel="noopener noreferrer"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-8.jpg" onerror="this.onerror=null;this.src='image-8.jpg'"></a><div class="album-banner">Captive</div></div><div class="album-desc">Passion et suspense 🔥</div></div>
+    <div class="album-card"><div class="album-image"><a href="https://booknode.com/avant_toi_0690393" target="_blank" rel="noopener noreferrer"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-9.jpg" onerror="this.onerror=null;this.src='image-9.jpg'"></a><div class="album-banner">Avant toi</div></div><div class="album-desc">Un amour impossible 💔</div></div>
+    <div class="album-card"><div class="album-image"><a href="https://www.fnac.com/a7792857/Katarina-Bivald-La-Bibliotheque-des-coeurs-cabosses" target="_blank" rel="noopener noreferrer"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-10.jpg" onerror="this.onerror=null;this.src='image-10.jpg'"></a><div class="album-banner">La bibliothèque des cœurs cabossés</div></div><div class="album-desc">Émotions à chaque page 📚</div></div>
   </div>
 </div>
 
@@ -4146,7 +4151,7 @@ body.light #counterBlock.glowing .c-num-big {
 <div id="lockPopup">
   <div style="padding:12px 14px 6px;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:2px">Mode caché 🔐</div>
   <div style="padding:0 10px 10px;display:flex;gap:7px;align-items:center">
-    <input type="text" id="lockInput" placeholder="Tape le code..." autocomplete="off">
+    <input type="password" id="lockInput" placeholder="Tape le code..." autocomplete="off">
     <button id="lockSubmit" onclick="checkCode()">OK</button>
   </div>
   <div id="lockError" style="display:none;padding:0 13px 10px;font-size:11px;color:#ff6b6b"></div>
@@ -4739,7 +4744,7 @@ body.light #counterBlock.glowing .c-num-big {
     <div class="memo-auth-icon">🎵</div>
     <div class="memo-auth-title">Suggérer une musique</div>
     <div class="memo-auth-sub">Entre le code pour déverrouiller</div>
-    <input type="text" class="memo-auth-input" id="sgAuthInput" placeholder="Code..." autocomplete="off">
+    <input type="password" class="memo-auth-input" id="sgAuthInput" placeholder="Code..." autocomplete="off">
     <button class="memo-auth-btn" onclick="sgCheckAuth()">Valider</button>
     <div class="memo-auth-err" id="sgAuthErr">❌ Code incorrect, réessaie !</div>
     <span class="memo-auth-cancel" onclick="closeSgAuth()">Annuler</span>
@@ -6723,7 +6728,7 @@ function buildStack() {
     el.style.zIndex = i + 1;
     el.style.transform = 'translateY(' + (depth * 4) + 'px) rotate(' + rots[dIdx % rots.length] + 'deg)';
     el.style.opacity = depth === 0 ? '1' : String(Math.max(0.38, 1 - depth * 0.16));
-    el.innerHTML = '<div class="p-art" style="background:' + dd.color + '">' + dd.icon + '</div><div class="p-body"><div class="p-title">' + dd.title + '</div><div class="p-text">' + dd.text + '</div></div>';
+    el.innerHTML = '<div class="p-art" style="background:' + escHtml(dd.color) + '">' + dd.icon + '</div><div class="p-body"><div class="p-title">' + escHtml(dd.title) + '</div><div class="p-text">' + escHtml(dd.text) + '</div></div>';
     if (dd.isAnniv) {
       el.style.boxShadow = '0 0 0 2px rgba(245,197,24,0.6), 0 8px 32px rgba(0,0,0,0.45)';
       el.style.outline = 'none';
@@ -6963,7 +6968,7 @@ function createSongEl(song, num) {
   var heartBtn = div.querySelector('.btn-heart');
   heartBtn.addEventListener('click', function(e){ e.stopPropagation(); toggleFavorite(song.file, heartBtn); });
   applyHeartState(song.file, heartBtn);
-  div.querySelector('.btn-yt').addEventListener('click',function(){window.open(song.yt,'_blank');});
+  div.querySelector('.btn-yt').addEventListener('click',function(){var u=song.yt;if(u&&(u.startsWith('https://')||u.startsWith('http://')))window.open(u,'_blank','noopener,noreferrer');});
   function ps(){audio.pause();btn.innerHTML='&#9654;';btn.classList.remove('active');div.classList.remove('playing');particleActive=false;hideDance();if(window.mpUpdate) mpUpdate();}
   function pl(){audio.play();btn.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';btn.classList.add('active');div.classList.add('playing');particleActive=true;showDance();if(window.mpUpdate) mpUpdate();}
   btn.addEventListener('click',function(){if(currentAudio===audio){audio.paused?pl():ps();}else{stopCurrent();currentAudio=audio;currentBtn=btn;currentRow=div;pl();}});
@@ -7017,7 +7022,7 @@ function renderTop50() {
     heartBtn.addEventListener('click', function(e){ e.stopPropagation(); toggleFavorite(song.file, heartBtn); });
     applyHeartState(song.file, heartBtn);
 
-    ytb.addEventListener('click', function(e){ e.stopPropagation(); window.open(song.yt,'_blank'); });
+    ytb.addEventListener('click', function(e){ e.stopPropagation(); var u=song.yt;if(u&&(u.startsWith('https://')||u.startsWith('http://')))window.open(u,'_blank','noopener,noreferrer'); });
     function ps(){ audio.pause(); btn.innerHTML='&#9654;'; btn.classList.remove('active'); div.classList.remove('playing'); particleActive=false; hideDance(); if(window.mpUpdate) mpUpdate(); }
     function pl(){ audio.play(); btn.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'; btn.classList.add('active'); div.classList.add('playing'); particleActive=true; showDance(); if(window.mpUpdate) mpUpdate(); }
     function toggle(e){ if(e) e.stopPropagation(); if(currentAudio===audio){ audio.paused?pl():ps(); }else{ stopCurrent(); currentAudio=audio; currentBtn=btn; currentRow=div; pl(); } }
@@ -7333,7 +7338,7 @@ document.getElementById('spinBtn').addEventListener('click',function(){
     currentAngle=startAngle+(targetAngle-startAngle)*easeOut(progress);
     drawWheel(currentAngle);
     if(progress<1){requestAnimationFrame(animate);}
-    else{isSpinning=false;spinBtn.disabled=false;var act=activities[targetSlice];wr.className='wheelResult has-result';wr.innerHTML='<span class="result-icon">'+act.icon+'</span><span class="result-label">Ce soir c\'est décidé !</span><span class="result-text">'+act.label+'</span>';}
+    else{isSpinning=false;spinBtn.disabled=false;var act=activities[targetSlice];wr.className='wheelResult has-result';wr.innerHTML='<span class="result-icon">'+act.icon+'</span><span class="result-label">Ce soir c\'est décidé !</span><span class="result-text">'+escHtml(act.label)+'</span>';}
   }
   requestAnimationFrame(animate);
 });
@@ -7432,12 +7437,23 @@ var _HASH_NEMO='eb38eebd7bef45d49aef46835c8460fc98c9af3f68f6af759a08173709cd76ea
 var _HASH_KEVIN='a586ffe3acf28484d17760d1ddaa2af699666c870aaaa66f8cfc826a528429ce';
 var _S=atob('UGxAeWxpc3RfSjR5YW5hXzIwMjUheEs5');
 async function _sha256(str){var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str+_S));return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');}
+var _lockFailCount=0, _lockBlocked=false;
 async function checkCode(){
+  if(_lockBlocked) return;
   var val=lockInput.value.trim().toUpperCase();lockError.style.display='none';
   var h=await _sha256(val);
-  if(h===_HASH_NEMO){lockPopup.style.display='none';document.getElementById('prankOverlay').classList.add('show');return;}
-  if(h===_HASH_KEVIN){lockPopup.style.display='none';openHiddenPage();return;}
-  lockError.style.display='block';lockError.textContent='❌ Code incorrect, recommence !';lockInput.value='';
+  if(h===_HASH_NEMO){_lockFailCount=0;lockPopup.style.display='none';document.getElementById('prankOverlay').classList.add('show');return;}
+  if(h===_HASH_KEVIN){_lockFailCount=0;lockPopup.style.display='none';openHiddenPage();return;}
+  _lockFailCount++;
+  lockError.style.display='block';lockInput.value='';
+  if(_lockFailCount>=5){
+    _lockBlocked=true;
+    lockError.textContent='⛔ Trop de tentatives — attends 30s';
+    lockInput.disabled=true;
+    setTimeout(function(){_lockBlocked=false;_lockFailCount=0;lockInput.disabled=false;lockError.style.display='none';},30000);
+  } else {
+    lockError.textContent='❌ Code incorrect, recommence ! ('+_lockFailCount+'/5)';
+  }
 }
 function closePrank(){document.getElementById('prankOverlay').classList.remove('show');lockPopup.style.display='block';lockInput.value='';}
 function openHiddenPage(){document.getElementById('hiddenPage').classList.add('active');window.scrollTo(0,0);}
@@ -8601,11 +8617,26 @@ function filterSongs(q){
     setTimeout(function(){document.getElementById('memoAuthInput').focus();},80);
   }
   window.closeMemoAuth=function(){document.getElementById('memoAuthModal').classList.remove('open');};
+  var _memoFailCount=0, _memoBlocked=false;
   window.memoCheckAuth=async function(){
+    if(_memoBlocked) return;
     var val=document.getElementById('memoAuthInput').value.trim().toUpperCase();
     var h=await _sha256(val);
-    if(h===_MEMO_HASH){window.closeMemoAuth();if(_authCb){_authCb();_authCb=null;}}
-    else{document.getElementById('memoAuthErr').style.display='block';document.getElementById('memoAuthInput').value='';document.getElementById('memoAuthInput').focus();}
+    if(h===_MEMO_HASH){_memoFailCount=0;window.closeMemoAuth();if(_authCb){_authCb();_authCb=null;}}
+    else{
+      _memoFailCount++;
+      document.getElementById('memoAuthInput').value='';
+      document.getElementById('memoAuthInput').focus();
+      var errEl=document.getElementById('memoAuthErr');
+      if(_memoFailCount>=5){
+        _memoBlocked=true;
+        errEl.style.display='block';errEl.textContent='⛔ Trop de tentatives — attends 30s';
+        document.getElementById('memoAuthInput').disabled=true;
+        setTimeout(function(){_memoBlocked=false;_memoFailCount=0;document.getElementById('memoAuthInput').disabled=false;errEl.style.display='none';},30000);
+      } else {
+        errEl.style.display='block';errEl.textContent='❌ Code incorrect, réessaie ! ('+_memoFailCount+'/5)';
+      }
+    }
   };
   document.getElementById('memoAuthInput').addEventListener('keydown',function(e){if(e.key==='Enter')window.memoCheckAuth();});
   document.getElementById('memoAuthModal').addEventListener('click',function(e){if(e.target===this)window.closeMemoAuth();});
@@ -9168,16 +9199,28 @@ function filterSongs(q){
   window.closeSgAuth = function(){
     document.getElementById('sgAuthModal').classList.remove('open');
   };
+  var _sgFailCount=0, _sgBlocked=false;
   window.sgCheckAuth = async function(){
+    if(_sgBlocked) return;
     var val = document.getElementById('sgAuthInput').value.trim().toUpperCase();
     var h = await _sha256(val);
     if(h === _SG_HASH){
+      _sgFailCount=0;
       window.closeSgAuth();
       if(_sgAuthCb){ _sgAuthCb(); _sgAuthCb = null; }
     } else {
-      document.getElementById('sgAuthErr').style.display = 'block';
+      _sgFailCount++;
       document.getElementById('sgAuthInput').value = '';
       document.getElementById('sgAuthInput').focus();
+      var errEl = document.getElementById('sgAuthErr');
+      if(_sgFailCount >= 5){
+        _sgBlocked = true;
+        errEl.style.display = 'block'; errEl.textContent = '⛔ Trop de tentatives — attends 30s';
+        document.getElementById('sgAuthInput').disabled = true;
+        setTimeout(function(){ _sgBlocked=false; _sgFailCount=0; document.getElementById('sgAuthInput').disabled=false; errEl.style.display='none'; }, 30000);
+      } else {
+        errEl.style.display = 'block'; errEl.textContent = '❌ Code incorrect, réessaie ! ('+_sgFailCount+'/5)';
+      }
     }
   };
   document.getElementById('sgAuthInput').addEventListener('keydown', function(e){ if(e.key==='Enter') window.sgCheckAuth(); });
