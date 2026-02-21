@@ -603,10 +603,36 @@ header::before {
 .lui-img-empty { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; background:var(--s2); }
 .lui-img-empty-icon { font-size:30px; opacity:0.35; }
 .lui-img-empty-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:0.3px; }
-.lui-desc-editable { cursor:pointer; border-bottom:1px dashed transparent; transition:border-color 0.2s, color 0.2s; }
-.lui-desc-editable:hover { border-bottom-color:rgba(232,121,160,0.5); color:#e879a0; }
-.lui-desc-editable::after { content:' ✏️'; font-size:9px; opacity:0; transition:opacity 0.2s; }
+.lui-desc-editable { cursor:pointer; position:relative; transition:color 0.2s; }
+.lui-desc-editable::after { content:'✏️'; font-size:9px; margin-left:4px; opacity:0; transition:opacity 0.2s; vertical-align:middle; }
+.lui-desc-editable:hover { color:#e879a0; }
 .lui-desc-editable:hover::after { opacity:1; }
+/* Modal édition description */
+#descEditModal {
+  position:fixed; inset:0; z-index:7000;
+  background:rgba(0,0,0,0.6); backdrop-filter:blur(8px);
+  display:none; align-items:flex-end; justify-content:center;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+#descEditModal.open { display:flex; }
+.desc-edit-sheet {
+  background:var(--s1); border:1px solid var(--border);
+  border-radius:22px 22px 0 0; padding:20px 20px 28px;
+  width:100%; max-width:480px;
+  animation: slideUpSheet 0.28s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes slideUpSheet { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
+.desc-edit-label { font-size:9px; font-weight:700; color:var(--green); text-transform:uppercase; letter-spacing:2.5px; margin-bottom:10px; display:block; }
+.desc-edit-input {
+  width:100%; padding:12px 14px; font-size:15px;
+  background:var(--s2); border:1px solid var(--border);
+  border-radius:10px; color:var(--text); font-family:'DM Sans',sans-serif;
+  outline:none; transition:border-color 0.2s;
+}
+.desc-edit-input:focus { border-color:var(--green); }
+.desc-edit-actions { display:flex; gap:8px; margin-top:12px; }
+.desc-edit-save { flex:1; padding:13px; background:var(--green); color:#000; font-weight:700; font-size:14px; font-family:'DM Sans',sans-serif; border:none; border-radius:10px; cursor:pointer; }
+.desc-edit-cancel { padding:13px 18px; background:var(--s2); color:var(--sub); font-size:14px; font-family:'DM Sans',sans-serif; border:1px solid var(--border); border-radius:10px; cursor:pointer; }
 
 .song-list { display: flex; flex-direction: column; gap: 2px; }
 .song { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; cursor:pointer; transition:background 0.15s; position:relative; border:1px solid transparent; }
@@ -5817,6 +5843,38 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
 })();
 
 
+// ── Modal édition description ──
+var _descEditCallback = null;
+function descEditOpen(currentVal, label, cb){
+  _descEditCallback = cb;
+  var input = document.getElementById('descEditInput');
+  var lbl = document.getElementById('descEditLabel');
+  if(lbl) lbl.textContent = label || 'Modifier la description';
+  if(input){ input.value = currentVal || ''; }
+  document.getElementById('descEditModal').classList.add('open');
+  setTimeout(function(){ if(input) input.focus(); }, 100);
+}
+function descEditClose(){
+  document.getElementById('descEditModal').classList.remove('open');
+  _descEditCallback = null;
+}
+function descEditSave(){
+  var val = document.getElementById('descEditInput').value.trim();
+  document.getElementById('descEditModal').classList.remove('open');
+  if(_descEditCallback){ _descEditCallback(val); _descEditCallback = null; }
+}
+document.addEventListener('DOMContentLoaded', function(){
+  var inp = document.getElementById('descEditInput');
+  var modal = document.getElementById('descEditModal');
+  if(inp) inp.addEventListener('keydown', function(e){
+    if(e.key === 'Enter') descEditSave();
+    if(e.key === 'Escape') descEditClose();
+  });
+  if(modal) modal.addEventListener('click', function(e){
+    if(e.target === this) descEditClose();
+  });
+});
+
 // ════════════════════════════════════════════
 // SECTION ELLE — Upload Supabase Storage (Link only)
 // ════════════════════════════════════════════
@@ -5932,12 +5990,11 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     if(localStorage.getItem('jayana_profile') !== 'boy') return;
     var el = document.getElementById('elle-desc-' + slot);
     if(!el) return;
-    var current = el.textContent.trim();
-    var newVal = prompt('Modifier la description :', current);
-    if(newVal === null) return;
-    newVal = newVal.trim() || ELLE_DESC_DEFAULTS[slot];
-    el.textContent = newVal;
-    localStorage.setItem('elle_desc_' + slot, newVal);
+    descEditOpen(el.textContent.trim(), 'Description — ' + slot, function(val){
+      val = val || ELLE_DESC_DEFAULTS[slot];
+      el.textContent = val;
+      localStorage.setItem('elle_desc_' + slot, val);
+    });
   };
 
   // ── Init ──
@@ -6084,16 +6141,14 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
   }
 
   window.luiEditDesc = function(slot){
-    var profile = localStorage.getItem('jayana_profile');
-    if(profile !== 'girl') return;
+    if(localStorage.getItem('jayana_profile') !== 'girl') return;
     var el = document.getElementById('lui-desc-' + slot);
     if(!el) return;
-    var current = el.textContent.replace(' ✏️','').trim();
-    var newVal = prompt('Modifier la description :', current);
-    if(newVal === null) return; // annulé
-    newVal = newVal.trim() || LUI_DESC_DEFAULTS[slot];
-    el.textContent = newVal;
-    localStorage.setItem('lui_desc_' + slot, newVal);
+    descEditOpen(el.textContent.trim(), 'Description — ' + slot, function(val){
+      val = val || LUI_DESC_DEFAULTS[slot];
+      el.textContent = val;
+      localStorage.setItem('lui_desc_' + slot, val);
+    });
   };
 
   function luiSyncDescs(){
@@ -10384,6 +10439,18 @@ loadFavorites();
     <div class="chantier-err" id="chantierErr"></div>
     <button class="chantier-btn" onclick="chantierValidate()">🔓 Débloquer</button>
     <div class="chantier-cancel" onclick="chantierClose()">Fermer</div>
+  </div>
+</div>
+
+<!-- Modal édition description pochette -->
+<div id="descEditModal">
+  <div class="desc-edit-sheet">
+    <span class="desc-edit-label" id="descEditLabel">Modifier la description</span>
+    <input type="text" class="desc-edit-input" id="descEditInput" maxlength="40" autocomplete="off" autocorrect="off" spellcheck="false">
+    <div class="desc-edit-actions">
+      <button class="desc-edit-cancel" onclick="descEditClose()">Annuler</button>
+      <button class="desc-edit-save" onclick="descEditSave()">Sauvegarder ✓</button>
+    </div>
   </div>
 </div>
 </body>
