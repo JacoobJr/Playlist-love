@@ -1095,173 +1095,74 @@ body.light #lockNavBtn.has-unread {
 .result-text { font-family:'DM Sans',sans-serif; font-size:16px; font-weight:600; color:var(--text); margin-top:2px; letter-spacing:-0.2px; }
 
 /* ══════════════════════════════════════
-   NOW LISTENING — Encadré unique dynamique
+   NOW LISTENING — Glow chanson dans la liste
 ══════════════════════════════════════ */
 
-/* ── Wrapper ── */
-#nlBox {
-  display: none;
-  margin: 20px 16px 4px;
-  border-radius: 18px;
-  padding: 16px 18px;
+/* nlBox masqué (plus utilisé visuellement) */
+#nlBox { display: none !important; }
+
+/* ── Glow sur la ligne de chanson ── */
+.sp-song.nl-other-playing {
   position: relative;
-  overflow: hidden;
-  border: 2px solid transparent;
-  transition: background 0.5s, border-color 0.5s;
 }
-#nlBox.visible { display: block; }
-
-/* ── Fond et bordure selon mode ── */
-#nlBox.nl-boy {
-  background: linear-gradient(135deg, rgba(91,156,246,0.13) 0%, rgba(91,156,246,0.04) 100%);
-  border-color: #5b9cf6;
-  animation: nlPulseBoy 1.8s ease-in-out infinite;
-}
-#nlBox.nl-girl {
-  background: linear-gradient(135deg, rgba(232,121,160,0.15) 0%, rgba(232,121,160,0.04) 100%);
-  border-color: #e879a0;
-  animation: nlPulseGirl 1.8s ease-in-out infinite;
-}
-#nlBox.nl-together {
-  background: linear-gradient(135deg, rgba(245,197,24,0.18) 0%, rgba(255,150,50,0.07) 100%);
-  border-color: #f5c518;
-  animation: nlPulseGold 1.4s ease-in-out infinite;
-}
-
-/* ── Animations pulse bordure + glow ── */
-@keyframes nlPulseBoy {
-  0%,100% { border-color: rgba(91,156,246,0.45); box-shadow: 0 4px 18px rgba(91,156,246,0.10); }
-  50%     { border-color: #5b9cf6;               box-shadow: 0 4px 32px rgba(91,156,246,0.45), 0 0 0 4px rgba(91,156,246,0.10); }
-}
-@keyframes nlPulseGirl {
-  0%,100% { border-color: rgba(232,121,160,0.45); box-shadow: 0 4px 18px rgba(232,121,160,0.10); }
-  50%     { border-color: #e879a0;                box-shadow: 0 4px 32px rgba(232,121,160,0.50), 0 0 0 4px rgba(232,121,160,0.12); }
-}
-@keyframes nlPulseGold {
-  0%,100% { border-color: rgba(245,197,24,0.55); box-shadow: 0 4px 20px rgba(245,197,24,0.15); }
-  50%     { border-color: #f5c518;               box-shadow: 0 4px 40px rgba(245,197,24,0.55), 0 0 0 5px rgba(245,197,24,0.12), 0 0 60px rgba(245,197,24,0.15); }
-}
-
-/* ── Barre de couleur haut ── */
-#nlBox::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  border-radius: 18px 18px 0 0;
-  opacity: 0;
-  transition: opacity 0.4s;
-}
-#nlBox.nl-boy::before   { background: linear-gradient(90deg, #5b9cf6, #a5c8ff, #5b9cf6); opacity: 1; background-size: 200%; animation: nlShimmerBar 2.5s linear infinite; }
-#nlBox.nl-girl::before  { background: linear-gradient(90deg, #e879a0, #ffc0db, #e879a0); opacity: 1; background-size: 200%; animation: nlShimmerBar 2.5s linear infinite; }
-#nlBox.nl-together::before { background: linear-gradient(90deg, #f5c518, #fff176, #ffab00, #f5c518); opacity: 1; background-size: 300%; animation: nlShimmerBar 1.8s linear infinite; }
-@keyframes nlShimmerBar { 0%{background-position:0%} 100%{background-position:200%} }
-
-/* ── Shimmer overlay pour le mode doré ── */
-#nlBox::after {
-  content: '';
-  position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent);
-  pointer-events: none;
-}
-#nlBox.nl-together::after { animation: nlBodyShimmer 2s ease-in-out infinite; }
-@keyframes nlBodyShimmer { 0%{left:-100%} 100%{left:200%} }
-
-/* ── Contenu ── */
-.nl-inner {
-  display: flex; align-items: center; gap: 14px;
-  position: relative; z-index: 1;
-}
-
-/* Avatar vibrant */
-.nl-avi {
-  font-size: 32px; line-height: 1; flex-shrink: 0;
-  display: inline-block;
-}
-#nlBox.nl-boy   .nl-avi { animation: nlVibeX 0.45s ease-in-out infinite alternate; }
-#nlBox.nl-girl  .nl-avi { animation: nlVibeX 0.45s ease-in-out infinite alternate; }
-#nlBox.nl-together .nl-avi { font-size: 26px; }
-#nlBox.nl-together .nl-avi-left  { animation: nlVibeTog 0.4s ease-in-out infinite alternate; }
-#nlBox.nl-together .nl-avi-right { animation: nlVibeTog 0.4s ease-in-out 0.2s infinite alternate; }
-@keyframes nlVibeX {
-  0%   { transform: rotate(-6deg) scale(1);    }
-  100% { transform: rotate(5deg)  scale(1.08); }
-}
-@keyframes nlVibeTog {
-  0%   { transform: translateY(0)   rotate(-5deg) scale(1);    }
-  100% { transform: translateY(-4px) rotate(4deg) scale(1.1);  }
-}
-
-/* Avatars côte à côte en mode together */
-.nl-avi-duo { display: flex; align-items: flex-end; gap: 2px; flex-shrink: 0; }
-
-.nl-text { flex: 1; min-width: 0; }
-.nl-label {
-  font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px;
-  margin-bottom: 4px; opacity: 0.85;
-}
-#nlBox.nl-boy   .nl-label { color: #5b9cf6; }
-#nlBox.nl-girl  .nl-label { color: #e879a0; }
-#nlBox.nl-together .nl-label { color: #f5c518; letter-spacing: 1.5px; }
-body.light #nlBox.nl-boy   .nl-label { color: #3b7dd8; }
-body.light #nlBox.nl-girl  .nl-label { color: #c8185e; }
-
-.nl-title {
-  font-size: 14px; font-weight: 700; color: var(--text);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  line-height: 1.2;
-}
-.nl-artist {
-  font-size: 11px; color: var(--sub); margin-top: 2px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-#nlBox.nl-together .nl-title { font-size: 13px; }
-
-/* Equalizer */
-.nl-eq {
-  display: flex; align-items: flex-end; gap: 2.5px;
-  height: 20px; flex-shrink: 0;
-}
-.nl-eq span { display: block; width: 3.5px; border-radius: 2px; }
-#nlBox.nl-boy   .nl-eq span { background: #5b9cf6; }
-#nlBox.nl-girl  .nl-eq span { background: #e879a0; }
-#nlBox.nl-together .nl-eq span { background: #f5c518; }
-.nl-eq span:nth-child(1) { animation: nlBar1 0.55s ease-in-out infinite alternate; }
-.nl-eq span:nth-child(2) { animation: nlBar2 0.45s ease-in-out 0.1s infinite alternate; }
-.nl-eq span:nth-child(3) { animation: nlBar3 0.65s ease-in-out 0.05s infinite alternate; }
-.nl-eq span:nth-child(4) { animation: nlBar4 0.5s ease-in-out 0.2s infinite alternate; }
-.nl-eq span:nth-child(5) { animation: nlBar1 0.6s ease-in-out 0.08s infinite alternate; }
-@keyframes nlBar1 { from{height:3px}  to{height:18px} }
-@keyframes nlBar2 { from{height:8px}  to{height:14px} }
-@keyframes nlBar3 { from{height:2px}  to{height:20px} }
-@keyframes nlBar4 { from{height:10px} to{height:12px} }
-
-/* ── Deux lignes côte à côte ── */
-.nl-rows { display: flex; flex-direction: column; gap: 0; width: 100%; }
-.nl-row {
-  display: flex; align-items: center; gap: 12px;
-  padding: 4px 0;
-  position: relative; z-index: 1;
-}
-.nl-row-idle .nl-avi { filter: grayscale(1); opacity: 0.3; }
-.nl-divider {
-  height: 1px; background: var(--border);
-  margin: 8px 0; opacity: 0.5;
-}
-.nl-avi-active {
-  animation: nlVibeX 0.45s ease-in-out infinite alternate !important;
-  filter: none !important; opacity: 1 !important;
-}
-.sp-song.nl-other-playing { position: relative; }
 .sp-song.nl-other-playing::after {
-  content: ''; position: absolute; inset: 0;
-  border-radius: inherit; pointer-events: none;
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  transition: box-shadow 0.3s, background 0.3s;
 }
+
+/* Zelda voit Link en bleu */
 .sp-song.nl-other-playing.nl-glow-boy::after {
-  box-shadow: inset 0 0 0 1.5px rgba(91,156,246,0.55);
-  background: rgba(91,156,246,0.05);
+  background: rgba(91,156,246,0.08);
+  animation: nlPulseRowBoy 1.6s ease-in-out infinite;
 }
+@keyframes nlPulseRowBoy {
+  0%,100% {
+    box-shadow: inset 0 0 0 1.5px rgba(91,156,246,0.45),
+                0 0 12px rgba(91,156,246,0.15);
+  }
+  50% {
+    box-shadow: inset 0 0 0 2px rgba(91,156,246,1),
+                0 0 28px rgba(91,156,246,0.55),
+                0 0 8px rgba(91,156,246,0.3);
+  }
+}
+
+/* Link voit Zelda en rose */
 .sp-song.nl-other-playing.nl-glow-girl::after {
-  box-shadow: inset 0 0 0 1.5px rgba(232,121,160,0.55);
-  background: rgba(232,121,160,0.05);
+  background: rgba(232,121,160,0.08);
+  animation: nlPulseRowGirl 1.6s ease-in-out infinite;
+}
+@keyframes nlPulseRowGirl {
+  0%,100% {
+    box-shadow: inset 0 0 0 1.5px rgba(232,121,160,0.45),
+                0 0 12px rgba(232,121,160,0.15);
+  }
+  50% {
+    box-shadow: inset 0 0 0 2px rgba(232,121,160,1),
+                0 0 28px rgba(232,121,160,0.55),
+                0 0 8px rgba(232,121,160,0.3);
+  }
+}
+
+/* Mode doré — même chanson — brille fort */
+.sp-song.nl-other-playing.nl-glow-together::after {
+  background: rgba(245,197,24,0.10);
+  animation: nlPulseRowGold 1.1s ease-in-out infinite;
+}
+@keyframes nlPulseRowGold {
+  0%,100% {
+    box-shadow: inset 0 0 0 1.5px rgba(245,197,24,0.5),
+                0 0 16px rgba(245,197,24,0.2);
+  }
+  50% {
+    box-shadow: inset 0 0 0 2.5px rgba(245,197,24,1),
+                0 0 40px rgba(245,197,24,0.7),
+                0 0 16px rgba(255,200,30,0.5),
+                0 0 60px rgba(245,197,24,0.25);
+  }
 }
 
 #lockPopup {
@@ -3908,14 +3809,6 @@ body.light #counterBlock.glowing .c-num-big {
   <div class="stack-ctr" id="stackCounter"></div>
 </div>
 
-<!-- ══════════════════════════════════════
-     NOW LISTENING — Encadré unique dynamique
-══════════════════════════════════════ -->
-<div id="nlBox" class="fade-in">
-  <div class="nl-inner" id="nlInner">
-    <!-- contenu injecté par JS selon le mode -->
-  </div>
-</div>
 
 <div id="loveSection" class="fade-in">
   <div class="top50-header">
@@ -11100,7 +10993,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.6</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -11119,176 +11012,86 @@ loadFavorites();
 </div>
 <script>
 /* ══════════════════════════════════════════════════════
-   NOW LISTENING — Encadré unique, 3 modes (version corrigée)
-   • nl-boy     : Link écoute
-   • nl-girl    : Zelda écoute
-   • nl-together: même chanson → encadré doré
+   NOW LISTENING — Glow sur la chanson (version propre)
+   
+   Logique :
+   - Je vois UNIQUEMENT ce que l'autre écoute (pas moi)
+   - Link voit Zelda en rose, Zelda voit Link en bleu
+   - Même chanson en même temps → doré qui brille fort sur les deux
 ══════════════════════════════════════════════════════ */
 (function(){
 
   var NL_TABLE = 'now_listening';
-  var EQ_HTML  = '<div class="nl-eq"><span></span><span></span><span></span><span></span><span></span></div>';
 
-  var box   = document.getElementById('nlBox');
-  var inner = document.getElementById('nlInner');
-  if(!box || !inner) return;
-
-  var _nlBoyFile   = null;
-  var _nlGirlFile  = null;
-  var _nlPollTimer = null;
-  // FIX: on garde séparément le dernier push envoyé à Supabase vs le dernier push local
-  // pour ne pas bloquer un re-push après pause+reprise sur la même chanson
+  var _nlBoyFile        = null;
+  var _nlGirlFile       = null;
   var _nlLastPushRemote = '__none__';
 
-  /* ── FIX: Cherche les infos d'une chanson (comparaison robuste) ── */
-  function songInfo(file){
+  /* ── Comparaison robuste par basename ── */
+  function basename(file){
     if(!file) return null;
-    if(typeof songsLove === 'undefined') return null;
-    var base = file.split('/').pop().split('?')[0];
-    return songsLove.find(function(s){
-      if(!s || !s.file) return false;
-      var sBase = s.file.split('/').pop().split('?')[0];
-      // Comparaison par basename pour éviter les problèmes de chemin relatif
-      return sBase === base || s.file === file || file.indexOf(s.file) !== -1;
-    }) || null;
+    return file.split('/').pop().split('?')[0];
   }
 
-  /* ── Construit une ligne pour une personne (mode deux lignes) ── */
-  function buildRow(who, file){
-    var avi   = who === 'boy' ? '🧑' : '👧';
-    var name  = who === 'boy' ? 'Link' : 'Zelda';
-    var color = who === 'boy' ? '#5b9cf6' : '#e879a0';
-    if(!file){
-      return '<div class="nl-row nl-row-idle">'
-           + '<span class="nl-avi" style="opacity:0.35;filter:grayscale(1)">' + avi + '</span>'
-           + '<div class="nl-text">'
-           + '<div class="nl-label" style="color:' + color + ';opacity:0.45">' + name + '</div>'
-           + '<div class="nl-title" style="color:var(--muted);font-style:italic;font-size:12px">Pas de musique en cours</div>'
-           + '</div>'
-           + '</div>';
-    }
-    var info   = songInfo(file);
-    var title  = info ? info.title  : file.split('/').pop().replace(/\.mp3$/i,'').replace(/_/g,' ');
-    var artist = info ? info.artist : '';
-    return '<div class="nl-row">'
-         + '<span class="nl-avi nl-avi-active">' + avi + '</span>'
-         + '<div class="nl-text">'
-         + '<div class="nl-label" style="color:' + color + '">' + name + ' écoute</div>'
-         + '<div class="nl-title">' + title + '</div>'
-         + (artist ? '<div class="nl-artist">' + artist + '</div>' : '')
-         + '</div>'
-         + EQ_HTML
-         + '</div>';
-  }
-
-  /* ── Met à jour l'encadré ── */
-  function updateWidget(){
-    var boyFile  = _nlBoyFile;
-    var girlFile = _nlGirlFile;
-
-    // FIX: cacher la box si personne n'écoute
-    if(!boyFile && !girlFile){
-      box.classList.remove('visible');
-      box.classList.remove('nl-boy','nl-girl','nl-together');
-      inner.innerHTML = '';
-      applyOtherGlow(null, null);
-      return;
-    }
-    box.classList.add('visible');
-    box.classList.remove('nl-boy','nl-girl','nl-together');
-
-    // FIX: comparaison des basenames pour la détection "même chanson"
-    var boyBase  = boyFile  ? boyFile.split('/').pop().split('?')[0]  : null;
-    var girlBase = girlFile ? girlFile.split('/').pop().split('?')[0] : null;
-    var sameSong = !!(boyBase && girlBase && boyBase === girlBase);
-
-    var html = '';
-
-    if(sameSong){
-      box.classList.add('nl-together');
-      var info   = songInfo(boyFile);
-      var title  = info ? info.title  : boyBase.replace(/\.mp3$/i,'').replace(/_/g,' ');
-      var artist = info ? info.artist : '';
-      html = '<div class="nl-avi-duo">'
-           + '<span class="nl-avi nl-avi-left nl-avi-active">🧑</span>'
-           + '<span class="nl-avi nl-avi-right nl-avi-active">👧</span>'
-           + '</div>'
-           + '<div class="nl-text">'
-           + '<div class="nl-label">✨ Vous écoutez ensemble</div>'
-           + '<div class="nl-title">' + title + '</div>'
-           + (artist ? '<div class="nl-artist">' + artist + '</div>' : '')
-           + '</div>'
-           + EQ_HTML;
-    } else if(boyFile && girlFile){
-      // Les deux écoutent des chansons différentes → deux lignes
-      // FIX: nl-inner est flex, nl-rows doit prendre toute la largeur
-      box.classList.add('nl-boy');
-      html = '<div class="nl-rows" style="width:100%">'
-           + buildRow('boy',  boyFile)
-           + '<div class="nl-divider"></div>'
-           + buildRow('girl', girlFile)
-           + '</div>';
-    } else if(boyFile){
-      box.classList.add('nl-boy');
-      html = '<span class="nl-avi nl-avi-active">🧑</span>'
-           + (function(){
-               var info = songInfo(boyFile);
-               var t = info ? info.title  : boyBase.replace(/\.mp3$/i,'').replace(/_/g,' ');
-               var a = info ? info.artist : '';
-               return '<div class="nl-text">'
-                    + '<div class="nl-label">Link écoute</div>'
-                    + '<div class="nl-title">' + t + '</div>'
-                    + (a ? '<div class="nl-artist">' + a + '</div>' : '')
-                    + '</div>';
-             })()
-           + EQ_HTML;
-    } else {
-      // girlFile seulement
-      box.classList.add('nl-girl');
-      html = '<span class="nl-avi nl-avi-active">👧</span>'
-           + (function(){
-               var info = songInfo(girlFile);
-               var t = info ? info.title  : girlBase.replace(/\.mp3$/i,'').replace(/_/g,' ');
-               var a = info ? info.artist : '';
-               return '<div class="nl-text">'
-                    + '<div class="nl-label">Zelda écoute</div>'
-                    + '<div class="nl-title">' + t + '</div>'
-                    + (a ? '<div class="nl-artist">' + a + '</div>' : '')
-                    + '</div>';
-             })()
-           + EQ_HTML;
-    }
-
-    inner.innerHTML = html;
-
-    // Glow playlist
+  /* ── Applique le glow sur les lignes de la playlist ── */
+  function applyGlow(){
     var myProfile = localStorage.getItem('jayana_profile');
-    var otherFile = myProfile === 'boy' ? girlFile : (myProfile === 'girl' ? boyFile : null);
-    var otherWho  = myProfile === 'boy' ? 'girl'   : 'boy';
-    applyOtherGlow(otherFile || null, otherFile ? otherWho : null);
-  }
+    var boyBase   = basename(_nlBoyFile);
+    var girlBase  = basename(_nlGirlFile);
+    var sameSong  = !!(boyBase && girlBase && boyBase === girlBase);
 
-  /* ── Glow playlist ── */
-  function applyOtherGlow(file, who){
+    // Détermine ce que l'autre écoute
+    var otherBase = null;
+    var otherWho  = null;
+    if(myProfile === 'boy'){
+      otherBase = girlBase;
+      otherWho  = 'girl';
+    } else if(myProfile === 'girl'){
+      otherBase = boyBase;
+      otherWho  = 'boy';
+    }
+
+    // Retire tous les glows existants
     document.querySelectorAll('.nl-other-playing').forEach(function(el){
-      el.classList.remove('nl-other-playing','nl-glow-boy','nl-glow-girl');
+      el.classList.remove('nl-other-playing','nl-glow-boy','nl-glow-girl','nl-glow-together');
     });
-    if(!file) return;
-    var targetBase = file.split('/').pop().split('?')[0];
+
+    if(!otherBase) return; // l'autre n'écoute rien → rien à afficher
+
+    // Cherche la ligne correspondante dans la playlist
     document.querySelectorAll('#Love .sp-song').forEach(function(row){
       var audio = row.querySelector('audio');
       if(!audio) return;
       var src = '';
       try{ src = decodeURIComponent(audio.src); }catch(e){ src = audio.src || ''; }
-      var srcBase = src.split('/').pop().split('?')[0];
-      // FIX: comparaison par basename uniquement
-      if(srcBase && srcBase === targetBase){
-        row.classList.add('nl-other-playing', 'nl-glow-' + who);
+      var rowBase = basename(src);
+      if(!rowBase || rowBase !== otherBase) return;
+
+      row.classList.add('nl-other-playing');
+      if(sameSong){
+        row.classList.add('nl-glow-together');
+      } else {
+        row.classList.add('nl-glow-' + otherWho);
       }
     });
+
+    // Si même chanson, aussi glow sur MA chanson (même ligne, même base)
+    if(sameSong && myProfile){
+      var myBase = myProfile === 'boy' ? boyBase : girlBase;
+      document.querySelectorAll('#Love .sp-song').forEach(function(row){
+        if(row.classList.contains('nl-glow-together')) return; // déjà fait
+        var audio = row.querySelector('audio');
+        if(!audio) return;
+        var src = '';
+        try{ src = decodeURIComponent(audio.src); }catch(e){ src = audio.src || ''; }
+        if(basename(src) === myBase){
+          row.classList.add('nl-other-playing','nl-glow-together');
+        }
+      });
+    }
   }
 
-  /* ── Poll Supabase ── */
+  /* ── Poll Supabase toutes les 5s ── */
   function nlPoll(){
     var url = SB_URL + '/rest/v1/' + NL_TABLE + '?select=sender,song_file&order=updated_at.desc';
     fetch(url, { headers: sbHeaders() })
@@ -11302,45 +11105,36 @@ loadFavorites();
         });
         _nlBoyFile  = newBoy;
         _nlGirlFile = newGirl;
-        updateWidget();
+        applyGlow();
       }).catch(function(){});
   }
 
   /* ── Push mon état vers Supabase ── */
-  function nlPushRemote(profile, normalized){
-    // FIX: upsert correct via POST + merge-duplicates
-    // Supabase requiert la clé primaire (sender) dans le body pour le merge
-    fetch(SB_URL + '/rest/v1/' + NL_TABLE, {
-      method: 'POST',
-      headers: sbHeaders({
-        'Prefer': 'resolution=merge-duplicates,return=minimal'
-      }),
-      body: JSON.stringify({ sender: profile, song_file: normalized })
-    }).catch(function(){});
-  }
-
-  /* ── Déclenche une mise à jour locale + push distant ── */
   function nlPush(file){
     var profile = localStorage.getItem('jayana_profile');
     if(!profile) return;
 
-    var normalized = file ? file.split('/').pop().split('?')[0] : null;
+    var normalized = basename(file);
 
-    // Mise à jour locale immédiate (toujours, même si même fichier)
+    // Mise à jour locale immédiate
     if(profile === 'boy')  _nlBoyFile  = normalized;
     if(profile === 'girl') _nlGirlFile = normalized;
-    updateWidget();
+    applyGlow();
 
-    // FIX: n'envoie au serveur que si la valeur a vraiment changé
-    // (evite les requêtes inutiles mais ne bloque pas un re-push après pause+reprise)
-    if(_nlLastPushRemote === normalized) return;
-    _nlLastPushRemote = normalized;
-    nlPushRemote(profile, normalized);
+    // Push distant seulement si changement
+    if(_nlLastPushRemote === (normalized || 'null')) return;
+    _nlLastPushRemote = normalized || 'null';
+
+    fetch(SB_URL + '/rest/v1/' + NL_TABLE, {
+      method: 'POST',
+      headers: sbHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+      body: JSON.stringify({ sender: profile, song_file: normalized })
+    }).catch(function(){});
   }
 
-  /* ── Poll toutes les 5s ── */
+  /* ── Démarre le poll ── */
   nlPoll();
-  _nlPollTimer = setInterval(nlPoll, 5000);
+  setInterval(nlPoll, 5000);
 
   /* ── Hooks audio ── */
   var _origMpUpdate = window.mpUpdate;
@@ -11350,7 +11144,7 @@ loadFavorites();
     if(ca && !ca.paused){
       var src = '';
       try{ src = decodeURIComponent(ca.src); }catch(e){ src = ca.src || ''; }
-      nlPush(src.split('/').pop().split('?')[0]);
+      nlPush(src);
     } else {
       nlPush(null);
     }
@@ -11366,18 +11160,15 @@ loadFavorites();
     if(e.target && e.target.tagName === 'AUDIO'){
       var src = '';
       try{ src = decodeURIComponent(e.target.src); }catch(ex){ src = e.target.src || ''; }
-      var f = src.split('/').pop().split('?')[0];
-      if(f) nlPush(f);
+      if(src) nlPush(src);
     }
   }, true);
 
   document.addEventListener('pause', function(e){
     if(e.target && e.target.tagName === 'AUDIO'){
-      // FIX: délai légèrement plus long pour laisser le temps au changement de chanson
       setTimeout(function(){
         var any = false;
         document.querySelectorAll('audio').forEach(function(a){ if(!a.paused) any = true; });
-        // FIX: on remet _nlLastPushRemote à __none__ pour permettre un re-push de null
         if(!any){
           _nlLastPushRemote = '__none__';
           nlPush(null);
@@ -11399,16 +11190,16 @@ loadFavorites();
     }
   }, true);
 
-  // FIX: quand on quitte la page / ferme l'onglet, effacer notre statut
+  /* ── Efface le statut à la fermeture ── */
   window.addEventListener('beforeunload', function(){
     var profile = localStorage.getItem('jayana_profile');
     if(!profile) return;
-    // sendBeacon pour que la requête parte même si la page se ferme
-    var data = JSON.stringify({ sender: profile, song_file: null });
-    var url  = SB_URL + '/rest/v1/' + NL_TABLE;
-    var hdrs = sbHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' });
-    // sendBeacon ne supporte pas les headers custom, on utilise fetch en mode keepalive
-    fetch(url, { method: 'POST', headers: hdrs, body: data, keepalive: true }).catch(function(){});
+    fetch(SB_URL + '/rest/v1/' + NL_TABLE, {
+      method: 'POST',
+      headers: sbHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+      body: JSON.stringify({ sender: profile, song_file: null }),
+      keepalive: true
+    }).catch(function(){});
   });
 
   window._nlPush = nlPush;
