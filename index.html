@@ -1094,6 +1094,203 @@ body.light #lockNavBtn.has-unread {
 .result-label { font-size:9px; font-weight:700; color:var(--green); text-transform:uppercase; letter-spacing:2.5px; }
 .result-text { font-family:'DM Sans',sans-serif; font-size:16px; font-weight:600; color:var(--text); margin-top:2px; letter-spacing:-0.2px; }
 
+/* ══════════════════════════════════════
+   NOW LISTENING — Widget & effets
+══════════════════════════════════════ */
+#nowListeningWidget {
+  display: none;
+  margin: 16px 16px 0;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+}
+#nowListeningWidget.visible { display: block; }
+
+/* Carte individuelle par personne */
+.nl-card {
+  position: relative;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border: 1.5px solid transparent;
+  background: var(--s1);
+  transition: border-color 0.4s, background 0.4s, box-shadow 0.4s;
+  overflow: hidden;
+}
+.nl-card:last-child { margin-bottom: 0; }
+
+.nl-card.boy {
+  border-color: rgba(91,156,246,0.4);
+  background: linear-gradient(135deg, rgba(91,156,246,0.08) 0%, var(--s1) 60%);
+  box-shadow: 0 4px 20px rgba(91,156,246,0.15);
+}
+.nl-card.girl {
+  border-color: rgba(232,121,160,0.4);
+  background: linear-gradient(135deg, rgba(232,121,160,0.08) 0%, var(--s1) 60%);
+  box-shadow: 0 4px 20px rgba(232,121,160,0.15);
+}
+body.light .nl-card.boy {
+  border-color: rgba(59,125,216,0.35);
+  background: linear-gradient(135deg, rgba(59,125,216,0.07) 0%, var(--s1) 60%);
+}
+body.light .nl-card.girl {
+  border-color: rgba(200,24,94,0.3);
+  background: linear-gradient(135deg, rgba(200,24,94,0.06) 0%, var(--s1) 60%);
+}
+
+/* Barre de couleur en haut de la carte */
+.nl-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  opacity: 0.8;
+}
+.nl-card.boy::before  { background: linear-gradient(90deg, #5b9cf6, transparent); }
+.nl-card.girl::before { background: linear-gradient(90deg, #e879a0, transparent); }
+
+.nl-card-inner {
+  display: flex; align-items: center; gap: 12px;
+}
+
+/* Avatar/emoji avec vibration */
+.nl-avatar {
+  font-size: 26px; line-height: 1; flex-shrink: 0;
+  display: inline-block;
+}
+.nl-card.active .nl-avatar {
+  animation: nlVibrate 0.35s ease-in-out infinite alternate;
+}
+@keyframes nlVibrate {
+  0%   { transform: rotate(-5deg) scale(1); }
+  50%  { transform: rotate(3deg) scale(1.05); }
+  100% { transform: rotate(-3deg) scale(0.97); }
+}
+
+.nl-info { flex: 1; min-width: 0; }
+.nl-who {
+  font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+  margin-bottom: 3px;
+}
+.nl-card.boy  .nl-who { color: #5b9cf6; }
+.nl-card.girl .nl-who { color: #e879a0; }
+body.light .nl-card.boy  .nl-who { color: #3b7dd8; }
+body.light .nl-card.girl .nl-who { color: #c8185e; }
+
+.nl-song-title {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.nl-song-artist {
+  font-size: 11px; color: var(--sub); margin-top: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.nl-idle { font-size: 11px; color: var(--muted); font-style: italic; }
+
+/* Equalizer animé */
+.nl-eq {
+  display: flex; align-items: flex-end; gap: 2px;
+  height: 18px; flex-shrink: 0;
+  opacity: 0; transition: opacity 0.3s;
+}
+.nl-card.active .nl-eq { opacity: 1; }
+.nl-eq span {
+  display: block; width: 3px; border-radius: 2px; background: currentColor;
+}
+.nl-card.boy  .nl-eq span { color: #5b9cf6; }
+.nl-card.girl .nl-eq span { color: #e879a0; }
+body.light .nl-card.boy  .nl-eq span { color: #3b7dd8; }
+body.light .nl-card.girl .nl-eq span { color: #c8185e; }
+.nl-eq span:nth-child(1) { animation: nlBar1 0.6s ease-in-out infinite alternate; }
+.nl-eq span:nth-child(2) { animation: nlBar2 0.5s ease-in-out 0.1s infinite alternate; }
+.nl-eq span:nth-child(3) { animation: nlBar3 0.7s ease-in-out 0.05s infinite alternate; }
+.nl-eq span:nth-child(4) { animation: nlBar4 0.55s ease-in-out 0.15s infinite alternate; }
+@keyframes nlBar1 { from{height:3px} to{height:16px} }
+@keyframes nlBar2 { from{height:6px} to{height:12px} }
+@keyframes nlBar3 { from{height:2px} to{height:18px} }
+@keyframes nlBar4 { from{height:8px} to{height:10px} }
+
+/* ── BANDEAU DORÉ "On écoute ensemble" ── */
+#nlTogetherBanner {
+  display: none;
+  align-items: center; justify-content: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, rgba(245,197,24,0.18), rgba(255,180,0,0.08));
+  border: 1.5px solid rgba(245,197,24,0.5);
+  position: relative; overflow: hidden;
+  animation: nlGoldPulse 1.8s ease-in-out infinite;
+}
+#nlTogetherBanner.visible { display: flex; }
+@keyframes nlGoldPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(245,197,24,0.15), 0 2px 12px rgba(245,197,24,0.12); border-color: rgba(245,197,24,0.5); }
+  50%     { box-shadow: 0 0 0 4px rgba(245,197,24,0.08), 0 2px 20px rgba(245,197,24,0.25); border-color: rgba(245,197,24,0.85); }
+}
+/* Shimmer doré */
+#nlTogetherBanner::before {
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,215,0,0.15), transparent);
+  animation: nlShimmer 2.2s ease-in-out infinite;
+}
+@keyframes nlShimmer {
+  0%   { left: -100%; }
+  100% { left: 200%; }
+}
+.nl-together-text {
+  font-size: 11px; font-weight: 700; color: #f5c518;
+  letter-spacing: 0.3px; text-align: center;
+}
+.nl-together-emojis {
+  display: flex; gap: 2px;
+}
+.nl-together-emojis span {
+  font-size: 18px; display: inline-block;
+  animation: nlEmojiVibe 0.4s ease-in-out infinite alternate;
+}
+.nl-together-emojis span:nth-child(1) { animation-delay: 0s; }
+.nl-together-emojis span:nth-child(2) { animation-delay: 0.1s; }
+.nl-together-emojis span:nth-child(3) { animation-delay: 0.05s; }
+@keyframes nlEmojiVibe {
+  0%   { transform: translateY(0) rotate(-5deg) scale(1); }
+  100% { transform: translateY(-3px) rotate(5deg) scale(1.12); }
+}
+
+/* Label de section "En écoute" */
+.nl-section-label {
+  font-size: 10px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 2.5px;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.nl-section-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+.nl-live-dot {
+  display: inline-block; width: 6px; height: 6px;
+  border-radius: 50%; background: #5b9cf6; margin-right: 2px;
+  animation: nlDotBlink 1.8s ease-in-out infinite;
+}
+@keyframes nlDotBlink { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+/* ── Effet glow sur les chansons quand elles sont jouées par l'autre ── */
+.sp-song.nl-other-playing {
+  position: relative;
+}
+.sp-song.nl-other-playing::after {
+  content: '';
+  position: absolute; inset: 0; border-radius: inherit;
+  pointer-events: none;
+}
+.sp-song.nl-other-playing.nl-glow-boy::after {
+  box-shadow: inset 0 0 0 1.5px rgba(91,156,246,0.5);
+  background: rgba(91,156,246,0.04);
+}
+.sp-song.nl-other-playing.nl-glow-girl::after {
+  box-shadow: inset 0 0 0 1.5px rgba(232,121,160,0.5);
+  background: rgba(232,121,160,0.04);
+}
+
 #lockPopup {
   position:fixed; bottom:72px; right:8px;
   background:var(--s2); border-radius:14px; display:none; z-index:1500;
@@ -3735,6 +3932,57 @@ body.light #counterBlock.glowing .c-num-big {
   <div class="postit-wrap" id="postitStack"></div>
   <div class="stack-hint">👆 Tape ou swipe pour passer au suivant</div>
   <div class="stack-ctr" id="stackCounter"></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     NOW LISTENING — En écoute en ce moment
+══════════════════════════════════════ -->
+<div id="nowListeningWidget" class="fade-in">
+  <div class="nl-section-label">
+    <span class="nl-live-dot"></span>En écoute en ce moment
+  </div>
+
+  <!-- Bandeau doré "on écoute la même chose" -->
+  <div id="nlTogetherBanner">
+    <div class="nl-together-emojis">
+      <span id="nlEmojiLeft">🧑</span>
+      <span>🎶</span>
+      <span id="nlEmojiRight">👧</span>
+    </div>
+    <div class="nl-together-text" id="nlTogetherText">Vous écoutez la même chanson 💛</div>
+  </div>
+
+  <!-- Carte Link (boy) -->
+  <div class="nl-card boy" id="nlCardBoy">
+    <div class="nl-card-inner">
+      <span class="nl-avatar" id="nlAvatarBoy">🧑‍🎧</span>
+      <div class="nl-info">
+        <div class="nl-who">Link</div>
+        <div class="nl-song-title" id="nlTitleBoy">—</div>
+        <div class="nl-song-artist" id="nlArtistBoy" style="display:none"></div>
+        <div class="nl-idle" id="nlIdleBoy">Pas de musique en cours</div>
+      </div>
+      <div class="nl-eq">
+        <span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Carte Zelda (girl) -->
+  <div class="nl-card girl" id="nlCardGirl">
+    <div class="nl-card-inner">
+      <span class="nl-avatar" id="nlAvatarGirl">👧‍🎧</span>
+      <div class="nl-info">
+        <div class="nl-who">Zelda</div>
+        <div class="nl-song-title" id="nlTitleGirl">—</div>
+        <div class="nl-song-artist" id="nlArtistGirl" style="display:none"></div>
+        <div class="nl-idle" id="nlIdleGirl">Pas de musique en cours</div>
+      </div>
+      <div class="nl-eq">
+        <span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="loveSection" class="fade-in">
@@ -10871,5 +11119,243 @@ loadFavorites();
     </div>
   </div>
 </div>
+<script>
+/* ══════════════════════════════════════════════════════
+   NOW LISTENING — Sync temps réel via Supabase
+   Table nécessaire : now_listening
+     - id         : integer (pk, auto)
+     - sender     : text   ('girl' | 'boy')
+     - song_file  : text   (null = rien en cours)
+     - updated_at : timestamptz (default now())
+   Row Level Security : anon peut SELECT/INSERT/UPDATE/DELETE
+══════════════════════════════════════════════════════ */
+(function(){
+
+  var NL_TABLE = 'now_listening';
+
+  /* ── Helpers Supabase (réutilise SB_URL / SB_KEY / sbHeaders déjà définis) ── */
+  function nlFetch(method, params, body){
+    var url = SB_URL + '/rest/v1/' + NL_TABLE + (params ? '?' + params : '');
+    var opts = { method: method, headers: sbHeaders({'Prefer':'return=representation'}) };
+    if(body) opts.body = JSON.stringify(body);
+    return fetch(url, opts).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; });
+  }
+
+  /* ── État local ── */
+  var _nlBoyFile  = null;
+  var _nlGirlFile = null;
+  var _nlPollTimer = null;
+  var _nlLastPush  = null; // fichier qu'on a pushé en dernier
+
+  /* ── Références DOM ── */
+  var widget      = document.getElementById('nowListeningWidget');
+  var cardBoy     = document.getElementById('nlCardBoy');
+  var cardGirl    = document.getElementById('nlCardGirl');
+  var titleBoy    = document.getElementById('nlTitleBoy');
+  var artistBoy   = document.getElementById('nlArtistBoy');
+  var idleBoy     = document.getElementById('nlIdleBoy');
+  var titleGirl   = document.getElementById('nlTitleGirl');
+  var artistGirl  = document.getElementById('nlArtistGirl');
+  var idleGirl    = document.getElementById('nlIdleGirl');
+  var togetherBanner = document.getElementById('nlTogetherBanner');
+  var togetherText   = document.getElementById('nlTogetherText');
+  var emojiLeft      = document.getElementById('nlEmojiLeft');
+  var emojiRight     = document.getElementById('nlEmojiRight');
+
+  /* ── Met à jour l'affichage d'une carte ── */
+  function renderCard(who, file){
+    var card    = who === 'boy' ? cardBoy    : cardGirl;
+    var titleEl = who === 'boy' ? titleBoy   : titleGirl;
+    var artEl   = who === 'boy' ? artistBoy  : artistGirl;
+    var idleEl  = who === 'boy' ? idleBoy    : idleGirl;
+
+    if(!file){
+      card.classList.remove('active');
+      titleEl.textContent = '—';
+      artEl.style.display = 'none';
+      idleEl.style.display = '';
+    } else {
+      card.classList.add('active');
+      idleEl.style.display = 'none';
+      // Retrouver le titre/artiste depuis songsLove
+      var songData = (typeof songsLove !== 'undefined')
+        ? songsLove.find(function(s){ return s.file === file || file.indexOf(s.file) !== -1; })
+        : null;
+      if(songData){
+        titleEl.textContent  = songData.title;
+        artEl.textContent    = songData.artist;
+        artEl.style.display  = '';
+      } else {
+        // fallback : nom du fichier nettoyé
+        var cleaned = decodeURIComponent(file.split('/').pop().replace(/\.mp3$/i,'').replace(/_/g,' '));
+        titleEl.textContent = cleaned;
+        artEl.style.display = 'none';
+      }
+    }
+  }
+
+  /* ── Glow sur la chanson en cours de l'autre dans la playlist ── */
+  function applyOtherGlow(file, otherWho){
+    // Retire tous les anciens glows
+    document.querySelectorAll('.nl-other-playing').forEach(function(el){
+      el.classList.remove('nl-other-playing','nl-glow-boy','nl-glow-girl');
+    });
+    if(!file) return;
+    // Cherche la ligne correspondante
+    var rows = document.querySelectorAll('#Love .sp-song');
+    rows.forEach(function(row){
+      var audio = row.querySelector('audio');
+      if(!audio) return;
+      var src = '';
+      try { src = decodeURIComponent(audio.src); } catch(e){ src = audio.src; }
+      if(src.indexOf(file) !== -1 || (audio.getAttribute('src') || '').indexOf(file) !== -1){
+        row.classList.add('nl-other-playing');
+        row.classList.add(otherWho === 'boy' ? 'nl-glow-boy' : 'nl-glow-girl');
+      }
+    });
+  }
+
+  /* ── Bandeau doré "on écoute ensemble" ── */
+  function updateTogether(){
+    if(_nlBoyFile && _nlGirlFile){
+      // Normalise : compare juste le nom de fichier
+      var bFile = _nlBoyFile.split('/').pop();
+      var gFile = _nlGirlFile.split('/').pop();
+      if(bFile === gFile){
+        togetherBanner.classList.add('visible');
+        var songData = (typeof songsLove !== 'undefined')
+          ? songsLove.find(function(s){ return s.file === bFile; })
+          : null;
+        var songName = songData ? '"' + songData.title + '"' : '';
+        togetherText.textContent = songName
+          ? 'Vous écoutez ' + songName + ' ensemble 💛'
+          : 'Vous écoutez la même chanson 💛';
+        emojiLeft.textContent  = '🧑‍🎧';
+        emojiRight.textContent = '👧‍🎧';
+        return;
+      }
+    }
+    togetherBanner.classList.remove('visible');
+  }
+
+  /* ── Affiche le widget si au moins une personne écoute ── */
+  function updateWidget(){
+    if(_nlBoyFile || _nlGirlFile){
+      widget.classList.add('visible');
+    }
+    // On garde le widget visible même quand tout est null (on montrait pas avant)
+    renderCard('boy',  _nlBoyFile);
+    renderCard('girl', _nlGirlFile);
+    updateTogether();
+
+    // Glow sur l'autre : dépend de qui je suis
+    var myProfile = localStorage.getItem('jayana_profile');
+    if(myProfile === 'boy'  && _nlGirlFile) applyOtherGlow(_nlGirlFile, 'girl');
+    else if(myProfile === 'girl' && _nlBoyFile) applyOtherGlow(_nlBoyFile, 'boy');
+    else applyOtherGlow(null, null);
+  }
+
+  /* ── Poll Supabase ── */
+  function nlPoll(){
+    nlFetch('GET', 'select=sender,song_file&order=updated_at.desc').then(function(rows){
+      if(!Array.isArray(rows)) return;
+      rows.forEach(function(r){
+        if(r.sender === 'boy')  _nlBoyFile  = r.song_file || null;
+        if(r.sender === 'girl') _nlGirlFile = r.song_file || null;
+      });
+      updateWidget();
+    });
+  }
+
+  /* ── Push mon état en cours ── */
+  function nlPush(file){
+    var profile = localStorage.getItem('jayana_profile');
+    if(!profile) return;
+    if(_nlLastPush === (file || null)) return; // pas de changement
+    _nlLastPush = file || null;
+
+    // Upsert : on efface l'ancienne ligne et on recrée
+    nlFetch('DELETE', 'sender=eq.' + profile).then(function(){
+      if(file){
+        return nlFetch('POST', null, { sender: profile, song_file: file });
+      }
+    });
+  }
+
+  /* ── Démarrage du polling ── */
+  function startPoll(){
+    if(_nlPollTimer) return;
+    nlPoll();
+    _nlPollTimer = setInterval(nlPoll, 5000);
+  }
+  function stopPoll(){
+    if(_nlPollTimer){ clearInterval(_nlPollTimer); _nlPollTimer = null; }
+  }
+
+  // Démarre dès que la page charge
+  startPoll();
+
+  /* ── Hook sur le player audio : push quand on joue/arrête ── */
+  // On intercepte mpUpdate qui est appelé à chaque changement d'état du player
+  var _origMpUpdate = window.mpUpdate;
+  window.mpUpdate = function(){
+    if(_origMpUpdate) _origMpUpdate.apply(this, arguments);
+    // Détermine le fichier courant
+    var profile = localStorage.getItem('jayana_profile');
+    if(!profile) return;
+    if(typeof currentAudio !== 'undefined' && currentAudio && !currentAudio.paused){
+      var src = '';
+      try { src = decodeURIComponent(currentAudio.src); } catch(e){ src = currentAudio.src || ''; }
+      // Extrait juste le nom de fichier
+      var filename = src.split('/').pop().split('?')[0];
+      nlPush(filename);
+    } else {
+      nlPush(null);
+    }
+  };
+
+  // Idem pour mpStop
+  var _origMpStop = window.mpStop;
+  window.mpStop = function(){
+    if(_origMpStop) _origMpStop.apply(this, arguments);
+    nlPush(null);
+  };
+
+  // Hook aussi les play/pause directs sur les éléments audio
+  // (les boutons dans #Love déclenchent pl()/ps() directement)
+  // On surveille via l'événement 'play' et 'pause' sur le document
+  document.addEventListener('play', function(e){
+    if(e.target && e.target.tagName === 'AUDIO'){
+      var src = '';
+      try { src = decodeURIComponent(e.target.src); } catch(ex){ src = e.target.src || ''; }
+      var filename = src.split('/').pop().split('?')[0];
+      if(filename) nlPush(filename);
+    }
+  }, true);
+
+  document.addEventListener('pause', function(e){
+    if(e.target && e.target.tagName === 'AUDIO'){
+      // Vérifie qu'aucun autre audio n'est en cours
+      setTimeout(function(){
+        var anyPlaying = false;
+        document.querySelectorAll('audio').forEach(function(a){ if(!a.paused) anyPlaying = true; });
+        if(!anyPlaying) nlPush(null);
+      }, 100);
+    }
+  }, true);
+
+  document.addEventListener('ended', function(e){
+    if(e.target && e.target.tagName === 'AUDIO'){
+      setTimeout(function(){
+        var anyPlaying = false;
+        document.querySelectorAll('audio').forEach(function(a){ if(!a.paused) anyPlaying = true; });
+        if(!anyPlaying) nlPush(null);
+      }, 200);
+    }
+  }, true);
+
+})();
+</script>
+
 </body>
 </html>
