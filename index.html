@@ -2104,6 +2104,37 @@ body.light .mp-btn:hover { background: rgba(200,24,94,0.09); }
 .mp-btn svg { width: 16px; height: 16px; }
 .mp-btn-play svg { width: 18px; height: 18px; }
 
+/* Progress bar mini player */
+.mp-progress-wrap {
+  display: flex; align-items: center; gap: 7px; margin-top: 5px;
+}
+.mp-seek {
+  flex: 1; height: 3px; background: rgba(255,255,255,0.15);
+  border-radius: 3px; position: relative; cursor: pointer;
+  touch-action: none;
+}
+body.light .mp-seek { background: rgba(0,0,0,0.12); }
+.mp-seek-fill {
+  height: 100%; border-radius: 3px;
+  background: var(--green); width: 0%;
+  pointer-events: none; transition: width 0.25s linear;
+}
+.mp-seek-thumb {
+  position: absolute; top: 50%; right: -5px;
+  transform: translateY(-50%) scale(0);
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--green);
+  transition: transform 0.15s;
+  pointer-events: none;
+}
+.mp-seek:hover .mp-seek-thumb,
+.mp-seek.dragging .mp-seek-thumb { transform: translateY(-50%) scale(1); }
+.mp-seek.dragging .mp-seek-fill { transition: none; }
+.mp-time {
+  font-size: 9px; color: var(--muted); flex-shrink: 0;
+  font-variant-numeric: tabular-nums; letter-spacing: 0.3px;
+}
+
 /* Pendu theme label */
 .pendu-theme {
   font-size: 11px;
@@ -4532,6 +4563,13 @@ body.light #counterBlock.glowing .c-num-big {
     <div class="mp-info">
       <div class="mp-title" id="mpTitle">—</div>
       <div class="mp-artist" id="mpArtist">—</div>
+      <div class="mp-progress-wrap" id="mpProgressWrap">
+        <div class="mp-seek" id="mpSeek">
+          <div class="mp-seek-fill" id="mpSeekFill"></div>
+          <div class="mp-seek-thumb" id="mpSeekThumb"></div>
+        </div>
+        <span class="mp-time" id="mpTime">0:00 / 0:00</span>
+      </div>
     </div>
     <div class="mp-controls">
       <!-- Bouton mode (ordre/aléatoire/répéter) -->
@@ -8334,6 +8372,48 @@ function filterSongs(q){
     mpIconPause.style.display = playing ? '' : 'none';
   }
 
+  /* ── Seekbar ── */
+  var mpSeek     = document.getElementById('mpSeek');
+  var mpSeekFill = document.getElementById('mpSeekFill');
+  var mpSeekThumb= document.getElementById('mpSeekThumb');
+  var mpTime     = document.getElementById('mpTime');
+
+  function fmtTime(s){
+    if(isNaN(s) || !isFinite(s)) return '—';
+    var m = Math.floor(s/60), sec = Math.floor(s%60);
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  }
+
+  function mpUpdateProgress(){
+    if(!currentAudio) return;
+    var cur = currentAudio.currentTime || 0;
+    var dur = currentAudio.duration;
+    var pct = (dur && isFinite(dur)) ? (cur / dur * 100) : 0;
+    mpSeekFill.style.width = pct + '%';
+    mpSeekThumb.style.right = (100 - pct) + '%';
+    mpSeekThumb.style.right = 'auto';
+    mpSeekThumb.style.left  = 'calc(' + pct + '% - 5px)';
+    var durStr = (dur && isFinite(dur)) ? fmtTime(dur) : '—';
+    mpTime.textContent = fmtTime(cur) + ' / ' + durStr;
+  }
+
+  // Seek on click / drag
+  function seekTo(e){
+    if(!currentAudio || !currentAudio.duration) return;
+    var rect = mpSeek.getBoundingClientRect();
+    var x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    var pct = Math.max(0, Math.min(1, x / rect.width));
+    currentAudio.currentTime = pct * currentAudio.duration;
+    mpUpdateProgress();
+  }
+  var _seeking = false;
+  mpSeek.addEventListener('mousedown',  function(e){ _seeking=true; mpSeek.classList.add('dragging'); seekTo(e); });
+  mpSeek.addEventListener('touchstart', function(e){ _seeking=true; mpSeek.classList.add('dragging'); seekTo(e); }, {passive:true});
+  document.addEventListener('mousemove', function(e){ if(_seeking) seekTo(e); });
+  document.addEventListener('touchmove', function(e){ if(_seeking) seekTo(e.touches?e:e); }, {passive:true});
+  document.addEventListener('mouseup',  function(){ if(_seeking){ _seeking=false; mpSeek.classList.remove('dragging'); } });
+  document.addEventListener('touchend', function(){ if(_seeking){ _seeking=false; mpSeek.classList.remove('dragging'); } });
+
   window.mpUpdateMode = function(){
     var mode = typeof playMode !== 'undefined' ? playMode : 'order';
     mpModeIconOrder.style.display = mode === 'order' ? '' : 'none';
@@ -8412,10 +8492,11 @@ function filterSongs(q){
   setInterval(function(){
     if(currentAudio && !currentAudio.paused) {
       mpUpdate();
+      mpUpdateProgress();
     }
     mpUpdateMode();
     mpCheckGameState();
-  }, 500);
+  }, 250);
 })();
 
 
