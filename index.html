@@ -7606,13 +7606,13 @@ function lbRender(rows) {
     var rankDisplay = i < 3 ? rankIcons[i] : (i + 1);
     var playerLabel = row.player === 'girl' ? 'Zelda' : 'Link';
     var dotClass = row.player === 'girl' ? 'girl' : 'boy';
-    var m = Math.floor(row.time_seconds / 60), s = row.time_seconds % 60;
+    var m = Math.floor(parseInt(row.time_seconds||0) / 60), s = parseInt(row.time_seconds||0) % 60;
     var timeStr = m ? m + 'm' + String(s).padStart(2,'0') + 's' : s + 's';
     return '<div class="lb-row">' +
       '<div class="lb-rank ' + rankClass + '">' + rankDisplay + '</div>' +
       '<div class="lb-dot ' + dotClass + '"></div>' +
       '<div class="lb-name">' + playerLabel + '</div>' +
-      '<div class="lb-score"><span>' + row.score + 'pts</span> · ' + row.moves + ' coups · ' + timeStr + '</div>' +
+      '<div class="lb-score"><span>' + parseInt(row.score||0) + 'pts</span> · ' + parseInt(row.moves||0) + ' coups · ' + timeStr + '</div>' +
     '</div>';
   }).join('');
 }
@@ -7875,7 +7875,7 @@ function plbLoad(){
   }).catch(function(){ document.getElementById('plbList').innerHTML='<div class="lb-empty">❌ Erreur</div>'; });
 }
 function plbRender(rows){
-  renderLb('plbList', plbTab==='all'?rows:rows.filter(function(r){return r.player===plbTab;}), function(r){ return '<span>'+r.score+'pts</span> · '+r.moves+' erreurs'; });
+  renderLb('plbList', plbTab==='all'?rows:rows.filter(function(r){return r.player===plbTab;}), function(r){ return '<span>'+parseInt(r.score||0)+'pts</span> · '+parseInt(r.moves||0)+' erreurs'; });
 }
 
 // ══════════════════════════════════════════
@@ -8191,7 +8191,7 @@ function zplbLoad(){
   }).catch(function(){ document.getElementById('zplbList').innerHTML='<div class="lb-empty">❌ Erreur</div>'; });
 }
 function zplbRender(rows){
-  renderLb('zplbList', zplbTab==='all'?rows:rows.filter(function(r){return r.player===zplbTab;}), function(r){ return '<span>'+r.score+'pts</span> · '+r.moves+' échanges'; });
+  renderLb('zplbList', zplbTab==='all'?rows:rows.filter(function(r){return r.player===zplbTab;}), function(r){ return '<span>'+parseInt(r.score||0)+'pts</span> · '+parseInt(r.moves||0)+' échanges'; });
 }
 
 // ══════════════════════════════════════════
@@ -8463,7 +8463,7 @@ function slbLoad(){
   }).catch(function(){ document.getElementById('slbList').innerHTML='<div class="lb-empty">❌ Erreur</div>'; });
 }
 function slbRender(rows){
-  renderLb('slbList', slbTab==='all'?rows:rows.filter(function(r){return r.player===slbTab;}), function(r){ return '<span>'+r.score+'pts</span>'; });
+  renderLb('slbList', slbTab==='all'?rows:rows.filter(function(r){return r.player===slbTab;}), function(r){ return '<span>'+parseInt(r.score||0)+'pts</span>'; });
 }
 
 // ── Fonction commune de rendu leaderboard ──
