@@ -2178,22 +2178,23 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 #penduView.active,#puzzleView.active,#snakeView.active,#skyjoView.active{display:block;animation:slideUp 0.25s ease;}
 
 /* ══ SKYJO STYLES ══ */
+/* ══ SKYJO CARDS & GRID ══ */
 .skyjo-card {
-  width: 52px; height: 74px;
+  width: 48px; height: 68px;
   border-radius: 8px;
   display: inline-flex; align-items: center; justify-content: center;
-  font-size: 18px; font-weight: 700;
+  font-size: 17px; font-weight: 700;
   border: 1.5px solid var(--border);
   background: var(--s2);
   color: var(--text);
   cursor: default;
   user-select: none;
   transition: transform 0.15s, box-shadow 0.15s;
-  position: relative;
+  flex-shrink: 0;
 }
-.skyjo-card-back { background: var(--s3); color: var(--muted); font-size: 22px; }
-.skyjo-card-held { background: rgba(167,139,250,0.2); border-color: rgba(167,139,250,0.6); color: #a78bfa; font-size: 20px; }
-.skyjo-card.skyjo-card-hidden { background: var(--s3); color: var(--muted); cursor: pointer; }
+.skyjo-card-back { background: var(--s3); color: var(--muted); font-size: 20px; }
+.skyjo-card-held { background: rgba(167,139,250,0.2); border-color: rgba(167,139,250,0.6); color: #a78bfa; font-size: 18px; }
+.skyjo-card.skyjo-card-hidden { background: var(--s3); color: var(--muted); }
 .skyjo-card.skyjo-card-hidden:hover { transform: scale(1.06); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 .skyjo-card.skyjo-card-clickable { cursor: pointer; border-color: rgba(0,201,167,0.5); background: rgba(0,201,167,0.08); }
 .skyjo-card.skyjo-card-clickable:hover { transform: scale(1.06); box-shadow: 0 4px 16px rgba(0,201,167,0.3); }
@@ -2203,12 +2204,57 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 .skyjo-card[data-val="1"],.skyjo-card[data-val="2"],.skyjo-card[data-val="3"],.skyjo-card[data-val="4"] { color: var(--text); }
 .skyjo-card[data-val="5"],.skyjo-card[data-val="6"],.skyjo-card[data-val="7"],.skyjo-card[data-val="8"] { color: #f59e0b; }
 .skyjo-card[data-val="9"],.skyjo-card[data-val="10"],.skyjo-card[data-val="11"],.skyjo-card[data-val="12"] { color: #ef4444; }
+/* Grille : 4 colonnes × 3 lignes, jamais côte à côte avec l'autre grille */
 .skyjo-grid {
   display: grid;
-  grid-template-columns: repeat(4, 52px);
-  grid-template-rows: repeat(3, 74px);
-  gap: 6px;
+  grid-template-columns: repeat(4, 48px);
+  grid-template-rows: repeat(3, 68px);
+  gap: 5px;
+  width: fit-content;
+}
+.skyjo-grid-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+.skyjo-grid-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.5px; margin-bottom: 8px;
+}
+/* Bannière de tour — clairement visible */
+.skyjo-turn-banner {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 14px; font-weight: 700;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.skyjo-turn-banner.my-turn {
+  background: rgba(0,201,167,0.12);
+  border: 1.5px solid rgba(0,201,167,0.4);
+  color: var(--green);
+}
+.skyjo-turn-banner.their-turn {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+/* Pioche & défausse alignées horizontalement, centrées */
+.skyjo-piles {
+  display: flex;
+  gap: 20px;
   justify-content: center;
+  align-items: flex-end;
+  margin-bottom: 16px;
+  width: 100%;
+}
+.skyjo-pile-slot { text-align: center; }
+.skyjo-pile-label {
+  font-size: 10px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px;
 }
 .skyjo-player-bubble {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -2217,13 +2263,11 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 }
 .skyjo-presence-dot {
   width: 8px; height: 8px; border-radius: 50%;
-  background: var(--muted);
-  transition: background 0.3s;
+  background: var(--muted); transition: background 0.3s;
 }
 .skyjo-presence-dot.online { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); animation: presencePulse 2s ease-in-out infinite; }
 @keyframes presencePulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
-.skyjo-card.skyjo-col-complete { opacity: 0.4; pointer-events: none; border-color: rgba(0,201,167,0.4); background: rgba(0,201,167,0.06); }
-.skyjo-card.skyjo-last-card { box-shadow: 0 0 0 2px #f59e0b; }
+.skyjo-card.skyjo-col-complete { opacity: 0.35; pointer-events: none; border-color: rgba(0,201,167,0.4); background: rgba(0,201,167,0.06); }
 .pendu-svg{display:block;margin:0 auto 8px;}
 .pendu-word{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
 .pendu-letter{width:26px;height:34px;border-bottom:2px solid var(--text);display:flex;align-items:flex-end;justify-content:center;font-size:17px;font-weight:700;color:var(--text);text-transform:uppercase;}
@@ -4675,64 +4719,62 @@ body.light #counterBlock.glowing .c-num-big {
 
     <!-- ZONE DE JEU -->
     <div id="skyjoGameArea" style="display:none;">
-      <!-- Infos tour -->
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;" id="skyjoTurnLabel">Tour de ...</div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <div style="font-size:11px;color:var(--muted)">Manche</div>
-          <div style="font-size:15px;font-weight:700;color:var(--text)" id="skyjoRound">1</div>
-        </div>
-      </div>
 
-      <!-- Scores -->
+      <!-- Bannière de tour (grande, bien visible) -->
+      <div id="skyjoTurnBanner" class="skyjo-turn-banner their-turn" style="margin-bottom:12px;">⏳ …</div>
+
+      <!-- Header : scores + manche -->
       <div style="display:flex;gap:8px;margin-bottom:14px;">
-        <div style="flex:1;background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;" id="skyjoScoreCardGirl">
-          <div style="font-size:18px">👧</div>
+        <div style="flex:1;background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:8px;text-align:center;" id="skyjoScoreCardGirl">
+          <div style="font-size:16px">👧</div>
           <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Zelda</div>
-          <div style="font-size:22px;font-weight:700;color:var(--text)" id="skyjoScoreGirl">0</div>
+          <div style="font-size:20px;font-weight:700;color:var(--text)" id="skyjoScoreGirl">0</div>
         </div>
-        <div style="flex:1;background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;" id="skyjoScoreCardBoy">
-          <div style="font-size:18px">👦</div>
+        <div style="flex:1;background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:8px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted)">Manche</div>
+          <div style="font-size:26px;font-weight:700;color:var(--text)" id="skyjoRound">1</div>
+        </div>
+        <div style="flex:1;background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:8px;text-align:center;" id="skyjoScoreCardBoy">
+          <div style="font-size:16px">👦</div>
           <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Link</div>
-          <div style="font-size:22px;font-weight:700;color:var(--text)" id="skyjoScoreBoy">0</div>
+          <div style="font-size:20px;font-weight:700;color:var(--text)" id="skyjoScoreBoy">0</div>
         </div>
       </div>
 
       <!-- Pioche + défausse -->
-      <div style="display:flex;gap:16px;justify-content:center;align-items:center;margin-bottom:16px;">
-        <div style="text-align:center;">
-          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">Pioche</div>
+      <div class="skyjo-piles">
+        <div class="skyjo-pile-slot">
+          <div class="skyjo-pile-label">Pioche</div>
           <div id="skyjoDeckCard" class="skyjo-card skyjo-card-back" onclick="skyjoDrawFromDeck()" style="cursor:pointer;">🂠</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:4px" id="skyjoDrawPileCount">— cartes</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px;text-align:center;" id="skyjoDrawPileCount">—</div>
         </div>
-        <div style="text-align:center;">
-          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">Défausse</div>
-          <div id="skyjoDiscardCard" class="skyjo-card" onclick="skyjoDrawFromDiscard()">—</div>
+        <div class="skyjo-pile-slot">
+          <div class="skyjo-pile-label">Défausse</div>
+          <div id="skyjoDiscardCard" class="skyjo-card" onclick="skyjoDrawFromDiscard()" style="cursor:pointer;">—</div>
         </div>
       </div>
 
       <!-- Carte en main -->
-      <div id="skyjoHeldCardWrap" style="display:none;text-align:center;margin-bottom:12px;">
-        <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">Carte en main</div>
-        <div id="skyjoHeldCard" class="skyjo-card skyjo-card-held"></div>
-        <div style="font-size:11px;color:var(--sub);margin-top:6px">Clique sur une de tes cartes pour l'échanger, ou</div>
-        <button onclick="skyjoDiscardHeld()" style="margin-top:6px;padding:7px 16px;background:rgba(239,83,80,0.12);color:#ef5350;border:1px solid rgba(239,83,80,0.3);border-radius:8px;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">Défausser + retourner une carte</button>
+      <div id="skyjoHeldCardWrap" style="display:none;background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.3);border-radius:10px;padding:12px;text-align:center;margin-bottom:14px;">
+        <div style="font-size:10px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px">🃏 Carte en main — place-la sur ta grille</div>
+        <div id="skyjoHeldCard" class="skyjo-card skyjo-card-held" style="margin:0 auto 10px;"></div>
+        <button onclick="skyjoDiscardHeld()" style="padding:7px 16px;background:rgba(239,83,80,0.12);color:#ef5350;border:1px solid rgba(239,83,80,0.3);border-radius:8px;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">🗑 Défausser → retourner une carte cachée</button>
       </div>
 
       <!-- Grille adverse -->
-      <div style="margin-bottom:14px;">
-        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px" id="skyjoOpponentLabel">Grille de l'autre</div>
+      <div class="skyjo-grid-wrap">
+        <div class="skyjo-grid-label" style="color:var(--muted);" id="skyjoOpponentLabel">Grille de l'autre</div>
         <div class="skyjo-grid" id="skyjoOpponentGrid"></div>
       </div>
 
       <!-- Grille du joueur -->
-      <div>
-        <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px">Ta grille</div>
+      <div class="skyjo-grid-wrap">
+        <div class="skyjo-grid-label" style="color:var(--green);">Ta grille</div>
         <div class="skyjo-grid" id="skyjoMyGrid"></div>
       </div>
 
-      <!-- Message de phase (initialisation) -->
-      <div id="skyjoPhaseMsg" style="margin-top:12px;background:rgba(0,201,167,0.08);border:1px solid rgba(0,201,167,0.2);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--sub);text-align:center;display:none;"></div>
+      <!-- Message contextuel -->
+      <div id="skyjoPhaseMsg" style="margin-top:4px;background:rgba(0,201,167,0.08);border:1px solid rgba(0,201,167,0.2);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--sub);text-align:center;display:none;"></div>
     </div>
 
     <!-- FIN DE MANCHE -->
@@ -9110,8 +9152,24 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     document.getElementById('skyjoScoreGirl').textContent=state.scores.girl;
     document.getElementById('skyjoScoreBoy').textContent=state.scores.boy;
     document.getElementById('skyjoRound').textContent=state.round||1;
-    var isInitPhase=state.phase==='init1';
-    document.getElementById('skyjoTurnLabel').textContent=isInitPhase?'🃏 Phase d\'initialisation':(isMyTurn?'🎯 À toi de jouer !':'⏳ Tour de '+oppName);
+    // Bannière de tour — grosse et claire
+    var banner=document.getElementById('skyjoTurnBanner');
+    if(state.phase==='init1'){
+      banner.textContent='🃏 Phase d\'initialisation — retourne 2 cartes';
+      banner.className='skyjo-turn-banner my-turn';
+    } else if(isMyTurn){
+      if(state.must_flip===_me){
+        banner.textContent='👆 Retourne une carte cachée de ta grille';
+      } else if(iHoldCard){
+        banner.textContent='🃏 Place ta carte sur ta grille (ou défausse)';
+      } else {
+        banner.textContent='🎯 C\'est ton tour — pioche une carte !';
+      }
+      banner.className='skyjo-turn-banner my-turn';
+    } else {
+      banner.textContent='⏳ Tour de '+oppName+'…';
+      banner.className='skyjo-turn-banner their-turn';
+    }
     document.getElementById('skyjoOpponentLabel').textContent='Grille de '+oppName;
 
     // Défausse
@@ -9139,23 +9197,16 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       heldWrap.style.display='none';
     }
 
-    // Message d'instruction contextuel
+    // Message init uniquement (le reste est géré par la bannière)
     var phaseMsg=document.getElementById('skyjoPhaseMsg');
     if(state.phase==='init1'){
       phaseMsg.style.display='block';
       var myFlippedCount=myCards.filter(function(c){return c.revealed;}).length;
-      if(myFlippedCount<2) phaseMsg.textContent='Retourne 2 cartes de ta grille pour commencer !';
-      else phaseMsg.textContent='\u2705 Fait ! En attente que '+oppName+' retourne ses 2 cartes\u2026';
-    } else if(state.phase==='play'){
-      phaseMsg.style.display='block';
-      if(!isMyTurn){
-        phaseMsg.textContent='\u23f3 Tour de '+oppName+'\u2026';
-      } else if(state.must_flip===_me){
-        phaseMsg.textContent='Choisis une carte CACH\u00c9E de ta grille \u00e0 retourner';
-      } else if(iHoldCard){
-        phaseMsg.textContent='Carte en main : \u00e9change-la avec n\'importe quelle carte, ou d\u00e9fausse-la';
+      var othFlippedCount=oppCards.filter(function(c){return c.revealed;}).length;
+      if(myFlippedCount<2){
+        phaseMsg.textContent='Clique sur 2 cartes de ta grille pour les retourner';
       } else {
-        phaseMsg.textContent='Pioche dans le tas ou prends la carte de la d\u00e9fausse';
+        phaseMsg.textContent='\u2705 Tu as retourné tes 2 cartes — en attente que '+oppName+' fasse pareil…';
       }
     } else {
       phaseMsg.style.display='none';
