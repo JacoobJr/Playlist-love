@@ -4152,7 +4152,6 @@ body.light #counterBlock.glowing .c-num-big {
 </div>
 
 
-
 <div id="lockPopup">
   <div style="padding:12px 14px 6px;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:2px">Mode caché 🔐</div>
   <div style="padding:0 10px 10px;display:flex;gap:7px;align-items:center">
@@ -4861,10 +4860,8 @@ body.light #counterBlock.glowing .c-num-big {
 // ════════════════════════════════════════════
 var SB_URL = 'https://zjmbyjpxqrojnuymnpcf.supabase.co';
 var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqbWJ5anB4cXJvam51eW1ucGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0MzEzNjcsImV4cCI6MjA4NzAwNzM2N30.vNRgLgCNqZ9g351YmodZoXYDqars-thVDFmri2Z3oxE';
-// URL publique du bucket Storage Supabase
 var SB_IMG = SB_URL + '/storage/v1/object/public/images/';
 
-// Lecture sécurisée du profil — valide que la valeur est 'boy' ou 'girl' uniquement
 function getProfile(){
   var v = localStorage.getItem('jayana_profile');
   return (v === 'boy' || v === 'girl') ? v : null;
@@ -4889,8 +4886,7 @@ function escHtml(str){
 })();
 
 // ── Auth via Edge Function sécurisée ──
-// SÉCURITÉ : APP_SECRET retiré du code client.
-// Le secret est désormais vérifié uniquement côté Edge Function
+// Sécurité : secret vérifié côté Edge Function uniquement
 // via la variable d'environnement Deno.env.get('APP_SECRET').
 var _sbAccessToken = null;
 var SB_SESSION_KEY = 'jayana_sb_session';
@@ -4910,7 +4906,6 @@ function sbLoadSession(gender){
   return false;
 }
 
-// Sauvegarde session dans sessionStorage
 function sbSaveSession(gender, data){
   try{
     var sessions = JSON.parse(sessionStorage.getItem(SB_SESSION_KEY)||'{}');
@@ -4920,7 +4915,6 @@ function sbSaveSession(gender, data){
   }catch(e){}
 }
 
-// Login via Edge Function — sans secret côté client
 function sbLogin(gender){
   if(sbLoadSession(gender)) return Promise.resolve(true);
   return fetch(SB_EDGE_FN, {
@@ -7524,6 +7518,8 @@ document.addEventListener('click',function(e){
   }
 });
 
+</script>
+<script type="text/plain" id="lazyGames">
 // ── MEMORY ──
 var MEMORY_EMOJIS=['💕','🌸','💋','🥰','🌙','✨','🎵','💎'];
 var memCards=[],memFlipped=[],memMatched=0,memMoves=0,memLocked=false,memTimerInt=null,memSeconds=0,memStarted=false;
@@ -7616,7 +7612,7 @@ function memoryWinFn(){
       score: scoreVal,
       moves: memMoves,
       time_seconds: memSeconds
-    }).then(function(){ lbLoad(); }).catch(function(){});
+    }).then(function(){ _lbLoad(); }).catch(function(){});
   }
 }
 
@@ -7634,7 +7630,7 @@ function lbSetTab(tab) {
 
 var lbCurrentData = [];
 
-function lbLoad() {
+function _lbLoad() {
   var list = document.getElementById('lbList');
   list.innerHTML = '<div class="lb-loading"><span class="spinner"></span></div>';
   sbGet('game_scores', 'game_id=eq.memory&order=score.desc&limit=50')
@@ -7673,7 +7669,6 @@ function lbRender(rows) {
   }).join('');
 }
 
-// Charger le classement à l'ouverture des jeux
 var _gamesLbLoaded = false;
 
 // ── QUIZ ──
@@ -7721,15 +7716,15 @@ var ALL_QUIZ_QUESTIONS=[
 ];
 
 var QUIZ_TOTAL=10,qzCurrent=0,qzScore=0,qzAnswered=false,qzSession=[];
-document.getElementById('quizBtn').addEventListener('click',function(){openQuiz();});
+document.getElementById('quizBtn').addEventListener('click',function(){_openQuiz();});
 document.getElementById('gamesBtn').addEventListener('click',function(){openGames();});
-function openQuiz(){resetZoom();isQuizOpen=true;document.getElementById('quizView').classList.add('active');particleActive=false;hideDance();document.getElementById('navSearch').style.display='none';startQuiz();window.scrollTo(0,0);}
-function closeQuiz(){isQuizOpen=false;document.getElementById('quizView').classList.remove('active');document.getElementById('navSearch').style.display='';}
+function _openQuiz(){resetZoom();isQuizOpen=true;document.getElementById('quizView').classList.add('active');particleActive=false;hideDance();document.getElementById('navSearch').style.display='none';_startQuiz();window.scrollTo(0,0);}
+function _closeQuiz(){isQuizOpen=false;document.getElementById('quizView').classList.remove('active');document.getElementById('navSearch').style.display='';}
 function getHints(){try{return JSON.parse(localStorage.getItem('qz_hints')||'{}');}catch(e){return{};}}
 function saveHint(id,hint){var h=getHints();h[id]=hint;try{localStorage.setItem('qz_hints',JSON.stringify(h));}catch(e){}}
 function pickQuestions(){var pool=ALL_QUIZ_QUESTIONS.slice(),picked=[];while(picked.length<QUIZ_TOTAL&&pool.length>0){var i=Math.floor(Math.random()*pool.length);picked.push(pool.splice(i,1)[0]);}return picked;}
-function startQuiz(){qzCurrent=0;qzScore=0;qzAnswered=false;qzSession=pickQuestions();document.getElementById('qzResult').classList.remove('show');document.getElementById('qzCodeBox').classList.remove('show');document.getElementById('qzFeedback').classList.remove('show');document.getElementById('qzNextBtn').classList.remove('show');renderQuestion();}
-function renderQuestion(){
+function _startQuiz(){qzCurrent=0;qzScore=0;qzAnswered=false;qzSession=pickQuestions();document.getElementById('qzResult').classList.remove('show');document.getElementById('qzCodeBox').classList.remove('show');document.getElementById('qzFeedback').classList.remove('show');document.getElementById('qzNextBtn').classList.remove('show');_renderQuestion();}
+function _renderQuestion(){
   var q=qzSession[qzCurrent];qzAnswered=false;
   document.getElementById('qzQNum').textContent='Question '+(qzCurrent+1);
   document.getElementById('qzQText').textContent=q.q;
@@ -7752,7 +7747,7 @@ function answerQ(idx){
   document.getElementById('qzNextBtn').classList.add('show');
   document.getElementById('qzNextBtn').textContent=qzCurrent+1<QUIZ_TOTAL?'Question suivante →':'Voir mon score 🎊';
 }
-document.getElementById('qzNextBtn').addEventListener('click',function(){qzCurrent++;if(qzCurrent<QUIZ_TOTAL){renderQuestion();}else{showResult();}});
+document.getElementById('qzNextBtn').addEventListener('click',function(){qzCurrent++;if(qzCurrent<QUIZ_TOTAL){_renderQuestion();}else{showResult();}});
 function showResult(){
   document.getElementById('qzOptions').innerHTML='';document.getElementById('qzFeedback').classList.remove('show');document.getElementById('qzNextBtn').classList.remove('show');document.getElementById('qzHintBar').style.display='none';
   document.getElementById('qzFill').style.width='100%';document.getElementById('qzProgressTxt').textContent=QUIZ_TOTAL+' / '+QUIZ_TOTAL;
@@ -7828,14 +7823,14 @@ var penduPlayer=null, penduWord='', penduHint='', penduTheme='', penduGuessed=[]
 var penduScore=0, penduWins=0;
 var PENDU_PARTS=['ph-head','ph-body','ph-arm1','ph-arm2','ph-leg1','ph-leg2'];
 
-function openPenduGame(){
+function _openPenduGame(){
   resetZoom();
   document.getElementById('penduView').classList.add('active');
   particleActive=false; hideDance();
   window.scrollTo(0,0);
   plbLoad();
 }
-function closePenduGame(){
+function _closePenduGame(){
   document.getElementById('penduView').classList.remove('active');
   penduPlayer=null;
   document.getElementById('penduGenderScreen').style.display='flex';
@@ -8111,14 +8106,14 @@ function generatePuzzleSource(sz, excludeImg){
 
 var puzzlePlayer=null, puzzleSize=3, puzzleOrder=[], puzzleSelected=null, puzzleMoveCount=0, puzzleDataURLCurrent='', puzzleSourceType='canvas', puzzleSourceSrc='';
 
-function openPuzzleGame(){
+function _openPuzzleGame(){
   resetZoom();
   document.getElementById('puzzleView').classList.add('active');
   particleActive=false; hideDance();
   window.scrollTo(0,0);
   zplbLoad();
 }
-function closePuzzleGame(){
+function _closePuzzleGame(){
   document.getElementById('puzzleView').classList.remove('active');
   puzzlePlayer=null;
   document.getElementById('puzzleGenderScreen').style.display='flex';
@@ -8268,7 +8263,7 @@ var snakeFrozen=false, snakeFreezeEnd=0;
 var snakeSpeedBoost=false, snakeSpeedBoostEnd=0;
 var snakeBaseMs=180; // vitesse progressive de base (jamais affectée par les bonus)
 
-function openSnakeGame(){
+function _openSnakeGame(){
   resetZoom();
   document.getElementById('snakeView').classList.add('active');
   particleActive=false; hideDance();
@@ -8281,7 +8276,7 @@ function openSnakeGame(){
   SNAKE_CELL=Math.floor(s/SNAKE_COLS);
   snakeDrawIdle();
 }
-function closeSnakeGame(){
+function _closeSnakeGame(){
   clearInterval(snakeInterval); snakeRunning=false;
   document.getElementById('snakeView').classList.remove('active');
   snakePlayer=null;
@@ -8536,6 +8531,26 @@ function renderLb(elId, rows, detailFn){
     return '<div class="lb-row"><div class="lb-rank '+rc+'">'+(i<3?icons[i]:i+1)+'</div><div class="lb-dot '+(r.player==='girl'?'girl':'boy')+'"></div><div class="lb-name">'+(r.player==='girl'?'Zelda':'Link')+'</div><div class="lb-score">'+detailFn(r)+'</div></div>';
   }).join('');
 }
+</script>
+<script>
+// ── LAZY GAMES ──
+var _gamesLoaded = false;
+function _loadGames() {
+  if (_gamesLoaded) return;
+  (0, eval)(document.getElementById('lazyGames').textContent);
+  _gamesLoaded = true;
+}
+function openQuiz()        { _loadGames(); _openQuiz(); }
+function closeQuiz()       { _loadGames(); _closeQuiz(); }
+function startQuiz()       { if(_gamesLoaded) _startQuiz(); }
+function renderQuestion()  { if(_gamesLoaded) _renderQuestion(); }
+function openPenduGame()   { _loadGames(); _openPenduGame(); }
+function closePenduGame()  { _loadGames(); _closePenduGame(); }
+function openPuzzleGame()  { _loadGames(); _openPuzzleGame(); }
+function closePuzzleGame() { _loadGames(); _closePuzzleGame(); }
+function openSnakeGame()   { _loadGames(); _openSnakeGame(); }
+function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
+
 
 // ── NAV : closeAllViews étendu ──
 function resetZoom(){
@@ -8554,11 +8569,12 @@ function closeGames(){
   document.getElementById('gamesView').classList.remove('active');
 }
 function openMemoryGame(){
+  _loadGames();
   resetZoom();
   document.getElementById('memoryView').classList.add('active');
   particleActive=false; hideDance();
   window.scrollTo(0,0);
-  lbLoad();
+  _lbLoad();
 }
 function closeMemoryGame(){
   document.getElementById('memoryView').classList.remove('active');
@@ -9045,8 +9061,6 @@ function filterSongs(q){
 })();
 
 
-
-
 // Patch openGames / closeGames / open*Game / close*Game to call mpCheckGameState
 (function(){
   var patchOpen = ['openGames','openMemoryGame','openPenduGame','openPuzzleGame','openSnakeGame','openQuiz'];
@@ -9061,16 +9075,7 @@ function filterSongs(q){
   });
 })();
 
-// ══════════════════════════════════════════════════════════════════
-//  NAVIGATION NAVIGATEUR — boutons retour & avant (iOS Chrome)
-//
-//  Même principe que jeux/quiz : on patch chaque fonction open/close
-//  pour push/pop dans l'historique. Une pile JS (_stack) garde la
-//  correspondance index → état visuel exact.
-//
-//  Mode caché : flèche avant IMPOSSIBLE depuis playlist (closeHiddenPage
-//  pousse un état 'closed' qui tronque la pile → pas d'état DM devant).
-// ══════════════════════════════════════════════════════════════════
+// ══ NAVIGATION BROWSER — historique iOS (retour/avant) ══
 (function(){
   var _busy = false;
   var _stack = [];
@@ -9158,11 +9163,7 @@ function filterSongs(q){
     };
   });
 
-  // ─── Patch mode caché ──────────────────────────────────────────
-  // Les fonctions _dmRaw* seront définies par le DM IIFE (plus bas).
-  // On patche openHiddenPage, dmShowConv, showScreen('chat'), closeHiddenPage
-  // APRÈS que le DM IIFE les aura définies — via un setTimeout(0) pour
-  // s'exécuter après tous les scripts de la page.
+  // Patch mode caché — setTimeout(0) pour exécuter après le DM IIFE
   setTimeout(function(){
 
     // ── openHiddenPage → push dm:home ──
@@ -9186,10 +9187,7 @@ function filterSongs(q){
       if(!_busy) push({ type:'dm', screen:'chat' });
     };
 
-    // ── closeHiddenPage → remonter à l'état de base, effacer la flèche avant ──
-    // replaceState ne peut effacer que l'état courant. Pour bloquer la flèche
-    // avant, on doit remonter jusqu'à l'état closed(0) via history.go(-N),
-    // puis replaceState depuis là. Ainsi plus aucun état DM n'est accessible.
+    // closeHiddenPage → revenir à closed(0) pour bloquer la flèche avant
     var rawCloseHP = window.closeHiddenPage;
     window.closeHiddenPage = function(){
       if(rawCloseHP) rawCloseHP.apply(this, arguments);
