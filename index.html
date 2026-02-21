@@ -861,10 +861,10 @@ body.light #loveBox .lb-label { color: rgba(200,24,94,0.65); }
   display: flex; justify-content: center; gap: 30px; font-size: 44px;
   opacity: 0; transition: opacity 0.4s; pointer-events: none; padding: 24px 0 32px;
 }
-@keyframes danceGirl { 0%,100%{transform:rotate(0) scale(1)} 25%{transform:rotate(-18deg) scale(1.05)} 50%{transform:rotate(12deg) scale(1)} 75%{transform:rotate(-8deg) scale(1.03)} }
-@keyframes danceBoy  { 0%,100%{transform:rotate(0) scale(1)} 25%{transform:rotate(18deg) scale(1.05)} 50%{transform:rotate(-12deg) scale(1)} 75%{transform:rotate(8deg) scale(1.03)} }
-#dancerGirl.animate { animation: danceGirl 0.4s infinite; }
-#dancerBoy.animate  { animation: danceBoy  0.4s infinite; }
+@keyframes danceGirl { 0%,100%{transform:rotate(0) scale(1)} 25%{transform:rotate(-12deg) scale(1.03)} 50%{transform:rotate(8deg) scale(1)} 75%{transform:rotate(-5deg) scale(1.02)} }
+@keyframes danceBoy  { 0%,100%{transform:rotate(0) scale(1)} 25%{transform:rotate(12deg) scale(1.03)} 50%{transform:rotate(-8deg) scale(1)} 75%{transform:rotate(5deg) scale(1.02)} }
+#dancerGirl.animate { animation: danceGirl 0.65s infinite; }
+#dancerBoy.animate  { animation: danceBoy  0.65s infinite; }
 
 .bottom-nav {
   position: fixed; bottom:0; left:0; width:100%;
@@ -7248,8 +7248,9 @@ canvas.width=window.innerWidth; canvas.height=window.innerHeight;
 var particles=[],particleActive=false;
 window.addEventListener('resize',function(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
 function HP(){this.reset();}
-HP.prototype.reset=function(){this.x=Math.random()*canvas.width;this.y=canvas.height+50;this.sz=Math.random()*7+3;this.vy=Math.random()*1+.5;this.vx=(Math.random()-.5)*.5;this.a=Math.random()*.4+.4;};
-HP.prototype.update=function(){this.y-=this.vy;this.x+=this.vx;this.a-=.002;if(this.y<-10||this.a<=0)this.reset();};
+// Particules réduites pour perf iPhone — max 20, opacité douce, vitesse modérée
+HP.prototype.reset=function(){this.x=Math.random()*canvas.width;this.y=canvas.height+30;this.sz=Math.random()*5+2;this.vy=Math.random()*0.7+0.4;this.vx=(Math.random()-.5)*.35;this.a=Math.random()*.28+.18;};
+HP.prototype.update=function(){this.y-=this.vy;this.x+=this.vx;this.a-=.0015;if(this.y<-10||this.a<=0)this.reset();};
 HP.prototype.draw=function(){var col=document.body.classList.contains('light')?'rgba(200,24,94,'+this.a+')':'rgba(0,201,167,'+this.a+')';ctx.save();ctx.translate(this.x,this.y);ctx.beginPath();var t=this.sz*.3;ctx.moveTo(0,t);ctx.bezierCurveTo(0,0,-this.sz/2,0,-this.sz/2,t);ctx.bezierCurveTo(-this.sz/2,this.sz/2,0,this.sz*.75,0,this.sz);ctx.bezierCurveTo(0,this.sz*.75,this.sz/2,this.sz/2,this.sz/2,t);ctx.bezierCurveTo(this.sz/2,0,0,0,0,t);ctx.fillStyle=col;ctx.fill();ctx.restore();};
 window._animPStopped = false;
 function animP(){if(window._animPStopped)return;ctx.clearRect(0,0,canvas.width,canvas.height);if(particleActive){if(particles.length<70)particles.push(new HP());particles.forEach(function(p){p.update();p.draw();});}requestAnimationFrame(animP);}
@@ -7325,8 +7326,18 @@ document.getElementById('loveBox').addEventListener('click',function(e){
 // ── DANCE ──
 var dZ=document.getElementById('danceZone'),dG=document.getElementById('dancerGirl'),dB=document.getElementById('dancerBoy');
 var isQuizOpen=false;
-function showDance(){if(isQuizOpen)return;dZ.style.opacity='1';dG.classList.add('animate');dB.classList.add('animate');}
-function hideDance(){dZ.style.opacity='0';dG.classList.remove('animate');dB.classList.remove('animate');}
+var _danceAutoStop=null;
+function showDance(){
+  if(isQuizOpen)return;
+  dZ.style.opacity='1';dG.classList.add('animate');dB.classList.add('animate');
+  // Auto-stop après 45s — évite de chauffer si musique en fond longtemps
+  if(_danceAutoStop) clearTimeout(_danceAutoStop);
+  _danceAutoStop=setTimeout(function(){ dG.classList.remove('animate'); dB.classList.remove('animate'); _danceAutoStop=null; },45000);
+}
+function hideDance(){
+  if(_danceAutoStop){ clearTimeout(_danceAutoStop); _danceAutoStop=null; }
+  dZ.style.opacity='0';dG.classList.remove('animate');dB.classList.remove('animate');
+}
 
 // ── TIMELINE ──
 var tlWrap=document.getElementById('tlWrap'),tlToggle=document.getElementById('tlToggle'),tlOpen=false;
@@ -11376,7 +11387,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.0 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v3.0 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -12002,7 +12013,7 @@ console.log('✨ Jayana UX v.UX1 chargé');
       if(window.particleActive){
         c.clearRect(0, 0, _canvas.width, _canvas.height);
         if(window.particles){
-          if(window.particles.length < 70 && window.HP)
+          if(window.particles.length < 20 && window.HP)
             window.particles.push(new window.HP());
           window.particles.forEach(function(p){ p.update(); p.draw(); });
         }
@@ -12136,6 +12147,27 @@ console.log('✨ Jayana UX v.UX1 chargé');
   document.addEventListener('visibilitychange', function(){
     _reschedAll();
     document.body.classList.toggle('perf-hidden', document.hidden);
+
+    // ── Particules & Danse : stop immédiat si page cachée ──
+    if(document.hidden){
+      // Stoppe les particules sans modifier l'état particleActive
+      // (si musique toujours en cours, elles reprendront au retour)
+      window._particlePausedByVisibility = !!window.particleActive;
+      window.particleActive = false;
+      // Stoppe la danse visuellement sans toucher au timer audio
+      var dG2 = document.getElementById('dancerGirl');
+      var dB2 = document.getElementById('dancerBoy');
+      if(dG2) dG2.classList.remove('animate');
+      if(dB2) dB2.classList.remove('animate');
+    } else {
+      // Page redevient visible — reprend si la musique était active
+      if(window._particlePausedByVisibility && window.currentAudio && !window.currentAudio.paused){
+        window.particleActive = true;
+        // La danse reprend aussi
+        if(window.showDance) window.showDance();
+      }
+      window._particlePausedByVisibility = false;
+    }
   });
 
   /* ══════════════════════════════════════════════════════
@@ -12283,7 +12315,7 @@ console.log('✨ Jayana UX v.UX1 chargé');
   ══════════════════════════════════════════════════════ */
   setTimeout(function(){
     console.log(
-      '⚡ Jayana Perf v3.3\n' +
+      '⚡ Jayana Perf v3.4\n' +
       '  ✓ animP original désactivé dès le départ (pas de double RAF)\n' +
       '  ✓ 250ms mini player → event-driven (play/pause/timeupdate/loadedmetadata)\n' +
       '  ✓ mpUpdateProgress exposé → barre de progression temps-réel\n' +
@@ -12294,22 +12326,18 @@ console.log('✨ Jayana UX v.UX1 chargé');
       '  ✓ will-change nettoyé après 4s\n' +
       '  ✓ Media Session API (contrôles iOS lock screen)\n' +
       '  ✓ [v3.2] backdrop-filter désactivé sur iOS (tous les overlays)\n' +
-      '  ✓ [v3.2] box-shadow animé → border-color/opacity (×12 animations)\n' +
-      '  ✓ [v3.2] drop-shadow filter animé → opacity (lockPulse, heartbeat)\n' +
-      '  ✓ [v3.2] playAllPulse: box-shadow ripple → transform scale\n' +
-      '  ✓ [v3.2] sgShimmer/annivShimmer: background-pos → transform\n' +
-      '  ✓ [v3.2] particleCanvas contain:strict, animP stoppé avant démarrage\n' +
-      '  ✓ [v3.2] nlPulseRow simplifié (1 couche box-shadow au lieu de 3)\n' +
+      '  ✓ [v3.2] box-shadow animé → opacity pseudo-éléments\n' +
       '  ✓ [v3.2] lbSweep: left → transform (GPU compositing)\n' +
       '  ✓ [v3.2] vues plein-écran contain:layout style\n' +
-      '  ✓ [v3.3] will-change:background-position supprimé (.skeleton/.skeleton-overlay)\n' +
-      '  ✓ [v3.3] kbHintBlink: box-shadow animé → opacity pseudo-élément (GPU compositable)\n' +
-      '  ✓ [v3.3] sgBadgePulse: border-color animé → opacity pseudo-élément ::before\n' +
-      '  ✓ [v3.3] #prankFogOverlay: backdrop-filter iOS → fond rgba + fallback JS\n' +
-      '  ✓ [v3.3] IntersectionObserver étendu : #loveBox, .lb-icon, nlGlow\n' +
-      '  ✓ [v3.3] prank-shake: durée max 4s (sécurité anti-surchauffe)\n' +
-      '  ✓ [v3.3] wobble emojis prank: will-change:transform ajouté\n' +
-      '  ✓ [v3.3] CSS dupliqué supprimé (header::before ×2, hdr-sub::before ×2)'
+      '  ✓ [v3.3] will-change:background-position supprimé\n' +
+      '  ✓ [v3.3] kbHintBlink/sgBadgePulse/prankNotifGlow → opacity compositable\n' +
+      '  ✓ [v3.3] #prankFogOverlay/#prankCurtainBanner couverts iOS\n' +
+      '  ✓ [v3.3] IntersectionObserver: #loveBox + nlGlow ajoutés\n' +
+      '  ✓ [v3.3] prank-shake durée max 4s\n' +
+      '  ✓ [v3.3] auraGirl/auraBoy/prankNotifGlow → opacity pseudo-éléments\n' +
+      '  ✓ [v3.4] Particules: 70 → 20 max, taille/vitesse/opacité réduites\n' +
+      '  ✓ [v3.4] danceGirl/Boy: 0.4s → 0.65s, amplitude réduite, auto-stop 45s\n' +
+      '  ✓ [v3.4] visibilitychange: particules + danse stoppées si page cachée'
     );
   }, 2000);
 
