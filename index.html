@@ -3397,8 +3397,8 @@ body.light #counterBlock.glowing .c-num-big {
 (function(){
   // ── Heures déclenchantes (format 24h) ──────────────────────────────────────
   var TRIGGER_HOURS = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23];
-  var WINDOW_BEFORE = 10; // minutes avant l'heure pile
-  var WINDOW_AFTER  = 10; // minutes après l'heure pile
+  var WINDOW_BEFORE = 10; // minutes avant l'heure pile (les 10 dernières minutes de l'heure)
+  var WINDOW_AFTER  = 0;  // plus de fenêtre après l'heure pile
 
   var tlContent = document.getElementById('tlContent');
   var videoWrap = document.getElementById('storyVideoWrap');
