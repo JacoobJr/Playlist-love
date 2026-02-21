@@ -8800,6 +8800,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   var _presTimer     = null;
   var _lobbyTimer    = null;
   var _pollTimer     = null;
+  var _saving        = false;  // verrou pendant PATCH
 
   // ─── Deck ────────────────────────────────────────────
   function shuffle(a){
@@ -9080,12 +9081,13 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     _pollTimer=setInterval(fetchState,2000);
   }
   function fetchState(){
-    if(!_gameId) return;
+    if(!_gameId||_saving) return; // ne pas ecraser un state en cours de sauvegarde
     fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId+'&select=id,status,state,created_by',{
       headers:sbHeaders()
     })
     .then(function(r){return r.json();})
     .then(function(rows){
+      if(_saving) return; // verif post-fetch aussi
       if(!Array.isArray(rows)||!rows[0]) return;
       renderState(rows[0]);
     }).catch(function(){});
@@ -9234,6 +9236,28 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     saveState(ns);
   };
 
+  // ─── Sauvegarde (poll pause pendant PATCH) ───────────
+  function saveState(ns){
+    if(!_gameId) return;
+    _saving = true;
+    stopPoll(); // pause le poll pendant la sauvegarde
+    fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId,{
+      method:'PATCH',
+      headers:sbHeaders({'Prefer':'return=representation'}),
+      body:JSON.stringify({state:ns})
+    })
+    .then(function(r){
+      if(!r.ok){ r.text().then(function(t){console.error('[SKYJO] saveState err:',t);}); return null; }
+      return r.json();
+    })
+    .then(function(rows){
+      _saving=false;
+      if(rows&&Array.isArray(rows)&&rows[0]) renderState(rows[0]);
+      startPoll(); // relance le poll apres rendu
+    })
+    .catch(function(e){ console.error('[SKYJO] saveState catch',e); _saving=false; startPoll(); });
+  }
+
   window.skyjoDrawFromDeck=function(){
     if(!_gameState||_phase!=='play') return;
     if(_gameState.turn!==_me||_gameState.held_card) return;
@@ -9244,6 +9268,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       ns.discard=[tp];
     }
     ns.held_card={value:ns.deck.pop(),holder:_me};
+    // PAS de changement de tour : on garde le tour jusqu'a ce qu'on joue la carte
     saveState(ns);
   };
 
@@ -9253,6 +9278,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     if(!_gameState.discard||!_gameState.discard.length) return;
     var ns=deepCopy(_gameState);
     ns.held_card={value:ns.discard.pop(),holder:_me};
+    // PAS de changement de tour : on garde le tour jusqu'a ce qu'on joue la carte
     saveState(ns);
   };
 
@@ -9262,31 +9288,36 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     if(!_gameState.held_card||_gameState.held_card.holder!==_me) return;
     var ns=deepCopy(_gameState);
     var key=_me+'_cards';
-    var oldCard=ns[key][idx];
-    // Mettre l'ancienne carte en defausse (meme si elle etait cachee, sa valeur est revelee)
-    ns.discard.push(oldCard.value);
-    // Poser la carte en main a cet emplacement (toujours revelee)
+    // Defausser l'ancienne carte (revelee ou non, sa valeur part en defausse)
+    ns.discard.push(ns[key][idx].value);
+    // Poser la carte en main (toujours revelee)
     ns[key][idx]={value:ns.held_card.value,revealed:true};
     ns.held_card=null;
+    ns.must_flip=null;
     checkColumns(ns,_me);
     checkRoundEnd(ns);
+    // Fin de tour -> passer a l'autre
     if(ns.phase!=='roundEnd'&&ns.phase!=='gameEnd') ns.turn=_other;
     saveState(ns);
   };
 
   window.skyjoDiscardHeld=function(){
     if(!_gameState||_phase!=='play') return;
+    if(_gameState.turn!==_me) return;
     if(!_gameState.held_card||_gameState.held_card.holder!==_me) return;
     var ns=deepCopy(_gameState);
     ns.discard.push(ns.held_card.value);
     ns.held_card=null;
+    // Le tour RESTE sur moi : je dois encore retourner une carte cachee
     ns.must_flip=_me;
+    // turn reste sur _me intentionnellement
     saveState(ns);
   };
 
   window.skyjoFlipReveal=function(idx){
     if(!_gameState||_phase!=='play') return;
-    if(_gameState.turn!==_me||_gameState.must_flip!==_me) return;
+    if(_gameState.turn!==_me) return;
+    if(_gameState.must_flip!==_me) return;
     var key=_me+'_cards';
     var ns=deepCopy(_gameState);
     if(ns[key][idx].revealed) return;
@@ -9294,9 +9325,11 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     ns.must_flip=null;
     checkColumns(ns,_me);
     checkRoundEnd(ns);
+    // Fin de tour complet -> passer a l'autre
     if(ns.phase!=='roundEnd'&&ns.phase!=='gameEnd') ns.turn=_other;
     saveState(ns);
   };
+
 
   // ─── Helpers ─────────────────────────────────────────
   function checkColumns(state,profile){
@@ -12292,7 +12325,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.09.8 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
