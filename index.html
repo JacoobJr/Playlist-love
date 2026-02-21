@@ -11100,7 +11100,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.6</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -11119,85 +11119,41 @@ loadFavorites();
 </div>
 <script>
 /* ══════════════════════════════════════════════════════
-   NOW LISTENING — Encadré unique, 3 modes
-   • nl-boy     : Link écoute (ou les deux écoutent des chansons différentes et moi = girl)
-   • nl-girl    : Zelda écoute (ou les deux écoutent des chansons différentes et moi = boy)
-   • nl-together: même chanson en cours → encadré doré
-   
-   Logique d'affichage :
-   - Personne n'écoute         → box cachée
-   - Seulement moi qui écoute  → mon encadré (bleu ou rose selon qui je suis)
-   - Seulement l'autre écoute  → encadré couleur de l'autre (attire l'œil)
-   - Les deux, même chanson    → encadré doré together
-   - Les deux, chansons diff.  → encadré couleur de l'autre (montre ce qu'il écoute)
+   NOW LISTENING — Encadré unique, 3 modes (version corrigée)
+   • nl-boy     : Link écoute
+   • nl-girl    : Zelda écoute
+   • nl-together: même chanson → encadré doré
 ══════════════════════════════════════════════════════ */
 (function(){
 
   var NL_TABLE = 'now_listening';
   var EQ_HTML  = '<div class="nl-eq"><span></span><span></span><span></span><span></span><span></span></div>';
 
-  var box    = document.getElementById('nlBox');
-  var inner  = document.getElementById('nlInner');
+  var box   = document.getElementById('nlBox');
+  var inner = document.getElementById('nlInner');
   if(!box || !inner) return;
 
-  var _nlBoyFile  = null;
-  var _nlGirlFile = null;
+  var _nlBoyFile   = null;
+  var _nlGirlFile  = null;
   var _nlPollTimer = null;
-  var _nlLastPush  = null;
-  var _nlLastMode  = '';
+  // FIX: on garde séparément le dernier push envoyé à Supabase vs le dernier push local
+  // pour ne pas bloquer un re-push après pause+reprise sur la même chanson
+  var _nlLastPushRemote = '__none__';
 
-  /* ── Cherche les infos d'une chanson ── */
+  /* ── FIX: Cherche les infos d'une chanson (comparaison robuste) ── */
   function songInfo(file){
     if(!file) return null;
     if(typeof songsLove === 'undefined') return null;
+    var base = file.split('/').pop().split('?')[0];
     return songsLove.find(function(s){
-      return s.file === file || file.indexOf(s.file) !== -1;
+      if(!s || !s.file) return false;
+      var sBase = s.file.split('/').pop().split('?')[0];
+      // Comparaison par basename pour éviter les problèmes de chemin relatif
+      return sBase === base || s.file === file || file.indexOf(s.file) !== -1;
     }) || null;
   }
 
-  /* ── Construit le HTML du contenu selon le mode ── */
-  function buildContent(mode, fileA){
-    var info, label, avi;
-
-    if(mode === 'together'){
-      info = songInfo(fileA);
-      var ttog  = info ? info.title  : (fileA ? fileA.split('/').pop().replace(/\.mp3$/i,'').replace(/_/g,' ') : '');
-      var artog = info ? info.artist : '';
-      return '<div class="nl-avi-duo">'
-           + '<span class="nl-avi nl-avi-left">🧑</span>'
-           + '<span class="nl-avi nl-avi-right">👧</span>'
-           + '</div>'
-           + '<div class="nl-text">'
-           + '<div class="nl-label">✨ On écoute ensemble</div>'
-           + '<div class="nl-title">' + ttog + '</div>'
-           + (artog ? '<div class="nl-artist">' + artog + '</div>' : '')
-           + '</div>'
-           + EQ_HTML;
-    }
-
-    if(mode === 'boy'){
-      label = 'Link écoute';
-      avi   = '🧑';
-    } else if(mode === 'girl'){
-      label = 'Zelda écoute';
-      avi   = '👧';
-    } else {
-      return '';
-    }
-
-    info = songInfo(fileA);
-    var title  = info ? info.title  : (fileA ? fileA.split('/').pop().replace(/\.mp3$/i,'').replace(/_/g,' ') : '—');
-    var artist = info ? info.artist : '';
-    return '<span class="nl-avi">' + avi + '</span>'
-         + '<div class="nl-text">'
-         + '<div class="nl-label">' + label + '</div>'
-         + '<div class="nl-title">' + title + '</div>'
-         + (artist ? '<div class="nl-artist">' + artist + '</div>' : '')
-         + '</div>'
-         + EQ_HTML;
-  }
-
-  /* ── Construit une ligne pour une personne ── */
+  /* ── Construit une ligne pour une personne (mode deux lignes) ── */
   function buildRow(who, file){
     var avi   = who === 'boy' ? '🧑' : '👧';
     var name  = who === 'boy' ? 'Link' : 'Zelda';
@@ -11205,8 +11161,10 @@ loadFavorites();
     if(!file){
       return '<div class="nl-row nl-row-idle">'
            + '<span class="nl-avi" style="opacity:0.35;filter:grayscale(1)">' + avi + '</span>'
-           + '<div class="nl-text"><div class="nl-label" style="color:' + color + ';opacity:0.45">' + name + '</div>'
-           + '<div class="nl-title" style="color:var(--muted);font-style:italic;font-size:12px">Pas de musique en cours</div></div>'
+           + '<div class="nl-text">'
+           + '<div class="nl-label" style="color:' + color + ';opacity:0.45">' + name + '</div>'
+           + '<div class="nl-title" style="color:var(--muted);font-style:italic;font-size:12px">Pas de musique en cours</div>'
+           + '</div>'
            + '</div>';
     }
     var info   = songInfo(file);
@@ -11219,7 +11177,7 @@ loadFavorites();
          + '<div class="nl-title">' + title + '</div>'
          + (artist ? '<div class="nl-artist">' + artist + '</div>' : '')
          + '</div>'
-         + '<div class="nl-eq"><span></span><span></span><span></span><span></span><span></span></div>'
+         + EQ_HTML
          + '</div>';
   }
 
@@ -11227,32 +11185,29 @@ loadFavorites();
   function updateWidget(){
     var boyFile  = _nlBoyFile;
     var girlFile = _nlGirlFile;
-    var anyPlaying = boyFile || girlFile;
 
-    // Toujours visible
+    // FIX: cacher la box si personne n'écoute
+    if(!boyFile && !girlFile){
+      box.classList.remove('visible');
+      box.classList.remove('nl-boy','nl-girl','nl-together');
+      inner.innerHTML = '';
+      applyOtherGlow(null, null);
+      return;
+    }
     box.classList.add('visible');
     box.classList.remove('nl-boy','nl-girl','nl-together');
 
-    // Détermine le mode couleur
-    var sameSong = boyFile && girlFile && boyFile.split('/').pop() === girlFile.split('/').pop();
+    // FIX: comparaison des basenames pour la détection "même chanson"
+    var boyBase  = boyFile  ? boyFile.split('/').pop().split('?')[0]  : null;
+    var girlBase = girlFile ? girlFile.split('/').pop().split('?')[0] : null;
+    var sameSong = !!(boyBase && girlBase && boyBase === girlBase);
+
+    var html = '';
+
     if(sameSong){
       box.classList.add('nl-together');
-    } else if(boyFile && girlFile){
-      // Les deux écoutent des chansons différentes → deux lignes, pas de couleur dominante
-      box.classList.add('nl-boy'); // bleu par défaut
-    } else if(boyFile){
-      box.classList.add('nl-boy');
-    } else if(girlFile){
-      box.classList.add('nl-girl');
-    }
-    // sinon : aucune classe couleur → aspect neutre
-
-    // Construit le contenu
-    var html = '';
-    if(sameSong){
-      // Mode together : une seule ligne avec les deux avatars
       var info   = songInfo(boyFile);
-      var title  = info ? info.title  : boyFile.split('/').pop().replace(/\.mp3$/i,'').replace(/_/g,' ');
+      var title  = info ? info.title  : boyBase.replace(/\.mp3$/i,'').replace(/_/g,' ');
       var artist = info ? info.artist : '';
       html = '<div class="nl-avi-duo">'
            + '<span class="nl-avi nl-avi-left nl-avi-active">🧑</span>'
@@ -11263,23 +11218,54 @@ loadFavorites();
            + '<div class="nl-title">' + title + '</div>'
            + (artist ? '<div class="nl-artist">' + artist + '</div>' : '')
            + '</div>'
-           + '<div class="nl-eq"><span></span><span></span><span></span><span></span><span></span></div>';
-    } else {
-      // Deux lignes : une par personne
-      html = '<div class="nl-rows">'
+           + EQ_HTML;
+    } else if(boyFile && girlFile){
+      // Les deux écoutent des chansons différentes → deux lignes
+      // FIX: nl-inner est flex, nl-rows doit prendre toute la largeur
+      box.classList.add('nl-boy');
+      html = '<div class="nl-rows" style="width:100%">'
            + buildRow('boy',  boyFile)
            + '<div class="nl-divider"></div>'
            + buildRow('girl', girlFile)
            + '</div>';
+    } else if(boyFile){
+      box.classList.add('nl-boy');
+      html = '<span class="nl-avi nl-avi-active">🧑</span>'
+           + (function(){
+               var info = songInfo(boyFile);
+               var t = info ? info.title  : boyBase.replace(/\.mp3$/i,'').replace(/_/g,' ');
+               var a = info ? info.artist : '';
+               return '<div class="nl-text">'
+                    + '<div class="nl-label">Link écoute</div>'
+                    + '<div class="nl-title">' + t + '</div>'
+                    + (a ? '<div class="nl-artist">' + a + '</div>' : '')
+                    + '</div>';
+             })()
+           + EQ_HTML;
+    } else {
+      // girlFile seulement
+      box.classList.add('nl-girl');
+      html = '<span class="nl-avi nl-avi-active">👧</span>'
+           + (function(){
+               var info = songInfo(girlFile);
+               var t = info ? info.title  : girlBase.replace(/\.mp3$/i,'').replace(/_/g,' ');
+               var a = info ? info.artist : '';
+               return '<div class="nl-text">'
+                    + '<div class="nl-label">Zelda écoute</div>'
+                    + '<div class="nl-title">' + t + '</div>'
+                    + (a ? '<div class="nl-artist">' + a + '</div>' : '')
+                    + '</div>';
+             })()
+           + EQ_HTML;
     }
+
     inner.innerHTML = html;
 
     // Glow playlist
     var myProfile = localStorage.getItem('jayana_profile');
     var otherFile = myProfile === 'boy' ? girlFile : (myProfile === 'girl' ? boyFile : null);
     var otherWho  = myProfile === 'boy' ? 'girl'   : 'boy';
-    if(otherFile) applyOtherGlow(otherFile, otherWho);
-    else applyOtherGlow(null, null);
+    applyOtherGlow(otherFile || null, otherFile ? otherWho : null);
   }
 
   /* ── Glow playlist ── */
@@ -11288,12 +11274,15 @@ loadFavorites();
       el.classList.remove('nl-other-playing','nl-glow-boy','nl-glow-girl');
     });
     if(!file) return;
+    var targetBase = file.split('/').pop().split('?')[0];
     document.querySelectorAll('#Love .sp-song').forEach(function(row){
       var audio = row.querySelector('audio');
       if(!audio) return;
       var src = '';
-      try{ src = decodeURIComponent(audio.src); }catch(e){ src = audio.src; }
-      if(src.indexOf(file) !== -1 || (audio.getAttribute('src')||'').indexOf(file) !== -1){
+      try{ src = decodeURIComponent(audio.src); }catch(e){ src = audio.src || ''; }
+      var srcBase = src.split('/').pop().split('?')[0];
+      // FIX: comparaison par basename uniquement
+      if(srcBase && srcBase === targetBase){
         row.classList.add('nl-other-playing', 'nl-glow-' + who);
       }
     });
@@ -11303,7 +11292,7 @@ loadFavorites();
   function nlPoll(){
     var url = SB_URL + '/rest/v1/' + NL_TABLE + '?select=sender,song_file&order=updated_at.desc';
     fetch(url, { headers: sbHeaders() })
-      .then(function(r){ return r.ok ? r.json() : []; })
+      .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(rows){
         if(!Array.isArray(rows)) return;
         var newBoy = null, newGirl = null;
@@ -11317,32 +11306,36 @@ loadFavorites();
       }).catch(function(){});
   }
 
-  /* ── Push mon état ── */
+  /* ── Push mon état vers Supabase ── */
+  function nlPushRemote(profile, normalized){
+    // FIX: upsert correct via POST + merge-duplicates
+    // Supabase requiert la clé primaire (sender) dans le body pour le merge
+    fetch(SB_URL + '/rest/v1/' + NL_TABLE, {
+      method: 'POST',
+      headers: sbHeaders({
+        'Prefer': 'resolution=merge-duplicates,return=minimal'
+      }),
+      body: JSON.stringify({ sender: profile, song_file: normalized })
+    }).catch(function(){});
+  }
+
+  /* ── Déclenche une mise à jour locale + push distant ── */
   function nlPush(file){
     var profile = localStorage.getItem('jayana_profile');
     if(!profile) return;
-    var normalized = file || null;
-    if(_nlLastPush === normalized) return;
-    _nlLastPush = normalized;
 
-    // Met à jour localement tout de suite
+    var normalized = file ? file.split('/').pop().split('?')[0] : null;
+
+    // Mise à jour locale immédiate (toujours, même si même fichier)
     if(profile === 'boy')  _nlBoyFile  = normalized;
     if(profile === 'girl') _nlGirlFile = normalized;
     updateWidget();
 
-    if(normalized){
-      fetch(SB_URL + '/rest/v1/' + NL_TABLE, {
-        method: 'POST',
-        headers: sbHeaders({'Prefer': 'resolution=merge-duplicates,return=minimal'}),
-        body: JSON.stringify({ sender: profile, song_file: normalized })
-      }).catch(function(){});
-    } else {
-      fetch(SB_URL + '/rest/v1/' + NL_TABLE + '?sender=eq.' + profile, {
-        method: 'PATCH',
-        headers: sbHeaders({'Prefer': 'return=minimal'}),
-        body: JSON.stringify({ song_file: null })
-      }).catch(function(){});
-    }
+    // FIX: n'envoie au serveur que si la valeur a vraiment changé
+    // (evite les requêtes inutiles mais ne bloque pas un re-push après pause+reprise)
+    if(_nlLastPushRemote === normalized) return;
+    _nlLastPushRemote = normalized;
+    nlPushRemote(profile, normalized);
   }
 
   /* ── Poll toutes les 5s ── */
@@ -11353,9 +11346,10 @@ loadFavorites();
   var _origMpUpdate = window.mpUpdate;
   window.mpUpdate = function(){
     if(_origMpUpdate) _origMpUpdate.apply(this, arguments);
-    if(typeof currentAudio !== 'undefined' && currentAudio && !currentAudio.paused){
+    var ca = (typeof currentAudio !== 'undefined') ? currentAudio : null;
+    if(ca && !ca.paused){
       var src = '';
-      try{ src = decodeURIComponent(currentAudio.src); }catch(e){ src = currentAudio.src||''; }
+      try{ src = decodeURIComponent(ca.src); }catch(e){ src = ca.src || ''; }
       nlPush(src.split('/').pop().split('?')[0]);
     } else {
       nlPush(null);
@@ -11371,7 +11365,7 @@ loadFavorites();
   document.addEventListener('play', function(e){
     if(e.target && e.target.tagName === 'AUDIO'){
       var src = '';
-      try{ src = decodeURIComponent(e.target.src); }catch(ex){ src = e.target.src||''; }
+      try{ src = decodeURIComponent(e.target.src); }catch(ex){ src = e.target.src || ''; }
       var f = src.split('/').pop().split('?')[0];
       if(f) nlPush(f);
     }
@@ -11379,11 +11373,16 @@ loadFavorites();
 
   document.addEventListener('pause', function(e){
     if(e.target && e.target.tagName === 'AUDIO'){
+      // FIX: délai légèrement plus long pour laisser le temps au changement de chanson
       setTimeout(function(){
         var any = false;
         document.querySelectorAll('audio').forEach(function(a){ if(!a.paused) any = true; });
-        if(!any) nlPush(null);
-      }, 120);
+        // FIX: on remet _nlLastPushRemote à __none__ pour permettre un re-push de null
+        if(!any){
+          _nlLastPushRemote = '__none__';
+          nlPush(null);
+        }
+      }, 200);
     }
   }, true);
 
@@ -11392,10 +11391,25 @@ loadFavorites();
       setTimeout(function(){
         var any = false;
         document.querySelectorAll('audio').forEach(function(a){ if(!a.paused) any = true; });
-        if(!any) nlPush(null);
-      }, 220);
+        if(!any){
+          _nlLastPushRemote = '__none__';
+          nlPush(null);
+        }
+      }, 300);
     }
   }, true);
+
+  // FIX: quand on quitte la page / ferme l'onglet, effacer notre statut
+  window.addEventListener('beforeunload', function(){
+    var profile = localStorage.getItem('jayana_profile');
+    if(!profile) return;
+    // sendBeacon pour que la requête parte même si la page se ferme
+    var data = JSON.stringify({ sender: profile, song_file: null });
+    var url  = SB_URL + '/rest/v1/' + NL_TABLE;
+    var hdrs = sbHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' });
+    // sendBeacon ne supporte pas les headers custom, on utilise fetch en mode keepalive
+    fetch(url, { method: 'POST', headers: hdrs, body: data, keepalive: true }).catch(function(){});
+  });
 
   window._nlPush = nlPush;
 
