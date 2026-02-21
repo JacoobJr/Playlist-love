@@ -2174,16 +2174,17 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 .game-view-body { padding: 16px 16px 0; }
 
 /* ════ PENDU ════ */
-#penduView,#puzzleView,#snakeView,#skyjoView{display:none;position:fixed;inset:0;background:var(--bg);z-index:600;overflow-y:auto;padding-bottom:80px;transition:background 0.3s;}
+#penduView,#puzzleView,#snakeView,#skyjoView{display:none;position:fixed;inset:0;background:var(--bg);z-index:600;overflow-y:auto;overflow-x:hidden;padding-bottom:80px;transition:background 0.3s;}
 #penduView.active,#puzzleView.active,#snakeView.active,#skyjoView.active{display:block;animation:slideUp 0.25s ease;}
 
 /* ══ SKYJO STYLES ══ */
 /* ══ SKYJO CARDS & GRID ══ */
 .skyjo-card {
-  width: 48px; height: 68px;
+  width: clamp(38px, calc((100vw - 80px) / 4), 56px);
+  height: clamp(54px, calc(((100vw - 80px) / 4) * 1.4), 78px);
   border-radius: 8px;
   display: inline-flex; align-items: center; justify-content: center;
-  font-size: 17px; font-weight: 700;
+  font-size: clamp(13px, calc((100vw - 80px) / 16), 18px); font-weight: 700;
   border: 1.5px solid var(--border);
   background: var(--s2);
   color: var(--text);
@@ -2207,8 +2208,8 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 /* Grille : 4 colonnes × 3 lignes, jamais côte à côte avec l'autre grille */
 .skyjo-grid {
   display: grid;
-  grid-template-columns: repeat(4, 48px);
-  grid-template-rows: repeat(3, 68px);
+  grid-template-columns: repeat(4, clamp(38px, calc((100vw - 80px) / 4), 56px));
+  grid-template-rows: repeat(3, clamp(54px, calc(((100vw - 80px) / 4) * 1.4), 78px));
   gap: 5px;
   width: fit-content;
   margin: 0 auto;
@@ -12317,7 +12318,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.08.8 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -13314,7 +13315,7 @@ console.log('✨ Jayana UX v.UX1 chargé');
       '.section{contain:layout;}' +
       '.bottom-nav{contain:layout style;}' +
       '.song,.sp-song{contain:layout style;}' +
-      '#gamesView,#quizView,#memoryView,#penduView,#puzzleView,#snakeView,#skyjoView,#hiddenPage{contain:layout style;}' +
+      '#gamesView,#quizView,#memoryView,#penduView,#puzzleView,#snakeView,#hiddenPage{contain:layout style;}' +
 
       /* ── Backdrop-filter désactivé sur iOS (webkit-touch-callout détecte iOS) ── */
       '@supports (-webkit-touch-callout: none){' +
