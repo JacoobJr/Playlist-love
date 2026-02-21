@@ -9236,133 +9236,73 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     saveState(ns);
   };
 
-  // ─── Sauvegarde (poll pause pendant PATCH) ───────────
-  function saveState(ns){
-    if(!_gameId) return;
-    _saving = true;
-    stopPoll(); // pause le poll pendant la sauvegarde
-    fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId,{
-      method:'PATCH',
-      headers:sbHeaders({'Prefer':'return=representation'}),
-      body:JSON.stringify({state:ns})
+  // ─── RPC : appel atomique cote serveur ──────────────────
+  // Chaque action passe par une fonction PostgreSQL :
+  // lecture + modification + ecriture en une seule transaction.
+  // Cela evite toute race condition entre les deux joueurs.
+
+  function callRpc(fnName, params){
+    return fetch(SB_URL+'/rest/v1/rpc/'+fnName,{
+      method:'POST',
+      headers:sbHeaders(),
+      body:JSON.stringify(params)
     })
     .then(function(r){
-      if(!r.ok){ r.text().then(function(t){console.error('[SKYJO] saveState err:',t);}); return null; }
+      if(!r.ok){ return r.text().then(function(t){ throw new Error(t); }); }
       return r.json();
     })
-    .then(function(rows){
-      _saving=false;
-      if(rows&&Array.isArray(rows)&&rows[0]) renderState(rows[0]);
-      startPoll(); // relance le poll apres rendu
+    .then(function(state){
+      // La RPC retourne le state mis a jour directement
+      if(state && typeof state === 'object' && !Array.isArray(state)){
+        renderState({id:_gameId, state:state});
+      }
     })
-    .catch(function(e){ console.error('[SKYJO] saveState catch',e); _saving=false; startPoll(); });
+    .catch(function(e){ console.error('[SKYJO] RPC',fnName,'err:',e.message); });
   }
+
+  window.skyjoFlipInit=function(idx){
+    if(!_gameState||_phase!=='init1') return;
+    var key=_me+'_cards';
+    var flipped=_gameState[key].filter(function(c){return c.revealed;}).length;
+    if(flipped>=2) return;
+    callRpc('skyjo_flip_init',{p_game_id:_gameId, p_player:_me, p_idx:idx});
+  };
 
   window.skyjoDrawFromDeck=function(){
     if(!_gameState||_phase!=='play') return;
     if(_gameState.turn!==_me||_gameState.held_card) return;
-    var ns=deepCopy(_gameState);
-    if(!ns.deck||!ns.deck.length){
-      var tp=ns.discard.pop();
-      ns.deck=shuffle(ns.discard);
-      ns.discard=[tp];
-    }
-    ns.held_card={value:ns.deck.pop(),holder:_me};
-    // PAS de changement de tour : on garde le tour jusqu'a ce qu'on joue la carte
-    saveState(ns);
+    callRpc('skyjo_draw_deck',{p_game_id:_gameId, p_player:_me});
   };
 
   window.skyjoDrawFromDiscard=function(){
     if(!_gameState||_phase!=='play') return;
     if(_gameState.turn!==_me||_gameState.held_card) return;
     if(!_gameState.discard||!_gameState.discard.length) return;
-    var ns=deepCopy(_gameState);
-    ns.held_card={value:ns.discard.pop(),holder:_me};
-    // PAS de changement de tour : on garde le tour jusqu'a ce qu'on joue la carte
-    saveState(ns);
+    callRpc('skyjo_draw_discard',{p_game_id:_gameId, p_player:_me});
   };
 
   window.skyjoReplaceCard=function(idx){
     if(!_gameState||_phase!=='play') return;
     if(_gameState.turn!==_me) return;
     if(!_gameState.held_card||_gameState.held_card.holder!==_me) return;
-    var ns=deepCopy(_gameState);
-    var key=_me+'_cards';
-    // Defausser l'ancienne carte (revelee ou non, sa valeur part en defausse)
-    ns.discard.push(ns[key][idx].value);
-    // Poser la carte en main (toujours revelee)
-    ns[key][idx]={value:ns.held_card.value,revealed:true};
-    ns.held_card=null;
-    ns.must_flip=null;
-    checkColumns(ns,_me);
-    checkRoundEnd(ns);
-    // Fin de tour -> passer a l'autre
-    if(ns.phase!=='roundEnd'&&ns.phase!=='gameEnd') ns.turn=_other;
-    saveState(ns);
+    callRpc('skyjo_replace_card',{p_game_id:_gameId, p_player:_me, p_idx:idx});
   };
 
   window.skyjoDiscardHeld=function(){
     if(!_gameState||_phase!=='play') return;
     if(_gameState.turn!==_me) return;
     if(!_gameState.held_card||_gameState.held_card.holder!==_me) return;
-    var ns=deepCopy(_gameState);
-    ns.discard.push(ns.held_card.value);
-    ns.held_card=null;
-    // Le tour RESTE sur moi : je dois encore retourner une carte cachee
-    ns.must_flip=_me;
-    // turn reste sur _me intentionnellement
-    saveState(ns);
+    callRpc('skyjo_discard_held',{p_game_id:_gameId, p_player:_me});
   };
 
   window.skyjoFlipReveal=function(idx){
     if(!_gameState||_phase!=='play') return;
-    if(_gameState.turn!==_me) return;
-    if(_gameState.must_flip!==_me) return;
+    if(_gameState.turn!==_me||_gameState.must_flip!==_me) return;
     var key=_me+'_cards';
-    var ns=deepCopy(_gameState);
-    if(ns[key][idx].revealed) return;
-    ns[key][idx].revealed=true;
-    ns.must_flip=null;
-    checkColumns(ns,_me);
-    checkRoundEnd(ns);
-    // Fin de tour complet -> passer a l'autre
-    if(ns.phase!=='roundEnd'&&ns.phase!=='gameEnd') ns.turn=_other;
-    saveState(ns);
+    if(_gameState[key][idx].revealed) return;
+    callRpc('skyjo_flip_reveal',{p_game_id:_gameId, p_player:_me, p_idx:idx});
   };
 
-
-  // ─── Helpers ─────────────────────────────────────────
-  function checkColumns(state,profile){
-    var key=profile+'_cards';
-    var cards=state[key];
-    for(var col=0;col<4;col++){
-      var i0=col,i1=col+4,i2=col+8;
-      if(!cards[i0].revealed||!cards[i1].revealed||!cards[i2].revealed) continue;
-      if(cards[i0].removed||cards[i1].removed||cards[i2].removed) continue;
-      if(cards[i0].value===cards[i1].value&&cards[i1].value===cards[i2].value){
-        state.discard.push(cards[i0].value);
-        cards[i0]={value:null,revealed:true,removed:true};
-        cards[i1]={value:null,revealed:true,removed:true};
-        cards[i2]={value:null,revealed:true,removed:true};
-      }
-    }
-  }
-
-  function checkRoundEnd(state){
-    var gDone=state.girl_cards.every(function(c){return c.revealed;});
-    var bDone=state.boy_cards.every(function(c){return c.revealed;});
-    if(!gDone&&!bDone) return;
-    state.girl_cards.forEach(function(c){c.revealed=true;});
-    state.boy_cards.forEach(function(c){c.revealed=true;});
-    var gs=calcScore(state.girl_cards),bs=calcScore(state.boy_cards);
-    var closer=gDone?'girl':'boy';
-    var cScore=closer==='girl'?gs:bs,oScore=closer==='girl'?bs:gs;
-    if(cScore>=oScore){if(closer==='girl') gs*=2; else bs*=2;}
-    state.scores.girl+=gs;state.scores.boy+=bs;
-    state.round_scores={girl:gs,boy:bs};
-    state.round_closer=closer;
-    state.phase=(state.scores.girl>=100||state.scores.boy>=100)?'gameEnd':'roundEnd';
-  }
 
   function saveState(ns){
     if(!_gameId) return;
@@ -12325,7 +12265,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.09.8 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
