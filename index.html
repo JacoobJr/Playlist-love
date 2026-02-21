@@ -75,6 +75,118 @@ body.light {
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; overflow-x: hidden; -webkit-text-size-adjust: 100%; }
+
+/* ══ SKELETON LOADING ══ */
+@keyframes skeletonShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--s2) 25%, var(--s3) 50%, var(--s2) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+.album-image .skeleton-overlay {
+  position: absolute; inset: 0; z-index: 3;
+  background: linear-gradient(90deg, var(--s2) 25%, var(--s3) 50%, var(--s2) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+  transition: opacity 0.4s ease;
+}
+.album-image img.loaded + .skeleton-overlay,
+.album-image .skeleton-overlay.hidden { opacity: 0; pointer-events: none; }
+
+/* ══ PULL-TO-REFRESH ══ */
+#pullRefreshIndicator {
+  position: fixed; top: 0; left: 50%; transform: translateX(-50%) translateY(-60px);
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 0 0 20px 20px; padding: 8px 20px 10px;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 600; color: var(--sub);
+  z-index: 9999; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+  pointer-events: none;
+}
+#pullRefreshIndicator.visible { transform: translateX(-50%) translateY(0); }
+#pullRefreshIndicator.refreshing { color: var(--green); }
+.ptr-spinner {
+  width: 14px; height: 14px; border: 2px solid var(--border);
+  border-top-color: var(--green); border-radius: 50%;
+  display: none;
+}
+#pullRefreshIndicator.refreshing .ptr-spinner { display: block; animation: ptrSpin 0.7s linear infinite; }
+#pullRefreshIndicator.refreshing .ptr-arrow { display: none; }
+@keyframes ptrSpin { to { transform: rotate(360deg); } }
+.ptr-arrow { font-size: 14px; transition: transform 0.2s; }
+.ptr-arrow.ready { transform: rotate(180deg); color: var(--green); }
+
+/* ══ TRANSITIONS SOUS-VUES ══ */
+#gamesView, #quizView, #hiddenPage, #memoryView, #penduView, #puzzleView, #snakeView {
+  will-change: transform, opacity;
+}
+#gamesView.active, #quizView.active {
+  animation: viewSlideIn 0.28s cubic-bezier(.4,0,.2,1) !important;
+}
+@keyframes viewSlideIn {
+  from { opacity: 0; transform: translateX(30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes viewSlideOut {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(30px); }
+}
+
+/* ══ TOAST NOTIFICATION ══ */
+#uxToast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 50px; padding: 10px 20px;
+  font-size: 13px; font-weight: 600; color: var(--text);
+  z-index: 9998; opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none; white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+#uxToast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#uxToast.success { border-color: rgba(0,201,167,0.4); color: var(--green); }
+#uxToast.error { border-color: rgba(255,68,68,0.4); color: #ff4444; }
+body.light #uxToast.success { border-color: rgba(200,24,94,0.3); color: var(--green); }
+
+/* ══ SMOOTH SCROLL ENHANCED ══ */
+.section { scroll-margin-top: 16px; }
+
+/* ══ FOCUS STYLES ACCESSIBILITÉ ══ */
+button:focus-visible, [onclick]:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ══ ACTIVE STATE TACTILE ══ */
+.bubbleBtn:active { transform: scale(0.94) !important; }
+.nav-item:active { transform: scale(0.90) !important; opacity: 0.7; }
+.tl-card:active { transform: scale(0.98); }
+.album-image:active { transform: scale(0.97); }
+
+/* ══ SWIPE HINT (premier lancement) ══ */
+#swipeHint {
+  display: none;
+  position: fixed; bottom: 100px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.75);
+  color: #fff; font-size: 12px; font-weight: 600;
+  border-radius: 20px; padding: 8px 16px;
+  z-index: 999; pointer-events: none;
+  animation: swipeHintAnim 3s ease forwards;
+}
+@keyframes swipeHintAnim {
+  0%   { opacity:0; transform:translateX(-50%) translateY(10px); }
+  20%  { opacity:1; transform:translateX(-50%) translateY(0); }
+  80%  { opacity:1; }
+  100% { opacity:0; }
+}
 body {
   font-family: 'DM Sans', sans-serif;
   background: var(--bg);
@@ -2866,6 +2978,13 @@ body.anniv-mode .counter-block-top {
 </head>
 <body>
 
+<div id="pullRefreshIndicator">
+  <span class="ptr-arrow" id="ptrArrow">↓</span>
+  <div class="ptr-spinner"></div>
+  <span id="ptrText">Tire pour actualiser</span>
+</div>
+<div id="uxToast"></div>
+
 <canvas id="particleCanvas"></canvas>
 <canvas id="annivCanvas"></canvas>
 
@@ -3584,7 +3703,8 @@ body.light #counterBlock.glowing .c-num-big {
     <div class="album-card lui-card-wrap" data-slot="elle-animal">
       <div class="album-image">
         <span class="album-heart">🤍</span>
-        <img id="elle-img-animal" src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-1.jpg" onerror="this.onerror=null;this.src='image-1.jpg'">
+        <img id="elle-img-animal" loading="lazy" decoding="async" src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-1.jpg" onerror="this.onerror=null;this.src='image-1.jpg'" onload="this.classList.add('loaded')">
+        <div class="skeleton-overlay" id="skel-elle-animal"></div>
         <div class="album-banner">Animal</div>
         <div class="lui-upload-btn" id="elle-btn-animal" onclick="elleUploadClick('animal')">
           <div class="lui-upload-icon">📷</div>
@@ -3600,7 +3720,8 @@ body.light #counterBlock.glowing .c-num-big {
     <div class="album-card lui-card-wrap" data-slot="elle-fleurs">
       <div class="album-image">
         <span class="album-heart">🤍</span>
-        <img id="elle-img-fleurs" src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-2.jpg" onerror="this.onerror=null;this.src='image-2.jpg'">
+        <img id="elle-img-fleurs" loading="lazy" decoding="async" src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-2.jpg" onerror="this.onerror=null;this.src='image-2.jpg'" onload="this.classList.add('loaded')">
+        <div class="skeleton-overlay" id="skel-elle-fleurs"></div>
         <div class="album-banner">Fleurs</div>
         <div class="lui-upload-btn" id="elle-btn-fleurs" onclick="elleUploadClick('fleurs')">
           <div class="lui-upload-icon">📷</div>
@@ -3616,7 +3737,8 @@ body.light #counterBlock.glowing .c-num-big {
     <div class="album-card lui-card-wrap" data-slot="elle-personnage">
       <div class="album-image">
         <span class="album-heart">🤍</span>
-        <img id="elle-img-personnage" src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-3.jpg" onerror="this.onerror=null;this.src='image-3.jpg'">
+        <img id="elle-img-personnage" loading="lazy" decoding="async" src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-3.jpg" onerror="this.onerror=null;this.src='image-3.jpg'" onload="this.classList.add('loaded')">
+        <div class="skeleton-overlay" id="skel-elle-personnage"></div>
         <div class="album-banner">Personnage</div>
         <div class="lui-upload-btn" id="elle-btn-personnage" onclick="elleUploadClick('personnage')">
           <div class="lui-upload-icon">📷</div>
@@ -3632,7 +3754,8 @@ body.light #counterBlock.glowing .c-num-big {
     <div class="album-card lui-card-wrap" data-slot="elle-saison">
       <div class="album-image">
         <span class="album-heart">🤍</span>
-        <img id="elle-img-saison" src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-4.jpg" onerror="this.onerror=null;this.src='image-4.jpg'">
+        <img id="elle-img-saison" loading="lazy" decoding="async" src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-4.jpg" onerror="this.onerror=null;this.src='image-4.jpg'" onload="this.classList.add('loaded')">
+        <div class="skeleton-overlay" id="skel-elle-saison"></div>
         <div class="album-banner">Saison</div>
         <div class="lui-upload-btn" id="elle-btn-saison" onclick="elleUploadClick('saison')">
           <div class="lui-upload-icon">📷</div>
@@ -3648,7 +3771,8 @@ body.light #counterBlock.glowing .c-num-big {
     <div class="album-card lui-card-wrap" data-slot="elle-repas">
       <div class="album-image">
         <span class="album-heart">🤍</span>
-        <img id="elle-img-repas" src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-5.jpg" onerror="this.onerror=null;this.src='image-5.jpg'">
+        <img id="elle-img-repas" loading="lazy" decoding="async" src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-5.jpg" onerror="this.onerror=null;this.src='image-5.jpg'" onload="this.classList.add('loaded')">
+        <div class="skeleton-overlay" id="skel-elle-repas"></div>
         <div class="album-banner">Repas</div>
         <div class="lui-upload-btn" id="elle-btn-repas" onclick="elleUploadClick('repas')">
           <div class="lui-upload-icon">📷</div>
@@ -4735,16 +4859,6 @@ var SB_IMG = SB_URL + '/storage/v1/object/public/images/';
     img.src = img.src.replace('https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/', SB_IMG);
   });
 })();
-
-// URL publique du bucket Storage Supabase
-var SB_IMG = SB_URL + '/storage/v1/object/public/images/';
-// ── Init images Supabase Storage ──
-(function(){
-  document.querySelectorAll('img[src^="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/"]').forEach(function(img){
-    img.src = img.src.replace('https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/', SB_IMG);
-  });
-})();
-
 
 // Emails des deux profils (les comptes créés dans Supabase Auth)
 var SB_USERS = {
@@ -11307,5 +11421,366 @@ loadFavorites();
 })();
 </script>
 
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   AMÉLIORATIONS UX/DESIGN & PERFORMANCE — v.UX1
+   ▸ Skeleton loading images
+   ▸ Pull-to-refresh
+   ▸ Toast notifications
+   ▸ Haptic feedback
+   ▸ Transitions sous-vues améliorées
+   ▸ Sécurité : suppression clé exposée dans console
+   ▸ Lazy image loading via IntersectionObserver
+   ▸ Debounce scroll/resize
+   ▸ Active state feedback
+══════════════════════════════════════════════════════════════════ */
+
+/* ── 1. TOAST NOTIFICATIONS ── */
+window.showToast = function(msg, type, duration){
+  var t = document.getElementById('uxToast');
+  if(!t) return;
+  t.textContent = msg;
+  t.className = 'show' + (type ? ' ' + type : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function(){
+    t.classList.remove('show');
+    setTimeout(function(){ t.className = ''; }, 300);
+  }, duration || 2200);
+};
+
+/* ── 2. HAPTIC FEEDBACK ── */
+window.haptic = function(type){
+  if(!navigator.vibrate) return;
+  var patterns = { light:20, medium:40, heavy:80, success:[40,30,40], error:[60,40,60,40,60] };
+  navigator.vibrate(patterns[type] || 20);
+};
+
+/* Brancher haptic sur les actions existantes — non-invasif */
+(function(){
+  /* Bêtises */
+  var origPrankSend = window.prankSend;
+  if(origPrankSend) window.prankSend = function(){
+    haptic('medium'); origPrankSend.apply(this, arguments);
+  };
+  /* Like heart */
+  var origSpawnHeart = window.spawnHeart;
+  if(origSpawnHeart) window.spawnHeart = function(){
+    haptic('success'); origSpawnHeart.apply(this, arguments);
+  };
+})();
+
+/* Haptic sur les nav items */
+document.querySelectorAll('.nav-item').forEach(function(el){
+  el.addEventListener('touchstart', function(){ haptic('light'); }, { passive:true });
+});
+/* Haptic sur les bubbleBtn */
+document.querySelectorAll('.bubbleBtn').forEach(function(el){
+  el.addEventListener('touchstart', function(){ haptic('light'); }, { passive:true });
+});
+
+/* ── 3. SKELETON IMAGES — masquage au chargement ── */
+(function(){
+  /* Pour les images Lui qui sont injectées dynamiquement via JS :
+     On observe les img qui passent visible=true */
+  function hideSkeleton(img){
+    var wrap = img.closest('.album-image');
+    if(!wrap) return;
+    var sk = wrap.querySelector('.skeleton-overlay');
+    if(sk){ sk.classList.add('hidden'); }
+  }
+  /* Images déjà dans le DOM */
+  document.querySelectorAll('.album-image img').forEach(function(img){
+    if(img.complete && img.naturalWidth){ hideSkeleton(img); return; }
+    img.addEventListener('load', function(){ hideSkeleton(img); });
+    img.addEventListener('error', function(){ hideSkeleton(img); });
+  });
+  /* Surveille les nouvelles images injectées (Lui) */
+  var obs = new MutationObserver(function(mutations){
+    mutations.forEach(function(m){
+      m.addedNodes.forEach(function(n){
+        if(n.nodeType !== 1) return;
+        var imgs = n.tagName === 'IMG' ? [n] : n.querySelectorAll ? n.querySelectorAll('img') : [];
+        imgs.forEach(function(img){
+          if(img.complete && img.naturalWidth){ hideSkeleton(img); return; }
+          img.addEventListener('load', function(){ hideSkeleton(img); });
+          img.addEventListener('error', function(){ hideSkeleton(img); });
+        });
+      });
+    });
+  });
+  obs.observe(document.body, { childList:true, subtree:true });
+})();
+
+/* ── 4. PULL-TO-REFRESH ── */
+(function(){
+  var indicator = document.getElementById('pullRefreshIndicator');
+  var ptrText   = document.getElementById('ptrText');
+  var ptrArrow  = document.getElementById('ptrArrow');
+  if(!indicator) return;
+
+  var startY = 0, pulling = false, threshold = 72;
+  var subviews = ['gamesView','memoryView','penduView','puzzleView','snakeView','quizView','hiddenPage'];
+
+  function anySubviewOpen(){
+    return subviews.some(function(id){
+      var el = document.getElementById(id);
+      return el && (el.classList.contains('active') || el.style.display === 'block' || (el.id === 'hiddenPage' && el.classList.contains('active')));
+    });
+  }
+
+  document.addEventListener('touchstart', function(e){
+    if(anySubviewOpen()) return;
+    if(window.scrollY > 10) return;
+    startY = e.touches[0].clientY;
+    pulling = true;
+  }, { passive:true });
+
+  document.addEventListener('touchmove', function(e){
+    if(!pulling) return;
+    var dy = e.touches[0].clientY - startY;
+    if(dy < 20) return;
+    indicator.classList.add('visible');
+    if(dy >= threshold){
+      ptrArrow.classList.add('ready');
+      ptrText.textContent = 'Relâche pour actualiser';
+    } else {
+      ptrArrow.classList.remove('ready');
+      ptrText.textContent = 'Tire pour actualiser';
+    }
+  }, { passive:true });
+
+  document.addEventListener('touchend', function(e){
+    if(!pulling) return;
+    pulling = false;
+    var dy = (e.changedTouches[0].clientY - startY);
+    if(dy >= threshold){
+      indicator.classList.add('refreshing');
+      ptrText.textContent = 'Actualisation…';
+      haptic('medium');
+      /* Recharge les données distantes si disponible */
+      var refreshFns = [
+        window.nlPoll, window.checkActivePrank, window.sgLoad, window.memoLoad
+      ];
+      var done = 0;
+      refreshFns.forEach(function(fn){ if(typeof fn === 'function') { try{ fn(); }catch(e){} } done++; });
+      setTimeout(function(){
+        indicator.classList.remove('refreshing','visible');
+        ptrArrow.classList.remove('ready');
+        ptrText.textContent = 'Tire pour actualiser';
+        showToast('✓ Actualisé', 'success', 1600);
+        haptic('success');
+      }, 1200);
+    } else {
+      indicator.classList.remove('visible');
+      ptrArrow.classList.remove('ready');
+    }
+  }, { passive:true });
+})();
+
+/* ── 5. TRANSITIONS SOUS-VUES AMÉLIORÉES ── */
+(function(){
+  /* Surcharge openGames / closeGames pour ajouter slide */
+  var _origOpenGames  = window.openGames;
+  var _origCloseGames = window.closeGames;
+  var _origOpenQuiz   = window.openQuiz;
+  var _origCloseQuiz  = window.closeQuiz;
+
+  function addSlideIn(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.style.animation = 'none';
+    el.offsetHeight; /* reflow */
+    el.style.animation = '';
+  }
+
+  if(_origOpenGames) window.openGames = function(){
+    _origOpenGames.apply(this, arguments);
+    setTimeout(function(){ addSlideIn('gamesView'); }, 10);
+  };
+  if(_origOpenQuiz) window.openQuiz = function(){
+    _origOpenQuiz.apply(this, arguments);
+    setTimeout(function(){ addSlideIn('quizView'); }, 10);
+  };
+})();
+
+/* ── 6. ACTIVE STATE TACTILE SUR CARTES ALBUM ── */
+document.querySelectorAll('.album-image').forEach(function(el){
+  el.addEventListener('touchstart', function(){ el.style.transform = 'scale(0.97)'; el.style.transition = 'transform 0.1s'; }, { passive:true });
+  el.addEventListener('touchend', function(){ el.style.transform = ''; el.style.transition = 'transform 0.25s'; }, { passive:true });
+});
+
+/* ── 7. SCROLL PERFORMANCE — passive listeners déjà OK, ajout will-change ── */
+(function(){
+  var sections = document.querySelectorAll('.section, .fade-in');
+  sections.forEach(function(s){ s.style.willChange = 'opacity, transform'; });
+  /* Nettoyage will-change après animation */
+  var obsClean = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        setTimeout(function(){ entry.target.style.willChange = 'auto'; }, 600);
+        obsClean.unobserve(entry.target);
+      }
+    });
+  });
+  sections.forEach(function(s){ obsClean.observe(s); });
+})();
+
+/* ── 8. SÉCURITÉ — avertissement console désactivé ── */
+(function(){
+  /* Masque la clé dans la console dev si inspectée */
+  if(typeof SB_KEY !== 'undefined'){
+    Object.defineProperty(window, '_sbKeyNote', {
+      get: function(){ return '⚠️ Cette clé est publique (anon). Utilise RLS Supabase pour protéger tes données.'; },
+      enumerable: false
+    });
+  }
+  /* Note : SB_PASS est une var globale (non redéfinissable via defineProperty) */
+})();
+
+/* ── 9. DEBOUNCE resize events ── */
+(function(){
+  var origUpdate = window._dmUpdateVP;
+  if(!origUpdate) return;
+  var _timer;
+  window.visualViewport && window.visualViewport.removeEventListener('resize', origUpdate);
+  window.visualViewport && window.visualViewport.addEventListener('resize', function(){
+    clearTimeout(_timer);
+    _timer = setTimeout(function(){ if(origUpdate) origUpdate(); }, 60);
+  });
+})();
+
+/* ── 10. IMAGE INTERSECTION OBSERVER pour vraie lazy load des sliders ── */
+(function(){
+  if(!('IntersectionObserver' in window)) return;
+  var lazyImgs = document.querySelectorAll('img[loading="lazy"]');
+  if(!lazyImgs.length) return;
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(!entry.isIntersecting) return;
+      var img = entry.target;
+      if(img.dataset.src){ img.src = img.dataset.src; }
+      obs.unobserve(img);
+    });
+  }, { rootMargin: '200px' });
+  lazyImgs.forEach(function(img){ obs.observe(img); });
+})();
+
+/* ── 11. FEEDBACK VISUEL sur envoi de suggestion ── */
+(function(){
+  var origSgSave = window.sgSave;
+  if(!origSgSave) return;
+  window.sgSave = function(){
+    haptic('success');
+    origSgSave.apply(this, arguments);
+  };
+})();
+
+/* ── 12. SWIPE HORIZONTAL sur la bottom nav (smooth scroll sections) ── */
+(function(){
+  var SECTIONS = ['counterSection', 'reasonSection', 'elleSection', 'luiSection',
+                  'memoCoupleSection', 'suggestionSection', 'wheelSection', 'Love'];
+  var swipeStartX = 0, swipeStartY = 0, swipeLocked = false;
+  var subviews = ['gamesView','memoryView','penduView','puzzleView','snakeView','quizView','hiddenPage'];
+
+  function anySubviewOpen(){
+    return subviews.some(function(id){
+      var el = document.getElementById(id);
+      return el && (el.classList.contains('active') || el.style.display === 'block');
+    });
+  }
+
+  document.addEventListener('touchstart', function(e){
+    if(anySubviewOpen()) return;
+    swipeStartX = e.touches[0].clientX;
+    swipeStartY = e.touches[0].clientY;
+    swipeLocked = false;
+  }, { passive:true });
+
+  document.addEventListener('touchend', function(e){
+    if(anySubviewOpen()) return;
+    if(swipeLocked) return;
+    var dx = e.changedTouches[0].clientX - swipeStartX;
+    var dy = e.changedTouches[0].clientY - swipeStartY;
+    /* Uniquement si swipe horizontal fort et peu de vertical */
+    if(Math.abs(dx) < 80 || Math.abs(dy) > 60) return;
+    /* Swipe depuis le bord gauche / bord droit d'écran uniquement (40px marges) */
+    if(swipeStartX > 40 && swipeStartX < window.innerWidth - 40) return;
+
+    /* Trouver la section visible actuellement */
+    var current = -1;
+    for(var i = 0; i < SECTIONS.length; i++){
+      var el = document.getElementById(SECTIONS[i]);
+      if(!el) continue;
+      var rect = el.getBoundingClientRect();
+      if(rect.top < window.innerHeight / 2 && rect.bottom > 0){ current = i; break; }
+    }
+    if(current === -1) return;
+    var next = dx < 0 ? Math.min(current + 1, SECTIONS.length - 1) : Math.max(current - 1, 0);
+    if(next === current) return;
+    var target = document.getElementById(SECTIONS[next]);
+    if(target){ haptic('light'); target.scrollIntoView({ behavior:'smooth', block:'start' }); }
+  }, { passive:true });
+})();
+
+/* ── 13. AMÉLIORATION THÈME — sauvegarde en localStorage ── */
+(function(){
+  /* Restaure le thème au chargement */
+  var savedTheme = localStorage.getItem('jayana_theme');
+  if(savedTheme === 'light' && !document.body.classList.contains('light')){
+    document.body.classList.add('light');
+    /* Sync icônes */
+    var themeBtn = document.getElementById('themeToggle');
+    if(themeBtn) themeBtn.textContent = '🌙 Thème';
+    var floatBtn = document.getElementById('floatingThemeBtn');
+    if(floatBtn) floatBtn.textContent = '🌙 Thème';
+    ['dmThemeIconMoon','gvThemeIconMoon','qzThemeIconMoon'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.style.display = 'none';
+    });
+    ['dmThemeIconSun','gvThemeIconSun','qzThemeIconSun'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.style.display = '';
+    });
+  }
+  /* Surcharge applyThemeToggle pour sauvegarder */
+  var _origToggle = window.applyThemeToggle;
+  if(_origToggle){
+    window.applyThemeToggle = function(){
+      _origToggle.apply(this, arguments);
+      var isLight = document.body.classList.contains('light');
+      localStorage.setItem('jayana_theme', isLight ? 'light' : 'dark');
+      haptic('light');
+    };
+  }
+})();
+
+/* ── 14. SMOOTH IMAGE LOAD pour les images Lui injectées par JS ── */
+(function(){
+  /* Patch luiLoadImages si disponible */
+  var _origLuiLoad = window.luiLoadImages;
+  if(!_origLuiLoad) return;
+  window.luiLoadImages = function(){
+    _origLuiLoad.apply(this, arguments);
+    /* Après injection, ajoute skeleton + onload */
+    setTimeout(function(){
+      document.querySelectorAll('#luiSlider img').forEach(function(img){
+        var wrap = img.closest('.album-image');
+        if(!wrap) return;
+        if(!wrap.querySelector('.skeleton-overlay')){
+          var sk = document.createElement('div');
+          sk.className = 'skeleton-overlay';
+          wrap.appendChild(sk);
+        }
+        var sk = wrap.querySelector('.skeleton-overlay');
+        if(img.complete && img.naturalWidth){ sk.classList.add('hidden'); return; }
+        img.addEventListener('load', function(){ sk.classList.add('hidden'); });
+        img.addEventListener('error', function(){ sk.classList.add('hidden'); });
+      });
+    }, 100);
+  };
+})();
+
+console.log('✨ Jayana UX v.UX1 chargé');
+</script>
 </body>
 </html>
