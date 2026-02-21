@@ -9314,9 +9314,15 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       headers:sbHeaders({'Prefer':'return=representation'}),
       body:JSON.stringify({state:ns})
     })
-    .then(function(r){return r.json();})
-    .then(function(rows){if(Array.isArray(rows)&&rows[0]) renderState(rows[0]);})
-    .catch(function(){});
+    .then(function(r){
+      if(!r.ok){
+        r.text().then(function(t){ console.error('[SKYJO] saveState 400 detail:', t); });
+        return null;
+      }
+      return r.json();
+    })
+    .then(function(rows){if(rows&&Array.isArray(rows)&&rows[0]) renderState(rows[0]);})
+    .catch(function(e){ console.error('[SKYJO] saveState err', e); });
   }
 
   // ─── Fin de manche ───────────────────────────────────
@@ -12262,7 +12268,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.08.8 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
