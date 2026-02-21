@@ -4860,21 +4860,11 @@ var SB_IMG = SB_URL + '/storage/v1/object/public/images/';
   });
 })();
 
-// Emails des deux profils (les comptes créés dans Supabase Auth)
-var SB_USERS = {
-  girl: 'kimiha.takeshijr@gmail.com',
-  boy:  'elric.jr22@gmail.com'
-};
-// Mots de passe Supabase — encodés base64, jamais tapés par l'utilisateur
-// Pour encoder : btoa('ton_mot_de_passe') dans la console du navigateur
-var SB_PASS = {
-  girl: atob('Ri12X0wyakEjaT9NTTJG'),
-  boy:  atob('Ri12X0wyakEjaT9NTTJG')
-};
-
-// Token de session actif
+// ── Auth via Edge Function sécurisée (credentials jamais dans le HTML) ──
 var _sbAccessToken = null;
 var SB_SESSION_KEY = 'jayana_sb_session';
+var SB_EDGE_FN     = SB_URL + '/functions/v1/get-token';
+var APP_SECRET     = 'jayana_secret_2026';
 
 // Charge session depuis localStorage (si non expirée)
 function sbLoadSession(gender){
@@ -4899,14 +4889,15 @@ function sbSaveSession(gender, data){
   }catch(e){}
 }
 
-// Login Supabase Auth pour un profil donné
+// Login via Edge Function — credentials 100% côté serveur
 function sbLogin(gender){
-  return fetch(SB_URL+'/auth/v1/token?grant_type=password',{
-    method:'POST',
-    headers:{'apikey':SB_KEY,'Content-Type':'application/json'},
-    body:JSON.stringify({email:SB_USERS[gender],password:SB_PASS[gender]})
-  }).then(function(r){return r.json();}).then(function(data){
-    if(data.access_token){ sbSaveSession(gender,data); return true; }
+  if(sbLoadSession(gender)) return Promise.resolve(true);
+  return fetch(SB_EDGE_FN, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-app-secret': APP_SECRET },
+    body: JSON.stringify({ gender: gender })
+  }).then(function(r){ return r.json(); }).then(function(data){
+    if(data.access_token){ sbSaveSession(gender, data); return true; }
     return false;
   }).catch(function(){ return false; });
 }
@@ -11208,7 +11199,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.6</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.6 - secured</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
