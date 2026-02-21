@@ -7494,6 +7494,12 @@ function toggleLockPopup(){
     document.body.style.position   = '';
     document.body.style.width      = '';
   } else {
+    // Si un profil est déjà connecté, accès direct sans mot de passe
+    var _prof = localStorage.getItem('jayana_profile');
+    if(_prof === 'girl' || _prof === 'boy'){
+      openHiddenPage();
+      return;
+    }
     lockError.style.display = 'none';
     lockInput.value = '';
     lockPopup.style.display = 'block';
@@ -8167,7 +8173,6 @@ function puzzleReplay(){
 }
 function loadImageThenInit(imgSrc, sz){
   var img=new Image();
-  img.crossOrigin='anonymous';
   img.onload=function(){
     var cvs=document.createElement('canvas'); cvs.width=sz; cvs.height=sz;
     var ctx=cvs.getContext('2d');
