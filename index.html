@@ -1217,8 +1217,7 @@ body:not(.prank-flip) > *:not(#prankFlipBanner):not(#prankGotcha):not(#prankLock
 .prank-splash-blob { position:fixed; border-radius:42% 58% 60% 40% / 50% 45% 55% 50%; cursor:pointer; pointer-events:all; transition:transform 0.15s; }
 .prank-splash-blob.wiped { animation:prankWipe 0.4s ease forwards; pointer-events:none; }
 @keyframes prankWipe { 0%{opacity:0.88} 100%{opacity:0;transform:scale(0.2)} }
-#prankLock { position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:4500; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:28px; text-align:center; backdrop-filter:blur(10px); }
-#prankLock.show { display:flex; animation:slideUp 0.3s ease; }
+
 .prank-lock-icon { font-size:72px; animation:wobble 0.7s infinite alternate; }
 .prank-lock-title { font-family:'Playfair Display',serif; font-size:22px; color:#fff; }
 .prank-lock-sub { font-size:13px; color:rgba(255,255,255,0.55); max-width:280px; }
@@ -1300,15 +1299,19 @@ body:not(.prank-flip) > *:not(#prankFlipBanner):not(#prankGotcha):not(#prankLock
 .prank-eyes-msg-text { font-family:'Playfair Display',serif; font-size:22px; color:#fff; text-align:center; padding:0 24px; line-height:1.4; }
 
 /* 📱 FAUSSE NOTIF */
-#prankNotif { position:fixed; top:-160px; left:12px; right:12px; z-index:5000; background:rgba(28,28,32,0.97); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:14px 16px; display:flex; align-items:flex-start; gap:12px; backdrop-filter:blur(30px); -webkit-backdrop-filter:blur(30px); box-shadow:0 12px 40px rgba(0,0,0,0.7), 0 0 0 0.5px rgba(255,255,255,0.08); transition:top 0.5s cubic-bezier(.34,1.56,.64,1); max-width:420px; margin:0 auto; cursor:pointer; user-select:none; -webkit-user-select:none; }
-#prankNotif.show { top:12px; }
-.pn-avatar { width:44px; height:44px; border-radius:12px; background:linear-gradient(135deg,#a78bfa,#60a5fa); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+#prankNotif { position:fixed; top:-180px; left:12px; right:12px; z-index:5000; background:rgba(20,20,28,0.98); border:1.5px solid rgba(167,139,250,0.5); border-radius:20px; padding:16px 18px; display:flex; align-items:flex-start; gap:12px; backdrop-filter:blur(30px); -webkit-backdrop-filter:blur(30px); box-shadow:0 16px 60px rgba(0,0,0,0.85), 0 0 0 1px rgba(167,139,250,0.15), 0 0 30px rgba(167,139,250,0.2); transition:top 0.45s cubic-bezier(.34,1.56,.64,1); max-width:420px; margin:0 auto; cursor:pointer; user-select:none; -webkit-user-select:none; }
+#prankNotif.show { top:14px; animation:prankNotifPop 0.45s cubic-bezier(.34,1.56,.64,1) forwards, prankNotifGlow 1.8s ease-in-out 0.45s infinite; }
+@keyframes prankNotifPop { 0%{top:-180px;opacity:0;transform:scale(0.92)} 100%{top:14px;opacity:1;transform:scale(1)} }
+@keyframes prankNotifGlow { 0%,100%{box-shadow:0 16px 60px rgba(0,0,0,0.85),0 0 0 1px rgba(167,139,250,0.15),0 0 20px rgba(167,139,250,0.15)} 50%{box-shadow:0 16px 60px rgba(0,0,0,0.85),0 0 0 1.5px rgba(167,139,250,0.5),0 0 40px rgba(167,139,250,0.4)} }
+@keyframes prankScreenShake { 0%,100%{transform:translate(0,0)} 10%{transform:translate(-5px,-3px)} 20%{transform:translate(5px,3px)} 30%{transform:translate(-4px,2px)} 40%{transform:translate(4px,-2px)} 50%{transform:translate(-3px,3px)} 60%{transform:translate(3px,-1px)} 70%{transform:translate(-2px,2px)} 80%{transform:translate(2px,-2px)} 90%{transform:translate(-1px,1px)} }
+body.prank-notif-shake { animation: prankScreenShake 0.5s ease; }
+.pn-avatar { width:48px; height:48px; border-radius:14px; background:linear-gradient(135deg,#a78bfa,#60a5fa); display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; box-shadow:0 4px 14px rgba(167,139,250,0.4); }
 .pn-content { flex:1; min-width:0; }
-.pn-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:3px; }
-.pn-app { font-size:11px; font-weight:600; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:0.5px; }
+.pn-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+.pn-app { font-size:11px; font-weight:700; color:rgba(167,139,250,0.85); text-transform:uppercase; letter-spacing:0.8px; }
 .pn-time { font-size:11px; color:rgba(255,255,255,0.35); }
-.pn-title { font-size:14px; font-weight:700; color:#fff; margin-bottom:3px; line-height:1.3; }
-.pn-body { font-size:13px; color:rgba(255,255,255,0.75); line-height:1.4; }
+.pn-title { font-size:15px; font-weight:700; color:#fff; margin-bottom:4px; line-height:1.3; }
+.pn-body { font-size:14px; color:rgba(255,255,255,0.88); line-height:1.4; font-weight:400; }
 
 /* #hiddenPage — défini dans le bloc InstaLove ci-dessous */
 .hp-header { padding: 28px 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); position: relative; overflow: hidden; }
@@ -4071,10 +4074,6 @@ body.light #counterBlock.glowing .c-num-big {
       <div class="prank-menu-item-icon">🎨</div>
       <div><div class="prank-menu-item-name">La flaque de peinture</div><div class="prank-menu-item-desc">Nettoie toutes les taches pour libérer le site</div></div>
     </div>
-    <div class="prank-menu-item" onclick="prankSelectType('lock')">
-      <div class="prank-menu-item-icon">🔐</div>
-      <div><div class="prank-menu-item-name">Le cadenas</div><div class="prank-menu-item-desc">Trouve le mot secret pour déverrouiller</div></div>
-    </div>
     <div class="prank-menu-item" onclick="prankSelectType('fog')">
       <div class="prank-menu-item-icon">🌫️</div>
       <div><div class="prank-menu-item-name">Le brouillard</div><div class="prank-menu-item-desc">Tapote 10 fois pour dissiper le flou</div></div>
@@ -4100,11 +4099,11 @@ body.light #counterBlock.glowing .c-num-big {
       <div><div class="prank-menu-item-name">Les yeux qui surveillent</div><div class="prank-menu-item-desc">Fixe chaque paire 5s sans bouger</div></div>
     </div>
     <div class="prank-menu-item" onclick="prankSelectType('notif')">
-      <div class="prank-menu-item-icon">📱</div>
-      <div><div class="prank-menu-item-name">Fausse notification</div><div class="prank-menu-item-desc">Une notif surprise avec ton message</div></div>
+      <div class="prank-menu-item-icon">🔔</div>
+      <div><div class="prank-menu-item-name">Envoyer une notification</div><div class="prank-menu-item-desc">Une notif surprise avec ton message</div></div>
     </div>
   </div>
-  <div class="prank-menu-cancel" onclick="closePrankMenu()">Quitter</div>
+  <div class="prank-menu-cancel" onclick="closePrankMenu()">Annuler</div>
   <div class="prank-menu-cancel" id="prankCancelAllBtn" onclick="prankCancelAll()" style="color:rgba(255,100,100,0.6);margin-top:0;">🗑️ Annuler toutes mes bêtises en attente</div>
 </div>
 
@@ -4211,16 +4210,6 @@ body.light #counterBlock.glowing .c-num-big {
 <!-- Bêtise : flaque de peinture -->
 <div id="prankSplash"></div>
 <div id="prankSplashBanner">🎨 <span id="prankSplashCount">?</span> taches restantes — nettoie tout !</div>
-
-<!-- Bêtise : cadenas -->
-<div id="prankLock">
-  <div class="prank-lock-icon">🔐</div>
-  <div class="prank-lock-title" id="prankLockTitle">Accès bloqué par Link</div>
-  <div class="prank-lock-sub">Trouve le mot secret pour déverrouiller</div>
-  <input class="prank-lock-input" id="prankLockInput" placeholder="••••••" autocomplete="off">
-  <button class="prank-lock-btn" onclick="prankCheckLock()">Valider</button>
-  <div class="prank-lock-err" id="prankLockErr">❌ Non ! Essaie encore…</div>
-</div>
 
 <!-- ══ SUGGESTION MODALS ══ -->
 <div id="sgAuthModal">
@@ -4521,14 +4510,13 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     intrus:   { emoji:'👾', label:'L\'intrus qui esquive' },
     flip:     { emoji:'🔤', label:'Le texte à l\'envers' },
     splash:   { emoji:'🎨', label:'La flaque de peinture' },
-    lock:     { emoji:'🔐', label:'Le cadenas' },
     fog:      { emoji:'🌫️', label:'Le brouillard' },
     colors:   { emoji:'🌈', label:'Les couleurs folles' },
     keyboard: { emoji:'⌨️', label:'Le faux clavier' },
     target:   { emoji:'🎯', label:'La cible qui esquive' },
     memory:   { emoji:'🃏', label:'Memory express' },
     eyes:     { emoji:'👁️', label:'Les yeux qui surveillent' },
-    notif:    { emoji:'📱', label:'Fausse notification' }
+    notif:    { emoji:'🔔', label:'Envoyer une notification' }
   };
 
   function showPrankToast(msg){
@@ -4731,7 +4719,6 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
       case 'intrus':   startIntrus(p); break;
       case 'flip':     startFlip(p); break;
       case 'splash':   startSplash(p); break;
-      case 'lock':     startLock(p); break;
       case 'fog':      startFog(p); break;
       case 'colors':   startColors(p); break;
       case 'keyboard': startKeyboard(p); break;
@@ -5177,8 +5164,11 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     document.getElementById('pnBody').textContent = p.message || '…';
     // Scroll vers le haut pour que la notif soit visible
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    // Vibration (si supportée)
-    if(navigator.vibrate){ navigator.vibrate([80, 60, 80]); }
+    // Vibration renforcée (si supportée)
+    if(navigator.vibrate){ navigator.vibrate([100, 50, 100, 50, 200]); }
+    // Shake visuel de l'écran
+    document.body.classList.add('prank-notif-shake');
+    setTimeout(function(){ document.body.classList.remove('prank-notif-shake'); }, 500);
     setTimeout(function(){
       var notif = document.getElementById('prankNotif');
       notif.classList.add('show');
@@ -5217,7 +5207,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
       var el = document.getElementById(id); if(el) el.classList.remove('show');
     });
     ['prankCurtain','prankSplash','prankFogOverlay','prankKeyboard',
-     'prankMemoryOverlay','prankEyesOverlay','prankLock'].forEach(function(id){
+     'prankMemoryOverlay','prankEyesOverlay'].forEach(function(id){
       var el = document.getElementById(id); if(el) el.classList.remove('show');
     });
     ['prankIntrus','prankTarget','prankNotif'].forEach(function(id){
@@ -5490,42 +5480,6 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
       prankDone();
     }
   }
-
-  /* ════ BÊTISE 6 : CADENAS ════ */
-  var _lockPrank = null;
-  function startLock(p){
-    _lockPrank = p;
-    var authorName = p.author === 'boy' ? 'Link' : 'Zelda';
-    document.getElementById('prankLockTitle').textContent = '🔐 Accès bloqué par ' + authorName;
-    document.getElementById('prankLockInput').value = '';
-    document.getElementById('prankLockErr').textContent = '';
-    document.getElementById('prankLock').classList.add('show');
-  }
-  window.prankCheckLock = function(){
-    var input    = document.getElementById('prankLockInput').value.trim().toLowerCase();
-    var expected = (_lockPrank && _lockPrank.lock_word) ? _lockPrank.lock_word.trim().toLowerCase() : null;
-    // Sécurité : si pas de lock_word en base ou saisie vide → bloquer
-    if(!expected || !input){
-      var inp = document.getElementById('prankLockInput');
-      inp.classList.add('error');
-      document.getElementById('prankLockErr').textContent = '❌ Non ! Essaie encore…';
-      setTimeout(function(){ inp.classList.remove('error'); }, 500);
-      return;
-    }
-    if(input === expected){
-      document.getElementById('prankLock').classList.remove('show');
-      prankDone();
-    } else {
-      var inp = document.getElementById('prankLockInput');
-      inp.classList.add('error');
-      document.getElementById('prankLockErr').textContent = '❌ Non ! Essaie encore…';
-      setTimeout(function(){ inp.classList.remove('error'); }, 500);
-    }
-  };
-  // Valider avec Entrée
-  document.getElementById('prankLockInput').addEventListener('keydown', function(e){
-    if(e.key === 'Enter') window.prankCheckLock();
-  });
 
   /* ── Hook sur setProfile : vérifier bêtise active ── */
   var _origSetProfile = window.setProfile;
@@ -9808,7 +9762,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.2</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.1</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
