@@ -6950,7 +6950,7 @@ function renderTop50() {
     div.addEventListener('click', toggle);
 
     audio.addEventListener('timeupdate', function(){
-      if(!audio._counted && audio.currentTime >= 3){
+      if(!audio._counted && audio.currentTime >= 10){
         audio._counted = true;
         savePlays(song.file);
       }
