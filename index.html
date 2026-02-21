@@ -6240,32 +6240,42 @@ document.addEventListener('DOMContentLoaded', function(){
     if(bar){ bar.style.width = '0%'; setTimeout(function(){ bar.style.width = '60%'; }, 100); }
 
     var path = SB_FOLDER + '/' + slot + '.jpg';
-    fetch(SB_URL + '/storage/v1/object/' + SB_BUCKET + '/' + path, {
-      method: 'POST',
-      headers: {
-        'apikey': SB_KEY,
-        'Authorization': 'Bearer ' + (_sbAccessToken || SB_KEY),
-        'Content-Type': file.type,
-        'x-upsert': 'true'
-      },
-      body: file
-    })
-    .then(function(r){
-      if(bar) bar.style.width = '100%';
-      return r.text().then(function(body){
+    var elleDoUpload = function(){
+      fetch(SB_URL + '/storage/v1/object/' + SB_BUCKET + '/' + path, {
+        method: 'POST',
+        headers: {
+          'apikey': SB_KEY,
+          'Authorization': 'Bearer ' + _sbAccessToken,
+          'Content-Type': file.type,
+          'x-upsert': 'true'
+        },
+        body: file
+      })
+      .then(function(r){
+        if(bar) bar.style.width = '100%';
+        return r.text().then(function(body){
+          if(loading) loading.classList.remove('show');
+          if(r.ok){
+            var img = document.getElementById('elle-img-' + slot);
+            if(img) img.src = SB_URL + '/storage/v1/object/public/' + SB_BUCKET + '/' + SB_FOLDER + '/' + slot + '.jpg?t=' + Date.now();
+          } else {
+            alert('Erreur ' + r.status + ' : ' + body);
+          }
+        });
+      })
+      .catch(function(err){
         if(loading) loading.classList.remove('show');
-        if(r.ok){
-          var img = document.getElementById('elle-img-' + slot);
-          if(img) img.src = SB_URL + '/storage/v1/object/public/' + SB_BUCKET + '/' + SB_FOLDER + '/' + slot + '.jpg?t=' + Date.now();
-        } else {
-          alert('Erreur ' + r.status + ' : ' + body);
-        }
+        alert('Erreur réseau : ' + err);
       });
-    })
-    .catch(function(err){
-      if(loading) loading.classList.remove('show');
-      alert('Erreur réseau : ' + err);
-    });
+    };
+    if(_sbAccessToken){
+      elleDoUpload();
+    } else {
+      sbLogin('boy').then(function(ok){
+        if(ok){ elleDoUpload(); }
+        else { if(loading) loading.classList.remove('show'); alert('Erreur de connexion Supabase'); }
+      });
+    }
   };
 
   // ── Descriptions éditables ──
@@ -6381,38 +6391,48 @@ document.addEventListener('DOMContentLoaded', function(){
     var path = SB_FOLDER + '/' + slot + '.jpg';
     var uploadUrl = SB_URL + '/storage/v1/object/' + SB_BUCKET + '/' + path;
 
-    fetch(uploadUrl, {
-      method: 'POST',
-      headers: {
-        'apikey': SB_KEY,
-        'Authorization': 'Bearer ' + (_sbAccessToken || SB_KEY),
-        'Content-Type': file.type,
-        'x-upsert': 'true'
-      },
-      body: file
-    })
-    .then(function(r){
-      if(bar) bar.style.width = '100%';
-      return r.text().then(function(body){
+    var luiDoUpload = function(){
+      fetch(uploadUrl, {
+        method: 'POST',
+        headers: {
+          'apikey': SB_KEY,
+          'Authorization': 'Bearer ' + _sbAccessToken,
+          'Content-Type': file.type,
+          'x-upsert': 'true'
+        },
+        body: file
+      })
+      .then(function(r){
+        if(bar) bar.style.width = '100%';
+        return r.text().then(function(body){
+          if(loading) loading.classList.remove('show');
+          if(r.ok){
+            var img = document.getElementById('lui-img-' + slot);
+            var empty = document.getElementById('lui-empty-' + slot);
+            var btn = document.getElementById('lui-btn-' + slot);
+            var newUrl = SB_URL + '/storage/v1/object/public/' + SB_BUCKET + '/' + SB_FOLDER + '/' + slot + '.jpg?t=' + Date.now();
+            if(img){ img.src = newUrl; img.style.display = ''; }
+            if(empty) empty.style.display = 'none';
+            if(btn) btn.classList.remove('empty');
+          } else {
+            console.error('Upload error', r.status, body);
+            alert('Erreur ' + r.status + ' : ' + body);
+          }
+        });
+      })
+      .catch(function(err){
         if(loading) loading.classList.remove('show');
-        if(r.ok){
-          var img = document.getElementById('lui-img-' + slot);
-          var empty = document.getElementById('lui-empty-' + slot);
-          var btn = document.getElementById('lui-btn-' + slot);
-          var newUrl = SB_URL + '/storage/v1/object/public/' + SB_BUCKET + '/' + SB_FOLDER + '/' + slot + '.jpg?t=' + Date.now();
-          if(img){ img.src = newUrl; img.style.display = ''; }
-          if(empty) empty.style.display = 'none';
-          if(btn) btn.classList.remove('empty');
-        } else {
-          console.error('Upload error', r.status, body);
-          alert('Erreur ' + r.status + ' : ' + body);
-        }
+        alert('Erreur réseau : ' + err);
       });
-    })
-    .catch(function(err){
-      if(loading) loading.classList.remove('show');
-      alert('Erreur réseau : ' + err);
-    });
+    };
+    if(_sbAccessToken){
+      luiDoUpload();
+    } else {
+      sbLogin('girl').then(function(ok){
+        if(ok){ luiDoUpload(); }
+        else { if(loading) loading.classList.remove('show'); alert('Erreur de connexion Supabase'); }
+      });
+    }
   };
 
   // ── Descriptions éditables ──
