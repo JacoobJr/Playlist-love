@@ -156,151 +156,12 @@ header::before {
 }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
-/* ── BETISES LOCK STYLES ── */
-#betisesBtn {
-  position: relative;
-  overflow: visible !important;
-  background: linear-gradient(135deg, rgba(255,200,60,0.12), rgba(255,165,0,0.07)) !important;
-  border-color: rgba(255,200,60,0.45) !important;
-  color: #f5c518 !important;
-  animation: betisesPulse 2.8s ease-in-out infinite;
-  box-shadow: 0 0 0 0 rgba(245,197,24,0.4);
-}
+/* ── BETISES STYLES ── */
 #betisesBtn:hover {
-  background: linear-gradient(135deg, rgba(255,200,60,0.22), rgba(255,165,0,0.14)) !important;
-  border-color: rgba(255,200,60,0.8) !important;
-  box-shadow: 0 4px 18px rgba(245,197,24,0.35) !important;
+  background: rgba(255,110,176,0.12) !important;
+  border-color: rgba(255,110,176,0.5) !important;
+  color: #ff6eb0 !important;
 }
-@keyframes betisesPulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(245,197,24,0.35), 0 2px 8px rgba(245,197,24,0.1); border-color: rgba(255,200,60,0.45) !important; }
-  50%     { box-shadow: 0 0 0 6px rgba(245,197,24,0), 0 2px 14px rgba(245,197,24,0.3); border-color: rgba(255,200,60,0.9) !important; }
-}
-#betisesLabel {
-  background: linear-gradient(90deg, #f5c518 0%, #fff4a0 40%, #f5c518 60%, #ffdd55 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: betisesShimmer 2.5s linear infinite;
-  font-weight: 700;
-}
-@keyframes betisesShimmer {
-  0%   { background-position: 200% center; }
-  100% { background-position: -200% center; }
-}
-#betisesLock {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  font-size: 13px;
-  line-height: 1;
-  filter: drop-shadow(0 1px 4px rgba(245,197,24,0.9));
-  animation: lockBlink 1.6s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 10;
-}
-@keyframes lockBlink {
-  0%,100% { opacity: 1;   transform: scale(1); filter: drop-shadow(0 1px 4px rgba(245,197,24,0.9)); }
-  45%     { opacity: 0.25; transform: scale(0.85); filter: drop-shadow(0 1px 2px rgba(245,197,24,0.3)); }
-  55%     { opacity: 0.25; transform: scale(0.85); }
-}
-
-/* ── MODAL CHANTIER ── */
-#chantierModal {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.88);
-  z-index: 6000;
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 28px;
-  backdrop-filter: blur(10px);
-}
-#chantierModal.show { display: flex; animation: slideUp 0.28s ease; }
-.chantier-box {
-  background: #1a1a0e;
-  border: 1.5px solid rgba(245,197,24,0.4);
-  border-radius: 22px;
-  padding: 28px 24px;
-  width: 100%;
-  max-width: 320px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  box-shadow: 0 8px 40px rgba(245,197,24,0.15), 0 0 0 1px rgba(245,197,24,0.08);
-  position: relative;
-  overflow: hidden;
-}
-.chantier-box::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 50% 0%, rgba(245,197,24,0.08) 0%, transparent 60%);
-  pointer-events: none;
-}
-.chantier-icon { font-size: 54px; animation: chantierWobble 1.2s ease-in-out infinite alternate; }
-@keyframes chantierWobble {
-  0%   { transform: rotate(-6deg) scale(1); }
-  100% { transform: rotate(6deg) scale(1.08); }
-}
-.chantier-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 20px;
-  color: #f5c518;
-  text-align: center;
-  line-height: 1.2;
-}
-.chantier-sub {
-  font-size: 12px;
-  color: rgba(255,255,255,0.5);
-  text-align: center;
-  line-height: 1.6;
-  max-width: 260px;
-}
-.chantier-input {
-  background: rgba(245,197,24,0.07);
-  border: 1.5px solid rgba(245,197,24,0.3);
-  border-radius: 12px;
-  padding: 12px 18px;
-  font-size: 18px;
-  color: #f5c518;
-  font-family: 'DM Sans', sans-serif;
-  text-align: center;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  outline: none;
-  width: 100%;
-  max-width: 220px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.chantier-input::placeholder { color: rgba(245,197,24,0.3); letter-spacing: 2px; font-size: 14px; text-transform: none; }
-.chantier-input:focus { border-color: rgba(245,197,24,0.75); box-shadow: 0 0 0 3px rgba(245,197,24,0.12); }
-.chantier-input.error { border-color: #e05555; box-shadow: 0 0 0 3px rgba(224,85,85,0.15); animation: prankShake 0.4s ease; }
-.chantier-btn {
-  background: linear-gradient(135deg, #d4a800, #f5c518);
-  color: #1a1000;
-  border: none;
-  border-radius: 50px;
-  padding: 12px 32px;
-  font-size: 14px;
-  font-weight: 800;
-  font-family: 'DM Sans', sans-serif;
-  cursor: pointer;
-  transition: opacity 0.15s, transform 0.12s;
-  box-shadow: 0 4px 16px rgba(245,197,24,0.35);
-  letter-spacing: 0.5px;
-}
-.chantier-btn:hover { opacity: 0.9; transform: scale(1.03); }
-.chantier-err { font-size: 12px; color: #e05555; min-height: 16px; text-align: center; }
-.chantier-cancel {
-  font-size: 11px;
-  color: rgba(255,255,255,0.3);
-  cursor: pointer;
-  padding: 6px 16px;
-  transition: color 0.15s;
-}
-.chantier-cancel:hover { color: rgba(255,255,255,0.7); }
 
 #topBubbleMenu {
   display: flex;
@@ -1307,12 +1168,12 @@ body.prank-shake { animation:prankShake 0.4s ease infinite; }
 #prankIntrusBanner.show { display:block; }
 body.prank-flip { overflow-x:hidden; }
 /* Tout le contenu se retourne à 180° sauf le bandeau de contrôle et les overlays */
-body.prank-flip > *:not(#prankFlipBanner):not(#prankGotcha):not(#prankLock):not(#prankOverlay):not(#chantierModal) {
+body.prank-flip > *:not(#prankFlipBanner):not(#prankGotcha):not(#prankLock):not(#prankOverlay) {
   transform: rotate(180deg) !important;
   transform-origin: center center;
   transition: transform 0.5s cubic-bezier(.4,0,.2,1);
 }
-body:not(.prank-flip) > *:not(#prankFlipBanner):not(#prankGotcha):not(#prankLock):not(#prankOverlay):not(#chantierModal) {
+body:not(.prank-flip) > *:not(#prankFlipBanner):not(#prankGotcha):not(#prankLock):not(#prankOverlay) {
   transition: transform 0.5s cubic-bezier(.4,0,.2,1);
 }
 #prankFlipBanner { position:fixed; top:0; left:0; right:0; z-index:4500; background:linear-gradient(135deg,#7c3aed,#4f46e5); padding:14px 16px 16px; display:none; text-align:center; box-shadow:0 4px 20px rgba(124,58,237,0.5); user-select:none; -webkit-user-select:none; touch-action:none; }
@@ -2959,10 +2820,7 @@ body.anniv-mode .counter-block-top {
   <div class="bubbleBtn" id="themeToggle">🌙 Thème</div>
   <div class="bubbleBtn" id="quizBtn" style="color:#ff6eb0;border-color:rgba(255,110,176,0.4);background:rgba(255,110,176,0.08);font-weight:600;">Quiz 💖</div>
   <div class="bubbleBtn" id="gamesBtn" style="color:#60a5fa;border-color:rgba(96,165,250,0.4);background:rgba(96,165,250,0.08);font-weight:600;">Jeux 🎮</div>
-  <div class="bubbleBtn" id="betisesBtn" style="position:relative;overflow:visible;">
-    <span id="betisesLabel">Bêtises </span><span style="-webkit-text-fill-color:initial;background:none;">🤡</span>
-    <span id="betisesLock" aria-hidden="true">🔒</span>
-  </div>
+  <div class="bubbleBtn" id="betisesBtn">Bêtises 🤡</div>
 </div>
 
 <script>
@@ -4867,51 +4725,15 @@ _subviewIds.forEach(function(id) {
 });
 
 // ── BETISES ──
-var CHANTIER_CODE = 'chantier';
-var _chantierUnlocked = false;
-
-function chantierOpen(){
-  var modal = document.getElementById('chantierModal');
-  var input = document.getElementById('chantierInput');
-  var err   = document.getElementById('chantierErr');
-  if(err)   err.textContent = '';
-  if(input) input.value = '';
-  modal.classList.add('show');
-  setTimeout(function(){ if(input) input.focus(); }, 200);
-}
-function chantierClose(){
-  document.getElementById('chantierModal').classList.remove('show');
-}
-function chantierValidate(){
-  var input = document.getElementById('chantierInput');
-  var err   = document.getElementById('chantierErr');
-  var val   = input.value.trim().toLowerCase();
-  if(val === CHANTIER_CODE){
-    _chantierUnlocked = true;
-    document.getElementById('chantierModal').classList.remove('show');
-    // Retirer l'apparence "verrouillée" du bouton
-    var btn  = document.getElementById('betisesBtn');
-    var lock = document.getElementById('betisesLock');
-    var lbl  = document.getElementById('betisesLabel');
-    if(lock) lock.style.display = 'none';
-    if(btn)  btn.style.animation = 'none';
-    if(lbl)  lbl.style.animation = 'none';
-    if(btn){ btn.style.background=''; btn.style.borderColor=''; btn.style.color=''; btn.style.boxShadow=''; }
-    setTimeout(function(){ openPrankMenu(); }, 120);
-  } else {
-    input.classList.add('error');
-    if(err) err.textContent = '❌ Mauvais code, réessaie !';
-    setTimeout(function(){ input.classList.remove('error'); input.value=''; input.focus(); }, 700);
-  }
-}
-window.chantierValidate = chantierValidate;
-window.chantierClose    = chantierClose;
-
 document.getElementById('betisesBtn').addEventListener('click', function() {
-  if(_chantierUnlocked){
+  var profile = localStorage.getItem('jayana_profile');
+  if(profile === 'girl' || profile === 'boy'){
     openPrankMenu();
   } else {
-    chantierOpen();
+    // Pas connecté → demander le profil
+    if(window.showProfileCodeModal){
+      showProfileCodeModal(null, function(){});
+    }
   }
 });
 
@@ -10901,29 +10723,6 @@ loadFavorites();
 </div>
 
 <div id="dmKeyboardBg"></div>
-
-<!-- ══ MODAL BÊTISES EN CHANTIER ══ -->
-<div id="chantierModal">
-  <div class="chantier-box">
-    <div class="chantier-icon">🚧</div>
-    <div class="chantier-title">Section en travaux&nbsp;!</div>
-    <div class="chantier-sub">Cette fonctionnalité est en cours de construction 🔨<br>Entre le code secret pour y accéder quand même.</div>
-    <input
-      class="chantier-input"
-      id="chantierInput"
-      type="text"
-      placeholder="code secret…"
-      autocomplete="off"
-      autocorrect="off"
-      spellcheck="false"
-      maxlength="20"
-      onkeydown="if(event.key==='Enter')chantierValidate()"
-    />
-    <div class="chantier-err" id="chantierErr"></div>
-    <button class="chantier-btn" onclick="chantierValidate()">🔓 Débloquer</button>
-    <div class="chantier-cancel" onclick="chantierClose()">Fermer</div>
-  </div>
-</div>
 
 <!-- Modal édition description pochette -->
 <div id="descEditModal">
