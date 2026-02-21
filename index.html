@@ -9137,13 +9137,24 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       heldWrap.style.display='none';
     }
 
-    // Message phase
+    // Message d'instruction contextuel
     var phaseMsg=document.getElementById('skyjoPhaseMsg');
     if(state.phase==='init1'){
       phaseMsg.style.display='block';
       var myFlippedCount=myCards.filter(function(c){return c.revealed;}).length;
-      if(myFlippedCount<2) phaseMsg.textContent='Phase init — retourne 2 cartes de ta grille !';
-      else phaseMsg.textContent='✅ Tu as retourné tes 2 cartes — en attente de '+oppName+'…';
+      if(myFlippedCount<2) phaseMsg.textContent='Retourne 2 cartes de ta grille pour commencer !';
+      else phaseMsg.textContent='\u2705 Fait ! En attente que '+oppName+' retourne ses 2 cartes\u2026';
+    } else if(state.phase==='play'){
+      phaseMsg.style.display='block';
+      if(!isMyTurn){
+        phaseMsg.textContent='\u23f3 Tour de '+oppName+'\u2026';
+      } else if(state.must_flip===_me){
+        phaseMsg.textContent='Choisis une carte CACH\u00c9E de ta grille \u00e0 retourner';
+      } else if(iHoldCard){
+        phaseMsg.textContent='Carte en main : \u00e9change-la avec n\'importe quelle carte, ou d\u00e9fausse-la';
+      } else {
+        phaseMsg.textContent='Pioche dans le tas ou prends la carte de la d\u00e9fausse';
+      }
     } else {
       phaseMsg.style.display='none';
     }
@@ -9157,11 +9168,14 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     grid.innerHTML='';
     var phase=state.phase;
     var isInit=phase==='init1';
-    // Pendant init : chaque joueur retourne ses propres cartes LIBREMENT (pas de tour)
     var flipped=cards.filter(function(c){return c.revealed;}).length;
-    var canFlip       =isMe&&isInit&&flipped<2;  // max 2 cartes en init, sans contrainte de tour
-    var canReplace    =isMe&&isMyTurn&&phase==='play'&&iHold;
-    var canFlipReveal =isMe&&isMyTurn&&phase==='play'&&!iHold&&state.must_flip===_me;
+
+    // Init : retourner 2 cartes librement, sans notion de tour
+    var canFlipInit    = isMe && isInit && flipped<2;
+    // En jeu avec carte en main : echanger avec N'IMPORTE quelle carte (revele ou cachee)
+    var canReplaceAny  = isMe && isMyTurn && phase==='play' && iHold;
+    // Apres defausse : doit retourner une carte cachee
+    var mustFlipHidden = isMe && isMyTurn && phase==='play' && !iHold && state.must_flip===_me;
 
     cards.forEach(function(card,idx){
       var el=document.createElement('div');
@@ -9172,14 +9186,21 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       } else if(card.revealed){
         el.textContent=card.value;
         el.setAttribute('data-val',card.value);
-        if(canReplace){el.classList.add('skyjo-card-clickable');el.onclick=function(){skyjoReplaceCard(idx);};}
+        if(canReplaceAny){
+          el.classList.add('skyjo-card-clickable');
+          el.onclick=function(){skyjoReplaceCard(idx);};
+        }
       } else {
         el.textContent='?';
         el.classList.add('skyjo-card-hidden');
-        if(canFlip){
+        if(canFlipInit){
           el.classList.add('skyjo-card-clickable');
           el.onclick=function(){skyjoFlipInit(idx);};
-        } else if(canFlipReveal){
+        } else if(canReplaceAny){
+          // On peut aussi remplacer une carte cachee (elle sera alors revelee)
+          el.classList.add('skyjo-card-clickable');
+          el.onclick=function(){skyjoReplaceCard(idx);};
+        } else if(mustFlipHidden){
           el.classList.add('skyjo-card-clickable');
           el.onclick=function(){skyjoFlipReveal(idx);};
         }
@@ -9241,7 +9262,10 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     if(!_gameState.held_card||_gameState.held_card.holder!==_me) return;
     var ns=deepCopy(_gameState);
     var key=_me+'_cards';
-    ns.discard.push(ns[key][idx].value);
+    var oldCard=ns[key][idx];
+    // Mettre l'ancienne carte en defausse (meme si elle etait cachee, sa valeur est revelee)
+    ns.discard.push(oldCard.value);
+    // Poser la carte en main a cet emplacement (toujours revelee)
     ns[key][idx]={value:ns.held_card.value,revealed:true};
     ns.held_card=null;
     checkColumns(ns,_me);
@@ -12268,7 +12292,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.08.8 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
