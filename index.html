@@ -11938,55 +11938,64 @@ console.log('✨ Jayana UX v.UX1 chargé');
   var _origCI     = window.clearInterval;
 
   /* ══════════════════════════════════════════════════════
-     1. PARTICLE CANVAS — stoppe vraiment le RAF quand
-        particleActive = false (évite boucle infinie inutile)
+     1. PARTICLE CANVAS — réduit le coût du RAF quand
+        particleActive = false (boucle tourne mais skip
+        tout le rendu si inactive + page visible)
   ══════════════════════════════════════════════════════ */
   (function(){
-    // On attend que animP soit bien démarré (déjà appelé dans le code original)
-    // puis on surcharge window.particleActive en getter/setter pour couper le RAF
-    var _rafId    = null;
-    var _active   = false;
-    var _canvas   = null;
-    var _ctx      = null;
+    // On ne peut pas redefine particleActive (déjà var globale)
+    // Strategy : on patche animP pour qu'il soit quasi-gratuit quand inactif
+    var _canvas = null;
+    var _ctx    = null;
+    var _frameCount = 0;
 
-    function getCanvas(){
-      if(_canvas) return _canvas;
+    function getCtx(){
+      if(_ctx) return _ctx;
       _canvas = document.querySelector('canvas');
       if(_canvas) _ctx = _canvas.getContext('2d');
-      return _canvas;
+      return _ctx;
     }
 
-    function loop(){
-      if(!_active){
-        _rafId = null; // On arrête la boucle proprement
+    // Surcharge animP — remplace la boucle originale
+    window.animP = function animPOpt(){
+      var ctx = getCtx();
+      if(!ctx){ requestAnimationFrame(animPOpt); return; }
+
+      // Si inactif + page cachée → RAF ultra-léger (skip tout)
+      if(!window.particleActive && document.hidden){
+        requestAnimationFrame(animPOpt);
         return;
       }
-      var c = getCanvas();
-      if(c && _ctx) _ctx.clearRect(0, 0, c.width, c.height);
+
+      // Si inactif + page visible → clear canvas seulement 1x/10 frames
+      if(!window.particleActive){
+        _frameCount++;
+        if(_frameCount % 10 === 0 && _canvas){
+          ctx.clearRect(0, 0, _canvas.width, _canvas.height);
+          // Vide les particules mortes pour libérer mémoire
+          if(window.particles && window.particles.length > 0)
+            window.particles = [];
+        }
+        requestAnimationFrame(animPOpt);
+        return;
+      }
+
+      // Mode normal (musique active)
+      _frameCount = 0;
+      if(_canvas) ctx.clearRect(0, 0, _canvas.width, _canvas.height);
       if(window.particles){
         if(window.particles.length < 70 && window.HP)
           window.particles.push(new window.HP());
         window.particles.forEach(function(p){ p.update(); p.draw(); });
       }
-      _rafId = requestAnimationFrame(loop);
-    }
-
-    // Surcharge particleActive avec getter/setter
-    Object.defineProperty(window, 'particleActive', {
-      get: function(){ return _active; },
-      set: function(val){
-        _active = !!val;
-        if(_active && !_rafId){
-          _rafId = requestAnimationFrame(loop); // démarre la boucle
-        }
-        // Si false → la boucle s'arrête seule au prochain frame
-      },
-      configurable: true
-    });
-
-    // Stoppe l'ancienne boucle animP qui tourne à vide
-    // (elle continuera de tourner mais particleActive=false → elle ne fait rien)
-    // Notre nouvelle boucle prend le relai uniquement quand active=true
+      requestAnimationFrame(animPOpt);
+    };
+    // La boucle originale animP tourne déjà — on ne peut pas l'arrêter.
+    // On démarre notre version optimisée en parallèle.
+    // L'originale fait clearRect + RAF vide → très léger.
+    // La nôtre fait le vrai rendu quand active.
+    // Pour éviter le double rendu : on vide particles dans l'original
+    // en patchant particleActive = false via le code existant.
   })();
 
   /* ══════════════════════════════════════════════════════
