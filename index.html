@@ -9108,7 +9108,8 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     document.getElementById('skyjoScoreGirl').textContent=state.scores.girl;
     document.getElementById('skyjoScoreBoy').textContent=state.scores.boy;
     document.getElementById('skyjoRound').textContent=state.round||1;
-    document.getElementById('skyjoTurnLabel').textContent=isMyTurn?'🎯 À toi de jouer !':'⏳ Tour de '+oppName;
+    var isInitPhase=state.phase==='init1';
+    document.getElementById('skyjoTurnLabel').textContent=isInitPhase?'🃏 Phase d\'initialisation':(isMyTurn?'🎯 À toi de jouer !':'⏳ Tour de '+oppName);
     document.getElementById('skyjoOpponentLabel').textContent='Grille de '+oppName;
 
     // Défausse
@@ -9140,10 +9141,9 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     var phaseMsg=document.getElementById('skyjoPhaseMsg');
     if(state.phase==='init1'){
       phaseMsg.style.display='block';
-      phaseMsg.textContent=isMyTurn?'Phase init — retourne 2 cartes de ta grille !':'En attente que '+oppName+' retourne ses 2 cartes…';
-    } else if(state.phase==='init2'){
-      phaseMsg.style.display='block';
-      phaseMsg.textContent=isMyTurn?'Retourne encore 1 carte pour finir l\'init':'En attente que '+oppName+' retourne sa dernière carte…';
+      var myFlippedCount=myCards.filter(function(c){return c.revealed;}).length;
+      if(myFlippedCount<2) phaseMsg.textContent='Phase init — retourne 2 cartes de ta grille !';
+      else phaseMsg.textContent='✅ Tu as retourné tes 2 cartes — en attente de '+oppName+'…';
     } else {
       phaseMsg.style.display='none';
     }
@@ -9156,11 +9156,10 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     var grid=document.getElementById(gridId);
     grid.innerHTML='';
     var phase=state.phase;
-    var isInit=phase==='init1'||phase==='init2';
-    var target=phase==='init1'?2:1;
-    var totalTarget=phase==='init1'?2:3;
+    var isInit=phase==='init1';
+    // Pendant init : chaque joueur retourne ses propres cartes LIBREMENT (pas de tour)
     var flipped=cards.filter(function(c){return c.revealed;}).length;
-    var canFlip       =isMe&&isMyTurn&&isInit&&flipped<target;
+    var canFlip       =isMe&&isInit&&flipped<2;  // max 2 cartes en init, sans contrainte de tour
     var canReplace    =isMe&&isMyTurn&&phase==='play'&&iHold;
     var canFlipReveal =isMe&&isMyTurn&&phase==='play'&&!iHold&&state.must_flip===_me;
 
@@ -9191,28 +9190,26 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
   // ─── Actions joueur ──────────────────────────────────
   window.skyjoFlipInit=function(idx){
-    if(!_gameState||!(_phase==='init1'||_phase==='init2')) return;
-    if(_gameState.turn!==_me) return;
+    if(!_gameState||_phase!=='init1') return;
+    // Phase init : chaque joueur retourne 2 cartes LIBREMENT (simultané, pas de tour)
     var key=_me+'_cards';
     var ns=deepCopy(_gameState);
     if(ns[key][idx].revealed) return;
     ns[key][idx].revealed=true;
-    var myFlipped=ns[key].filter(function(c){return c.revealed;}).length;
-    var otherKey=(_me==='girl'?'boy':'girl')+'_cards';
-    var otherFlipped=ns[otherKey].filter(function(c){return c.revealed;}).length;
-    var tgt=_phase==='init1'?2:1;
-    var otherTgt=_phase==='init1'?2:3;
 
-    if(myFlipped>=tgt){
-      if(otherFlipped>=otherTgt){
-        var myTot=ns[key].filter(function(c){return c.revealed;}).reduce(function(a,c){return a+c.value;},0);
-        var otherTot=ns[otherKey].filter(function(c){return c.revealed;}).reduce(function(a,c){return a+c.value;},0);
-        ns.turn=myTot>=otherTot?_me:_other;
-        ns.phase='play';
-      } else {
-        ns.turn=_other;
-      }
+    var myFlipped  =ns[key].filter(function(c){return c.revealed;}).length;
+    var otherKey   =(_me==='girl'?'boy':'girl')+'_cards';
+    var otherFlipped=ns[otherKey].filter(function(c){return c.revealed;}).length;
+
+    // Les deux ont retourné leurs 2 cartes → passer en play
+    if(myFlipped>=2 && otherFlipped>=2){
+      var myTot  =ns[key].filter(function(c){return c.revealed;}).reduce(function(a,c){return a+c.value;},0);
+      var othTot =ns[otherKey].filter(function(c){return c.revealed;}).reduce(function(a,c){return a+c.value;},0);
+      // Celui avec le PLUS GRAND total commence (règle Skyjo)
+      ns.turn  = myTot>=othTot ? _me : _other;
+      ns.phase = 'play';
     }
+    // Sinon : je sauvegarde juste mon flip, l'autre verra et pourra continuer
     saveState(ns);
   };
 
