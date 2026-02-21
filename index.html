@@ -1608,7 +1608,7 @@ body:not(.prank-flip) > *:not(#prankFlipBanner):not(#prankGotcha):not(#prankLock
 .memo-note-img { width:130px; height:130px; border-radius:8px; background:var(--s2); border:1px solid var(--border); display:flex; flex-direction:column; justify-content:flex-end; overflow:hidden; transition:transform 0.3s, box-shadow 0.3s; position:relative; }
 .memo-note-card:hover .memo-note-img { transform:scale(1.03); box-shadow:var(--shadow); }
 .memo-note-bg { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:42px; opacity:0.13; }
-.memo-note-banner { position:absolute; bottom:0; left:0; width:100%; padding:6px 8px; font-size:11px; font-weight:600; color:#fff; text-align:center; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.memo-note-banner { position:absolute; bottom:0; left:0; width:100%; padding:6px 8px; font-size:11px; font-weight:600; color:#fff; text-align:center; background:rgba(0,0,0,0.78); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .memo-note-preview { margin-top:7px; font-size:11px; color:var(--sub); max-width:130px; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 .memo-note-add-card { min-width:130px; flex:0 0 auto; scroll-snap-align:start; cursor:pointer; display:none; }
 .memo-note-add-card.visible { display:block; }
@@ -7183,7 +7183,7 @@ function updateTop50PlayBtn(){
   }
 }
 // Poll léger pour capturer les changements d'état audio
-setInterval(updateTop50PlayBtn, 500);
+window._top50Iv = setInterval(updateTop50PlayBtn, 500);
 
 // ── CHARGEMENT INITIAL depuis Supabase ──
 (function(){
@@ -7220,7 +7220,8 @@ function HP(){this.reset();}
 HP.prototype.reset=function(){this.x=Math.random()*canvas.width;this.y=canvas.height+50;this.sz=Math.random()*7+3;this.vy=Math.random()*1+.5;this.vx=(Math.random()-.5)*.5;this.a=Math.random()*.4+.4;};
 HP.prototype.update=function(){this.y-=this.vy;this.x+=this.vx;this.a-=.002;if(this.y<-10||this.a<=0)this.reset();};
 HP.prototype.draw=function(){var col=document.body.classList.contains('light')?'rgba(200,24,94,'+this.a+')':'rgba(0,201,167,'+this.a+')';ctx.save();ctx.translate(this.x,this.y);ctx.beginPath();var t=this.sz*.3;ctx.moveTo(0,t);ctx.bezierCurveTo(0,0,-this.sz/2,0,-this.sz/2,t);ctx.bezierCurveTo(-this.sz/2,this.sz/2,0,this.sz*.75,0,this.sz);ctx.bezierCurveTo(0,this.sz*.75,this.sz/2,this.sz/2,this.sz/2,t);ctx.bezierCurveTo(this.sz/2,0,0,0,0,t);ctx.fillStyle=col;ctx.fill();ctx.restore();};
-function animP(){ctx.clearRect(0,0,canvas.width,canvas.height);if(particleActive){if(particles.length<70)particles.push(new HP());particles.forEach(function(p){p.update();p.draw();});}requestAnimationFrame(animP);}
+window._animPStopped = false;
+function animP(){if(window._animPStopped)return;ctx.clearRect(0,0,canvas.width,canvas.height);if(particleActive){if(particles.length<70)particles.push(new HP());particles.forEach(function(p){p.update();p.draw();});}requestAnimationFrame(animP);}
 animP();
 
 // ── LOVE BOX ──
@@ -8563,7 +8564,7 @@ function loadLikeCounters(){
 
 loadLikeCounters();
 // Polling toutes les 5s pour voir les coeurs de l'autre en temps réel
-setInterval(loadLikeCounters, 5000);
+window._likesIv = setInterval(loadLikeCounters, 5000);
 function openSearch(){
   if(isQuizOpen)return;
   resetZoom();
@@ -8980,8 +8981,8 @@ function filterSongs(q){
     }
   };
 
-  // Poll for updates
-  setInterval(function(){
+  // Poll for updates — remplacé par event-driven dans Perf v3
+  window._mpPollIv = setInterval(function(){
     if(currentAudio && !currentAudio.paused) {
       mpUpdate();
       mpUpdateProgress();
@@ -10233,9 +10234,16 @@ loadFavorites();
     stopPoll();
     fetchMsgs();
     pollId = setInterval(function(){ fetchMsgs(); pollTyping(); }, 3000);
+    window._chatPollId = pollId;
   }
 
-  function stopPoll(){ if(pollId){ clearInterval(pollId); pollId = null; } }
+  function stopPoll(){ if(pollId){ clearInterval(pollId); pollId = null; window._chatPollId = null; } }
+  window._dmStopPoll  = stopPoll;
+  window._dmStartPoll = function(ms){
+    stopPoll();
+    pollId = setInterval(function(){ fetchMsgs(); pollTyping(); }, ms||3000);
+    window._chatPollId = pollId;
+  };
 
   function attachListeners(){
     var input    = $('dmInput');
@@ -11495,8 +11503,9 @@ loadFavorites();
   }
 
   /* ── Démarre le poll ── */
+  window.nlPoll = nlPoll;
   nlPoll();
-  setInterval(nlPoll, 5000);
+  window._nlIv = setInterval(nlPoll, 5000);
 
   /* ── Hooks audio ── */
   var _origMpUpdate = window.mpUpdate;
@@ -11927,27 +11936,26 @@ console.log('✨ Jayana UX v.UX1 chargé');
 </script>
 
 <!-- ════════════════════════════════════════════════════
-     ⚡ JAYANA PERF v2.0 — Optimisations performances
+     ⚡ JAYANA PERF v3.0 — Optimisations performances
+     Zéro doublon. Zéro RAF inutile. iPhone 12 ready.
      ════════════════════════════════════════════════════ -->
 <script>
 (function(){
   'use strict';
 
-  var _pageHidden = document.hidden;
-  var _origSI     = window.setInterval;
-  var _origCI     = window.clearInterval;
+  var _CI = window.clearInterval;
+  var _SI = window.setInterval;
 
   /* ══════════════════════════════════════════════════════
-     1. PARTICLE CANVAS — réduit le coût du RAF quand
-        particleActive = false (boucle tourne mais skip
-        tout le rendu si inactive + page visible)
+     1. CANVAS PARTICLES
+        Stoppe animP original via _animPStopped
+        Lance une seule boucle RAF optimisée
+        RAF s'arrête vraiment quand particleActive = false
   ══════════════════════════════════════════════════════ */
   (function(){
-    // On ne peut pas redefine particleActive (déjà var globale)
-    // Strategy : on patche animP pour qu'il soit quasi-gratuit quand inactif
     var _canvas = null;
     var _ctx    = null;
-    var _frameCount = 0;
+    var _rafId  = null;
 
     function getCtx(){
       if(_ctx) return _ctx;
@@ -11956,297 +11964,263 @@ console.log('✨ Jayana UX v.UX1 chargé');
       return _ctx;
     }
 
-    // Surcharge animP — remplace la boucle originale
-    window.animP = function animPOpt(){
-      var ctx = getCtx();
-      if(!ctx){ requestAnimationFrame(animPOpt); return; }
-
-      // Si inactif + page cachée → RAF ultra-léger (skip tout)
-      if(!window.particleActive && document.hidden){
-        requestAnimationFrame(animPOpt);
-        return;
-      }
-
-      // Si inactif + page visible → clear canvas seulement 1x/10 frames
-      if(!window.particleActive){
-        _frameCount++;
-        if(_frameCount % 10 === 0 && _canvas){
-          ctx.clearRect(0, 0, _canvas.width, _canvas.height);
-          // Vide les particules mortes pour libérer mémoire
-          if(window.particles && window.particles.length > 0)
-            window.particles = [];
+    function loop(){
+      var c = getCtx();
+      if(!c){ _rafId = requestAnimationFrame(loop); return; }
+      if(window.particleActive){
+        c.clearRect(0, 0, _canvas.width, _canvas.height);
+        if(window.particles){
+          if(window.particles.length < 70 && window.HP)
+            window.particles.push(new window.HP());
+          window.particles.forEach(function(p){ p.update(); p.draw(); });
         }
-        requestAnimationFrame(animPOpt);
-        return;
+        _rafId = requestAnimationFrame(loop);
+      } else {
+        // Inactif → vide canvas une fois et STOPPE le RAF
+        c.clearRect(0, 0, _canvas.width, _canvas.height);
+        if(window.particles) window.particles = [];
+        _rafId = null;
+        // Relancé par _watchParticle ci-dessous
       }
+    }
 
-      // Mode normal (musique active)
-      _frameCount = 0;
-      if(_canvas) ctx.clearRect(0, 0, _canvas.width, _canvas.height);
-      if(window.particles){
-        if(window.particles.length < 70 && window.HP)
-          window.particles.push(new window.HP());
-        window.particles.forEach(function(p){ p.update(); p.draw(); });
+    // Watcher léger (1/s) qui relance la boucle si particleActive repasse à true
+    _SI(function(){
+      if(window.particleActive && !_rafId){
+        _rafId = requestAnimationFrame(loop);
       }
-      requestAnimationFrame(animPOpt);
-    };
-    // La boucle originale animP tourne déjà — on ne peut pas l'arrêter.
-    // On démarre notre version optimisée en parallèle.
-    // L'originale fait clearRect + RAF vide → très léger.
-    // La nôtre fait le vrai rendu quand active.
-    // Pour éviter le double rendu : on vide particles dans l'original
-    // en patchant particleActive = false via le code existant.
+    }, 1000);
+
+    // Stoppe l'animP original et démarre le nôtre après init
+    setTimeout(function(){
+      window._animPStopped = true;
+      window.particles = window.particles || [];
+      if(window.particleActive && !_rafId){
+        _rafId = requestAnimationFrame(loop);
+      }
+    }, 1500);
   })();
 
   /* ══════════════════════════════════════════════════════
-     2. MINI PLAYER POLL 250ms → event-driven
-        Supprime le setInterval le plus coûteux du site
+     2. MINI PLAYER 250ms → EVENT-DRIVEN
+        Annule window._mpPollIv (exposé dans le code original)
+        Remplace par événements audio natifs
   ══════════════════════════════════════════════════════ */
   (function(){
     function hookAudio(audio){
-      if(!audio || audio._perfHooked) return;
-      audio._perfHooked = true;
-
+      if(!audio || audio._v3Hooked) return;
+      audio._v3Hooked = true;
       audio.addEventListener('timeupdate', function(){
-        if(typeof window.mpUpdateProgress === 'function') window.mpUpdateProgress();
+        if(window.mpUpdateProgress) window.mpUpdateProgress();
       });
       audio.addEventListener('play', function(){
-        if(typeof window.mpUpdate === 'function') window.mpUpdate();
-        if(typeof window.mpUpdateMode === 'function') window.mpUpdateMode();
-        if(typeof window.mpCheckGameState === 'function') window.mpCheckGameState();
+        if(window.mpUpdate)           window.mpUpdate();
+        if(window.mpUpdateMode)       window.mpUpdateMode();
+        if(window.mpCheckGameState)   window.mpCheckGameState();
+        if(window.updateTop50PlayBtn) window.updateTop50PlayBtn();
       });
       audio.addEventListener('pause', function(){
-        if(typeof window.mpUpdate === 'function') window.mpUpdate();
-        if(typeof window.mpUpdateMode === 'function') window.mpUpdateMode();
+        if(window.mpUpdate)           window.mpUpdate();
+        if(window.mpUpdateMode)       window.mpUpdateMode();
+        if(window.updateTop50PlayBtn) window.updateTop50PlayBtn();
       });
       audio.addEventListener('ended', function(){
-        if(typeof window.mpUpdate === 'function') window.mpUpdate();
+        if(window.mpUpdate)           window.mpUpdate();
+        if(window.updateTop50PlayBtn) window.updateTop50PlayBtn();
       });
     }
 
-    // Hook tous les audios existants
     document.querySelectorAll('audio').forEach(hookAudio);
 
-    // Hook les futurs audios via mpUpdate (appelé à chaque changement de piste)
     var _origMpUpdate = window.mpUpdate;
     window.mpUpdate = function(){
       if(_origMpUpdate) _origMpUpdate.apply(this, arguments);
       if(window.currentAudio) hookAudio(window.currentAudio);
     };
 
-    // mpUpdateMode aussi (appelé souvent)
-    var _origMpUpdateMode = window.mpUpdateMode;
-    window.mpUpdateMode = function(){
-      if(_origMpUpdateMode) _origMpUpdateMode.apply(this, arguments);
-      if(window.currentAudio) hookAudio(window.currentAudio);
-    };
+    setTimeout(function(){
+      // Annule 250ms original
+      if(window._mpPollIv != null){ _CI(window._mpPollIv); window._mpPollIv = null; }
+      // Annule 500ms top50
+      if(window._top50Iv  != null){ _CI(window._top50Iv);  window._top50Iv  = null; }
+      // Fallback basse fréquence pour états non-audio (mode, game state)
+      _SI(function(){
+        if(window.mpUpdateMode)     window.mpUpdateMode();
+        if(window.mpCheckGameState) window.mpCheckGameState();
+      }, 2000);
+      // Appel initial top50
+      if(window.updateTop50PlayBtn) window.updateTop50PlayBtn();
+    }, 1500);
   })();
 
   /* ══════════════════════════════════════════════════════
-     3. setInterval 500ms updateTop50PlayBtn → events audio
+     3. POLLS ADAPTATIFS — SANS DOUBLON
+        Annule les originaux (exposés via window._likesIv, window._nlIv)
+        Recrée avec fréquences optimales selon visibilité
   ══════════════════════════════════════════════════════ */
-  (function(){
-    var fn = window.updateTop50PlayBtn;
-    if(!fn) return;
-    // Hook audio events pour mettre à jour le bouton play all
-    document.addEventListener('play',  function(e){ if(e.target.tagName==='AUDIO') fn(); }, true);
-    document.addEventListener('pause', function(e){ if(e.target.tagName==='AUDIO') fn(); }, true);
-    document.addEventListener('ended', function(e){ if(e.target.tagName==='AUDIO') fn(); }, true);
-    fn(); // appel initial
-    // L'ancien setInterval 500ms tourne encore mais la fonction est si légère
-    // que son impact est maintenant négligeable (pas de fetch réseau)
-  })();
+  var _timers = { likes: null, nl: null };
 
-  /* ══════════════════════════════════════════════════════
-     4. POLLS ADAPTATIFS — visibilité + fréquence optimale
-        likes   : 5s → 12s visible | pause si caché
-        nl      : 5s → 8s visible  | 25s si caché
-        pranks  : natif            | pause si caché
-        moods   : 30s              | pause si caché
-        chat    : 3s → 4s visible  | 8s si caché
-  ══════════════════════════════════════════════════════ */
-  var _timers = {};
+  var FREQ = {
+    likes: { visible: 12000, hidden: 0     },
+    nl:    { visible: 8000,  hidden: 25000 }
+  };
 
-  function _sched(key, fn, msVisible, msHidden){
-    if(_timers[key]) _origCI(_timers[key]);
-    var ms = _pageHidden ? (msHidden || 0) : msVisible;
-    if(ms === 0) return; // pause complète si caché
-    _timers[key] = _origSI(function(){
-      if(typeof fn === 'function') fn();
-    }, ms);
+  function _sched(key, fn, freq){
+    if(_timers[key]){ _CI(_timers[key]); _timers[key] = null; }
+    var ms = document.hidden ? freq.hidden : freq.visible;
+    if(!ms) return;
+    _timers[key] = _SI(fn, ms);
   }
 
   function _reschedAll(){
-    _pageHidden = document.hidden;
-
-    // Likes
     _sched('likes', function(){
-      if(typeof window.loadLikeCounters === 'function') window.loadLikeCounters();
-    }, 12000, 0);
+      if(window.loadLikeCounters) window.loadLikeCounters();
+    }, FREQ.likes);
 
-    // Now listening
     _sched('nl', function(){
-      if(typeof window.nlPoll === 'function') window.nlPoll();
-    }, 8000, 25000);
+      if(window.nlPoll) window.nlPoll();
+    }, FREQ.nl);
 
-    // Chat — seulement si ouvert (le code original gère déjà ça,
-    // on laisse son propre interval mais on le ralentit indirectement
-    // en patchant fetchMsgs)
+    // Chat : ralentit si page cachée et chat ouvert
+    if(document.hidden && window._dmStartPoll && window._chatPollId){
+      window._dmStartPoll(10000);
+    } else if(!document.hidden && window._dmStartPoll && window._chatPollId){
+      window._dmStartPoll(4000);
+    }
   }
+
+  setTimeout(function(){
+    // Annule les originaux
+    if(window._likesIv != null){ _CI(window._likesIv); window._likesIv = null; }
+    if(window._nlIv    != null){ _CI(window._nlIv);    window._nlIv    = null; }
+    // Lance les optimisés
+    _reschedAll();
+  }, 1500);
 
   document.addEventListener('visibilitychange', function(){
     _reschedAll();
-
-    // Gèle toutes les animations CSS si page cachée
-    if(document.hidden){
-      document.body.classList.add('perf-hidden');
-    } else {
-      document.body.classList.remove('perf-hidden');
-    }
+    document.body.classList.toggle('perf-hidden', document.hidden);
   });
 
   /* ══════════════════════════════════════════════════════
-     5. ANIMATIONS CSS HORS VIEWPORT — pausées automatiquement
+     4. ANIMATIONS CSS HORS VIEWPORT
   ══════════════════════════════════════════════════════ */
-  function _pauseOffscreenAnims(){
+  (function(){
     if(!('IntersectionObserver' in window)) return;
-
-    var selectors = [
-      '.skeleton', '.skeleton-overlay', '.wave-bar',
-      '.pa-wave span', '.badge-new', '.aura-girl', '.aura-boy',
-      '#counterBlock', '#profileAvatar'
-    ];
-
+    var sels = ['.skeleton','.skeleton-overlay','.wave-bar','.pa-wave span',
+                '.badge-new','#profileAvatar','#counterBlock','.spinner'];
     var obs = new IntersectionObserver(function(entries){
-      entries.forEach(function(entry){
-        entry.target.style.animationPlayState =
-          entry.isIntersecting ? '' : 'paused';
+      entries.forEach(function(e){
+        e.target.style.animationPlayState = e.isIntersecting ? '' : 'paused';
       });
     }, { rootMargin: '80px' });
-
-    selectors.forEach(function(sel){
-      document.querySelectorAll(sel).forEach(function(el){ obs.observe(el); });
-    });
-
-    // MutationObserver pour les éléments injectés dynamiquement
-    new MutationObserver(function(mutations){
-      mutations.forEach(function(m){
-        m.addedNodes.forEach(function(node){
-          if(node.nodeType !== 1) return;
-          selectors.forEach(function(sel){
-            if(node.matches && node.matches(sel)) obs.observe(node);
-            node.querySelectorAll && node.querySelectorAll(sel).forEach(function(el){ obs.observe(el); });
+    function observe(root){
+      sels.forEach(function(sel){
+        (root||document).querySelectorAll(sel).forEach(function(el){ obs.observe(el); });
+      });
+    }
+    observe();
+    new MutationObserver(function(muts){
+      muts.forEach(function(m){
+        m.addedNodes.forEach(function(n){
+          if(n.nodeType!==1) return;
+          sels.forEach(function(sel){
+            if(n.matches&&n.matches(sel)) obs.observe(n);
+            if(n.querySelectorAll) n.querySelectorAll(sel).forEach(function(el){ obs.observe(el); });
           });
         });
       });
-    }).observe(document.body, { childList:true, subtree:true });
-  }
+    }).observe(document.body,{childList:true,subtree:true});
+  })();
 
   /* ══════════════════════════════════════════════════════
-     6. WILL-CHANGE — nettoyage après animations d'entrée
+     5. WILL-CHANGE — nettoyage après 4s
   ══════════════════════════════════════════════════════ */
-  function _cleanWillChange(){
-    setTimeout(function(){
-      document.querySelectorAll('.section, .fade-in, .counter-unit, .tl-card').forEach(function(el){
-        el.style.willChange = 'auto';
-      });
-    }, 3500);
-  }
-
-  /* ══════════════════════════════════════════════════════
-     7. SCROLL iOS — overscroll-behavior sur sous-vues
-  ══════════════════════════════════════════════════════ */
-  function _optimizeScroll(){
-    ['gamesView','memoryView','penduView','puzzleView',
-     'snakeView','quizView','hiddenPage'].forEach(function(id){
-      var el = document.getElementById(id);
-      if(!el) return;
-      el.style.overscrollBehavior    = 'contain';
-      el.style.webkitOverflowScrolling = 'touch';
+  setTimeout(function(){
+    document.querySelectorAll('.section,.fade-in,.counter-unit,.tl-card,.song,.sp-song').forEach(function(el){
+      el.style.willChange = 'auto';
     });
-  }
+  }, 4000);
 
   /* ══════════════════════════════════════════════════════
-     8. MEDIA SESSION API — iOS gère l'audio nativement
-        = moins de CPU pour le contrôle de lecture
+     6. SCROLL iOS
   ══════════════════════════════════════════════════════ */
-  function _patchMediaSession(){
-    if(!('mediaSession' in navigator)) return;
-    var _hookedMS = false;
+  ['gamesView','memoryView','penduView','puzzleView','snakeView','quizView','hiddenPage'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.style.overscrollBehavior     = 'contain';
+    el.style.webkitOverflowScrolling = 'touch';
+  });
 
-    var _origMU = window.mpUpdate;
+  /* ══════════════════════════════════════════════════════
+     7. MEDIA SESSION API
+  ══════════════════════════════════════════════════════ */
+  (function(){
+    if(!('mediaSession' in navigator)) return;
+    var _linked = false;
+    document.addEventListener('play', function(e){
+      if(e.target.tagName==='AUDIO') _linked = false;
+    }, true);
+    var _origMU2 = window.mpUpdate;
     window.mpUpdate = function(){
-      if(_origMU) _origMU.apply(this, arguments);
-      if(_hookedMS || !window.currentAudio || window.currentAudio.paused) return;
-      _hookedMS = true;
+      if(_origMU2) _origMU2.apply(this, arguments);
+      if(_linked||!window.currentAudio||window.currentAudio.paused) return;
+      _linked = true;
       try{
-        var title = 'Playlist Jayana 💖';
-        if(window.currentRow){
-          var t = window.currentRow.querySelector('.sp-title');
-          var a = window.currentRow.querySelector('.sp-artist');
-          if(t) title = t.textContent;
-        }
+        var tEl = window.currentRow&&window.currentRow.querySelector('.sp-title,.song-title');
+        var aEl = window.currentRow&&window.currentRow.querySelector('.sp-artist,.song-artist');
         navigator.mediaSession.metadata = new MediaMetadata({
-          title: title, artist: 'Jayana 💖', album: 'Playlist Jayana'
+          title:  tEl ? tEl.textContent : 'Playlist Jayana',
+          artist: aEl ? aEl.textContent : 'Jayana',
+          album:  'Playlist Jayana 💖'
         });
-        navigator.mediaSession.setActionHandler('play',  function(){ if(window.currentAudio) window.currentAudio.play(); });
-        navigator.mediaSession.setActionHandler('pause', function(){ if(window.currentAudio) window.currentAudio.pause(); });
-        navigator.mediaSession.setActionHandler('nexttrack', function(){
-          var nxt = document.querySelector('#Love .sp-song.playing ~ .sp-song .sp-btn-play');
-          if(nxt) nxt.click();
+        navigator.mediaSession.setActionHandler('play',          function(){ if(window.currentAudio) window.currentAudio.play(); });
+        navigator.mediaSession.setActionHandler('pause',         function(){ if(window.currentAudio) window.currentAudio.pause(); });
+        navigator.mediaSession.setActionHandler('nexttrack',     function(){
+          var rows=Array.from(document.querySelectorAll('#Love .sp-song'));
+          var cur=document.querySelector('#Love .sp-song.playing');
+          var nxt=rows[rows.indexOf(cur)+1]||rows[0];
+          if(nxt){var b=nxt.querySelector('.sp-btn-play');if(b)b.click();}
         });
         navigator.mediaSession.setActionHandler('previoustrack', function(){
-          var rows = Array.from(document.querySelectorAll('#Love .sp-song'));
-          var cur  = document.querySelector('#Love .sp-song.playing');
-          var idx  = rows.indexOf(cur);
-          if(idx > 0){ var pb = rows[idx-1].querySelector('.sp-btn-play'); if(pb) pb.click(); }
+          var rows=Array.from(document.querySelectorAll('#Love .sp-song'));
+          var cur=document.querySelector('#Love .sp-song.playing');
+          var prv=rows[rows.indexOf(cur)-1];
+          if(prv){var b=prv.querySelector('.sp-btn-play');if(b)b.click();}
         });
       }catch(e){}
     };
-
-    // Reset hookedMS à chaque changement de piste
-    document.addEventListener('play', function(e){
-      if(e.target.tagName === 'AUDIO') _hookedMS = false;
-    }, true);
-  }
+  })();
 
   /* ══════════════════════════════════════════════════════
-     9. CSS GLOBAL — injecte règle perf-hidden + contain
+     8. CSS GLOBAL
   ══════════════════════════════════════════════════════ */
   (function(){
     var s = document.createElement('style');
-    s.textContent = [
-      /* Gèle toutes les animations quand page cachée */
-      'body.perf-hidden *{ animation-play-state:paused !important; }',
-      /* contain: layout sur les sections pour réduire les reflows */
-      '.section{ contain: layout; }',
-      /* Évite repaint sur les éléments fixes */
-      '.bottom-nav{ contain: layout style; }',
-      /* Réduction GPU : transform3d → will-change géré dynamiquement */
-      '.song, .sp-song, .tl-card{ contain: layout style; }'
-    ].join('\n');
+    s.textContent =
+      'body.perf-hidden *{animation-play-state:paused !important;}' +
+      '.section{contain:layout;}' +
+      '.bottom-nav{contain:layout style;}' +
+      '.song,.sp-song{contain:layout style;}';
     document.head.appendChild(s);
   })();
 
   /* ══════════════════════════════════════════════════════
-     10. INIT
+     9. LOG
   ══════════════════════════════════════════════════════ */
-  function _init(){
-    setTimeout(function(){
-      _reschedAll();
-      _cleanWillChange();
-      _optimizeScroll();
-      _pauseOffscreenAnims();
-      _patchMediaSession();
-      console.log('⚡ Jayana Perf v2.0 actif — iPhone ready');
-    }, 1200);
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', _init);
-  } else {
-    _init();
-  }
+  setTimeout(function(){
+    console.log(
+      '⚡ Jayana Perf v3.0\n' +
+      '  ✓ 1 seul RAF canvas (animP original stoppé)\n' +
+      '  ✓ 250ms mini player supprimé → event-driven\n' +
+      '  ✓ 500ms top50 supprimé → event-driven\n' +
+      '  ✓ likes original 5s supprimé → 12s visible / pause si caché\n' +
+      '  ✓ nlPoll original 5s supprimé → 8s visible / 25s si caché\n' +
+      '  ✓ animations hors viewport pausées\n' +
+      '  ✓ will-change nettoyé\n' +
+      '  ✓ Media Session API active'
+    );
+  }, 2000);
 
 })();
 </script>
