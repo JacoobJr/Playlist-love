@@ -125,7 +125,7 @@ html { scroll-behavior: smooth; overflow-x: hidden; -webkit-text-size-adjust: 10
 .ptr-arrow.ready { transform: rotate(180deg); color: var(--green); }
 
 /* ══ TRANSITIONS SOUS-VUES ══ */
-#gamesView, #quizView, #hiddenPage, #memoryView, #penduView, #puzzleView, #snakeView {
+#gamesView, #quizView, #hiddenPage, #memoryView, #penduView, #puzzleView, #snakeView, #skyjoView {
   will-change: transform, opacity;
 }
 #gamesView.active, #quizView.active {
@@ -2174,8 +2174,56 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 .game-view-body { padding: 16px 16px 0; }
 
 /* ════ PENDU ════ */
-#penduView,#puzzleView,#snakeView{display:none;position:fixed;inset:0;background:var(--bg);z-index:600;overflow-y:auto;padding-bottom:80px;transition:background 0.3s;}
-#penduView.active,#puzzleView.active,#snakeView.active{display:block;animation:slideUp 0.25s ease;}
+#penduView,#puzzleView,#snakeView,#skyjoView{display:none;position:fixed;inset:0;background:var(--bg);z-index:600;overflow-y:auto;padding-bottom:80px;transition:background 0.3s;}
+#penduView.active,#puzzleView.active,#snakeView.active,#skyjoView.active{display:block;animation:slideUp 0.25s ease;}
+
+/* ══ SKYJO STYLES ══ */
+.skyjo-card {
+  width: 52px; height: 74px;
+  border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 700;
+  border: 1.5px solid var(--border);
+  background: var(--s2);
+  color: var(--text);
+  cursor: default;
+  user-select: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+  position: relative;
+}
+.skyjo-card-back { background: var(--s3); color: var(--muted); font-size: 22px; }
+.skyjo-card-held { background: rgba(167,139,250,0.2); border-color: rgba(167,139,250,0.6); color: #a78bfa; font-size: 20px; }
+.skyjo-card.skyjo-card-hidden { background: var(--s3); color: var(--muted); cursor: pointer; }
+.skyjo-card.skyjo-card-hidden:hover { transform: scale(1.06); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+.skyjo-card.skyjo-card-clickable { cursor: pointer; border-color: rgba(0,201,167,0.5); background: rgba(0,201,167,0.08); }
+.skyjo-card.skyjo-card-clickable:hover { transform: scale(1.06); box-shadow: 0 4px 16px rgba(0,201,167,0.3); }
+.skyjo-card[data-val="-2"]  { color: #3b82f6; }
+.skyjo-card[data-val="-1"]  { color: #60a5fa; }
+.skyjo-card[data-val="0"]   { color: #a78bfa; }
+.skyjo-card[data-val="1"],.skyjo-card[data-val="2"],.skyjo-card[data-val="3"],.skyjo-card[data-val="4"] { color: var(--text); }
+.skyjo-card[data-val="5"],.skyjo-card[data-val="6"],.skyjo-card[data-val="7"],.skyjo-card[data-val="8"] { color: #f59e0b; }
+.skyjo-card[data-val="9"],.skyjo-card[data-val="10"],.skyjo-card[data-val="11"],.skyjo-card[data-val="12"] { color: #ef4444; }
+.skyjo-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 52px);
+  grid-template-rows: repeat(3, 74px);
+  gap: 6px;
+  justify-content: center;
+}
+.skyjo-player-bubble {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 16px; position: relative;
+}
+.skyjo-presence-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--muted);
+  transition: background 0.3s;
+}
+.skyjo-presence-dot.online { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); animation: presencePulse 2s ease-in-out infinite; }
+@keyframes presencePulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+.skyjo-card.skyjo-col-complete { opacity: 0.4; pointer-events: none; border-color: rgba(0,201,167,0.4); background: rgba(0,201,167,0.06); }
+.skyjo-card.skyjo-last-card { box-shadow: 0 0 0 2px #f59e0b; }
 .pendu-svg{display:block;margin:0 auto 8px;}
 .pendu-word{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
 .pendu-letter{width:26px;height:34px;border-bottom:2px solid var(--text);display:flex;align-items:flex-end;justify-content:center;font-size:17px;font-weight:700;color:var(--text);text-transform:uppercase;}
@@ -4341,6 +4389,14 @@ body.light #counterBlock.glowing .c-num-big {
       </div>
       <div class="gv-game-card-arrow">›</div>
     </div>
+    <div class="gv-game-card" onclick="openSkyjoLock()" id="skyjoCard" style="position:relative;overflow:hidden;">
+      <div class="gv-game-card-icon">🃏</div>
+      <div class="gv-game-card-info">
+        <div class="gv-game-card-name">Skyjo <span style="font-size:9px;font-weight:700;letter-spacing:1px;color:#a78bfa;background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.35);border-radius:4px;padding:2px 6px;vertical-align:middle;">🔒 BÊTA</span></div>
+        <div class="gv-game-card-desc">Le jeu de cartes en duo — objectif : le moins de points possible !</div>
+      </div>
+      <div class="gv-game-card-arrow">›</div>
+    </div>
   </div>
 </div>
 
@@ -4573,6 +4629,139 @@ body.light #counterBlock.glowing .c-num-big {
       </div>
       <div id="slbList"><div class="lb-loading">Chargement...</div></div>
     </div>
+  </div>
+</div>
+
+<!-- ════ VUE SKYJO ════ -->
+<div id="skyjoView">
+  <div class="game-view-header">
+    <div class="game-view-back" onclick="closeSkyjoGame()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Retour aux jeux</div>
+    <div class="game-view-title">Skyjo 🃏</div>
+  </div>
+  <div class="game-view-body" style="padding:16px">
+
+    <!-- ÉCRAN CODE D'ACCÈS -->
+    <div id="skyjoLockScreen" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;text-align:center;">
+      <div style="font-size:56px">🔒</div>
+      <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--text)">Accès Skyjo</div>
+      <div style="font-size:13px;color:var(--muted);max-width:260px">Ce jeu est en cours de développement — entre le code pour y accéder</div>
+      <input type="password" id="skyjoLockInput" placeholder="Code..." autocomplete="off" style="width:100%;max-width:240px;padding:12px 16px;font-size:16px;border:1.5px solid var(--border);border-radius:10px;background:var(--s2);color:var(--text);font-family:'DM Sans',sans-serif;outline:none;text-align:center;letter-spacing:3px;">
+      <div id="skyjoLockErr" style="font-size:12px;color:#e05555;display:none;">❌ Code incorrect</div>
+      <button onclick="skyjoCheckLock()" style="padding:12px 32px;background:var(--green);color:#000;font-weight:700;font-size:14px;font-family:'DM Sans',sans-serif;border:none;border-radius:50px;cursor:pointer;">Valider</button>
+      <span onclick="closeSkyjoGame()" style="font-size:12px;color:var(--muted);cursor:pointer;padding:4px 0;">Annuler</span>
+    </div>
+
+    <!-- ÉCRAN ATTENTE (stand-by, en attente de l'autre joueur) -->
+    <div id="skyjoWaitScreen" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:20px;text-align:center;">
+      <div style="font-size:52px">⏳</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--text)">En attente...</div>
+      <div id="skyjoWaitMsg" style="font-size:14px;color:var(--sub);max-width:280px;line-height:1.6"></div>
+      <div style="display:flex;gap:12px;align-items:center;margin-top:4px;">
+        <div class="skyjo-player-bubble" id="skyjoWaitBubbleGirl">
+          <span style="font-size:22px">👧</span>
+          <div style="font-size:10px;font-weight:700;color:var(--sub)">Zelda</div>
+          <div class="skyjo-presence-dot" id="skyjoPresenceGirl"></div>
+        </div>
+        <div style="font-size:24px;color:var(--muted)">vs</div>
+        <div class="skyjo-player-bubble" id="skyjoWaitBubbleBoy">
+          <span style="font-size:22px">👦</span>
+          <div style="font-size:10px;font-weight:700;color:var(--sub)">Link</div>
+          <div class="skyjo-presence-dot" id="skyjoPresenceBoy"></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Le jeu se lance automatiquement quand vous êtes tous les deux connectés 🎮</div>
+      <button onclick="skyjoLeaveWait()" style="margin-top:8px;padding:10px 24px;background:var(--s2);color:var(--sub);border:1px solid var(--border);border-radius:50px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">Annuler</button>
+    </div>
+
+    <!-- ZONE DE JEU -->
+    <div id="skyjoGameArea" style="display:none;">
+      <!-- Infos tour -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;" id="skyjoTurnLabel">Tour de ...</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div style="font-size:11px;color:var(--muted)">Manche</div>
+          <div style="font-size:15px;font-weight:700;color:var(--text)" id="skyjoRound">1</div>
+        </div>
+      </div>
+
+      <!-- Scores -->
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <div style="flex:1;background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;" id="skyjoScoreCardGirl">
+          <div style="font-size:18px">👧</div>
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Zelda</div>
+          <div style="font-size:22px;font-weight:700;color:var(--text)" id="skyjoScoreGirl">0</div>
+        </div>
+        <div style="flex:1;background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;" id="skyjoScoreCardBoy">
+          <div style="font-size:18px">👦</div>
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Link</div>
+          <div style="font-size:22px;font-weight:700;color:var(--text)" id="skyjoScoreBoy">0</div>
+        </div>
+      </div>
+
+      <!-- Pioche + défausse -->
+      <div style="display:flex;gap:16px;justify-content:center;align-items:center;margin-bottom:16px;">
+        <div style="text-align:center;">
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">Pioche</div>
+          <div id="skyjoDeckCard" class="skyjo-card skyjo-card-back" onclick="skyjoDrawFromDeck()" style="cursor:pointer;">🂠</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px" id="skyjoDrawPileCount">— cartes</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">Défausse</div>
+          <div id="skyjoDiscardCard" class="skyjo-card" onclick="skyjoDrawFromDiscard()">—</div>
+        </div>
+      </div>
+
+      <!-- Carte en main -->
+      <div id="skyjoHeldCardWrap" style="display:none;text-align:center;margin-bottom:12px;">
+        <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">Carte en main</div>
+        <div id="skyjoHeldCard" class="skyjo-card skyjo-card-held"></div>
+        <div style="font-size:11px;color:var(--sub);margin-top:6px">Clique sur une de tes cartes pour l'échanger, ou</div>
+        <button onclick="skyjoDiscardHeld()" style="margin-top:6px;padding:7px 16px;background:rgba(239,83,80,0.12);color:#ef5350;border:1px solid rgba(239,83,80,0.3);border-radius:8px;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">Défausser + retourner une carte</button>
+      </div>
+
+      <!-- Grille adverse -->
+      <div style="margin-bottom:14px;">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px" id="skyjoOpponentLabel">Grille de l'autre</div>
+        <div class="skyjo-grid" id="skyjoOpponentGrid"></div>
+      </div>
+
+      <!-- Grille du joueur -->
+      <div>
+        <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px">Ta grille</div>
+        <div class="skyjo-grid" id="skyjoMyGrid"></div>
+      </div>
+
+      <!-- Message de phase (initialisation) -->
+      <div id="skyjoPhaseMsg" style="margin-top:12px;background:rgba(0,201,167,0.08);border:1px solid rgba(0,201,167,0.2);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--sub);text-align:center;display:none;"></div>
+    </div>
+
+    <!-- FIN DE MANCHE -->
+    <div id="skyjoRoundEnd" style="display:none;flex-direction:column;align-items:center;gap:16px;padding:20px 0;text-align:center;">
+      <div style="font-size:48px" id="skyjoRoundEndEmoji">🏆</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--text)" id="skyjoRoundEndTitle"></div>
+      <div style="font-size:13px;color:var(--sub)" id="skyjoRoundEndSub"></div>
+      <div style="display:flex;gap:12px;">
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px 20px;text-align:center;">
+          <div style="font-size:12px;color:var(--muted)">👧 Zelda</div>
+          <div style="font-size:26px;font-weight:700;color:var(--text)" id="skyjoRoundScoreGirl">0</div>
+        </div>
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px 20px;text-align:center;">
+          <div style="font-size:12px;color:var(--muted)">👦 Link</div>
+          <div style="font-size:26px;font-weight:700;color:var(--text)" id="skyjoRoundScoreBoy">0</div>
+        </div>
+      </div>
+      <button id="skyjoNextRoundBtn" onclick="skyjoNextRound()" style="padding:12px 28px;background:var(--green);color:#000;font-weight:700;font-size:14px;font-family:'DM Sans',sans-serif;border:none;border-radius:50px;cursor:pointer;">Manche suivante →</button>
+    </div>
+
+    <!-- FIN DE PARTIE -->
+    <div id="skyjoGameEnd" style="display:none;flex-direction:column;align-items:center;gap:16px;padding:20px 0;text-align:center;">
+      <div style="font-size:64px" id="skyjoGameEndEmoji">🏆</div>
+      <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--text)" id="skyjoGameEndTitle">Victoire !</div>
+      <div style="font-size:14px;color:var(--sub)" id="skyjoGameEndSub"></div>
+      <button onclick="skyjoNewGame()" style="padding:12px 28px;background:var(--green);color:#000;font-weight:700;font-size:14px;font-family:'DM Sans',sans-serif;border:none;border-radius:50px;cursor:pointer;">Rejouer 🔄</button>
+      <button onclick="closeSkyjoGame()" style="padding:10px 22px;background:var(--s2);color:var(--sub);border:1px solid var(--border);border-radius:50px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;">Retour aux jeux</button>
+    </div>
+
   </div>
 </div>
 
@@ -5020,7 +5209,7 @@ document.getElementById('floatingThemeBtn').addEventListener('click', applyTheme
 
 // Gestion de la visibilité du bouton flottant selon la vue active
 function updateFloatingThemeBtn() {
-  var subviews = ['gamesView','memoryView','penduView','puzzleView','snakeView','quizView','hiddenPage'];
+  var subviews = ['gamesView','memoryView','penduView','puzzleView','snakeView','skyjoView','quizView','hiddenPage'];
   var open = subviews.some(function(id) {
     var el = document.getElementById(id);
     return el && (el.classList.contains('active') || el.style.display === 'block');
@@ -5028,7 +5217,7 @@ function updateFloatingThemeBtn() {
   document.body.classList.toggle('subview-open', open);
 }
 // Observer les changements de classe sur les sous-vues
-var _subviewIds = ['gamesView','memoryView','penduView','puzzleView','snakeView','quizView','hiddenPage'];
+var _subviewIds = ['gamesView','memoryView','penduView','puzzleView','snakeView','skyjoView','quizView','hiddenPage'];
 _subviewIds.forEach(function(id) {
   var el = document.getElementById(id);
   if(!el) return;
@@ -8591,7 +8780,675 @@ function closePuzzleGame() { _loadGames(); _closePuzzleGame(); }
 function openSnakeGame()   { _loadGames(); _openSnakeGame(); }
 function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
-// Listeners boutons quiz et jeux
+/* ══════════════════════════════════════════════════════
+   SKYJO — JEU DE CARTES MULTIJOUEUR
+══════════════════════════════════════════════════════ */
+(function(){
+  var SKYJO_TABLE = 'skyjo_games';
+  var SKYJO_LOCK_HASH = 'b80ddb31af6d25697b30e80de7abf8bddb28b18e7a47fbb437b6bbb97f9f3a39'; // sha256 de "CHANTIER"
+  var _skyjoUnlocked = false;
+  var _skyjoGameState = null;
+  var _skyjoMyProfile = null;
+  var _skyjoOtherProfile = null;
+  var _skyjoGameId = null;
+  var _skyjoPresenceInterval = null;
+  var _skyjoStateInterval = null;
+  var _skyjoPhase = null; // 'init1' | 'init2' | 'play' | 'roundEnd' | 'gameEnd'
+  var _skyjoHeldCard = null; // {value, fromDiscard}
+  var _skyjoInitFlipped = []; // cartes retournées pendant init
+
+  // ── Fonctions d'affichage ──
+  function showSkyjoScreen(name){
+    ['skyjoLockScreen','skyjoWaitScreen','skyjoGameArea','skyjoRoundEnd','skyjoGameEnd'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.style.display = 'none';
+    });
+    var el = document.getElementById(name);
+    if(el) el.style.display = 'flex';
+  }
+
+  // ── Ouverture avec lock ──
+  window.openSkyjoLock = function(){
+    var profile = getProfile();
+    if(!profile){
+      // Pas connecté → demander de se connecter d'abord
+      alert('Tu dois être connecté sur un profil pour jouer à Skyjo !');
+      return;
+    }
+    resetZoom();
+    document.getElementById('skyjoView').classList.add('active');
+    particleActive = false; hideDance(); window.scrollTo(0, 0);
+    if(_skyjoUnlocked){
+      skyjoEnterLobby();
+    } else {
+      showSkyjoScreen('skyjoLockScreen');
+      var inp = document.getElementById('skyjoLockInput');
+      if(inp){ inp.value = ''; setTimeout(function(){ inp.focus(); }, 80); }
+    }
+  };
+
+  window.skyjoCheckLock = async function(){
+    var val = (document.getElementById('skyjoLockInput').value || '').trim().toUpperCase();
+    var h = await _sha256(val);
+    var errEl = document.getElementById('skyjoLockErr');
+    if(h === SKYJO_LOCK_HASH){
+      _skyjoUnlocked = true;
+      errEl.style.display = 'none';
+      skyjoEnterLobby();
+    } else {
+      errEl.style.display = 'block';
+      document.getElementById('skyjoLockInput').value = '';
+      document.getElementById('skyjoLockInput').focus();
+    }
+  };
+  document.getElementById('skyjoLockInput').addEventListener('keydown', function(e){ if(e.key==='Enter') window.skyjoCheckLock(); });
+
+  // ── Entrée dans le lobby ──
+  function skyjoEnterLobby(){
+    _skyjoMyProfile = getProfile();
+    _skyjoOtherProfile = _skyjoMyProfile === 'girl' ? 'boy' : 'girl';
+    showSkyjoScreen('skyjoWaitScreen');
+    var myName = _skyjoMyProfile === 'girl' ? 'Zelda' : 'Link';
+    var otherName = _skyjoMyProfile === 'girl' ? 'Link' : 'Zelda';
+    document.getElementById('skyjoWaitMsg').innerHTML =
+      'Tu es connecté en tant que <strong>' + myName + '</strong>.<br>En attente que <strong>' + otherName + '</strong> rejoigne…';
+    // Démarrer la présence
+    startPresencePolling();
+  }
+
+  window.skyjoLeaveWait = function(){
+    stopPresencePolling();
+    closeSkyjoGame();
+  };
+
+  // ── Présence via Supabase ──
+  function startPresencePolling(){
+    // Marquer comme présent
+    updateMyPresence(true);
+    checkPresence();
+    _skyjoPresenceInterval = setInterval(function(){
+      updateMyPresence(true);
+      checkPresence();
+    }, 3000);
+  }
+
+  function stopPresencePolling(){
+    if(_skyjoPresenceInterval){ clearInterval(_skyjoPresenceInterval); _skyjoPresenceInterval = null; }
+    updateMyPresence(false);
+  }
+
+  function updateMyPresence(online){
+    if(!_skyjoMyProfile) return;
+    var now = new Date().toISOString();
+    fetch(SB_URL + '/rest/v1/skyjo_presence?profile=eq.' + _skyjoMyProfile, {
+      method: 'DELETE', headers: sbHeaders()
+    }).then(function(){
+      if(!online) return;
+      fetch(SB_URL + '/rest/v1/skyjo_presence', {
+        method: 'POST',
+        headers: sbHeaders({'Prefer':'return=minimal'}),
+        body: JSON.stringify({ profile: _skyjoMyProfile, updated_at: now })
+      }).catch(function(){});
+    }).catch(function(){});
+  }
+
+  function checkPresence(){
+    fetch(SB_URL + '/rest/v1/skyjo_presence?select=profile,updated_at', {
+      headers: sbHeaders()
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(rows){
+      if(!Array.isArray(rows)) return;
+      var now = Date.now();
+      var girlOnline = false, boyOnline = false;
+      rows.forEach(function(row){
+        var age = now - new Date(row.updated_at).getTime();
+        if(age < 8000){
+          if(row.profile === 'girl') girlOnline = true;
+          if(row.profile === 'boy') boyOnline = true;
+        }
+      });
+      updatePresenceDots(girlOnline, boyOnline);
+      // Si les 2 sont présents → chercher ou créer une partie
+      if(girlOnline && boyOnline){
+        checkOrCreateGame();
+      }
+    }).catch(function(){});
+  }
+
+  function updatePresenceDots(girlOnline, boyOnline){
+    var dg = document.getElementById('skyjoPresenceGirl');
+    var db = document.getElementById('skyjoPresenceBoy');
+    if(dg) dg.className = 'skyjo-presence-dot' + (girlOnline ? ' online' : '');
+    if(db) db.className = 'skyjo-presence-dot' + (boyOnline ? ' online' : '');
+  }
+
+  // ── Gestion de la partie ──
+  function checkOrCreateGame(){
+    // Chercher une partie active
+    fetch(SB_URL + '/rest/v1/' + SKYJO_TABLE + '?status=eq.waiting&order=created_at.desc&limit=1', {
+      headers: sbHeaders()
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(rows){
+      if(Array.isArray(rows) && rows.length > 0){
+        // Partie existante → la rejoindre
+        _skyjoGameId = rows[0].id;
+        if(rows[0].status === 'waiting' && rows[0].created_by !== _skyjoMyProfile){
+          // Rejoindre la partie (la passer en 'playing')
+          joinGame(rows[0]);
+        } else if(rows[0].status === 'playing'){
+          // Déjà en cours → rejoindre
+          _skyjoGameId = rows[0].id;
+          stopPresencePolling();
+          startGameStatePolling();
+          showSkyjoScreen('skyjoGameArea');
+          document.getElementById('skyjoGameArea').style.display = 'block';
+          renderGameState(rows[0]);
+        } else {
+          // C'est moi qui ai créé, attendre
+        }
+      } else {
+        // Créer une nouvelle partie (seulement si je suis la "girl" pour éviter double création)
+        if(_skyjoMyProfile === 'girl'){
+          createGame();
+        }
+      }
+    }).catch(function(){});
+  }
+
+  function createGame(){
+    var deck = buildAndShuffleDeck();
+    var girlCards = [];
+    var boyCards = [];
+    for(var i = 0; i < 12; i++) girlCards.push({value: deck.pop(), revealed: false});
+    for(var i = 0; i < 12; i++) boyCards.push({value: deck.pop(), revealed: false});
+    var topDiscard = deck.pop();
+    var state = {
+      deck: deck,
+      discard: [topDiscard],
+      girl_cards: girlCards,
+      boy_cards: boyCards,
+      phase: 'init1', // init1=chacun retourne 2 cartes, init2=attente, play=jeu normal
+      turn: null, // déterminé après init
+      round: 1,
+      scores: { girl: 0, boy: 0 },
+      last_player: null // celui qui a fermé
+    };
+    fetch(SB_URL + '/rest/v1/' + SKYJO_TABLE, {
+      method: 'POST',
+      headers: sbHeaders({'Prefer':'return=representation'}),
+      body: JSON.stringify({ status: 'waiting', created_by: _skyjoMyProfile, state: state })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(rows){
+      if(Array.isArray(rows) && rows[0]){
+        _skyjoGameId = rows[0].id;
+        // Attendre que l'autre rejoigne
+      }
+    }).catch(function(){});
+  }
+
+  function joinGame(gameRow){
+    _skyjoGameId = gameRow.id;
+    fetch(SB_URL + '/rest/v1/' + SKYJO_TABLE + '?id=eq.' + _skyjoGameId, {
+      method: 'PATCH',
+      headers: sbHeaders({'Prefer':'return=representation'}),
+      body: JSON.stringify({ status: 'playing' })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(rows){
+      if(Array.isArray(rows) && rows[0]){
+        stopPresencePolling();
+        startGameStatePolling();
+        showSkyjoScreen('skyjoGameArea');
+        document.getElementById('skyjoGameArea').style.display = 'block';
+        renderGameState(rows[0]);
+      }
+    }).catch(function(){});
+  }
+
+  function startGameStatePolling(){
+    fetchGameState();
+    _skyjoStateInterval = setInterval(fetchGameState, 2000);
+  }
+
+  function stopGameStatePolling(){
+    if(_skyjoStateInterval){ clearInterval(_skyjoStateInterval); _skyjoStateInterval = null; }
+  }
+
+  function fetchGameState(){
+    if(!_skyjoGameId) return;
+    fetch(SB_URL + '/rest/v1/' + SKYJO_TABLE + '?id=eq.' + _skyjoGameId, {
+      headers: sbHeaders()
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(rows){
+      if(!Array.isArray(rows) || !rows[0]) return;
+      renderGameState(rows[0]);
+    }).catch(function(){});
+  }
+
+  function renderGameState(gameRow){
+    var state = gameRow.state;
+    if(!state) return;
+    _skyjoGameState = state;
+    _skyjoPhase = state.phase;
+    _skyjoHeldCard = null; // reset held card display only
+
+    // Scores
+    document.getElementById('skyjoScoreGirl').textContent = state.scores.girl;
+    document.getElementById('skyjoScoreBoy').textContent = state.scores.boy;
+    document.getElementById('skyjoRound').textContent = state.round || 1;
+
+    // Tour
+    var myCards = _skyjoMyProfile === 'girl' ? state.girl_cards : state.boy_cards;
+    var oppCards = _skyjoMyProfile === 'girl' ? state.boy_cards : state.girl_cards;
+    var myName = _skyjoMyProfile === 'girl' ? 'Zelda' : 'Link';
+    var oppName = _skyjoMyProfile === 'girl' ? 'Link' : 'Zelda';
+
+    var isMyTurn = state.turn === _skyjoMyProfile;
+    document.getElementById('skyjoTurnLabel').textContent = isMyTurn ? '🎯 À toi de jouer !' : '⏳ Tour de ' + oppName;
+    document.getElementById('skyjoOpponentLabel').textContent = 'Grille de ' + oppName;
+
+    // Défausse
+    var discardEl = document.getElementById('skyjoDiscardCard');
+    var topDiscard = state.discard && state.discard.length > 0 ? state.discard[state.discard.length - 1] : null;
+    if(topDiscard !== null && topDiscard !== undefined){
+      discardEl.textContent = topDiscard;
+      discardEl.setAttribute('data-val', topDiscard);
+      discardEl.classList.remove('skyjo-card-back');
+    } else {
+      discardEl.textContent = '—';
+      discardEl.removeAttribute('data-val');
+    }
+
+    // Pioche count
+    document.getElementById('skyjoDrawPileCount').textContent = (state.deck ? state.deck.length : 0) + ' cartes';
+
+    // Grilles
+    renderGrid('skyjoMyGrid', myCards, true, isMyTurn, state.phase, state.held_card && state.held_card.holder === _skyjoMyProfile);
+    renderGrid('skyjoOpponentGrid', oppCards, false, false, state.phase, false);
+
+    // Carte en main (tenue par moi)
+    var heldWrap = document.getElementById('skyjoHeldCardWrap');
+    var heldEl = document.getElementById('skyjoHeldCard');
+    if(state.held_card && state.held_card.holder === _skyjoMyProfile){
+      heldWrap.style.display = 'block';
+      heldEl.textContent = state.held_card.value;
+      heldEl.setAttribute('data-val', state.held_card.value);
+    } else {
+      heldWrap.style.display = 'none';
+    }
+
+    // Message de phase
+    var phaseMsg = document.getElementById('skyjoPhaseMsg');
+    if(state.phase === 'init1'){
+      phaseMsg.style.display = 'block';
+      phaseMsg.textContent = isMyTurn 
+        ? 'Phase d\'initialisation — retourne 2 cartes de ta grille pour commencer !'
+        : 'En attente que ' + oppName + ' retourne ses 2 cartes…';
+    } else if(state.phase === 'init2'){
+      phaseMsg.style.display = 'block';
+      phaseMsg.textContent = isMyTurn 
+        ? 'Retourne encore 1 carte pour finir l\'initialisation'
+        : 'En attente que ' + oppName + ' retourne sa carte…';
+    } else {
+      phaseMsg.style.display = 'none';
+    }
+
+    // Fin de manche / partie
+    if(state.phase === 'roundEnd'){
+      stopGameStatePolling();
+      showRoundEnd(state);
+    } else if(state.phase === 'gameEnd'){
+      stopGameStatePolling();
+      showGameEnd(state);
+    }
+  }
+
+  function renderGrid(gridId, cards, isMe, isMyTurn, phase, hasHeld){
+    var grid = document.getElementById(gridId);
+    grid.innerHTML = '';
+    var revealedCount = cards.filter(function(c){ return c.revealed; }).length;
+    var isInitPhase = phase === 'init1' || phase === 'init2';
+    var targetInit = phase === 'init1' ? 2 : 1;
+    var myInitFlipped = cards.filter(function(c){ return c.revealed; }).length;
+    var canFlip = isMe && isMyTurn && isInitPhase && myInitFlipped < targetInit;
+    var canReplace = isMe && isMyTurn && phase === 'play' && hasHeld;
+
+    cards.forEach(function(card, idx){
+      var el = document.createElement('div');
+      el.className = 'skyjo-card';
+      if(card.revealed){
+        el.textContent = card.value;
+        el.setAttribute('data-val', card.value);
+        if(canReplace) el.classList.add('skyjo-card-clickable');
+        el.onclick = canReplace ? function(){ skyjoReplaceCard(idx); } : null;
+      } else {
+        el.textContent = isMe ? '?' : '?';
+        el.classList.add('skyjo-card-hidden');
+        if(canFlip){
+          el.classList.add('skyjo-card-clickable');
+          el.onclick = function(){ skyjoFlipInit(idx); };
+        } else if(isMe && isMyTurn && phase === 'play' && !hasHeld){
+          // Phase jeu, pas de carte en main : on peut retourner une carte face cachée
+          el.classList.add('skyjo-card-clickable');
+          el.onclick = function(){ skyjoFlipReveal(idx); };
+        }
+      }
+      grid.appendChild(el);
+    });
+  }
+
+  // ── Actions du joueur ──
+
+  // Phase init : retourner une carte
+  window.skyjoFlipInit = function(cardIdx){
+    if(!_skyjoGameState || !(_skyjoPhase === 'init1' || _skyjoPhase === 'init2')) return;
+    if(_skyjoGameState.turn !== _skyjoMyProfile) return;
+    var myCardsKey = _skyjoMyProfile + '_cards';
+    var cards = JSON.parse(JSON.stringify(_skyjoGameState[myCardsKey]));
+    if(cards[cardIdx].revealed) return;
+    cards[cardIdx].revealed = true;
+    var revealedCount = cards.filter(function(c){ return c.revealed; }).length;
+    var newState = JSON.parse(JSON.stringify(_skyjoGameState));
+    newState[myCardsKey] = cards;
+
+    // Calculer le prochain état de phase
+    var otherKey = (_skyjoMyProfile === 'girl' ? 'boy' : 'girl') + '_cards';
+    var otherCards = newState[otherKey];
+    var otherRevealed = otherCards.filter(function(c){ return c.revealed; }).length;
+
+    if(_skyjoPhase === 'init1'){
+      var targetInit = 2;
+      if(revealedCount >= targetInit && otherRevealed >= targetInit){
+        // Les 2 joueurs ont retourné 2 cartes → passer en play
+        // Celui qui a le plus haut total commence
+        var myTotal = cards.filter(function(c){ return c.revealed; }).reduce(function(a,c){ return a + c.value; }, 0);
+        var otherTotal = otherCards.filter(function(c){ return c.revealed; }).reduce(function(a,c){ return a + c.value; }, 0);
+        newState.turn = myTotal > otherTotal ? _skyjoMyProfile : _skyjoOtherProfile;
+        newState.phase = 'play';
+      } else if(revealedCount >= targetInit){
+        // Moi fini, l'autre pas encore → passer au tour de l'autre pour init1
+        newState.turn = _skyjoOtherProfile;
+      }
+      // sinon je continue de retourner (si pas encore 2)
+    } else if(_skyjoPhase === 'init2'){
+      if(revealedCount >= 3 && otherRevealed >= 3){
+        newState.phase = 'play';
+        var myTotal2 = cards.filter(function(c){ return c.revealed; }).reduce(function(a,c){ return a + c.value; }, 0);
+        var otherTotal2 = otherCards.filter(function(c){ return c.revealed; }).reduce(function(a,c){ return a + c.value; }, 0);
+        newState.turn = myTotal2 > otherTotal2 ? _skyjoMyProfile : _skyjoOtherProfile;
+      } else {
+        newState.turn = _skyjoOtherProfile;
+      }
+    }
+
+    saveGameState(newState);
+  };
+
+  // Piocher dans le deck
+  window.skyjoDrawFromDeck = function(){
+    if(!_skyjoGameState || _skyjoPhase !== 'play') return;
+    if(_skyjoGameState.turn !== _skyjoMyProfile) return;
+    if(_skyjoGameState.held_card) return; // déjà une carte en main
+    var newState = JSON.parse(JSON.stringify(_skyjoGameState));
+    if(!newState.deck || newState.deck.length === 0){
+      // Recycler la défausse
+      var top = newState.discard.pop();
+      newState.deck = shuffle(newState.discard);
+      newState.discard = [top];
+    }
+    var drawn = newState.deck.pop();
+    newState.held_card = { value: drawn, holder: _skyjoMyProfile, fromDiscard: false };
+    saveGameState(newState);
+  };
+
+  // Piocher depuis la défausse
+  window.skyjoDrawFromDiscard = function(){
+    if(!_skyjoGameState || _skyjoPhase !== 'play') return;
+    if(_skyjoGameState.turn !== _skyjoMyProfile) return;
+    if(_skyjoGameState.held_card) return;
+    if(!_skyjoGameState.discard || _skyjoGameState.discard.length === 0) return;
+    var newState = JSON.parse(JSON.stringify(_skyjoGameState));
+    var drawn = newState.discard.pop();
+    newState.held_card = { value: drawn, holder: _skyjoMyProfile, fromDiscard: true };
+    saveGameState(newState);
+  };
+
+  // Remplacer une carte (en ayant une carte en main)
+  window.skyjoReplaceCard = function(cardIdx){
+    if(!_skyjoGameState || _skyjoPhase !== 'play') return;
+    if(_skyjoGameState.turn !== _skyjoMyProfile) return;
+    if(!_skyjoGameState.held_card || _skyjoGameState.held_card.holder !== _skyjoMyProfile) return;
+    var newState = JSON.parse(JSON.stringify(_skyjoGameState));
+    var myCardsKey = _skyjoMyProfile + '_cards';
+    var oldCard = newState[myCardsKey][cardIdx].value;
+    newState[myCardsKey][cardIdx] = { value: newState.held_card.value, revealed: true };
+    // Mettre l'ancienne carte en défausse
+    newState.discard.push(oldCard);
+    newState.held_card = null;
+    // Vérifier colonnes complètes
+    checkAndRemoveColumns(newState, _skyjoMyProfile);
+    // Vérifier fin de manche
+    checkRoundEnd(newState);
+    if(newState.phase !== 'roundEnd' && newState.phase !== 'gameEnd'){
+      newState.turn = _skyjoOtherProfile;
+    }
+    saveGameState(newState);
+  };
+
+  // Défausser la carte tenue + retourner une de ses cartes cachées
+  window.skyjoDiscardHeld = function(){
+    if(!_skyjoGameState || _skyjoPhase !== 'play') return;
+    if(!_skyjoGameState.held_card || _skyjoGameState.held_card.holder !== _skyjoMyProfile) return;
+    var newState = JSON.parse(JSON.stringify(_skyjoGameState));
+    newState.discard.push(newState.held_card.value);
+    newState.held_card = null;
+    // Maintenant le joueur doit retourner une carte cachée → on marque un flag
+    newState.must_flip = _skyjoMyProfile;
+    saveGameState(newState);
+  };
+
+  // Retourner une carte face cachée (quand must_flip ou phase init)
+  window.skyjoFlipReveal = function(cardIdx){
+    if(!_skyjoGameState) return;
+    var myCardsKey = _skyjoMyProfile + '_cards';
+    // must_flip : retourner après avoir défaussé
+    if(_skyjoGameState.must_flip === _skyjoMyProfile && _skyjoGameState.turn === _skyjoMyProfile){
+      var newState = JSON.parse(JSON.stringify(_skyjoGameState));
+      if(newState[myCardsKey][cardIdx].revealed) return;
+      newState[myCardsKey][cardIdx].revealed = true;
+      newState.must_flip = null;
+      checkAndRemoveColumns(newState, _skyjoMyProfile);
+      checkRoundEnd(newState);
+      if(newState.phase !== 'roundEnd' && newState.phase !== 'gameEnd'){
+        newState.turn = _skyjoOtherProfile;
+      }
+      saveGameState(newState);
+    }
+  };
+
+  // ── Helpers ──
+  function checkAndRemoveColumns(state, profile){
+    var key = profile + '_cards';
+    var cards = state[key];
+    // 4 colonnes de 3 cartes (indices : col 0 = 0,4,8 | col 1 = 1,5,9 | col 2 = 2,6,10 | col 3 = 3,7,11)
+    for(var col = 0; col < 4; col++){
+      var i0 = col, i1 = col+4, i2 = col+8;
+      if(cards[i0].revealed && cards[i1].revealed && cards[i2].revealed){
+        if(cards[i0].value === cards[i1].value && cards[i1].value === cards[i2].value){
+          // Colonne complète → retirer les cartes (defausse = ignoré dans Skyjo standard)
+          state.discard.push(cards[i0].value);
+          cards[i0] = { value: null, revealed: true, removed: true };
+          cards[i1] = { value: null, revealed: true, removed: true };
+          cards[i2] = { value: null, revealed: true, removed: true };
+        }
+      }
+    }
+  }
+
+  function checkRoundEnd(state){
+    // Une manche se termine quand toutes les cartes d'un joueur sont révélées
+    var girlAllRevealed = state.girl_cards.every(function(c){ return c.revealed; });
+    var boyAllRevealed  = state.boy_cards.every(function(c){ return c.revealed; });
+    if(!girlAllRevealed && !boyAllRevealed) return;
+    // Révéler toutes les cartes cachées de l'autre joueur
+    state.girl_cards.forEach(function(c){ c.revealed = true; });
+    state.boy_cards.forEach(function(c){ c.revealed = true; });
+    var girlScore = calcScore(state.girl_cards);
+    var boyScore  = calcScore(state.boy_cards);
+    // Pénalité : si celui qui a fermé n'a pas le moins de points, son score double
+    var closer = girlAllRevealed ? 'girl' : 'boy';
+    var other  = closer === 'girl' ? 'boy' : 'girl';
+    var closerScore = closer === 'girl' ? girlScore : boyScore;
+    var otherScore  = other  === 'girl' ? girlScore : boyScore;
+    if(closerScore >= otherScore){
+      if(closer === 'girl') girlScore *= 2;
+      else                  boyScore  *= 2;
+    }
+    state.scores.girl += girlScore;
+    state.scores.boy  += boyScore;
+    state.round_scores = { girl: girlScore, boy: boyScore };
+    state.round_closer = closer;
+    // Fin de partie si un joueur dépasse 100 points
+    if(state.scores.girl >= 100 || state.scores.boy >= 100){
+      state.phase = 'gameEnd';
+    } else {
+      state.phase = 'roundEnd';
+    }
+  }
+
+  function calcScore(cards){
+    return cards.reduce(function(acc, c){
+      return acc + (c.removed || c.value === null ? 0 : c.value);
+    }, 0);
+  }
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for(var i = a.length-1; i > 0; i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
+  function buildAndShuffleDeck(){
+    var deck = [];
+    // Skyjo : -2×5, -1×10, 0×15, 1-12×10 chacun
+    for(var i=0;i<5;i++) deck.push(-2);
+    for(var i=0;i<10;i++) deck.push(-1);
+    for(var i=0;i<15;i++) deck.push(0);
+    for(var v=1;v<=12;v++) for(var i=0;i<10;i++) deck.push(v);
+    return shuffle(deck);
+  }
+
+  function saveGameState(newState){
+    if(!_skyjoGameId) return;
+    fetch(SB_URL + '/rest/v1/' + SKYJO_TABLE + '?id=eq.' + _skyjoGameId, {
+      method: 'PATCH',
+      headers: sbHeaders({'Prefer':'return=representation'}),
+      body: JSON.stringify({ state: newState })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(rows){
+      if(Array.isArray(rows) && rows[0]){
+        renderGameState(rows[0]);
+      }
+    }).catch(function(){});
+  }
+
+  // ── Fin de manche ──
+  function showRoundEnd(state){
+    document.getElementById('skyjoGameArea').style.display = 'none';
+    document.getElementById('skyjoRoundEnd').style.display = 'flex';
+    var rg = state.round_scores ? state.round_scores.girl : 0;
+    var rb = state.round_scores ? state.round_scores.boy  : 0;
+    document.getElementById('skyjoRoundScoreGirl').textContent = '+' + rg;
+    document.getElementById('skyjoRoundScoreBoy').textContent  = '+' + rb;
+    var winner = rg < rb ? 'Zelda 👧' : (rb < rg ? 'Link 👦' : 'Égalité !');
+    document.getElementById('skyjoRoundEndEmoji').textContent = rg === rb ? '🤝' : '🏆';
+    document.getElementById('skyjoRoundEndTitle').textContent = rg === rb ? 'Manche nulle !' : winner + ' gagne la manche !';
+    document.getElementById('skyjoRoundEndSub').textContent = 'Scores totaux — Zelda : ' + state.scores.girl + ' pts | Link : ' + state.scores.boy + ' pts';
+    // Seul le gagnant de manche (ou girl par défaut) peut lancer la suivante
+    var nbtn = document.getElementById('skyjoNextRoundBtn');
+    nbtn.style.display = (_skyjoMyProfile === 'girl' || rg <= rb) ? 'block' : 'none';
+    if(_skyjoMyProfile === 'boy' && rb < rg) nbtn.style.display = 'block';
+  }
+
+  window.skyjoNextRound = function(){
+    // Seulement un joueur crée la manche suivante
+    var newDeck = buildAndShuffleDeck();
+    var girlCards = [];
+    var boyCards  = [];
+    for(var i=0;i<12;i++) girlCards.push({value:newDeck.pop(),revealed:false});
+    for(var i=0;i<12;i++) boyCards.push({value:newDeck.pop(),revealed:false});
+    var topDiscard = newDeck.pop();
+    var newState = {
+      deck: newDeck,
+      discard: [topDiscard],
+      girl_cards: girlCards,
+      boy_cards: boyCards,
+      phase: 'init1',
+      turn: _skyjoGameState ? (_skyjoGameState.round_closer === 'girl' ? 'boy' : 'girl') : 'girl',
+      round: (_skyjoGameState ? (_skyjoGameState.round || 1) + 1 : 2),
+      scores: _skyjoGameState ? _skyjoGameState.scores : {girl:0,boy:0},
+      last_player: null
+    };
+    fetch(SB_URL + '/rest/v1/' + SKYJO_TABLE + '?id=eq.' + _skyjoGameId, {
+      method: 'PATCH',
+      headers: sbHeaders({'Prefer':'return=representation'}),
+      body: JSON.stringify({ status: 'playing', state: newState })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(rows){
+      if(Array.isArray(rows) && rows[0]){
+        document.getElementById('skyjoRoundEnd').style.display = 'none';
+        document.getElementById('skyjoGameArea').style.display = 'block';
+        startGameStatePolling();
+        renderGameState(rows[0]);
+      }
+    }).catch(function(){});
+  };
+
+  // ── Fin de partie ──
+  function showGameEnd(state){
+    document.getElementById('skyjoGameArea').style.display = 'none';
+    document.getElementById('skyjoRoundEnd').style.display = 'none';
+    document.getElementById('skyjoGameEnd').style.display = 'flex';
+    var gg = state.scores.girl;
+    var gb = state.scores.boy;
+    var winner = gg < gb ? 'Zelda 👧' : (gb < gg ? 'Link 👦' : 'Égalité totale !');
+    document.getElementById('skyjoGameEndEmoji').textContent = gg === gb ? '🤝' : (gg < gb ? '👧' : '👦');
+    document.getElementById('skyjoGameEndTitle').textContent = gg === gb ? 'Égalité !' : winner + ' gagne !';
+    document.getElementById('skyjoGameEndSub').textContent = 'Score final — Zelda : ' + gg + ' pts | Link : ' + gb + ' pts (moins de points = victoire)';
+  }
+
+  window.skyjoNewGame = function(){
+    if(!_skyjoGameId) return;
+    // Supprimer la partie actuelle et en créer une nouvelle
+    fetch(SB_URL + '/rest/v1/' + SKYJO_TABLE + '?id=eq.' + _skyjoGameId, {
+      method: 'DELETE', headers: sbHeaders()
+    }).then(function(){
+      _skyjoGameId = null;
+      document.getElementById('skyjoGameEnd').style.display = 'none';
+      skyjoEnterLobby();
+    }).catch(function(){});
+  };
+
+  // ── Fermeture ──
+  window.closeSkyjoGame = function(){
+    stopPresencePolling();
+    stopGameStatePolling();
+    document.getElementById('skyjoView').classList.remove('active');
+  };
+
+  // ── Patch dans les fonctions globales ──
+  var origCloseAll = window.closeAllViews;
+
+})();
 document.getElementById('quizBtn').addEventListener('click', function(){ openQuiz(); });
 document.getElementById('gamesBtn').addEventListener('click', function(){ openGames(); });
 
@@ -8637,6 +9494,7 @@ function closeAllViews(){
   if(document.getElementById('penduView').classList.contains('active'))  closePenduGame();
   if(document.getElementById('puzzleView').classList.contains('active')) closePuzzleGame();
   if(document.getElementById('snakeView').classList.contains('active'))  closeSnakeGame();
+  if(document.getElementById('skyjoView') && document.getElementById('skyjoView').classList.contains('active'))  closeSkyjoGame();
   if(document.getElementById('gamesView').classList.contains('active'))  closeGames();
   if(document.getElementById('hiddenPage').classList.contains('active')) closeHiddenPage();
   // Nettoie toutes les bêtises actives si une navigation force la sortie
@@ -8920,7 +9778,7 @@ function filterSongs(q){
   var mpModeBtn = document.getElementById('mpModeBtn');
 
   // Track if we're in a game (to hide mini player)
-  var _gameViews = ['memoryView','penduView','puzzleView','snakeView','gamesView','quizView'];
+  var _gameViews = ['memoryView','penduView','puzzleView','snakeView','skyjoView','gamesView','quizView'];
 
   function isGameActive(){
     return _gameViews.some(function(id){
@@ -9107,8 +9965,8 @@ function filterSongs(q){
 
 // Patch openGames / closeGames / open*Game / close*Game to call mpCheckGameState
 (function(){
-  var patchOpen = ['openGames','openMemoryGame','openPenduGame','openPuzzleGame','openSnakeGame','openQuiz'];
-  var patchClose = ['closeGames','closeMemoryGame','closePenduGame','closePuzzleGame','closeSnakeGame','closeQuiz'];
+  var patchOpen = ['openGames','openMemoryGame','openPenduGame','openPuzzleGame','openSnakeGame','openSkyjoLock','openQuiz'];
+  var patchClose = ['closeGames','closeMemoryGame','closePenduGame','closePuzzleGame','closeSnakeGame','closeSkyjoGame','closeQuiz'];
   patchOpen.forEach(function(fn){
     var orig = window[fn];
     if(orig) window[fn] = function(){ orig.apply(this,arguments); if(window.mpCheckGameState) mpCheckGameState(); };
@@ -11884,7 +12742,7 @@ document.querySelectorAll('.bubbleBtn').forEach(function(el){
   if(!indicator) return;
 
   var startY = 0, pulling = false, threshold = 72;
-  var subviews = ['gamesView','memoryView','penduView','puzzleView','snakeView','quizView','hiddenPage'];
+  var subviews = ['gamesView','memoryView','penduView','puzzleView','snakeView','skyjoView','quizView','hiddenPage'];
 
   function anySubviewOpen(){
     return subviews.some(function(id){
@@ -12040,7 +12898,7 @@ document.querySelectorAll('.album-image').forEach(function(el){
   var SECTIONS = ['counterSection', 'reasonSection', 'elleSection', 'luiSection',
                   'memoCoupleSection', 'suggestionSection', 'wheelSection', 'Love'];
   var swipeStartX = 0, swipeStartY = 0, swipeLocked = false;
-  var subviews = ['gamesView','memoryView','penduView','puzzleView','snakeView','quizView','hiddenPage'];
+  var subviews = ['gamesView','memoryView','penduView','puzzleView','snakeView','skyjoView','quizView','hiddenPage'];
 
   function anySubviewOpen(){
     return subviews.some(function(id){
@@ -12387,7 +13245,7 @@ console.log('✨ Jayana UX v.UX1 chargé');
   /* ══════════════════════════════════════════════════════
      6. SCROLL iOS
   ══════════════════════════════════════════════════════ */
-  ['gamesView','memoryView','penduView','puzzleView','snakeView','quizView','hiddenPage'].forEach(function(id){
+  ['gamesView','memoryView','penduView','puzzleView','snakeView','skyjoView','quizView','hiddenPage'].forEach(function(id){
     var el = document.getElementById(id);
     if(!el) return;
     el.style.overscrollBehavior     = 'contain';
@@ -12445,7 +13303,7 @@ console.log('✨ Jayana UX v.UX1 chargé');
       '.section{contain:layout;}' +
       '.bottom-nav{contain:layout style;}' +
       '.song,.sp-song{contain:layout style;}' +
-      '#gamesView,#quizView,#memoryView,#penduView,#puzzleView,#snakeView,#hiddenPage{contain:layout style;}' +
+      '#gamesView,#quizView,#memoryView,#penduView,#puzzleView,#snakeView,#skyjoView,#hiddenPage{contain:layout style;}' +
 
       /* ── Backdrop-filter désactivé sur iOS (webkit-touch-callout détecte iOS) ── */
       '@supports (-webkit-touch-callout: none){' +
