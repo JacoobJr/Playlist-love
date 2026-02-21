@@ -8535,7 +8535,9 @@ function renderLb(elId, rows, detailFn){
 var _gamesLoaded = false;
 function _loadGames() {
   if (_gamesLoaded) return;
-  (0, eval)(document.getElementById('lazyGames').textContent);
+  var s = document.createElement('script');
+  s.textContent = document.getElementById('lazyGames').textContent;
+  document.head.appendChild(s);
   _gamesLoaded = true;
 }
 function openQuiz()        { _loadGames(); _openQuiz(); }
