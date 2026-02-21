@@ -4890,6 +4890,7 @@ function escHtml(str){
 var _sbAccessToken = null;
 var SB_SESSION_KEY = 'jayana_sb_session';
 var SB_EDGE_FN     = SB_URL + '/functions/v1/get-token';
+var SB_APP_SECRET  = 'JayanaSecret2025!';
 
 // Charge session depuis sessionStorage (plus sûr que localStorage)
 function sbLoadSession(gender){
@@ -4919,7 +4920,7 @@ function sbLogin(gender){
   if(sbLoadSession(gender)) return Promise.resolve(true);
   return fetch(SB_EDGE_FN, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-app-secret': SB_APP_SECRET },
     body: JSON.stringify({ gender: gender })
   }).then(function(r){ return r.json(); }).then(function(data){
     if(data.access_token){ sbSaveSession(gender, data); return true; }
