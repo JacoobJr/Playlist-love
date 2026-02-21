@@ -495,35 +495,60 @@ header::before {
 #reasonBox {
   background: var(--s1);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 18px 16px;
+  border-radius: 16px;
+  padding: 20px 18px;
   cursor: pointer;
-  min-height: 110px;
+  min-height: 120px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 8px;
-  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+  gap: 10px;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   position: relative;
   overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 #reasonBox::before {
   content: '';
   position: absolute; inset: 0;
-  background: radial-gradient(circle at 30% 50%, rgba(0,201,167,0.05) 0%, transparent 60%);
+  background: radial-gradient(ellipse at 20% 60%, rgba(0,201,167,0.07) 0%, transparent 65%);
   pointer-events: none;
+  transition: opacity 0.3s;
 }
-#reasonBox:hover { background: var(--s2); transform: translateY(-2px); box-shadow: var(--shadow); }
-.r-label { font-size: 9px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 2px; }
+#reasonBox:hover { background: var(--s2); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.28); border-color: rgba(0,201,167,0.22); }
+#reasonBox:active { transform: scale(0.98); }
+#reasonBox:hover::before { opacity: 1.8; }
+.r-label { font-size: 9px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 2px; opacity: 0.85; }
 #reasonText {
   font-family: 'DM Sans', sans-serif;
   font-size: clamp(14px, 4vw, 17px);
   color: var(--text);
-  line-height: 1.5;
+  line-height: 1.55;
   font-weight: 500;
-  transition: opacity 0.18s, transform 0.18s;
+  /* animation state managed by JS */
+  will-change: opacity, transform, filter;
 }
-.r-hint { font-size: 10px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+#reasonText.reason-out-up {
+  animation: reasonOutUp 0.22s cubic-bezier(0.4,0,1,1) forwards;
+}
+#reasonText.reason-in-down {
+  animation: reasonInDown 0.3s cubic-bezier(0.0,0.0,0.2,1) forwards;
+}
+@keyframes reasonOutUp {
+  0%   { opacity:1; transform:translateY(0) scale(1); filter:blur(0px); }
+  100% { opacity:0; transform:translateY(-14px) scale(0.97); filter:blur(3px); }
+}
+@keyframes reasonInDown {
+  0%   { opacity:0; transform:translateY(16px) scale(0.97); filter:blur(3px); }
+  60%  { opacity:1; filter:blur(0px); }
+  100% { opacity:1; transform:translateY(0) scale(1); filter:blur(0px); }
+}
+.r-hint {
+  font-size: 10px; color: var(--muted); display: flex; align-items: center; gap: 5px;
+  transition: color 0.2s;
+}
+#reasonBox:hover .r-hint { color: var(--sub); }
 
 .postit-wrap {
   position: relative;
@@ -3477,7 +3502,7 @@ body.light #counterBlock.glowing .c-num-big {
   <div class="section-label">Pourquoi je t'aime</div>
   <div id="reasonBox">
     <span class="r-label">Une raison parmi tant d'autres ✨</span>
-    <div id="reasonText">T'es un peu bête parfois 🤡 ... mais tellement attachante que ça devient adorable 🥺</div>
+    <div id="reasonText">...</div>
     <span class="r-hint">👆 Tape pour en découvrir une autre</span>
   </div>
 </div>
@@ -6240,16 +6265,40 @@ var reasons = [
   "La façon dont tu travailles sur toi — ça me pousse à faire pareil 🚀",
   "Ton cœur. T'as une façon d'aimer qui me touche vraiment au fond 💞",
   "Nos fous rires. Ces moments où on rit de rien pendant des heures — y'a rien de mieux 🥰",
-  "Le fait que t'es ma meilleure amie autant que mon amour 👫",
+  "Le fait que tu sois ma meilleure amie autant que mon amour 👫",
   "Le fait d'être toi, sans faire semblant. Juste toi. Et c'est tout ce qu'il faut ✨"
 ];
 var lastRIdx = -1;
+
+// Init : afficher une raison aléatoire dès le chargement (pas toujours la même)
+(function(){
+  var i = Math.floor(Math.random() * reasons.length);
+  lastRIdx = i;
+  var rText = document.getElementById('reasonText');
+  if(rText) rText.textContent = reasons[i];
+})();
+
+function showReason(idx) {
+  var rText = document.getElementById('reasonText');
+  if(!rText) return;
+
+  // Phase 1 : sortie vers le haut avec blur
+  rText.classList.remove('reason-in-down');
+  rText.classList.add('reason-out-up');
+
+  setTimeout(function(){
+    rText.textContent = reasons[idx];
+    rText.classList.remove('reason-out-up');
+    // Force reflow pour relancer l'animation
+    void rText.offsetWidth;
+    rText.classList.add('reason-in-down');
+  }, 200);
+}
+
 document.getElementById('reasonBox').addEventListener('click', function() {
   var i; do { i = Math.floor(Math.random() * reasons.length); } while (i === lastRIdx);
   lastRIdx = i;
-  var rText = document.getElementById('reasonText');
-  rText.style.opacity = '0'; rText.style.transform = 'translateY(6px)';
-  setTimeout(function(){ rText.textContent = reasons[i]; rText.style.opacity = '1'; rText.style.transform = 'translateY(0)'; }, 180);
+  showReason(i);
 });
 
 // ── POSTIT ──
