@@ -86,16 +86,18 @@ html { scroll-behavior: smooth; overflow-x: hidden; -webkit-text-size-adjust: 10
 .skeleton {
   background: linear-gradient(90deg, var(--s2) 25%, var(--s3) 50%, var(--s2) 75%);
   background-size: 200% 100%;
-  animation: skeletonShimmer 1.5s ease-in-out infinite;
+  animation: skeletonShimmer 2s ease-in-out infinite;
   border-radius: 8px;
+  will-change: background-position;
 }
 .album-image .skeleton-overlay {
   position: absolute; inset: 0; z-index: 3;
   background: linear-gradient(90deg, var(--s2) 25%, var(--s3) 50%, var(--s2) 75%);
   background-size: 200% 100%;
-  animation: skeletonShimmer 1.5s ease-in-out infinite;
+  animation: skeletonShimmer 2s ease-in-out infinite;
   border-radius: 8px;
   transition: opacity 0.4s ease;
+  will-change: background-position;
 }
 .album-image img.loaded + .skeleton-overlay,
 .album-image .skeleton-overlay.hidden { opacity: 0; pointer-events: none; }
@@ -717,20 +719,15 @@ audio { display: none; }
 .top50-play-all.playing {
   background: var(--green);
   animation: playAllPulse 2.5s ease-in-out infinite;
+  will-change: transform;
 }
 .top50-play-all.playing:hover { background: var(--green2); transform: scale(1.08); }
 @keyframes playAllPulse {
-  0%   { box-shadow: 0 0 0 0 rgba(0,201,167,0.5), 0 4px 16px rgba(0,201,167,0.3); }
-  60%  { box-shadow: 0 0 0 10px rgba(29,185,84,0), 0 4px 16px rgba(0,201,167,0.3); }
-  100% { box-shadow: 0 0 0 0 rgba(29,185,84,0), 0 4px 16px rgba(0,201,167,0.3); }
+  0%,100% { transform: scale(1); }
+  50%     { transform: scale(1.06); }
 }
 body.light .top50-play-all.playing {
-  animation: playAllPulseLight 1.8s ease-in-out infinite;
-}
-@keyframes playAllPulseLight {
-  0%   { box-shadow: 0 0 0 0 rgba(200,24,94,0.45), 0 4px 18px rgba(200,24,94,0.35); }
-  60%  { box-shadow: 0 0 0 10px rgba(200,24,94,0), 0 4px 18px rgba(200,24,94,0.35); }
-  100% { box-shadow: 0 0 0 0 rgba(200,24,94,0), 0 4px 18px rgba(200,24,94,0.35); }
+  animation: playAllPulse 2.5s ease-in-out infinite;
 }
 .top50-play-all .pa-wave {
   display: none; align-items: flex-end; gap: 2px; height: 14px;
@@ -1083,18 +1080,18 @@ body.light #lockNavBtn { color: #7c3aed; }
 
 /* Clignotement cadenas quand non-lus */
 @keyframes lockPulse {
-  0%,100% { color: #a78bfa; filter: drop-shadow(0 0 0px #a78bfa); }
-  50%     { color: #c4b5fd; filter: drop-shadow(0 0 6px #a78bfa); }
+  0%,100% { color: #a78bfa; opacity: 0.75; }
+  50%     { color: #c4b5fd; opacity: 1; }
 }
 #lockNavBtn.has-unread {
-  animation: lockPulse 1.6s ease-in-out infinite;
+  animation: lockPulse 2s ease-in-out infinite;
 }
 body.light #lockNavBtn.has-unread {
-  animation: lockPulseLight 1.6s ease-in-out infinite;
+  animation: lockPulseLight 2s ease-in-out infinite;
 }
 @keyframes lockPulseLight {
-  0%,100% { color: #7c3aed; filter: drop-shadow(0 0 0px #7c3aed); }
-  50%     { color: #a78bfa; filter: drop-shadow(0 0 6px #7c3aed); }
+  0%,100% { color: #7c3aed; opacity: 0.75; }
+  50%     { color: #a78bfa; opacity: 1; }
 }
 
 @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:none;opacity:1} }
@@ -1481,8 +1478,8 @@ body:not(.prank-flip) > *:not(#prankFlipBanner):not(#prankGotcha):not(#prankLock
 #prankNotifOverlay { position:fixed; inset:0; z-index:4999; background:rgba(0,0,0,0); pointer-events:none; transition:background 0.35s ease; touch-action:none; }
 #prankNotifOverlay.active { background:rgba(0,0,0,0.78); pointer-events:all; }
 #prankNotif { position:fixed; top:-160px; left:12px; right:12px; z-index:5000; background:rgba(22,22,30,0.98); border:1.5px solid rgba(167,139,250,0.55); border-radius:20px; padding:15px 16px; display:flex; align-items:flex-start; gap:12px; backdrop-filter:blur(30px); -webkit-backdrop-filter:blur(30px); box-shadow:0 12px 50px rgba(0,0,0,0.8),0 0 0 1px rgba(167,139,250,0.12); transition:top 0.5s cubic-bezier(.34,1.56,.64,1); max-width:420px; margin:0 auto; cursor:pointer; user-select:none; -webkit-user-select:none; }
-#prankNotif.show { top:14px; animation:prankNotifGlow 1.6s ease-in-out 0.5s infinite; }
-@keyframes prankNotifGlow { 0%,100%{box-shadow:0 12px 50px rgba(0,0,0,0.8),0 0 0 1px rgba(167,139,250,0.15),0 0 18px rgba(167,139,250,0.1);border-color:rgba(167,139,250,0.4)} 50%{box-shadow:0 12px 50px rgba(0,0,0,0.8),0 0 0 2px rgba(167,139,250,0.75),0 0 50px rgba(167,139,250,0.5);border-color:rgba(167,139,250,1)} }
+#prankNotif.show { top:14px; animation:prankNotifGlow 2s ease-in-out 0.5s infinite; }
+@keyframes prankNotifGlow { 0%,100%{border-color:rgba(167,139,250,0.4)} 50%{border-color:rgba(167,139,250,1)} }
 .pn-avatar { width:46px; height:46px; border-radius:13px; background:linear-gradient(135deg,#a78bfa,#60a5fa); display:flex; align-items:center; justify-content:center; font-size:23px; flex-shrink:0; box-shadow:0 3px 12px rgba(167,139,250,0.4); }
 .pn-content { flex:1; min-width:0; }
 .pn-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:3px; }
@@ -1576,12 +1573,12 @@ body:not(.prank-flip) > *:not(#prankFlipBanner):not(#prankGotcha):not(#prankLock
   animation: auraBoy 1.8s ease-in-out infinite;
 }
 @keyframes auraGirl {
-  0%,100% { box-shadow: 0 0 0px rgba(232,121,160,0.0); }
-  50%     { box-shadow: 0 0 12px rgba(232,121,160,0.7), 0 0 24px rgba(232,121,160,0.25); }
+  0%,100% { border-color: rgba(232,121,160,0.35); }
+  50%     { border-color: rgba(232,121,160,1); }
 }
 @keyframes auraBoy {
-  0%,100% { box-shadow: 0 0 0px rgba(91,156,246,0.0); }
-  50%     { box-shadow: 0 0 12px rgba(91,156,246,0.7), 0 0 24px rgba(91,156,246,0.25); }
+  0%,100% { border-color: rgba(91,156,246,0.35); }
+  50%     { border-color: rgba(91,156,246,1); }
 }
 
 /* ── LEADERBOARD ── */
@@ -1770,34 +1767,35 @@ body:has(#snakeView.active) #floatingThemeBtn { opacity: 0 !important; pointer-e
   overflow: hidden;
   transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s, background 0.18s;
   box-shadow: 0 2px 10px rgba(0,0,0,0.18);
-  animation: sgBadgePulse 3s ease-in-out infinite;
+  animation: sgBadgePulse 4s ease-in-out infinite;
 }
-/* Shimmer background */
+/* Shimmer background — transform-based pour GPU compositing */
 .suggestion-lock-badge::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.07) 50%, transparent 60%);
-  background-size: 200% 100%;
-  animation: sgShimmer 3s ease-in-out infinite;
+  background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.08) 50%, transparent 70%);
+  animation: sgShimmer 4s ease-in-out infinite;
   pointer-events: none;
+  will-change: transform;
+  transform: translateX(-100%);
 }
 @keyframes sgShimmer {
-  0%   { background-position: 200% 0; }
-  50%  { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0%,40%  { transform: translateX(-100%); opacity: 0; }
+  50%     { opacity: 1; }
+  60%,100% { transform: translateX(200%); opacity: 0; }
 }
 @keyframes sgBadgePulse {
-  0%,100% { box-shadow: 0 2px 10px rgba(0,0,0,0.18); }
-  50%     { box-shadow: 0 4px 20px rgba(0,201,167,0.22), 0 2px 8px rgba(0,0,0,0.15); }
+  0%,100% { border-color: var(--border); }
+  50%     { border-color: rgba(0,201,167,0.45); }
 }
 body.light .suggestion-lock-badge {
   box-shadow: 0 2px 10px rgba(200,24,94,0.10);
 }
-/* mode clair: pulsation rose via une animation dédiée */
+/* mode clair */
 @keyframes sgBadgePulseLight {
-  0%,100% { box-shadow: 0 2px 10px rgba(200,24,94,0.10); }
-  50%     { box-shadow: 0 4px 20px rgba(200,24,94,0.3), 0 2px 8px rgba(200,24,94,0.12); }
+  0%,100% { border-color: rgba(200,24,94,0.18); }
+  50%     { border-color: rgba(200,24,94,0.55); }
 }
 body.light .suggestion-lock-badge:not(.unlocked):not(:hover) {
   animation-name: sgBadgePulseLight;
@@ -1809,11 +1807,7 @@ body.light .suggestion-lock-badge:not(.unlocked):not(:hover) {
   border-radius: 50%;
   background: var(--green);
   flex-shrink: 0;
-  animation: blink 2.2s ease-in-out infinite;
-  box-shadow: 0 0 6px rgba(29,185,84,0.6);
-}
-body.light .sg-badge-dot {
-  box-shadow: 0 0 6px rgba(200,24,94,0.5);
+  animation: blink 3s ease-in-out infinite;
 }
 
 .suggestion-lock-badge:hover {
@@ -2483,8 +2477,8 @@ body.light .pendu-theme {
   animation: dmLogoPulse 3s ease-in-out infinite;
 }
 @keyframes dmLogoPulse {
-  0%,100% { box-shadow: 0 8px 32px rgba(238,42,123,0.4),0 2px 8px rgba(64,93,230,0.25); }
-  50%     { box-shadow: 0 12px 48px rgba(238,42,123,0.6),0 4px 16px rgba(64,93,230,0.4); }
+  0%,100% { opacity: 0.88; }
+  50%     { opacity: 1; }
 }
 .dm-home-logo-icon { position: relative; z-index: 1; width: 54px; height: 54px; }
 .dm-home-appname {
@@ -2914,18 +2908,20 @@ body.light .dm-send-btn { background:linear-gradient(135deg,#c8185e,#e879a0); }
 #annivBanner::before {
   content: '';
   position: absolute; inset: 0;
-  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.07) 50%, transparent 60%);
-  background-size: 200% 100%;
-  animation: annivShimmer 2.5s ease-in-out infinite;
+  background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.08) 50%, transparent 70%);
+  animation: annivShimmer 3.5s ease-in-out infinite;
   pointer-events: none;
+  will-change: transform;
+  transform: translateX(-100%);
 }
 @keyframes annivShimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0%,35%  { transform: translateX(-100%); opacity: 0; }
+  50%     { opacity: 1; }
+  65%,100% { transform: translateX(200%); opacity: 0; }
 }
 #annivBanner.visible { display: block; }
-.anniv-emoji { font-size: 22px; display: block; margin-bottom: 4px; animation: annivBounce 1.2s ease-in-out infinite; }
-@keyframes annivBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+.anniv-emoji { font-size: 22px; display: block; margin-bottom: 4px; animation: annivBounce 2s ease-in-out infinite; will-change: transform; }
+@keyframes annivBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
 .anniv-title {
   font-family: 'Playfair Display', serif;
   font-size: clamp(14px, 4vw, 18px);
@@ -3216,20 +3212,20 @@ async function nativeLogout(){
   user-select: none;
   z-index: 2;
 }
-#profileAvatar.neutral { animation: avatarPulse 2.2s ease-in-out infinite; }
+#profileAvatar.neutral { animation: avatarPulse 3s ease-in-out infinite; }
 @keyframes avatarPulse {
-  0%,100% { box-shadow: 0 0 0px rgba(91,156,246,0.0); border-color: rgba(91,156,246,0.3); }
-  50%     { box-shadow: 0 0 12px rgba(91,156,246,0.6), 0 0 24px rgba(91,156,246,0.2); border-color: rgba(91,156,246,0.9); }
+  0%,100% { border-color: rgba(91,156,246,0.3); }
+  50%     { border-color: rgba(91,156,246,0.9); }
 }
-body.light #profileAvatar.neutral { background: rgba(200,24,94,0.10); border-color: rgba(200,24,94,0.35); animation: avatarPulseLight 2.2s ease-in-out infinite; }
+body.light #profileAvatar.neutral { background: rgba(200,24,94,0.10); border-color: rgba(200,24,94,0.35); animation: avatarPulseLight 3s ease-in-out infinite; }
 @keyframes avatarPulseLight {
-  0%,100% { box-shadow: 0 0 0px rgba(200,24,94,0.0); border-color: rgba(200,24,94,0.2); }
-  50%     { box-shadow: 0 0 12px rgba(200,24,94,0.5), 0 0 24px rgba(200,24,94,0.15); border-color: rgba(200,24,94,0.8); }
+  0%,100% { border-color: rgba(200,24,94,0.2); }
+  50%     { border-color: rgba(200,24,94,0.8); }
 }
-#profileAvatar.girl { border-color: #e879a0; box-shadow: 0 0 8px rgba(232,121,160,0.5), 0 0 18px rgba(232,121,160,0.2); animation: none; }
-#profileAvatar.boy  { border-color: #5b9cf6; box-shadow: 0 0 8px rgba(91,156,246,0.5),  0 0 18px rgba(91,156,246,0.2);  animation: none; }
-body.light #profileAvatar.girl { background: rgba(232,121,160,0.12); border-color: #c8185e; box-shadow: 0 0 8px rgba(200,24,94,0.35), 0 0 18px rgba(200,24,94,0.12); }
-body.light #profileAvatar.boy  { background: rgba(59,125,216,0.10);  border-color: #3b7dd8; box-shadow: 0 0 8px rgba(59,125,216,0.35),  0 0 18px rgba(59,125,216,0.12); }
+#profileAvatar.girl { border-color: #e879a0; animation: none; }
+#profileAvatar.boy  { border-color: #5b9cf6; animation: none; }
+body.light #profileAvatar.girl { background: rgba(232,121,160,0.12); border-color: #c8185e; }
+body.light #profileAvatar.boy  { background: rgba(59,125,216,0.10);  border-color: #3b7dd8; }
 
 /* Avatar secondaire — l'autre, discret en bas-gauche */
 #profileAvatarOther {
@@ -3284,22 +3280,18 @@ body.light #profileAvatar.boy  { background: rgba(59,125,216,0.10);  border-colo
 
 /* ── Clignotement doux + effet lumière en veille ── */
 #profileMoodOther.idle-glow {
-  animation: moodIdleGlow 3s ease-in-out infinite;
+  animation: moodIdleGlow 4s ease-in-out infinite;
 }
 @keyframes moodIdleGlow {
-  0%   { opacity: 0.55; box-shadow: none; border-color: var(--border); }
-  40%  { opacity: 0.85; box-shadow: 0 0 6px rgba(255,255,255,0.18), 0 0 12px rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25); }
-  55%  { opacity: 0.90; box-shadow: 0 0 10px rgba(255,255,255,0.22), 0 0 18px rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.32); }
-  100% { opacity: 0.55; box-shadow: none; border-color: var(--border); }
+  0%,100% { opacity: 0.55; border-color: var(--border); }
+  50%     { opacity: 0.9;  border-color: rgba(255,255,255,0.28); }
 }
 body.light #profileMoodOther.idle-glow {
-  animation: moodIdleGlowLight 3s ease-in-out infinite;
+  animation: moodIdleGlowLight 4s ease-in-out infinite;
 }
 @keyframes moodIdleGlowLight {
-  0%   { opacity: 0.55; box-shadow: none; border-color: var(--border); }
-  40%  { opacity: 0.85; box-shadow: 0 0 6px rgba(200,24,94,0.25), 0 0 12px rgba(200,24,94,0.10); border-color: rgba(200,24,94,0.35); }
-  55%  { opacity: 0.90; box-shadow: 0 0 10px rgba(200,24,94,0.30), 0 0 18px rgba(200,24,94,0.14); border-color: rgba(200,24,94,0.45); }
-  100% { opacity: 0.55; box-shadow: none; border-color: var(--border); }
+  0%,100% { opacity: 0.55; border-color: var(--border); }
+  50%     { opacity: 0.9;  border-color: rgba(200,24,94,0.4); }
 }
 
 /* Capsule texte — s'étire vers la gauche, son bord droit touche la bulle */
@@ -3525,24 +3517,12 @@ body.light .mood-picker-cancel:hover { color: var(--green); }
 
 /* ── Bloc compteur unifié illuminé pendant la fenêtre vidéo ── */
 @keyframes counterGlow {
-  0%,100% {
-    box-shadow: 0 0 0 2px rgba(0,229,189,0.25), 0 0 18px rgba(0,229,189,0.18), 0 0 40px rgba(0,229,189,0.08);
-    border-color: rgba(0,229,189,0.45);
-  }
-  50% {
-    box-shadow: 0 0 0 3px rgba(0,229,189,0.6), 0 0 32px rgba(0,229,189,0.45), 0 0 70px rgba(0,229,189,0.18);
-    border-color: rgba(0,229,189,0.85);
-  }
+  0%,100% { border-color: rgba(0,229,189,0.4); }
+  50%     { border-color: rgba(0,229,189,0.9); }
 }
 @keyframes counterGlowLight {
-  0%,100% {
-    box-shadow: 0 0 0 2px rgba(224,40,110,0.25), 0 0 16px rgba(224,40,110,0.18), 0 0 36px rgba(224,40,110,0.08);
-    border-color: rgba(224,40,110,0.45);
-  }
-  50% {
-    box-shadow: 0 0 0 3px rgba(224,40,110,0.6), 0 0 28px rgba(224,40,110,0.45), 0 0 60px rgba(224,40,110,0.18);
-    border-color: rgba(224,40,110,0.85);
-  }
+  0%,100% { border-color: rgba(224,40,110,0.4); }
+  50%     { border-color: rgba(224,40,110,0.9); }
 }
 @keyframes counterTopBar {
   0%,100% { opacity: 0.5; }
@@ -3583,9 +3563,9 @@ body.light #counterBlock.glowing .c-num-big {
 /* ── Coeur battant dans l'overlay vidéo ── */
 @keyframes heartbeat {
   0%,100% { transform: translateY(-50%) scale(1);   opacity: 0.85; }
-  14%     { transform: translateY(-50%) scale(1.25); opacity: 1; }
+  14%     { transform: translateY(-50%) scale(1.22); opacity: 1; }
   28%     { transform: translateY(-50%) scale(1);   opacity: 0.85; }
-  42%     { transform: translateY(-50%) scale(1.18); opacity: 1; }
+  42%     { transform: translateY(-50%) scale(1.15); opacity: 1; }
   70%     { transform: translateY(-50%) scale(1);   opacity: 0.85; }
 }
 #storyHeart {
@@ -3595,9 +3575,9 @@ body.light #counterBlock.glowing .c-num-big {
   font-size: 52px;
   pointer-events: none;
   z-index: 3;
-  animation: heartbeat 1.1s ease-in-out infinite;
-  filter: drop-shadow(0 0 12px rgba(220,30,60,0.7)) drop-shadow(0 0 28px rgba(220,30,60,0.35));
+  animation: heartbeat 1.4s ease-in-out infinite;
   display: none;
+  will-change: transform, opacity;
 }
 </style>
 
@@ -7234,7 +7214,8 @@ HP.prototype.update=function(){this.y-=this.vy;this.x+=this.vx;this.a-=.002;if(t
 HP.prototype.draw=function(){var col=document.body.classList.contains('light')?'rgba(200,24,94,'+this.a+')':'rgba(0,201,167,'+this.a+')';ctx.save();ctx.translate(this.x,this.y);ctx.beginPath();var t=this.sz*.3;ctx.moveTo(0,t);ctx.bezierCurveTo(0,0,-this.sz/2,0,-this.sz/2,t);ctx.bezierCurveTo(-this.sz/2,this.sz/2,0,this.sz*.75,0,this.sz);ctx.bezierCurveTo(0,this.sz*.75,this.sz/2,this.sz/2,this.sz/2,t);ctx.bezierCurveTo(this.sz/2,0,0,0,0,t);ctx.fillStyle=col;ctx.fill();ctx.restore();};
 window._animPStopped = false;
 function animP(){if(window._animPStopped)return;ctx.clearRect(0,0,canvas.width,canvas.height);if(particleActive){if(particles.length<70)particles.push(new HP());particles.forEach(function(p){p.update();p.draw();});}requestAnimationFrame(animP);}
-animP();
+// Ne pas démarrer animP ici — Perf v3 gère le RAF
+// animP(); // désactivé
 
 // ── LOVE BOX ──
 var loveWords=["Je t'aime Anaelle 💘","Mon cœur ❤️","Mon amour 💕","Mon ange ☀️","Ma madame ✨","Ma chérie 💓","Mon petit bonheur 🥰","Love you biloute 🤡💖","Ma vieille dame préférée 👵💕","Mon équilibre 🌙","Ma meilleure amie 💞","Mon monde 🌍","T'es tout ce qu'il me faut 💎"];
@@ -12003,14 +11984,13 @@ console.log('✨ Jayana UX v.UX1 chargé');
       }
     }, 1000);
 
-    // Stoppe l'animP original et démarre le nôtre après init
+    // animP est déjà désactivé dès le départ — démarrage direct
     setTimeout(function(){
-      window._animPStopped = true;
+      window._animPStopped = true; // sécurité au cas où
       window.particles = window.particles || [];
-      if(window.particleActive && !_rafId){
-        _rafId = requestAnimationFrame(loop);
-      }
-    }, 1500);
+      // Le loop se lancera dès que particleActive passe à true (via le watcher)
+      // Pas besoin de démarrer le RAF à froid — économie CPU au chargement
+    }, 100);
   })();
 
   /* ══════════════════════════════════════════════════════
@@ -12215,22 +12195,34 @@ console.log('✨ Jayana UX v.UX1 chargé');
   (function(){
     var s = document.createElement('style');
     s.textContent =
+      /* ── Perf globale ── */
       'body.perf-hidden *{animation-play-state:paused !important;}' +
       '.section{contain:layout;}' +
       '.bottom-nav{contain:layout style;}' +
       '.song,.sp-song{contain:layout style;}' +
-      /* Désactive backdrop-filter sur iOS ≤ 15 (iPhone 12 max iOS 15.8) pour éviter la surchauffe GPU */
-      '@supports not (backdrop-filter: blur(0px)){' +
-        '#searchOverlay,#memoModal,#memoAuthModal,#sgModal,#sgAuthModal,#sgEditModal,' +
-        '#prankOverlay,#prankMenu,#prankMsgModal,#prankGotcha,#prankLock,#prankKeyboard,' +
-        '#prankMemoryOverlay,.prank-toast{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}' +
+      '#gamesView,#quizView,#memoryView,#penduView,#puzzleView,#snakeView,#hiddenPage{contain:layout style;}' +
+
+      /* ── Backdrop-filter désactivé sur iOS (webkit-touch-callout détecte iOS) ── */
+      '@supports (-webkit-touch-callout: none){' +
+        '#searchOverlay{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}' +
+        '#memoModal,#memoAuthModal{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}' +
+        '#sgModal,#sgAuthModal,#sgEditModal{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}' +
+        '#prankOverlay,#prankMenu,#prankMsgModal,#prankGotcha{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}' +
+        '#prankLock,#prankKeyboard,#prankMemoryOverlay{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}' +
+        '.prank-toast,.prank-curtain-banner,#prankIntrusBanner{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}' +
+        '#prankTargetBanner,#prankEyesBanner,#prankFogBanner,#prankColorsBanner{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}' +
+        '#prankSplashBanner,#prankNotif,.memo-note-date-badge{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}' +
+        '.sg-modal-inner,.search-popup{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}' +
       '}' +
-      /* Force GPU layers uniquement sur les éléments animés actifs */
+
+      /* ── GPU layers ── */
       '#miniPlayer,#miniPlayer .mp-inner{will-change:transform;}' +
-      /* Réduit les nlPulseRow animations coûteuses */
-      '.sp-song.nl-other-playing.nl-glow-together::after{animation-duration:2s!important;}' +
-      '.sp-song.nl-other-playing.nl-glow-boy::after{animation-duration:2.5s!important;}' +
-      '.sp-song.nl-other-playing.nl-glow-girl::after{animation-duration:2.5s!important;}';
+      '.mp-seek-fill{will-change:width;}' +
+
+      /* ── NL Glow durations ── */
+      '.sp-song.nl-other-playing.nl-glow-together::after{animation-duration:2.5s!important;}' +
+      '.sp-song.nl-other-playing.nl-glow-boy::after{animation-duration:3s!important;}' +
+      '.sp-song.nl-other-playing.nl-glow-girl::after{animation-duration:3s!important;}';
     document.head.appendChild(s);
   })();
 
@@ -12239,21 +12231,25 @@ console.log('✨ Jayana UX v.UX1 chargé');
   ══════════════════════════════════════════════════════ */
   setTimeout(function(){
     console.log(
-      '⚡ Jayana Perf v3.1\n' +
-      '  ✓ 1 seul RAF canvas (animP original stoppé)\n' +
-      '  ✓ 250ms mini player supprimé → event-driven\n' +
-      '  ✓ 500ms top50 supprimé → event-driven\n' +
-      '  ✓ likes original 5s supprimé → 12s visible / pause si caché\n' +
-      '  ✓ nlPoll original 5s supprimé → 8s visible / 25s si caché\n' +
-      '  ✓ animations hors viewport pausées\n' +
-      '  ✓ will-change nettoyé\n' +
-      '  ✓ Media Session API active\n' +
-      '  ✓ [v3.1] mpUpdateProgress exposé → progress bar temps-réel\n' +
-      '  ✓ [v3.1] backdrop-filter désactivé si non supporté (iOS perf)\n' +
-      '  ✓ [v3.1] animations glow/box-shadow allégées\n' +
-      '  ✓ [v3.1] particleCanvas contain:strict\n' +
-      '  ✓ [v3.1] lbSweep: left→transform GPU-composited\n' +
-      '  ✓ [v3.1] loadedmetadata hook pour durée immédiate'
+      '⚡ Jayana Perf v3.2\n' +
+      '  ✓ animP original désactivé dès le départ (pas de double RAF)\n' +
+      '  ✓ 250ms mini player → event-driven (play/pause/timeupdate/loadedmetadata)\n' +
+      '  ✓ mpUpdateProgress exposé → barre de progression temps-réel\n' +
+      '  ✓ 500ms top50 → event-driven\n' +
+      '  ✓ likes 5s → 12s visible / 0 si caché\n' +
+      '  ✓ nlPoll 5s → 8s visible / 25s si caché\n' +
+      '  ✓ animations hors viewport pausées (IntersectionObserver)\n' +
+      '  ✓ will-change nettoyé après 4s\n' +
+      '  ✓ Media Session API (contrôles iOS lock screen)\n' +
+      '  ✓ [v3.2] backdrop-filter désactivé sur iOS (tous les overlays)\n' +
+      '  ✓ [v3.2] box-shadow animé → border-color/opacity (×12 animations)\n' +
+      '  ✓ [v3.2] drop-shadow filter animé → opacity (lockPulse, heartbeat)\n' +
+      '  ✓ [v3.2] playAllPulse: box-shadow ripple → transform scale\n' +
+      '  ✓ [v3.2] sgShimmer/annivShimmer: background-pos → transform\n' +
+      '  ✓ [v3.2] particleCanvas contain:strict, animP stoppé avant démarrage\n' +
+      '  ✓ [v3.2] nlPulseRow simplifié (1 couche box-shadow au lieu de 3)\n' +
+      '  ✓ [v3.2] lbSweep: left → transform (GPU compositing)\n' +
+      '  ✓ [v3.2] vues plein-écran contain:layout style'
     );
   }, 2000);
 
