@@ -6269,13 +6269,35 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   };
 
-  // ── Descriptions éditables ──
+  // ── Descriptions éditables — sauvegarde Supabase ──
   function elleLoadDescs(){
-    SLOTS.forEach(function(slot){
-      var saved = localStorage.getItem('elle_desc_' + slot);
-      var el = document.getElementById('elle-desc-' + slot);
-      if(el && saved) el.textContent = saved;
+    fetch(SB_URL + '/rest/v1/photo_descs?category=eq.elle&select=slot,description', {
+      headers: sbHeaders()
+    })
+    .then(function(r){ return r.ok ? r.json() : []; })
+    .then(function(rows){
+      if(!Array.isArray(rows)) return;
+      rows.forEach(function(row){
+        var el = document.getElementById('elle-desc-' + row.slot);
+        if(el && row.description) el.textContent = row.description;
+      });
+    })
+    .catch(function(){
+      SLOTS.forEach(function(slot){
+        var saved = localStorage.getItem('elle_desc_' + slot);
+        var el = document.getElementById('elle-desc-' + slot);
+        if(el && saved) el.textContent = saved;
+      });
     });
+  }
+
+  function elleSaveDesc(slot, val){
+    fetch(SB_URL + '/rest/v1/photo_descs', {
+      method: 'POST',
+      headers: sbHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+      body: JSON.stringify({ category: 'elle', slot: slot, description: val })
+    }).catch(function(){});
+    localStorage.setItem('elle_desc_' + slot, val);
   }
 
   var SLOT_LABELS = { animal:'Son animal', fleurs:'Ses fleurs', personnage:'Son personnage', saison:'Sa saison', repas:'Son repas' };
@@ -6286,7 +6308,7 @@ document.addEventListener('DOMContentLoaded', function(){
     descEditOpen(el.textContent.trim(), 'Légende · ' + (SLOT_LABELS[slot] || slot), function(val){
       val = val || ELLE_DESC_DEFAULTS[slot];
       el.textContent = val;
-      localStorage.setItem('elle_desc_' + slot, val);
+      elleSaveDesc(slot, val);
     });
   };
 
@@ -6426,7 +6448,7 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   };
 
-  // ── Descriptions éditables ──
+  // ── Descriptions éditables — sauvegarde Supabase ──
   var LUI_DESC_DEFAULTS = {
     animal: 'Son animal 🐾',
     fleurs: 'Ses fleurs 🌸',
@@ -6436,11 +6458,33 @@ document.addEventListener('DOMContentLoaded', function(){
   };
 
   function luiLoadDescs(){
-    SLOTS.forEach(function(slot){
-      var saved = localStorage.getItem('lui_desc_' + slot);
-      var el = document.getElementById('lui-desc-' + slot);
-      if(el && saved) el.textContent = saved;
+    fetch(SB_URL + '/rest/v1/photo_descs?category=eq.lui&select=slot,description', {
+      headers: sbHeaders()
+    })
+    .then(function(r){ return r.ok ? r.json() : []; })
+    .then(function(rows){
+      if(!Array.isArray(rows)) return;
+      rows.forEach(function(row){
+        var el = document.getElementById('lui-desc-' + row.slot);
+        if(el && row.description) el.textContent = row.description;
+      });
+    })
+    .catch(function(){
+      SLOTS.forEach(function(slot){
+        var saved = localStorage.getItem('lui_desc_' + slot);
+        var el = document.getElementById('lui-desc-' + slot);
+        if(el && saved) el.textContent = saved;
+      });
     });
+  }
+
+  function luiSaveDesc(slot, val){
+    fetch(SB_URL + '/rest/v1/photo_descs', {
+      method: 'POST',
+      headers: sbHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+      body: JSON.stringify({ category: 'lui', slot: slot, description: val })
+    }).catch(function(){});
+    localStorage.setItem('lui_desc_' + slot, val);
   }
 
   window.luiEditDesc = function(slot){
@@ -6451,7 +6495,7 @@ document.addEventListener('DOMContentLoaded', function(){
     descEditOpen(el.textContent.trim(), 'Légende · ' + (SLOT_LABELS_LUI[slot] || slot), function(val){
       val = val || LUI_DESC_DEFAULTS[slot];
       el.textContent = val;
-      localStorage.setItem('lui_desc_' + slot, val);
+      luiSaveDesc(slot, val);
     });
   };
 
