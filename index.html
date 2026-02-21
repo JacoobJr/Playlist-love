@@ -8117,8 +8117,8 @@ function generatePuzzleCanvas(sz){
 
 var _puzzleLoading = false;
 function generatePuzzleSource(sz, excludeImg){
-  // 80% de chance d'avoir une photo du site
-  if(Math.random() < 0.8){
+  // 65% de chance d'avoir une photo du site
+  if(Math.random() < 0.65){
     var available=PUZZLE_IMAGES.filter(function(img){ return img !== excludeImg; });
     if(available.length > 0){
       var chosen=available[Math.floor(Math.random()*available.length)];
@@ -8126,7 +8126,7 @@ function generatePuzzleSource(sz, excludeImg){
       return { type:'image', src:chosen };
     }
   }
-  // Génération procédurale (fallback ou 20%)
+  // Génération procédurale (fallback ou 35%)
   puzzleLastImage='';
   return { type:'canvas', src:generatePuzzleCanvas(sz) };
 }
