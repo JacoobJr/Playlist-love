@@ -2511,9 +2511,19 @@ body.light .dm-msg-wrap.mine .dm-bubble {
 .dm-msg-wrap.last-in-group .dm-bubble-meta { display:block; }
 .dm-msg-wrap.mine .dm-bubble-meta { color:rgba(255,255,255,0.8); }
 .dm-msg-wrap:not(.mine) .dm-bubble-meta { color:var(--muted); }
-.dm-tick { margin-left:2px; }
-.dm-tick.seen { color:#60a5fa; }
-body.light .dm-tick.seen { color:#c8185e; }
+/* "Vu" Instagram-style */
+.dm-seen-label {
+  font-size: 10px; color: var(--muted);
+  text-align: right; padding: 0 4px 4px;
+  display: flex; align-items: center; justify-content: flex-end; gap: 4px;
+  animation: dmMsgIn 0.2s ease;
+}
+.dm-seen-label .dm-seen-avatar {
+  width: 14px; height: 14px; border-radius: 50%;
+  font-size: 10px; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+body.light .dm-seen-label { color: var(--muted); }
 .dm-react {
   position:absolute; bottom:-10px; font-size:13px;
   background:var(--s1); border:1px solid var(--border); border-radius:10px;
@@ -2779,36 +2789,6 @@ body.light .dm-send-btn { background:linear-gradient(135deg,#c8185e,#e879a0); }
 .dm-edit-confirm { background: var(--green); color: #000; }
 .dm-edit-cancel-btn { background: var(--s3); color: var(--sub); }
 
-/* Fonds de chat */
-#dmMessages.bg-hearts  { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-size='18' opacity='0.06'%3E%E2%9D%A4%EF%B8%8F%3C/text%3E%3C/svg%3E"); }
-#dmMessages.bg-gradient { background: linear-gradient(160deg, rgba(238,42,123,0.07) 0%, rgba(131,58,180,0.07) 100%); }
-#dmMessages.bg-bubbles  { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='18' stroke='rgba(238,42,123,0.06)' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); }
-body.light #dmMessages.bg-hearts   { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-size='18' opacity='0.09'%3E%E2%9D%A4%EF%B8%8F%3C/text%3E%3C/svg%3E"); }
-body.light #dmMessages.bg-gradient { background: linear-gradient(160deg, rgba(200,24,94,0.06) 0%, rgba(131,58,180,0.06) 100%); }
-
-/* Bouton fond chat */
-.dm-bg-btn {
-  width: 32px; height: 32px; border-radius: 50%; border: none;
-  background: transparent; color: var(--muted);
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: background 0.15s, color 0.15s; flex-shrink: 0;
-}
-.dm-bg-btn:hover { background: var(--s2); color: var(--text); }
-.dm-bg-picker {
-  position: absolute; bottom: calc(100% + 8px); right: 0;
-  background: var(--s1); border: 1px solid var(--border);
-  border-radius: 14px; padding: 10px 12px;
-  display: none; gap: 8px; align-items: center;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3); z-index: 20; white-space: nowrap;
-}
-.dm-bg-picker.open { display: flex; }
-.dm-bg-opt {
-  width: 34px; height: 34px; border-radius: 10px; cursor: pointer;
-  border: 2px solid transparent; transition: border-color 0.15s, transform 0.15s;
-  display: flex; align-items: center; justify-content: center; font-size: 14px;
-}
-.dm-bg-opt:hover { transform: scale(1.12); }
-.dm-bg-opt.active { border-color: var(--green); }
 
 /* Loading dots */
 .dm-loading-dots { display:flex; gap:5px; align-items:center; }
@@ -4159,17 +4139,6 @@ body.light #counterBlock.glowing .c-num-big {
         <button class="dm-send-btn" id="dmSendBtn">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
         </button>
-      </div>
-      <div style="position:relative;display:flex;justify-content:flex-end;margin-top:4px;">
-        <button class="dm-bg-btn" id="dmBgBtn" title="Fond du chat">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        </button>
-        <div class="dm-bg-picker" id="dmBgPicker">
-          <div class="dm-bg-opt active" data-bg="" title="Aucun" style="background:var(--s2);">✕</div>
-          <div class="dm-bg-opt" data-bg="bg-hearts"   title="Cœurs"   style="background:linear-gradient(135deg,#2a1520,#1a1a2a);">❤️</div>
-          <div class="dm-bg-opt" data-bg="bg-gradient" title="Dégradé" style="background:linear-gradient(135deg,rgba(238,42,123,0.3),rgba(131,58,180,0.3));">🌸</div>
-          <div class="dm-bg-opt" data-bg="bg-bubbles"  title="Bulles"  style="background:radial-gradient(circle at 50% 50%,rgba(238,42,123,0.2),transparent 70%);">🫧</div>
-        </div>
       </div>
     </div>
   </div>
@@ -9823,7 +9792,6 @@ loadFavorites();
     if(el) el.innerHTML = '<div class="dm-loading-msgs"><div class="dm-loading-dots"><span></span><span></span><span></span></div></div>';
     if(!attached){ attachListeners(); attached = true; }
     stopPoll();
-    applyChatBg();
     fetchMsgs();
     pollId = setInterval(function(){ fetchMsgs(); pollTyping(); }, 3000);
   }
@@ -10038,44 +10006,35 @@ loadFavorites();
     });
   }
 
-  /* ══ FOND DU CHAT ══ */
-  var _chatBg = localStorage.getItem('dm_chat_bg') || '';
-  function applyChatBg(){
+
+  /* ══ LABEL "VU" INSTAGRAM ══ */
+  function updateSeenLabel(){
     var el = $('dmMessages');
     if(!el) return;
-    el.classList.remove('bg-hearts','bg-gradient','bg-bubbles');
-    if(_chatBg) el.classList.add(_chatBg);
-    // Sync opts
-    var picker = $('dmBgPicker');
-    if(!picker) return;
-    picker.querySelectorAll('.dm-bg-opt').forEach(function(o){
-      o.classList.toggle('active', o.dataset.bg === _chatBg);
-    });
-  }
 
-  document.addEventListener('DOMContentLoaded', function(){
-    var bgBtn    = $('dmBgBtn');
-    var bgPicker = $('dmBgPicker');
-    if(bgBtn && bgPicker){
-      bgBtn.addEventListener('click', function(e){
-        e.stopPropagation();
-        bgPicker.classList.toggle('open');
-      });
-      bgPicker.querySelectorAll('.dm-bg-opt').forEach(function(opt){
-        opt.addEventListener('click', function(e){
-          e.stopPropagation();
-          _chatBg = opt.dataset.bg;
-          localStorage.setItem('dm_chat_bg', _chatBg);
-          applyChatBg();
-          bgPicker.classList.remove('open');
-        });
-      });
-      document.addEventListener('click', function(){
-        bgPicker.classList.remove('open');
-      });
+    // Supprimer l'ancien label
+    var old = el.querySelector('.dm-seen-label');
+    if(old) old.remove();
+
+    // Dernier message envoyé par moi qui est vu
+    var lastSeen = null;
+    for(var i = cache.length - 1; i >= 0; i--){
+      if(cache[i].sender === identity && cache[i].seen && !cache[i].deleted){
+        lastSeen = cache[i]; break;
+      }
     }
-  });
+    if(!lastSeen) return;
 
+    var wrap = el.querySelector('[data-id="' + lastSeen.id + '"]');
+    if(!wrap) return;
+
+    var other = identity === 'girl' ? 'boy' : 'girl';
+    var emo   = other === 'girl' ? '👧' : '👦';
+    var lbl   = document.createElement('div');
+    lbl.className = 'dm-seen-label';
+    lbl.innerHTML = '<span class="dm-seen-avatar">' + emo + '</span>Vu';
+    wrap.insertAdjacentElement('afterend', lbl);
+  }
 
   function fetchMsgs(){
     fetch(SB_URL + '/rest/v1/' + TABLE + '?order=created_at.asc&limit=300&select=*', {
@@ -10114,13 +10073,11 @@ loadFavorites();
       if(added) scrollBottom();
 
       // Mettre à jour les ticks "vu" et réactions
+      var seenChanged = false;
       rows.forEach(function(msg){
         if(msg.sender === identity && msg.seen){
-          var node = document.querySelector('[data-id="'+msg.id+'"] .dm-tick');
-          if(node && !node.classList.contains('seen')){
-            node.textContent = '\u2713\u2713';
-            node.classList.add('seen');
-          }
+          var cached = cache.find(function(m){ return m.id === msg.id; });
+          if(cached && !cached.seen){ cached.seen = true; seenChanged = true; }
         }
         // Sync réaction depuis serveur
         var cached = cache.find(function(m){ return m.id === msg.id; });
@@ -10144,6 +10101,7 @@ loadFavorites();
         }
         if(msg.sender !== identity && !msg.seen) markSeen(msg.id);
       });
+      if(seenChanged) updateSeenLabel();
     })
     .catch(function(err){ console.error('[DM] fetchMsgs erreur:', err); });
   }
@@ -10186,6 +10144,7 @@ loadFavorites();
     });
     scrollBottom();
     cache.forEach(function(m){ if(m.sender !== identity && !m.seen) markSeen(m.id); });
+    updateSeenLabel();
   }
 
   /* ══ MENU CONTEXTUEL ══ */
@@ -10440,16 +10399,12 @@ loadFavorites();
       }
     }
 
-    // Heure + tick
+    // Heure (plus de tick dans la bulle)
     var d  = new Date(msg.created_at);
     var ts = ('0'+d.getHours()).slice(-2) + ':' + ('0'+d.getMinutes()).slice(-2);
     var meta = document.createElement('div');
     meta.className = 'dm-bubble-meta';
-    if(mine){
-      meta.innerHTML = ts + ' <span class="dm-tick' + (msg.seen ? ' seen' : '') + '">' + (msg.seen ? '\u2713\u2713' : '\u2713') + '</span>';
-    } else {
-      meta.textContent = ts;
-    }
+    meta.textContent = ts;
     bbl.appendChild(meta);
 
     // Réaction existante
@@ -10763,7 +10718,6 @@ loadFavorites();
     if(saved === 'girl' || saved === 'boy') identity = saved;
     attached = false;
     showScreen('home');
-    applyChatBg();
     if(window._dmUpdateVP) window._dmUpdateVP();
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
