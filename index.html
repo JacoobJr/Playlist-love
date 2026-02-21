@@ -5874,7 +5874,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
 
   /* ════ BÊTISE 1 : TREMBLEMENT ════ */
   var _shakeTaps = 0; var _shakeTimer = null; var _shakeLock = false;
-  var _shakeMaxTimer = null; // sécurité : arrêt automatique après 4s max
+  var _shakeMaxTimer = null; // sécurité : arrêt automatique après 20s max
   function startShake(p){
     _shakeTaps = 0;
     _shakeLock = false;
@@ -5897,7 +5897,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
       var b = document.getElementById('prankShakeBanner');
       if(b) b.classList.remove('show');
       prankDone();
-    }, 4000);
+    }, 20000);
   }
   function updateShakeCount(){
     var el = document.getElementById('prankShakeCount');
@@ -7494,6 +7494,12 @@ function toggleLockPopup(){
     document.body.style.position   = '';
     document.body.style.width      = '';
   } else {
+    // Si un profil est déjà connecté, accès direct sans mot de passe
+    var _prof = localStorage.getItem('jayana_profile');
+    if(_prof === 'girl' || _prof === 'boy'){
+      openHiddenPage();
+      return;
+    }
     lockError.style.display = 'none';
     lockInput.value = '';
     lockPopup.style.display = 'block';
@@ -8109,18 +8115,20 @@ function generatePuzzleCanvas(sz){
   return cvs.toDataURL();
 }
 
+var _puzzleLoading = false;
 function generatePuzzleSource(sz, excludeImg){
-  if(Math.random() < 0.5){
-    // Image du site
+  // 80% de chance d'avoir une photo du site
+  if(Math.random() < 0.8){
     var available=PUZZLE_IMAGES.filter(function(img){ return img !== excludeImg; });
-    var chosen=available[Math.floor(Math.random()*available.length)];
-    puzzleLastImage=chosen;
-    return { type:'image', src:chosen };
-  } else {
-    // Génération procédurale
-    puzzleLastImage='';
-    return { type:'canvas', src:generatePuzzleCanvas(sz) };
+    if(available.length > 0){
+      var chosen=available[Math.floor(Math.random()*available.length)];
+      puzzleLastImage=chosen;
+      return { type:'image', src:chosen };
+    }
   }
+  // Génération procédurale (fallback ou 20%)
+  puzzleLastImage='';
+  return { type:'canvas', src:generatePuzzleCanvas(sz) };
 }
 
 var puzzlePlayer=null, puzzleSize=3, puzzleOrder=[], puzzleSelected=null, puzzleMoveCount=0, puzzleDataURLCurrent='', puzzleSourceType='canvas', puzzleSourceSrc='';
@@ -8153,12 +8161,19 @@ function puzzleSelectGender(g){
   else { loadImageThenInit(src.src, sz); }
 }
 function puzzleSetSize(n, btn){
+  if(_puzzleLoading) return;
   puzzleSize=n;
   document.querySelectorAll('.puzzle-size-btn').forEach(function(b){ b.classList.remove('active'); });
   btn.classList.add('active');
-  puzzleInit();
+  if(puzzleSourceType==='image' && puzzleSourceSrc){
+    var sz=Math.min(340,window.innerWidth*0.92);
+    loadImageThenInit(puzzleSourceSrc, sz);
+  } else {
+    puzzleInit();
+  }
 }
 function puzzleReplay(){
+  if(_puzzleLoading) return;
   var sz=Math.min(340,window.innerWidth*0.92);
   var src=generatePuzzleSource(sz, puzzleLastImage||'');
   puzzleSourceType=src.type; puzzleSourceSrc=src.src;
@@ -8166,7 +8181,9 @@ function puzzleReplay(){
   else { loadImageThenInit(src.src, sz); }
 }
 function loadImageThenInit(imgSrc, sz){
+  _puzzleLoading = true;
   var img=new Image();
+  img.crossOrigin='anonymous';
   img.onload=function(){
     var cvs=document.createElement('canvas'); cvs.width=sz; cvs.height=sz;
     var ctx=cvs.getContext('2d');
@@ -8175,11 +8192,13 @@ function loadImageThenInit(imgSrc, sz){
     var bw=img.naturalWidth*scale, bh=img.naturalHeight*scale;
     ctx.drawImage(img,(sz-bw)/2,(sz-bh)/2,bw,bh);
     puzzleDataURLCurrent=cvs.toDataURL();
+    _puzzleLoading = false;
     puzzleInit();
   };
   img.onerror=function(){
     // fallback canvas procédural
     puzzleDataURLCurrent=generatePuzzleCanvas(sz);
+    _puzzleLoading = false;
     puzzleInit();
   };
   img.src=imgSrc;
