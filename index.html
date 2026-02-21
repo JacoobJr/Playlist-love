@@ -5874,7 +5874,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
 
   /* ════ BÊTISE 1 : TREMBLEMENT ════ */
   var _shakeTaps = 0; var _shakeTimer = null; var _shakeLock = false;
-  var _shakeMaxTimer = null; // sécurité : arrêt automatique après 20s max
+  var _shakeMaxTimer = null; // sécurité : arrêt automatique après 4s max
   function startShake(p){
     _shakeTaps = 0;
     _shakeLock = false;
@@ -5897,7 +5897,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
       var b = document.getElementById('prankShakeBanner');
       if(b) b.classList.remove('show');
       prankDone();
-    }, 20000);
+    }, 4000);
   }
   function updateShakeCount(){
     var el = document.getElementById('prankShakeCount');
@@ -9162,6 +9162,9 @@ function filterSongs(q){
 
     } else if(e.type === 'dm'){
       var s = e.screen;
+      // Vérifier qu'un profil est connecté avant de restaurer le mode caché
+      var _profCheck = localStorage.getItem('jayana_profile');
+      if(_profCheck !== 'girl' && _profCheck !== 'boy') return;
       // Ouvrir hiddenPage si fermé (version brute, sans push)
       var hp2 = document.getElementById('hiddenPage');
       if(!hp2 || !hp2.classList.contains('active'))
