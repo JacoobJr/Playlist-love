@@ -8167,6 +8167,7 @@ function puzzleReplay(){
 }
 function loadImageThenInit(imgSrc, sz){
   var img=new Image();
+  img.crossOrigin='anonymous';
   img.onload=function(){
     var cvs=document.createElement('canvas'); cvs.width=sz; cvs.height=sz;
     var ctx=cvs.getContext('2d');
