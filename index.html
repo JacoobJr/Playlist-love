@@ -1319,12 +1319,13 @@ body.light .nl-card.girl .nl-eq span { color: #c8185e; }
 }
 
 #lockPopup {
-  position:fixed; bottom:72px; right:8px;
+  position: fixed;
+  bottom: 80px; right: 8px;
   background:var(--s2); border-radius:14px; display:none; z-index:1500;
   width:230px; border:1px solid var(--border);
   box-shadow: var(--shadow);
   animation: popIn2 0.2s cubic-bezier(.4,2,.55,.9);
-  transition: bottom 0.15s ease;
+  will-change: transform;
 }
 @keyframes popIn2 { from{transform:scale(0.9);opacity:0} to{transform:scale(1);opacity:1} }
 #lockInput { flex:1; padding:9px 11px; font-size:13px; border:1px solid var(--border); border-radius:6px; background:var(--s3); color:var(--text); font-family:'DM Sans',sans-serif; outline:none; width:100%; transition:border-color 0.2s; }
@@ -7265,27 +7266,93 @@ document.getElementById('spinBtn').addEventListener('click',function(){
 // ── LOCK ──
 var lockPopup=document.getElementById('lockPopup'),lockInput=document.getElementById('lockInput'),lockError=document.getElementById('lockError');
 
-/* ── Repositionne le lockPopup quand le clavier iOS s'ouvre ── */
+/* ══════════════════════════════════════════════════
+   lockPopup — ancrage au visualViewport iOS
+   
+   Sur iOS, position:fixed est relatif au layout viewport.
+   Quand le clavier s'ouvre, la page scroll vers le bas et
+   le popup (en bas à droite) disparaît hors de la zone visible.
+   
+   Solution : calculer top/left en coordonnées absolues depuis
+   visualViewport.offsetTop + visualViewport.height, puis
+   utiliser ces valeurs pour positionner via top+right.
+══════════════════════════════════════════════════ */
 (function(){
-  function updateLockPopupPos(){
+  var MARGIN_BOTTOM = 12; // px au-dessus du clavier (ou du bas d'écran)
+  var MARGIN_RIGHT  = 10;
+  var _rafId = null;
+
+  function positionPopup(){
     if(!lockPopup || lockPopup.style.display !== 'block') return;
-    if(!window.visualViewport) return;
-    var vv = window.visualViewport;
-    var kbH = window.innerHeight - vv.height;
-    if(kbH > 80){
-      lockPopup.style.bottom = (kbH + 8) + 'px';
+
+    if(window.visualViewport){
+      var vv     = window.visualViewport;
+      // Bas du visual viewport en coordonnées layout (= ce que "top" comprend)
+      var vvBottom = vv.offsetTop + vv.height;
+      // Hauteur du popup
+      var popH   = lockPopup.offsetHeight || 120;
+      var popW   = lockPopup.offsetWidth  || 230;
+
+      // On place le popup : son bas = vvBottom - MARGIN_BOTTOM
+      var topPx  = vvBottom - popH - MARGIN_BOTTOM;
+      // À droite : vv.offsetLeft + vv.width - popW - MARGIN_RIGHT
+      var leftPx = vv.offsetLeft + vv.width - popW - MARGIN_RIGHT;
+
+      // On utilise top+left (pas bottom+right) pour éviter la confusion
+      lockPopup.style.bottom = 'auto';
+      lockPopup.style.top    = Math.max(8, topPx) + 'px';
+      lockPopup.style.left   = Math.max(8, leftPx) + 'px';
+      lockPopup.style.right  = 'auto';
     } else {
-      lockPopup.style.bottom = '72px';
+      // Fallback navigateurs sans visualViewport
+      lockPopup.style.bottom = '80px';
+      lockPopup.style.right  = '8px';
+      lockPopup.style.top    = 'auto';
+      lockPopup.style.left   = 'auto';
     }
   }
-  if(window.visualViewport){
-    window.visualViewport.addEventListener('resize', updateLockPopupPos);
-    window.visualViewport.addEventListener('scroll', updateLockPopupPos);
+
+  function schedulePosition(){
+    if(_rafId) cancelAnimationFrame(_rafId);
+    _rafId = requestAnimationFrame(function(){
+      _rafId = null;
+      positionPopup();
+    });
   }
-  window._updateLockPopupPos = updateLockPopupPos;
+
+  // Écoute le visual viewport (clavier iOS)
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize', schedulePosition);
+    window.visualViewport.addEventListener('scroll', schedulePosition);
+  }
+  // Écoute aussi le scroll de la page (au cas où)
+  window.addEventListener('scroll', schedulePosition, { passive: true });
+  window.addEventListener('resize', schedulePosition, { passive: true });
+
+  window._positionLockPopup = positionPopup;
 })();
 
-function toggleLockPopup(){resetZoom();var isOpen=lockPopup.style.display==='block';document.getElementById('libraryPopup').style.display='none';lockPopup.style.display=isOpen?'none':'block';if(!isOpen){lockError.style.display='none';lockInput.value='';setTimeout(function(){ if(window._updateLockPopupPos) window._updateLockPopupPos(); },50);}}
+function toggleLockPopup(){
+  resetZoom();
+  var isOpen = lockPopup.style.display === 'block';
+  document.getElementById('libraryPopup').style.display = 'none';
+  if(isOpen){
+    lockPopup.style.display = 'none';
+    // Restore scroll
+    document.body.style.overflow   = '';
+    document.body.style.position   = '';
+    document.body.style.width      = '';
+  } else {
+    lockError.style.display = 'none';
+    lockInput.value = '';
+    lockPopup.style.display = 'block';
+    // Positionne immédiatement avant que le clavier s'ouvre
+    if(window._positionLockPopup) window._positionLockPopup();
+    // Re-positionne après l'animation d'ouverture du clavier (~350ms)
+    setTimeout(function(){ if(window._positionLockPopup) window._positionLockPopup(); }, 100);
+    setTimeout(function(){ if(window._positionLockPopup) window._positionLockPopup(); }, 400);
+  }
+}
 var _HASH_NEMO='eb38eebd7bef45d49aef46835c8460fc98c9af3f68f6af759a08173709cd76ea';
 var _HASH_KEVIN='9e1822c2d03202bc1cf8dfb8b858c5f679302f17db901abb111a9f8eecaae8db';
 var _S=atob('UGxAeWxpc3RfSjR5YW5hXzIwMjUheEs5');
