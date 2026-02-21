@@ -4104,7 +4104,7 @@ body.light #counterBlock.glowing .c-num-big {
     </div>
     <div class="prank-menu-item" onclick="prankSelectType('notif')">
       <div class="prank-menu-item-icon">📱</div>
-      <div><div class="prank-menu-item-name">Fausse notification</div><div class="prank-menu-item-desc">Une notif surprise avec ton message</div></div>
+      <div><div class="prank-menu-item-name">Envoyer une notification</div><div class="prank-menu-item-desc">Une notif surprise avec ton message</div></div>
     </div>
   </div>
   <div class="prank-menu-cancel" onclick="closePrankMenu()">Annuler</div>
@@ -4534,7 +4534,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     target:   { emoji:'🎯', label:'La cible qui esquive' },
     memory:   { emoji:'🃏', label:'Memory express' },
     eyes:     { emoji:'👁️', label:'Les yeux qui surveillent' },
-    notif:    { emoji:'📱', label:'Fausse notification' }
+    notif:    { emoji:'🔔', label:'Envoyer une notification' }
   };
 
   function showPrankToast(msg){
@@ -5178,7 +5178,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     var authorName = p.author === 'boy' ? 'Link' : 'Zelda';
     var avatar = p.author === 'boy' ? '💙' : '💖';
     document.getElementById('pnAvatar').textContent = avatar;
-    document.getElementById('pnApp').textContent = authorName + ' • Messages';
+    document.getElementById('pnApp').textContent = 'Nouveau message';
     document.getElementById('pnTitle').textContent = authorName;
     document.getElementById('pnBody').textContent = p.message || '…';
     // 1. Scroll vers le haut
@@ -9835,7 +9835,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.1</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.4</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
