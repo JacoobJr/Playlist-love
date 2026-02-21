@@ -6850,8 +6850,16 @@ function savePlays(file){
   })
   .then(function(r){ return r.json(); })
   .then(function(result){
-    var newCount = Array.isArray(result) ? result[0] : result;
-    if(typeof newCount === 'number'){
+    // Supabase RPC peut retourner : un number, { increment_play: N }, ou [N]
+    var newCount;
+    if(typeof result === 'number'){
+      newCount = result;
+    } else if(Array.isArray(result)){
+      newCount = parseInt(result[0], 10);
+    } else if(result && typeof result === 'object'){
+      newCount = parseInt(result.increment_play || result.play_count || result, 10);
+    }
+    if(!isNaN(newCount) && newCount > 0){
       var s = songsLove.find(function(x){ return x.file === file; });
       if(s) s.plays = newCount;
       var row = songRows[file];
@@ -8454,6 +8462,8 @@ function loadLikeCounters(){
 }
 
 loadLikeCounters();
+// Polling toutes les 5s pour voir les coeurs de l'autre en temps réel
+setInterval(loadLikeCounters, 5000);
 function openSearch(){
   if(isQuizOpen)return;
   resetZoom();
