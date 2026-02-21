@@ -1129,6 +1129,33 @@ body.light #lockNavBtn.has-unread {
   background: linear-gradient(135deg, rgba(232,121,160,0.08) 0%, var(--s1) 60%);
   box-shadow: 0 4px 20px rgba(232,121,160,0.15);
 }
+/* Clignotement quand actif */
+.nl-card.boy.active {
+  animation: nlBlinkBoy 1.6s ease-in-out infinite;
+}
+.nl-card.girl.active {
+  animation: nlBlinkGirl 1.6s ease-in-out infinite;
+}
+@keyframes nlBlinkBoy {
+  0%,100% {
+    border-color: rgba(91,156,246,0.35);
+    box-shadow: 0 4px 20px rgba(91,156,246,0.10);
+  }
+  50% {
+    border-color: rgba(91,156,246,0.9);
+    box-shadow: 0 4px 28px rgba(91,156,246,0.40), 0 0 0 3px rgba(91,156,246,0.10);
+  }
+}
+@keyframes nlBlinkGirl {
+  0%,100% {
+    border-color: rgba(232,121,160,0.35);
+    box-shadow: 0 4px 20px rgba(232,121,160,0.10);
+  }
+  50% {
+    border-color: rgba(232,121,160,0.9);
+    box-shadow: 0 4px 28px rgba(232,121,160,0.40), 0 0 0 3px rgba(232,121,160,0.10);
+  }
+}
 body.light .nl-card.boy {
   border-color: rgba(59,125,216,0.35);
   background: linear-gradient(135deg, rgba(59,125,216,0.07) 0%, var(--s1) 60%);
@@ -11259,27 +11286,54 @@ loadFavorites();
   function nlPoll(){
     nlFetch('GET', 'select=sender,song_file&order=updated_at.desc').then(function(rows){
       if(!Array.isArray(rows)) return;
+      // IMPORTANT : reset les deux à null avant de lire
+      // Si une ligne disparaît (arrêt), on veut le détecter
+      var newBoy  = null;
+      var newGirl = null;
       rows.forEach(function(r){
-        if(r.sender === 'boy')  _nlBoyFile  = r.song_file || null;
-        if(r.sender === 'girl') _nlGirlFile = r.song_file || null;
+        if(r.sender === 'boy')  newBoy  = r.song_file || null;
+        if(r.sender === 'girl') newGirl = r.song_file || null;
       });
+      _nlBoyFile  = newBoy;
+      _nlGirlFile = newGirl;
       updateWidget();
     });
   }
 
-  /* ── Push mon état en cours ── */
+  /* ── Push mon état via UPSERT (conflict sur sender) ── */
   function nlPush(file){
     var profile = localStorage.getItem('jayana_profile');
     if(!profile) return;
-    if(_nlLastPush === (file || null)) return; // pas de changement
-    _nlLastPush = file || null;
+    var normalized = file || null;
+    if(_nlLastPush === normalized) return; // rien de changé
+    _nlLastPush = normalized;
 
-    // Upsert : on efface l'ancienne ligne et on recrée
-    nlFetch('DELETE', 'sender=eq.' + profile).then(function(){
-      if(file){
-        return nlFetch('POST', null, { sender: profile, song_file: file });
-      }
-    });
+    if(normalized){
+      // UPSERT : POST avec Prefer: resolution=merge-duplicates
+      var url = SB_URL + '/rest/v1/' + NL_TABLE;
+      fetch(url, {
+        method: 'POST',
+        headers: sbHeaders({'Prefer': 'resolution=merge-duplicates,return=minimal'}),
+        body: JSON.stringify({ sender: profile, song_file: normalized })
+      }).catch(function(){});
+    } else {
+      // Arrêt : met song_file à null via PATCH
+      var url2 = SB_URL + '/rest/v1/' + NL_TABLE + '?sender=eq.' + profile;
+      fetch(url2, {
+        method: 'PATCH',
+        headers: sbHeaders({'Prefer': 'return=minimal'}),
+        body: JSON.stringify({ song_file: null })
+      }).then(function(r){
+        // Si pas de ligne existante (204 vs 404), on crée
+        if(r.status === 404){
+          fetch(SB_URL + '/rest/v1/' + NL_TABLE, {
+            method: 'POST',
+            headers: sbHeaders({'Prefer': 'return=minimal'}),
+            body: JSON.stringify({ sender: profile, song_file: null })
+          }).catch(function(){});
+        }
+      }).catch(function(){});
+    }
   }
 
   /* ── Démarrage du polling ── */
