@@ -9148,6 +9148,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     var myName   =_me==='girl'?'Zelda':'Link';
     var oppName  =_me==='girl'?'Link':'Zelda';
     var isMyTurn =state.turn===_me;
+    var iHoldCard=state.held_card&&state.held_card.holder===_me; // défini ici pour la bannière
 
     document.getElementById('skyjoScoreGirl').textContent=state.scores.girl;
     document.getElementById('skyjoScoreBoy').textContent=state.scores.boy;
@@ -9182,14 +9183,13 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     }
     document.getElementById('skyjoDrawPileCount').textContent=(state.deck?state.deck.length:0)+' cartes';
 
-    var iHold=state.held_card&&state.held_card.holder===_me;
-    renderGrid('skyjoMyGrid',myCards,true,isMyTurn,state,iHold);
+    renderGrid('skyjoMyGrid',myCards,true,isMyTurn,state,iHoldCard);
     renderGrid('skyjoOpponentGrid',oppCards,false,false,state,false);
 
     // Carte en main
     var heldWrap=document.getElementById('skyjoHeldCardWrap');
     var heldEl  =document.getElementById('skyjoHeldCard');
-    if(iHold){
+    if(iHoldCard){
       heldWrap.style.display='block';
       heldEl.textContent=state.held_card.value;
       heldEl.setAttribute('data-val',state.held_card.value);
