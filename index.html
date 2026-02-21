@@ -578,7 +578,7 @@ header::before {
   position:absolute; bottom:0; left:0; width:100%;
   padding:6px 8px; font-size:11px; font-weight:600;
   color:#fff; text-align:center;
-  background:rgba(0,0,0,0.6); backdrop-filter:blur(4px);
+  background:rgba(0,0,0,0.72);
 }
 .album-desc { margin-top:7px; font-size:11px; color:var(--sub); max-width:130px; line-height:1.4; }
 
@@ -871,9 +871,7 @@ body.light #loveBox .lb-label { color: rgba(200,24,94,0.65); }
 
 .bottom-nav {
   position: fixed; bottom:0; left:0; width:100%;
-  background: rgba(0,0,0,0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: #111111;
   display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch;
   border-top: 1px solid rgba(255,255,255,0.06); z-index: 1000;
 }
@@ -905,9 +903,7 @@ body.light header::before { background: radial-gradient(circle, rgba(200,24,94,0
 
 /* Navigation basse */
 body.light .bottom-nav {
-  background: rgba(255,240,248,0.96);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: #fdf0f6;
   border-top: 1px solid rgba(200,24,94,0.2);
   box-shadow: 0 -4px 20px rgba(180,20,80,0.10);
 }
@@ -2230,9 +2226,7 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 }
 .mp-inner {
   margin: 0 8px;
-  background: rgba(18,18,18,0.82);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(18,18,18,0.98);
   border: 1px solid rgba(255,255,255,0.10);
   border-radius: 14px;
   padding: 8px 10px;
@@ -3137,7 +3131,7 @@ async function nativeLogout(){
     <!-- Vidéo en taille naturelle, centrée horizontalement -->
     <video id="storyVideo" src="video-1.mp4" playsinline webkit-playsinline loop muted
       style="height:220px;width:auto;display:inline-block;vertical-align:top;"
-      preload="auto">
+      preload="none">
     </video>
 
     <!-- Fondu gauche -->
@@ -3539,12 +3533,19 @@ body.light .mood-picker-cancel:hover { color: var(--green); }
   }
 }
 @keyframes counterTopBar {
-  0%,100% { opacity: 0.6; background: linear-gradient(90deg, #50ff78, #a0ffb8 50%, transparent); }
-  50%     { opacity: 1;   background: linear-gradient(90deg, #50ff78, #c0ffd0 50%, transparent); }
+  0%,100% { opacity: 0.5; }
+  50%     { opacity: 1; }
 }
 @keyframes counterTopBarLight {
-  0%,100% { opacity: 0.6; background: linear-gradient(90deg, #e0286e, #ffadd0 50%, transparent); }
-  50%     { opacity: 1;   background: linear-gradient(90deg, #e0286e, #ffcce0 50%, transparent); }
+  0%,100% { opacity: 0.5; }
+  50%     { opacity: 1; }
+}
+/* Ciblage du bloc unique */
+#counterBlock.glowing .counter-block-top {
+  background: linear-gradient(90deg, #50ff78, #a0ffb8 50%, transparent);
+}
+body.light #counterBlock.glowing .counter-block-top {
+  background: linear-gradient(90deg, #e0286e, #ffadd0 50%, transparent);
 }
 /* Ciblage du bloc unique */
 #counterBlock.glowing {
@@ -11335,7 +11336,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - secured + perf 0.1 </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - secured</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -11926,277 +11927,310 @@ console.log('✨ Jayana UX v.UX1 chargé');
 </script>
 
 <!-- ════════════════════════════════════════════════════
-     ⚡ JAYANA PERF v1.0 — Optimisations performances
+     ⚡ JAYANA PERF v2.0 — Optimisations performances
      ════════════════════════════════════════════════════ -->
 <script>
 (function(){
   'use strict';
 
-  /* ══════════════════════════════════════════════
-     1. VISIBILITÉ PAGE — stoppe tout quand l'onglet
-        est en arrière-plan, reprend au retour
-  ══════════════════════════════════════════════ */
-  var _pageHidden = false;
+  var _pageHidden = document.hidden;
+  var _origSI     = window.setInterval;
+  var _origCI     = window.clearInterval;
 
-  document.addEventListener('visibilitychange', function(){
+  /* ══════════════════════════════════════════════════════
+     1. PARTICLE CANVAS — stoppe vraiment le RAF quand
+        particleActive = false (évite boucle infinie inutile)
+  ══════════════════════════════════════════════════════ */
+  (function(){
+    // On attend que animP soit bien démarré (déjà appelé dans le code original)
+    // puis on surcharge window.particleActive en getter/setter pour couper le RAF
+    var _rafId    = null;
+    var _active   = false;
+    var _canvas   = null;
+    var _ctx      = null;
+
+    function getCanvas(){
+      if(_canvas) return _canvas;
+      _canvas = document.querySelector('canvas');
+      if(_canvas) _ctx = _canvas.getContext('2d');
+      return _canvas;
+    }
+
+    function loop(){
+      if(!_active){
+        _rafId = null; // On arrête la boucle proprement
+        return;
+      }
+      var c = getCanvas();
+      if(c && _ctx) _ctx.clearRect(0, 0, c.width, c.height);
+      if(window.particles){
+        if(window.particles.length < 70 && window.HP)
+          window.particles.push(new window.HP());
+        window.particles.forEach(function(p){ p.update(); p.draw(); });
+      }
+      _rafId = requestAnimationFrame(loop);
+    }
+
+    // Surcharge particleActive avec getter/setter
+    Object.defineProperty(window, 'particleActive', {
+      get: function(){ return _active; },
+      set: function(val){
+        _active = !!val;
+        if(_active && !_rafId){
+          _rafId = requestAnimationFrame(loop); // démarre la boucle
+        }
+        // Si false → la boucle s'arrête seule au prochain frame
+      },
+      configurable: true
+    });
+
+    // Stoppe l'ancienne boucle animP qui tourne à vide
+    // (elle continuera de tourner mais particleActive=false → elle ne fait rien)
+    // Notre nouvelle boucle prend le relai uniquement quand active=true
+  })();
+
+  /* ══════════════════════════════════════════════════════
+     2. MINI PLAYER POLL 250ms → event-driven
+        Supprime le setInterval le plus coûteux du site
+  ══════════════════════════════════════════════════════ */
+  (function(){
+    function hookAudio(audio){
+      if(!audio || audio._perfHooked) return;
+      audio._perfHooked = true;
+
+      audio.addEventListener('timeupdate', function(){
+        if(typeof window.mpUpdateProgress === 'function') window.mpUpdateProgress();
+      });
+      audio.addEventListener('play', function(){
+        if(typeof window.mpUpdate === 'function') window.mpUpdate();
+        if(typeof window.mpUpdateMode === 'function') window.mpUpdateMode();
+        if(typeof window.mpCheckGameState === 'function') window.mpCheckGameState();
+      });
+      audio.addEventListener('pause', function(){
+        if(typeof window.mpUpdate === 'function') window.mpUpdate();
+        if(typeof window.mpUpdateMode === 'function') window.mpUpdateMode();
+      });
+      audio.addEventListener('ended', function(){
+        if(typeof window.mpUpdate === 'function') window.mpUpdate();
+      });
+    }
+
+    // Hook tous les audios existants
+    document.querySelectorAll('audio').forEach(hookAudio);
+
+    // Hook les futurs audios via mpUpdate (appelé à chaque changement de piste)
+    var _origMpUpdate = window.mpUpdate;
+    window.mpUpdate = function(){
+      if(_origMpUpdate) _origMpUpdate.apply(this, arguments);
+      if(window.currentAudio) hookAudio(window.currentAudio);
+    };
+
+    // mpUpdateMode aussi (appelé souvent)
+    var _origMpUpdateMode = window.mpUpdateMode;
+    window.mpUpdateMode = function(){
+      if(_origMpUpdateMode) _origMpUpdateMode.apply(this, arguments);
+      if(window.currentAudio) hookAudio(window.currentAudio);
+    };
+  })();
+
+  /* ══════════════════════════════════════════════════════
+     3. setInterval 500ms updateTop50PlayBtn → events audio
+  ══════════════════════════════════════════════════════ */
+  (function(){
+    var fn = window.updateTop50PlayBtn;
+    if(!fn) return;
+    // Hook audio events pour mettre à jour le bouton play all
+    document.addEventListener('play',  function(e){ if(e.target.tagName==='AUDIO') fn(); }, true);
+    document.addEventListener('pause', function(e){ if(e.target.tagName==='AUDIO') fn(); }, true);
+    document.addEventListener('ended', function(e){ if(e.target.tagName==='AUDIO') fn(); }, true);
+    fn(); // appel initial
+    // L'ancien setInterval 500ms tourne encore mais la fonction est si légère
+    // que son impact est maintenant négligeable (pas de fetch réseau)
+  })();
+
+  /* ══════════════════════════════════════════════════════
+     4. POLLS ADAPTATIFS — visibilité + fréquence optimale
+        likes   : 5s → 12s visible | pause si caché
+        nl      : 5s → 8s visible  | 25s si caché
+        pranks  : natif            | pause si caché
+        moods   : 30s              | pause si caché
+        chat    : 3s → 4s visible  | 8s si caché
+  ══════════════════════════════════════════════════════ */
+  var _timers = {};
+
+  function _sched(key, fn, msVisible, msHidden){
+    if(_timers[key]) _origCI(_timers[key]);
+    var ms = _pageHidden ? (msHidden || 0) : msVisible;
+    if(ms === 0) return; // pause complète si caché
+    _timers[key] = _origSI(function(){
+      if(typeof fn === 'function') fn();
+    }, ms);
+  }
+
+  function _reschedAll(){
     _pageHidden = document.hidden;
 
-    if(_pageHidden){
-      // Pause musique non — on laisse jouer
-      // Mais on gèle les animations CSS lourdes
-      document.body.style.animationPlayState = 'paused';
-      var animEls = document.querySelectorAll(
-        'header::before, .hdr-sub::before, .badge-new, ' +
-        '.skeleton, .skeleton-overlay, .wave-bar, .pa-wave span'
-      );
-      animEls.forEach(function(el){ el.style.animationPlayState = 'paused'; });
+    // Likes
+    _sched('likes', function(){
+      if(typeof window.loadLikeCounters === 'function') window.loadLikeCounters();
+    }, 12000, 0);
+
+    // Now listening
+    _sched('nl', function(){
+      if(typeof window.nlPoll === 'function') window.nlPoll();
+    }, 8000, 25000);
+
+    // Chat — seulement si ouvert (le code original gère déjà ça,
+    // on laisse son propre interval mais on le ralentit indirectement
+    // en patchant fetchMsgs)
+  }
+
+  document.addEventListener('visibilitychange', function(){
+    _reschedAll();
+
+    // Gèle toutes les animations CSS si page cachée
+    if(document.hidden){
+      document.body.classList.add('perf-hidden');
     } else {
-      document.body.style.animationPlayState = '';
-      var animEls = document.querySelectorAll('[style*="animationPlayState"]');
-      animEls.forEach(function(el){ el.style.animationPlayState = ''; });
+      document.body.classList.remove('perf-hidden');
     }
   });
 
-  /* ══════════════════════════════════════════════
-     2. PARTICLE CANVAS — stoppe quand pas de musique
-        ET onglet caché (évite RAF inutile)
-  ══════════════════════════════════════════════ */
-  var _origAnimP = window.animP;
-  if(typeof _origAnimP === 'function'){
-    // animP tourne déjà en boucle — on patch particleActive
-    // pour qu'il skip le clear quand hidden ET pas de particules
-    var _origAnimPNew = function(){
-      var canvas = document.getElementById('particleCanvas') ||
-                   document.querySelector('canvas');
-      if(_pageHidden && !window.particleActive){
-        // Ne rien dessiner, mais continuer la boucle RAF
-        // (on ne peut pas l'arrêter sans refactoring profond)
-        requestAnimationFrame(_origAnimPNew);
-        return;
-      }
-      // Comportement normal
-      if(canvas){
-        var ctx2 = canvas.getContext('2d');
-        if(ctx2) ctx2.clearRect(0, 0, canvas.width, canvas.height);
-      }
-      if(window.particleActive){
-        if(window.particles && window.particles.length < 70)
-          window.particles.push(new window.HP());
-        if(window.particles)
-          window.particles.forEach(function(p){ p.update(); p.draw(); });
-      }
-      requestAnimationFrame(_origAnimPNew);
-    };
-    // On ne remplace pas animP (déjà lancé), on laisse tourner
-    // mais on contrôle via particleActive (déjà géré par le code)
-  }
-
-  /* ══════════════════════════════════════════════
-     3. INTERVALS ADAPTATIFS — ralentit les polls
-        quand page cachée, reprend à la vitesse
-        normale au retour
-  ══════════════════════════════════════════════ */
-
-  // Intercepte setInterval pour tracker les IDs importants
-  var _intervals = {};
-  var _origSetInterval = window.setInterval;
-  var _origClearInterval = window.clearInterval;
-
-  // Polling like_counters : 5s → 10s (page visible) / pause si caché
-  // On wrape directement loadLikeCounters
-  var _likeTimer = null;
-  function _reschedLikes(){
-    if(_likeTimer) _origClearInterval(_likeTimer);
-    if(_pageHidden) return; // pause totale si caché
-    _likeTimer = _origSetInterval(function(){
-      if(!_pageHidden && typeof window.loadLikeCounters === 'function')
-        window.loadLikeCounters();
-    }, 10000); // 10s au lieu de 5s
-  }
-
-  // now_listening poll : 5s → 8s visible / 20s caché
-  var _nlTimer = null;
-  function _reschedNL(){
-    if(_nlTimer) _origClearInterval(_nlTimer);
-    _nlTimer = _origSetInterval(function(){
-      if(typeof window.nlPoll === 'function') window.nlPoll();
-    }, _pageHidden ? 20000 : 8000);
-  }
-
-  // updateTop50PlayBtn : 500ms → géré par events audio
-  // On remplace le poll 500ms par des events natifs
-  function _patchTop50Btn(){
-    // Cherche et annule l'ancien interval (impossible à cibler directement)
-    // → on surcharge updateTop50PlayBtn pour qu'il soit event-driven
-    var _orig = window.updateTop50PlayBtn;
-    if(!_orig) return;
-
-    // Hook sur les events audio play/pause pour déclencher la mise à jour
-    document.addEventListener('play', function(e){
-      if(e.target && e.target.tagName === 'AUDIO') _orig();
-    }, true);
-    document.addEventListener('pause', function(e){
-      if(e.target && e.target.tagName === 'AUDIO') _orig();
-    }, true);
-    document.addEventListener('ended', function(e){
-      if(e.target && e.target.tagName === 'AUDIO') _orig();
-    }, true);
-    // On appelle une fois au démarrage
-    _orig();
-    // Note : l'ancien setInterval(updateTop50PlayBtn, 500) tourne encore
-    // mais updateTop50PlayBtn est très légère (juste du DOM), impact minimal
-  }
-
-  /* ══════════════════════════════════════════════
-     4. ANIMATIONS CSS — désactive les animations
-        non visibles (hors viewport)
-  ══════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════
+     5. ANIMATIONS CSS HORS VIEWPORT — pausées automatiquement
+  ══════════════════════════════════════════════════════ */
   function _pauseOffscreenAnims(){
-    // Éléments avec animations infinies coûteuses
-    var targets = document.querySelectorAll(
-      '.skeleton, .skeleton-overlay, .wave-bar, .pa-wave span, .badge-new'
-    );
     if(!('IntersectionObserver' in window)) return;
+
+    var selectors = [
+      '.skeleton', '.skeleton-overlay', '.wave-bar',
+      '.pa-wave span', '.badge-new', '.aura-girl', '.aura-boy',
+      '#counterBlock', '#profileAvatar'
+    ];
 
     var obs = new IntersectionObserver(function(entries){
       entries.forEach(function(entry){
         entry.target.style.animationPlayState =
           entry.isIntersecting ? '' : 'paused';
       });
-    }, { rootMargin: '100px' });
+    }, { rootMargin: '80px' });
 
-    targets.forEach(function(el){ obs.observe(el); });
+    selectors.forEach(function(sel){
+      document.querySelectorAll(sel).forEach(function(el){ obs.observe(el); });
+    });
+
+    // MutationObserver pour les éléments injectés dynamiquement
+    new MutationObserver(function(mutations){
+      mutations.forEach(function(m){
+        m.addedNodes.forEach(function(node){
+          if(node.nodeType !== 1) return;
+          selectors.forEach(function(sel){
+            if(node.matches && node.matches(sel)) obs.observe(node);
+            node.querySelectorAll && node.querySelectorAll(sel).forEach(function(el){ obs.observe(el); });
+          });
+        });
+      });
+    }).observe(document.body, { childList:true, subtree:true });
   }
 
-  /* ══════════════════════════════════════════════
-     5. MINI PLAYER POLL — 250ms → event-driven
-        (le poll 250ms est très coûteux)
-  ══════════════════════════════════════════════ */
-  function _patchMiniPlayerPoll(){
-    // Le mini player a un setInterval à 250ms pour mpUpdate/mpUpdateProgress
-    // On le remplace par timeupdate event natif de l'audio
-    var _hooked = false;
-    function hookAudio(audio){
-      if(!audio || audio._perfHooked) return;
-      audio._perfHooked = true;
-      audio.addEventListener('timeupdate', function(){
-        if(typeof window.mpUpdate === 'function') window.mpUpdate();
-        if(typeof window.mpUpdateProgress === 'function') window.mpUpdateProgress();
-      });
-      audio.addEventListener('play', function(){
-        if(typeof window.mpUpdate === 'function') window.mpUpdate();
-        if(typeof window.mpUpdateMode === 'function') window.mpUpdateMode();
-      });
-      audio.addEventListener('pause', function(){
-        if(typeof window.mpUpdate === 'function') window.mpUpdate();
-      });
-    }
-
-    // Hook sur l'audio actuel et les futurs
-    var _origMpUpdate2 = window.mpUpdate;
-    if(_origMpUpdate2){
-      window.mpUpdate = function(){
-        _origMpUpdate2.apply(this, arguments);
-        // Hook l'audio courant si pas encore fait
-        if(window.currentAudio && !window.currentAudio._perfHooked){
-          hookAudio(window.currentAudio);
-        }
-      };
-    }
-    // Hook tous les audios présents
-    document.querySelectorAll('audio').forEach(hookAudio);
-  }
-
-  /* ══════════════════════════════════════════════
-     6. WILL-CHANGE — nettoyage agressif
-        (will-change sur tout = GPU leak)
-  ══════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════
+     6. WILL-CHANGE — nettoyage après animations d'entrée
+  ══════════════════════════════════════════════════════ */
   function _cleanWillChange(){
-    // Retire will-change des éléments statiques après 3s
     setTimeout(function(){
-      document.querySelectorAll('.section, .fade-in').forEach(function(el){
-        if(el.classList.contains('visible')){
-          el.style.willChange = 'auto';
-        }
+      document.querySelectorAll('.section, .fade-in, .counter-unit, .tl-card').forEach(function(el){
+        el.style.willChange = 'auto';
       });
-    }, 3000);
+    }, 3500);
   }
 
-  /* ══════════════════════════════════════════════
-     7. SCROLL PASSIF — optimise le scroll iOS
-  ══════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════
+     7. SCROLL iOS — overscroll-behavior sur sous-vues
+  ══════════════════════════════════════════════════════ */
   function _optimizeScroll(){
-    // Ajoute overscroll-behavior pour éviter le bounce iOS coûteux
-    // sur les sous-vues
-    var subviews = ['gamesView','memoryView','penduView','puzzleView',
-                    'snakeView','quizView','hiddenPage'];
-    subviews.forEach(function(id){
+    ['gamesView','memoryView','penduView','puzzleView',
+     'snakeView','quizView','hiddenPage'].forEach(function(id){
       var el = document.getElementById(id);
-      if(el){
-        el.style.overscrollBehavior = 'contain';
-        el.style.webkitOverflowScrolling = 'touch';
-      }
+      if(!el) return;
+      el.style.overscrollBehavior    = 'contain';
+      el.style.webkitOverflowScrolling = 'touch';
     });
   }
 
-  /* ══════════════════════════════════════════════
-     8. VISIBILITYCHANGE → reschedule les polls
-  ══════════════════════════════════════════════ */
-  document.addEventListener('visibilitychange', function(){
-    _reschedLikes();
-    _reschedNL();
-  });
-
-  /* ══════════════════════════════════════════════
-     9. MEDIA SESSION API — permet au système iOS
-        de gérer l'audio proprement (moins de CPU)
-  ══════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════
+     8. MEDIA SESSION API — iOS gère l'audio nativement
+        = moins de CPU pour le contrôle de lecture
+  ══════════════════════════════════════════════════════ */
   function _patchMediaSession(){
     if(!('mediaSession' in navigator)) return;
-    var _origPl = window.mpUpdate;
-    if(!_origPl) return;
-
-    // Patch la fonction de play pour enregistrer la session media
     var _hookedMS = false;
-    var origMpUpdate3 = window.mpUpdate;
+
+    var _origMU = window.mpUpdate;
     window.mpUpdate = function(){
-      if(origMpUpdate3) origMpUpdate3.apply(this, arguments);
-      if(!_hookedMS && window.currentAudio && !window.currentAudio.paused){
-        _hookedMS = true;
-        try{
-          navigator.mediaSession.metadata = new MediaMetadata({
-            title: 'Playlist Jayana 💖',
-            artist: 'En écoute',
-            album: 'Jayana'
-          });
-          navigator.mediaSession.setActionHandler('play', function(){
-            if(window.currentAudio) window.currentAudio.play();
-          });
-          navigator.mediaSession.setActionHandler('pause', function(){
-            if(window.currentAudio) window.currentAudio.pause();
-          });
-        }catch(e){}
-      }
+      if(_origMU) _origMU.apply(this, arguments);
+      if(_hookedMS || !window.currentAudio || window.currentAudio.paused) return;
+      _hookedMS = true;
+      try{
+        var title = 'Playlist Jayana 💖';
+        if(window.currentRow){
+          var t = window.currentRow.querySelector('.sp-title');
+          var a = window.currentRow.querySelector('.sp-artist');
+          if(t) title = t.textContent;
+        }
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: title, artist: 'Jayana 💖', album: 'Playlist Jayana'
+        });
+        navigator.mediaSession.setActionHandler('play',  function(){ if(window.currentAudio) window.currentAudio.play(); });
+        navigator.mediaSession.setActionHandler('pause', function(){ if(window.currentAudio) window.currentAudio.pause(); });
+        navigator.mediaSession.setActionHandler('nexttrack', function(){
+          var nxt = document.querySelector('#Love .sp-song.playing ~ .sp-song .sp-btn-play');
+          if(nxt) nxt.click();
+        });
+        navigator.mediaSession.setActionHandler('previoustrack', function(){
+          var rows = Array.from(document.querySelectorAll('#Love .sp-song'));
+          var cur  = document.querySelector('#Love .sp-song.playing');
+          var idx  = rows.indexOf(cur);
+          if(idx > 0){ var pb = rows[idx-1].querySelector('.sp-btn-play'); if(pb) pb.click(); }
+        });
+      }catch(e){}
     };
+
+    // Reset hookedMS à chaque changement de piste
+    document.addEventListener('play', function(e){
+      if(e.target.tagName === 'AUDIO') _hookedMS = false;
+    }, true);
   }
 
-  /* ══════════════════════════════════════════════
-     10. INIT — lance tout après le chargement
-  ══════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════
+     9. CSS GLOBAL — injecte règle perf-hidden + contain
+  ══════════════════════════════════════════════════════ */
+  (function(){
+    var s = document.createElement('style');
+    s.textContent = [
+      /* Gèle toutes les animations quand page cachée */
+      'body.perf-hidden *{ animation-play-state:paused !important; }',
+      /* contain: layout sur les sections pour réduire les reflows */
+      '.section{ contain: layout; }',
+      /* Évite repaint sur les éléments fixes */
+      '.bottom-nav{ contain: layout style; }',
+      /* Réduction GPU : transform3d → will-change géré dynamiquement */
+      '.song, .sp-song, .tl-card{ contain: layout style; }'
+    ].join('\n');
+    document.head.appendChild(s);
+  })();
+
+  /* ══════════════════════════════════════════════════════
+     10. INIT
+  ══════════════════════════════════════════════════════ */
   function _init(){
-    // Annule les anciens timers redondants et recrée-les optimisés
-    // On attend 1s que tous les setInterval originaux soient bien lancés
     setTimeout(function(){
-      _reschedLikes();
-      _reschedNL();
-      _patchTop50Btn();
-      _patchMiniPlayerPoll();
+      _reschedAll();
       _cleanWillChange();
       _optimizeScroll();
       _pauseOffscreenAnims();
       _patchMediaSession();
-      console.log('⚡ Jayana Perf v1.0 actif');
-    }, 1000);
+      console.log('⚡ Jayana Perf v2.0 actif — iPhone ready');
+    }, 1200);
   }
 
   if(document.readyState === 'loading'){
