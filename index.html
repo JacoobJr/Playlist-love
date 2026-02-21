@@ -582,6 +582,28 @@ header::before {
 }
 .album-desc { margin-top:7px; font-size:11px; color:var(--sub); max-width:130px; line-height:1.4; }
 
+/* ── Section LUI — upload ── */
+.lui-card-wrap { position:relative; }
+.lui-upload-btn {
+  position:absolute; inset:0; border-radius:8px;
+  background:rgba(0,0,0,0.45); display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:5px;
+  opacity:0; transition:opacity 0.2s; cursor:pointer; z-index:5;
+  border:2px dashed rgba(232,121,160,0.6);
+}
+.lui-upload-btn:hover { opacity:1; }
+.lui-upload-btn.empty { opacity:1; background:rgba(0,0,0,0.18); }
+.lui-upload-icon { font-size:26px; line-height:1; }
+.lui-upload-lbl { font-size:10px; font-weight:700; color:#fff; letter-spacing:0.5px; text-align:center; padding:0 4px; }
+.lui-uploading { position:absolute; inset:0; border-radius:8px; background:rgba(0,0,0,0.65); display:none; flex-direction:column; align-items:center; justify-content:center; gap:8px; z-index:6; }
+.lui-uploading.show { display:flex; }
+.lui-upload-progress { width:80%; height:4px; background:rgba(255,255,255,0.2); border-radius:2px; overflow:hidden; }
+.lui-upload-bar { height:100%; background:#e879a0; width:0%; transition:width 0.3s; border-radius:2px; }
+.lui-upload-status { font-size:10px; color:#fff; font-weight:600; }
+.lui-img-empty { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; background:var(--s2); }
+.lui-img-empty-icon { font-size:30px; opacity:0.35; }
+.lui-img-empty-lbl { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:0.3px; }
+
 .song-list { display: flex; flex-direction: column; gap: 2px; }
 .song { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; cursor:pointer; transition:background 0.15s; position:relative; border:1px solid transparent; }
 .song:hover { background:var(--s2); }
@@ -3406,6 +3428,99 @@ body.light #counterBlock.glowing .c-num-big {
   </div>
 </div>
 
+<div class="section fade-in" id="luiSection">
+  <div class="section-label">Lui</div>
+  <div class="slider" id="luiSlider">
+    <div class="album-card lui-card-wrap" data-slot="animal">
+      <div class="album-image">
+        <span class="album-heart">🤍</span>
+        <div class="lui-img-empty" id="lui-empty-animal"><div class="lui-img-empty-icon">🐾</div><div class="lui-img-empty-lbl">Animal</div></div>
+        <img id="lui-img-animal" src="" style="display:none">
+        <div class="album-banner">Animal</div>
+        <div class="lui-upload-btn empty" id="lui-btn-animal" onclick="luiUploadClick('animal')">
+          <div class="lui-upload-icon">📷</div>
+          <div class="lui-upload-lbl">Ajouter</div>
+        </div>
+        <div class="lui-uploading" id="lui-loading-animal">
+          <div class="lui-upload-progress"><div class="lui-upload-bar" id="lui-bar-animal"></div></div>
+          <div class="lui-upload-status">Envoi...</div>
+        </div>
+      </div>
+      <div class="album-desc" id="lui-desc-animal">Son animal 🐾</div>
+    </div>
+    <div class="album-card lui-card-wrap" data-slot="fleurs">
+      <div class="album-image">
+        <span class="album-heart">🤍</span>
+        <div class="lui-img-empty" id="lui-empty-fleurs"><div class="lui-img-empty-icon">🌸</div><div class="lui-img-empty-lbl">Fleurs</div></div>
+        <img id="lui-img-fleurs" src="" style="display:none">
+        <div class="album-banner">Fleurs</div>
+        <div class="lui-upload-btn empty" id="lui-btn-fleurs" onclick="luiUploadClick('fleurs')">
+          <div class="lui-upload-icon">📷</div>
+          <div class="lui-upload-lbl">Ajouter</div>
+        </div>
+        <div class="lui-uploading" id="lui-loading-fleurs">
+          <div class="lui-upload-progress"><div class="lui-upload-bar" id="lui-bar-fleurs"></div></div>
+          <div class="lui-upload-status">Envoi...</div>
+        </div>
+      </div>
+      <div class="album-desc" id="lui-desc-fleurs">Ses fleurs 🌸</div>
+    </div>
+    <div class="album-card lui-card-wrap" data-slot="personnage">
+      <div class="album-image">
+        <span class="album-heart">🤍</span>
+        <div class="lui-img-empty" id="lui-empty-personnage"><div class="lui-img-empty-icon">🧑</div><div class="lui-img-empty-lbl">Personnage</div></div>
+        <img id="lui-img-personnage" src="" style="display:none">
+        <div class="album-banner">Personnage</div>
+        <div class="lui-upload-btn empty" id="lui-btn-personnage" onclick="luiUploadClick('personnage')">
+          <div class="lui-upload-icon">📷</div>
+          <div class="lui-upload-lbl">Ajouter</div>
+        </div>
+        <div class="lui-uploading" id="lui-loading-personnage">
+          <div class="lui-upload-progress"><div class="lui-upload-bar" id="lui-bar-personnage"></div></div>
+          <div class="lui-upload-status">Envoi...</div>
+        </div>
+      </div>
+      <div class="album-desc" id="lui-desc-personnage">Son personnage 💙</div>
+    </div>
+    <div class="album-card lui-card-wrap" data-slot="saison">
+      <div class="album-image">
+        <span class="album-heart">🤍</span>
+        <div class="lui-img-empty" id="lui-empty-saison"><div class="lui-img-empty-icon">🍂</div><div class="lui-img-empty-lbl">Saison</div></div>
+        <img id="lui-img-saison" src="" style="display:none">
+        <div class="album-banner">Saison</div>
+        <div class="lui-upload-btn empty" id="lui-btn-saison" onclick="luiUploadClick('saison')">
+          <div class="lui-upload-icon">📷</div>
+          <div class="lui-upload-lbl">Ajouter</div>
+        </div>
+        <div class="lui-uploading" id="lui-loading-saison">
+          <div class="lui-upload-progress"><div class="lui-upload-bar" id="lui-bar-saison"></div></div>
+          <div class="lui-upload-status">Envoi...</div>
+        </div>
+      </div>
+      <div class="album-desc" id="lui-desc-saison">Sa saison 🍂</div>
+    </div>
+    <div class="album-card lui-card-wrap" data-slot="repas">
+      <div class="album-image">
+        <span class="album-heart">🤍</span>
+        <div class="lui-img-empty" id="lui-empty-repas"><div class="lui-img-empty-icon">🍽️</div><div class="lui-img-empty-lbl">Repas</div></div>
+        <img id="lui-img-repas" src="" style="display:none">
+        <div class="album-banner">Repas</div>
+        <div class="lui-upload-btn empty" id="lui-btn-repas" onclick="luiUploadClick('repas')">
+          <div class="lui-upload-icon">📷</div>
+          <div class="lui-upload-lbl">Ajouter</div>
+        </div>
+        <div class="lui-uploading" id="lui-loading-repas">
+          <div class="lui-upload-progress"><div class="lui-upload-bar" id="lui-bar-repas"></div></div>
+          <div class="lui-upload-status">Envoi...</div>
+        </div>
+      </div>
+      <div class="album-desc" id="lui-desc-repas">Son repas préféré 🍽️</div>
+    </div>
+  </div>
+  <!-- Input file caché — déclenché par JS -->
+  <input type="file" id="luiFileInput" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="luiHandleFile(this)">
+</div>
+
 <div id="memoCoupleSection" class="fade-in">
   <div class="memo-header-row">
     <div class="section-label" style="margin-bottom:0">Mémo couple 📝</div>
@@ -5617,6 +5732,132 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
   window.nativeLogout = function(){
     stopPrankPoll();
     if(_origLogout) return _origLogout.apply(this, arguments);
+  };
+
+})();
+
+// ════════════════════════════════════════════
+// SECTION LUI — Upload Supabase Storage
+// ════════════════════════════════════════════
+(function(){
+  var SB_BUCKET = 'images';
+  var SB_FOLDER = 'lui';
+  var SLOTS = ['animal','fleurs','personnage','saison','repas'];
+  var _currentSlot = null;
+
+  // ── Charger les images déjà uploadées ──
+  function luiLoadImages(){
+    SLOTS.forEach(function(slot){
+      var url = SB_URL + '/storage/v1/object/public/' + SB_BUCKET + '/' + SB_FOLDER + '/' + slot + '.jpg?t=' + Date.now();
+      var img = document.getElementById('lui-img-' + slot);
+      var empty = document.getElementById('lui-empty-' + slot);
+      var btn = document.getElementById('lui-btn-' + slot);
+      if(!img) return;
+      // Tester si l'image existe
+      var probe = new Image();
+      probe.onload = function(){
+        img.src = url;
+        img.style.display = '';
+        if(empty) empty.style.display = 'none';
+        if(btn){ btn.classList.remove('empty'); }
+      };
+      probe.onerror = function(){
+        img.style.display = 'none';
+        if(empty) empty.style.display = '';
+        if(btn){ btn.classList.add('empty'); }
+      };
+      probe.src = url;
+    });
+  }
+
+  // ── Afficher/masquer les boutons selon profil ──
+  function luiSyncEditMode(){
+    var profile = localStorage.getItem('jayana_profile');
+    var isZelda = (profile === 'girl');
+    SLOTS.forEach(function(slot){
+      var btn = document.getElementById('lui-btn-' + slot);
+      if(btn) btn.style.display = isZelda ? '' : 'none';
+    });
+  }
+
+  // ── Clic sur une pochette ──
+  window.luiUploadClick = function(slot){
+    var profile = localStorage.getItem('jayana_profile');
+    if(profile !== 'girl'){
+      return; // sécurité
+    }
+    _currentSlot = slot;
+    var input = document.getElementById('luiFileInput');
+    input.value = '';
+    input.click();
+  };
+
+  // ── Traitement du fichier sélectionné ──
+  window.luiHandleFile = function(input){
+    if(!input.files || !input.files[0]) return;
+    var file = input.files[0];
+    var slot = _currentSlot;
+    if(!slot) return;
+
+    // Vérif taille max 5 Mo
+    if(file.size > 5 * 1024 * 1024){
+      alert('Image trop lourde (max 5 Mo)');
+      return;
+    }
+
+    // Afficher progress
+    var loading = document.getElementById('lui-loading-' + slot);
+    var bar = document.getElementById('lui-bar-' + slot);
+    if(loading) loading.classList.add('show');
+    if(bar){ bar.style.width = '0%'; setTimeout(function(){ bar.style.width = '60%'; }, 100); }
+
+    // Upload vers Supabase Storage
+    var path = SB_FOLDER + '/' + slot + '.jpg';
+    var uploadUrl = SB_URL + '/storage/v1/object/' + SB_BUCKET + '/' + path;
+
+    fetch(uploadUrl, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + (_sbAccessToken || SB_KEY),
+        'Content-Type': file.type,
+        'x-upsert': 'true'
+      },
+      body: file
+    })
+    .then(function(r){
+      if(bar) bar.style.width = '100%';
+      setTimeout(function(){
+        if(loading) loading.classList.remove('show');
+        if(r.ok){
+          // Rafraîchir l'image
+          var img = document.getElementById('lui-img-' + slot);
+          var empty = document.getElementById('lui-empty-' + slot);
+          var btn = document.getElementById('lui-btn-' + slot);
+          var newUrl = SB_URL + '/storage/v1/object/public/' + SB_BUCKET + '/' + SB_FOLDER + '/' + slot + '.jpg?t=' + Date.now();
+          if(img){ img.src = newUrl; img.style.display = ''; }
+          if(empty) empty.style.display = 'none';
+          if(btn) btn.classList.remove('empty');
+        } else {
+          alert("Erreur lors de l'upload. Réessaie.");
+        }
+      }, 400);
+    })
+    .catch(function(){
+      if(loading) loading.classList.remove('show');
+      alert('Erreur réseau. Vérifie ta connexion.');
+    });
+  };
+
+  // ── Init au chargement ──
+  luiLoadImages();
+  luiSyncEditMode();
+
+  // ── Resync si profil change ──
+  var _origSetProfile = window.setProfile;
+  window.setProfile = function(gender){
+    if(_origSetProfile) _origSetProfile.apply(this, arguments);
+    setTimeout(luiSyncEditMode, 300);
   };
 
 })();
