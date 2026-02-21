@@ -8863,7 +8863,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
   // ── Présence via Supabase (UPSERT) ──
   function startPresencePolling(){
-    upsertPresence();
+    lobbyTick();
     _skyjoPresenceInterval = setInterval(lobbyTick, 2000);
   }
 
@@ -8888,6 +8888,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   // Tick principal du lobby — appelé toutes les 2s
   function lobbyTick(){
     upsertPresence();
+    console.log('[SKYJO] tick | profile=' + _skyjoMyProfile + ' | gameId=' + _skyjoGameId + ' | joining=' + _skyjoJoining);
 
     // Si on a déjà un gameId → poll la partie directement
     if(_skyjoGameId){
@@ -8897,11 +8898,12 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       .then(function(r){ return r.json(); })
       .then(function(rows){
         if(!Array.isArray(rows) || !rows[0]) return;
+        console.log('[SKYJO] poll game status=' + rows[0].status);
         if(rows[0].status === 'playing'){
+          console.log('[SKYJO] LAUNCH via gameId poll');
           stopPresencePolling();
           startGameStatePolling();
           showSkyjoScreen('skyjoGameArea');
-          document.getElementById('skyjoGameArea').style.display = 'block';
           renderGameState(rows[0]);
         }
       }).catch(function(){});
@@ -8924,11 +8926,11 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
           if(row.profile === 'boy')  boyOnline  = true;
         }
       });
+      console.log('[SKYJO] presence girl=' + girlOnline + ' boy=' + boyOnline);
       updatePresenceDots(girlOnline, boyOnline);
 
-      if(!girlOnline || !boyOnline) return; // pas encore les 2
+      if(!girlOnline || !boyOnline) return;
 
-      // Les 2 sont là → chercher ou créer une partie
       handleMatchmaking();
     }).catch(function(){});
   }
@@ -8946,6 +8948,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   function handleMatchmaking(){
     if(_skyjoJoining) return;
     _skyjoJoining = true;
+    console.log('[SKYJO] handleMatchmaking start | profile=' + _skyjoMyProfile);
 
     fetch(SB_URL + '/rest/v1/' + SKYJO_TABLE + '?status=in.(waiting,playing)&order=created_at.desc&limit=1', {
       headers: sbHeaders()
@@ -8953,51 +8956,64 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     .then(function(r){ return r.json(); })
     .then(function(rows){
       var game = Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
+      console.log('[SKYJO] game found:', game ? (game.status + ' by ' + game.created_by + ' id=' + game.id) : 'none');
 
-      // Cas A : partie playing → les 2 la rejoignent
+      // Cas A : partie playing → je la rejoins (peu importe qui je suis)
       if(game && game.status === 'playing'){
+        console.log('[SKYJO] CAS A - launch playing');
         _skyjoGameId = game.id;
         stopPresencePolling();
         startGameStatePolling();
         showSkyjoScreen('skyjoGameArea');
-        document.getElementById('skyjoGameArea').style.display = 'block';
         renderGameState(game);
         _skyjoJoining = false;
         return;
       }
 
-      // Cas B : partie waiting créée par MOI → stocker l'id et attendre le prochain tick
+      // Cas B : partie waiting créée par MOI → stocker l'id, laisser l'autre rejoindre
       if(game && game.status === 'waiting' && game.created_by === _skyjoMyProfile){
+        console.log('[SKYJO] CAS B - waiting by me, storing gameId');
         _skyjoGameId = game.id;
         _skyjoJoining = false;
         return;
       }
 
-      // Cas C : partie waiting créée par l'AUTRE → je la rejoins
+      // Cas C : partie waiting créée par l'AUTRE → je la rejoins et je me lance
       if(game && game.status === 'waiting' && game.created_by !== _skyjoMyProfile){
+        console.log('[SKYJO] CAS C - joining other player game id=' + game.id);
         _skyjoGameId = game.id;
         fetch(SB_URL + '/rest/v1/' + SKYJO_TABLE + '?id=eq.' + _skyjoGameId, {
           method: 'PATCH',
-          headers: sbHeaders({'Prefer':'return=minimal'}),
+          headers: sbHeaders({'Prefer':'return=representation'}),
           body: JSON.stringify({ status: 'playing' })
         })
-        .then(function(){ _skyjoJoining = false; }) // les 2 joueurs vont détecter via lobbyTick
-        .catch(function(){ _skyjoJoining = false; });
+        .then(function(r){ return r.json(); })
+        .then(function(updated){
+          _skyjoJoining = false;
+          if(Array.isArray(updated) && updated[0]){
+            console.log('[SKYJO] CAS C - PATCH ok, me launching');
+            stopPresencePolling();
+            startGameStatePolling();
+            showSkyjoScreen('skyjoGameArea');
+            renderGameState(updated[0]);
+            // L'AUTRE joueur a _skyjoGameId stocké (cas B) → au prochain lobbyTick
+            // il poll sa partie et voit status=playing → se lance aussi
+          } else {
+            console.log('[SKYJO] CAS C - PATCH retourné vide');
+          }
+        }).catch(function(e){ console.log('[SKYJO] CAS C err', e); _skyjoJoining = false; });
         return;
       }
 
-      // Cas D : aucune partie → seule la girl crée
+      // Cas D : aucune partie → le PREMIER arrivé crée (girl ou boy)
       if(!game){
-        if(_skyjoMyProfile === 'girl'){
-          createGame();
-        } else {
-          _skyjoJoining = false; // boy attend
-        }
+        console.log('[SKYJO] CAS D - creating game as ' + _skyjoMyProfile);
+        createGame();
         return;
       }
 
       _skyjoJoining = false;
-    }).catch(function(){ _skyjoJoining = false; });
+    }).catch(function(e){ console.log('[SKYJO] matchmaking err', e); _skyjoJoining = false; });
   }
 
   function createGame(){
@@ -12322,7 +12338,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.08.1 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
