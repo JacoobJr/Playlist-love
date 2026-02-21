@@ -223,13 +223,22 @@ header::before {
   width: 260px; height: 260px;
   background: radial-gradient(circle, rgba(0,201,167,0.10) 0%, transparent 70%);
   pointer-events: none;
-  animation: pulseGlow 4s ease-in-out infinite;
+  animation: pulseGlow 6s ease-in-out infinite;
+  will-change: opacity;
+}@keyframes pulseGlow {
+  0%,100% { opacity: 0.5; }
+  50%      { opacity: 0.85; }
 }
-@keyframes pulseGlow {
-  0%,100% { opacity: 0.6; transform: scale(1); }
-  50%      { opacity: 1;   transform: scale(1.1); }
-}
-.hdr-tag {
+header::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -40px;
+  width: 260px; height: 260px;
+  background: radial-gradient(circle, rgba(0,201,167,0.10) 0%, transparent 70%);
+  pointer-events: none;
+  animation: pulseGlow 6s ease-in-out infinite;
+  will-change: opacity;
+}.hdr-tag {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 3px;
@@ -269,7 +278,14 @@ header::before {
   animation: blink 2s ease-in-out infinite;
 }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
-
+.hdr-sub::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: blink 4s ease-in-out infinite;
+}
 /* ── BETISES STYLES ── */
 #betisesBtn:hover {
   background: rgba(255,110,176,0.12) !important;
@@ -700,7 +716,7 @@ audio { display: none; }
 .top50-play-all:hover { transform:scale(1.08); background:var(--green2); }
 .top50-play-all.playing {
   background: var(--green);
-  animation: playAllPulse 1.8s ease-in-out infinite;
+  animation: playAllPulse 2.5s ease-in-out infinite;
 }
 .top50-play-all.playing:hover { background: var(--green2); transform: scale(1.08); }
 @keyframes playAllPulse {
@@ -819,7 +835,7 @@ body.light .top50-play-all.playing {
 }
 #loveBox .lb-icon {
   display: block; font-size: 22px; margin-bottom: 6px;
-  animation: lbHeartbeat 2s ease-in-out infinite;
+  animation: lbHeartbeat 3s ease-in-out infinite;
 }
 @keyframes lbHeartbeat {
   0%,100% { transform: scale(1); }
@@ -835,18 +851,20 @@ body.light .top50-play-all.playing {
 #loveBox::after {
   content: '';
   position: absolute;
-  top: 0; left: -100%; width: 60%; height: 100%;
+  top: 0; left: 0; width: 60%; height: 100%;
   background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.14) 50%, transparent 70%);
-  animation: lbSweep 3s ease-in-out infinite;
+  animation: lbSweep 4s ease-in-out infinite;
   pointer-events: none;
   z-index: 1;
+  will-change: transform;
+  transform: translateX(-100%);
 }
 @keyframes lbSweep {
-  0%   { left: -80%; opacity: 0; }
+  0%   { transform: translateX(-100%); opacity: 0; }
   10%  { opacity: 1; }
-  50%  { left: 130%; opacity: 1; }
+  50%  { transform: translateX(250%); opacity: 1; }
   55%  { opacity: 0; }
-  100% { left: 130%; opacity: 0; }
+  100% { transform: translateX(250%); opacity: 0; }
 }
 
 body.light #loveBox {
@@ -858,7 +876,7 @@ body.light #loveBox::before { background: radial-gradient(ellipse at 50% 0%, rgb
 body.light #loveBox::after { background: linear-gradient(90deg, transparent, rgba(200,24,94,0.4), transparent); }
 body.light #loveBox .lb-label { color: rgba(200,24,94,0.65); }
 
-#particleCanvas { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1; }
+#particleCanvas { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1; contain: strict; isolation: isolate; }
 
 #danceZone {
   display: flex; justify-content: center; gap: 30px; font-size: 44px;
@@ -1241,13 +1259,11 @@ body.light #lockNavBtn.has-unread {
 }
 @keyframes nlPulseRowBoy {
   0%,100% {
-    box-shadow: inset 0 0 0 1.5px rgba(91,156,246,0.45),
-                0 0 12px rgba(91,156,246,0.15);
+    box-shadow: inset 0 0 0 1.5px rgba(91,156,246,0.4);
   }
   50% {
-    box-shadow: inset 0 0 0 2px rgba(91,156,246,1),
-                0 0 28px rgba(91,156,246,0.55),
-                0 0 8px rgba(91,156,246,0.3);
+    box-shadow: inset 0 0 0 2px rgba(91,156,246,0.9),
+                0 0 16px rgba(91,156,246,0.35);
   }
 }
 
@@ -1258,13 +1274,11 @@ body.light #lockNavBtn.has-unread {
 }
 @keyframes nlPulseRowGirl {
   0%,100% {
-    box-shadow: inset 0 0 0 1.5px rgba(232,121,160,0.45),
-                0 0 12px rgba(232,121,160,0.15);
+    box-shadow: inset 0 0 0 1.5px rgba(232,121,160,0.4);
   }
   50% {
-    box-shadow: inset 0 0 0 2px rgba(232,121,160,1),
-                0 0 28px rgba(232,121,160,0.55),
-                0 0 8px rgba(232,121,160,0.3);
+    box-shadow: inset 0 0 0 2px rgba(232,121,160,0.9),
+                0 0 16px rgba(232,121,160,0.35);
   }
 }
 
@@ -1275,14 +1289,11 @@ body.light #lockNavBtn.has-unread {
 }
 @keyframes nlPulseRowGold {
   0%,100% {
-    box-shadow: inset 0 0 0 1.5px rgba(245,197,24,0.5),
-                0 0 16px rgba(245,197,24,0.2);
+    box-shadow: inset 0 0 0 1.5px rgba(245,197,24,0.45);
   }
   50% {
-    box-shadow: inset 0 0 0 2.5px rgba(245,197,24,1),
-                0 0 40px rgba(245,197,24,0.7),
-                0 0 16px rgba(255,200,30,0.5),
-                0 0 60px rgba(245,197,24,0.25);
+    box-shadow: inset 0 0 0 2px rgba(245,197,24,0.9),
+                0 0 24px rgba(245,197,24,0.45);
   }
 }
 
@@ -2309,7 +2320,8 @@ body.light .mp-seek { background: rgba(0,0,0,0.12); }
 .mp-seek-fill {
   height: 100%; border-radius: 3px;
   background: var(--green); width: 0%;
-  pointer-events: none; transition: width 0.25s linear;
+  pointer-events: none; transition: none;
+  will-change: width;
 }
 .mp-seek-thumb {
   position: absolute; top: 50%; right: -5px;
@@ -8863,18 +8875,18 @@ function filterSongs(q){
     return m + ':' + (sec < 10 ? '0' : '') + sec;
   }
 
-  function mpUpdateProgress(){
+  window.mpUpdateProgress = function(){
     if(!currentAudio) return;
     var cur = currentAudio.currentTime || 0;
     var dur = currentAudio.duration;
     var pct = (dur && isFinite(dur)) ? (cur / dur * 100) : 0;
     mpSeekFill.style.width = pct + '%';
-    mpSeekThumb.style.right = (100 - pct) + '%';
     mpSeekThumb.style.right = 'auto';
     mpSeekThumb.style.left  = 'calc(' + pct + '% - 5px)';
     var durStr = (dur && isFinite(dur)) ? fmtTime(dur) : '—';
     mpTime.textContent = fmtTime(cur) + ' / ' + durStr;
-  }
+  };
+  var mpUpdateProgress = window.mpUpdateProgress;
 
   // Seek on click / drag
   function seekTo(e){
@@ -12011,10 +12023,12 @@ console.log('✨ Jayana UX v.UX1 chargé');
       if(!audio || audio._v3Hooked) return;
       audio._v3Hooked = true;
       audio.addEventListener('timeupdate', function(){
+        // Appelle la version window (exposée par le mini player)
         if(window.mpUpdateProgress) window.mpUpdateProgress();
       });
       audio.addEventListener('play', function(){
         if(window.mpUpdate)           window.mpUpdate();
+        if(window.mpUpdateProgress)   window.mpUpdateProgress();
         if(window.mpUpdateMode)       window.mpUpdateMode();
         if(window.mpCheckGameState)   window.mpCheckGameState();
         if(window.updateTop50PlayBtn) window.updateTop50PlayBtn();
@@ -12027,6 +12041,9 @@ console.log('✨ Jayana UX v.UX1 chargé');
       audio.addEventListener('ended', function(){
         if(window.mpUpdate)           window.mpUpdate();
         if(window.updateTop50PlayBtn) window.updateTop50PlayBtn();
+      });
+      audio.addEventListener('loadedmetadata', function(){
+        if(window.mpUpdateProgress) window.mpUpdateProgress();
       });
     }
 
@@ -12201,7 +12218,19 @@ console.log('✨ Jayana UX v.UX1 chargé');
       'body.perf-hidden *{animation-play-state:paused !important;}' +
       '.section{contain:layout;}' +
       '.bottom-nav{contain:layout style;}' +
-      '.song,.sp-song{contain:layout style;}';
+      '.song,.sp-song{contain:layout style;}' +
+      /* Désactive backdrop-filter sur iOS ≤ 15 (iPhone 12 max iOS 15.8) pour éviter la surchauffe GPU */
+      '@supports not (backdrop-filter: blur(0px)){' +
+        '#searchOverlay,#memoModal,#memoAuthModal,#sgModal,#sgAuthModal,#sgEditModal,' +
+        '#prankOverlay,#prankMenu,#prankMsgModal,#prankGotcha,#prankLock,#prankKeyboard,' +
+        '#prankMemoryOverlay,.prank-toast{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}' +
+      '}' +
+      /* Force GPU layers uniquement sur les éléments animés actifs */
+      '#miniPlayer,#miniPlayer .mp-inner{will-change:transform;}' +
+      /* Réduit les nlPulseRow animations coûteuses */
+      '.sp-song.nl-other-playing.nl-glow-together::after{animation-duration:2s!important;}' +
+      '.sp-song.nl-other-playing.nl-glow-boy::after{animation-duration:2.5s!important;}' +
+      '.sp-song.nl-other-playing.nl-glow-girl::after{animation-duration:2.5s!important;}';
     document.head.appendChild(s);
   })();
 
@@ -12210,7 +12239,7 @@ console.log('✨ Jayana UX v.UX1 chargé');
   ══════════════════════════════════════════════════════ */
   setTimeout(function(){
     console.log(
-      '⚡ Jayana Perf v3.0\n' +
+      '⚡ Jayana Perf v3.1\n' +
       '  ✓ 1 seul RAF canvas (animP original stoppé)\n' +
       '  ✓ 250ms mini player supprimé → event-driven\n' +
       '  ✓ 500ms top50 supprimé → event-driven\n' +
@@ -12218,7 +12247,13 @@ console.log('✨ Jayana UX v.UX1 chargé');
       '  ✓ nlPoll original 5s supprimé → 8s visible / 25s si caché\n' +
       '  ✓ animations hors viewport pausées\n' +
       '  ✓ will-change nettoyé\n' +
-      '  ✓ Media Session API active'
+      '  ✓ Media Session API active\n' +
+      '  ✓ [v3.1] mpUpdateProgress exposé → progress bar temps-réel\n' +
+      '  ✓ [v3.1] backdrop-filter désactivé si non supporté (iOS perf)\n' +
+      '  ✓ [v3.1] animations glow/box-shadow allégées\n' +
+      '  ✓ [v3.1] particleCanvas contain:strict\n' +
+      '  ✓ [v3.1] lbSweep: left→transform GPU-composited\n' +
+      '  ✓ [v3.1] loadedmetadata hook pour durée immédiate'
     );
   }, 2000);
 
