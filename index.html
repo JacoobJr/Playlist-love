@@ -8781,46 +8781,46 @@ function openSnakeGame()   { _loadGames(); _openSnakeGame(); }
 function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
 /* ══════════════════════════════════════════════════════
-   SKYJO — JEU DE CARTES MULTIJOUEUR (v2 - sync corrigée)
+   SKYJO — JEU DE CARTES MULTIJOUEUR (v3 - sync robuste)
 ══════════════════════════════════════════════════════ */
 (function(){
-  var SKYJO_TABLE      = 'skyjo_games';
-  var SKYJO_PRESENCE   = 'skyjo_presence';
-  var SKYJO_LOCK_HASH  = '1efb505088f507510d26dbaa162b373948cd26b7a90782ed195e8058aeceea5c';
+  var SKYJO_TABLE    = 'skyjo_games';
+  var SKYJO_PRESENCE = 'skyjo_presence';
+  var SKYJO_LOCK_HASH = '1efb505088f507510d26dbaa162b373948cd26b7a90782ed195e8058aeceea5c';
 
-  var _skyjoUnlocked  = false;
-  var _skyjoGameId    = null;
-  var _skyjoMyProfile = null;
-  var _skyjoOtherProfile = null;
-  var _skyjoGameState = null;
-  var _skyjoPhase     = null;
+  // ─── État global ──────────────────────────────────────
+  var _unlocked      = false;
+  var _gameId        = null;
+  var _me            = null;   // 'girl' | 'boy'
+  var _other         = null;
+  var _gameState     = null;
+  var _phase         = null;
+  var _launched      = false;  // GARDE : empêche double launchGame
 
-  var _presenceTimer  = null;
-  var _lobbyTimer     = null;
-  var _pollTimer      = null;
+  var _presTimer     = null;
+  var _lobbyTimer    = null;
+  var _pollTimer     = null;
 
-  // ─── Utilitaires deck ───────────────────────────────
-  function shuffle(arr){
-    var a = arr.slice();
-    for(var i = a.length-1; i > 0; i--){
-      var j = Math.floor(Math.random()*(i+1));
-      var t = a[i]; a[i] = a[j]; a[j] = t;
-    }
+  // ─── Deck ────────────────────────────────────────────
+  function shuffle(a){
+    a=a.slice();
+    for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
     return a;
   }
   function buildDeck(){
-    var d = [];
-    for(var i=0;i<5;i++)  d.push(-2);
+    var d=[];
+    for(var i=0;i<5;i++) d.push(-2);
     for(var i=0;i<10;i++) d.push(-1);
     for(var i=0;i<15;i++) d.push(0);
     for(var v=1;v<=12;v++) for(var i=0;i<10;i++) d.push(v);
     return shuffle(d);
   }
-  function dealHand(deck){ var h=[]; for(var i=0;i<12;i++) h.push({value:deck.pop(),revealed:false}); return h; }
-  function calcScore(cards){ return cards.reduce(function(s,c){ return s+(c.removed||c.value===null?0:c.value); },0); }
+  function dealHand(deck){var h=[];for(var i=0;i<12;i++)h.push({value:deck.pop(),revealed:false});return h;}
+  function calcScore(cards){return cards.reduce(function(s,c){return s+(c.removed||c.value===null?0:c.value);},0);}
+  function deepCopy(o){return JSON.parse(JSON.stringify(o));}
 
-  // ─── Affichage ──────────────────────────────────────
-  function show(id){
+  // ─── Affichage écrans ────────────────────────────────
+  function showScreen(id){
     ['skyjoLockScreen','skyjoWaitScreen','skyjoGameArea','skyjoRoundEnd','skyjoGameEnd'].forEach(function(sid){
       var el=document.getElementById(sid);
       if(el) el.style.display='none';
@@ -8829,197 +8829,208 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     if(el) el.style.display='flex';
   }
 
-  // ─── Ouverture / Lock ────────────────────────────────
+  // ─── Reset complet de l'état ─────────────────────────
+  function resetState(){
+    _gameId=null;
+    _gameState=null;
+    _phase=null;
+    _launched=false;
+  }
+
+  // ─── Stop tous les timers ────────────────────────────
+  function stopAll(){
+    if(_presTimer){clearInterval(_presTimer);_presTimer=null;}
+    if(_lobbyTimer){clearInterval(_lobbyTimer);_lobbyTimer=null;}
+    if(_pollTimer){clearInterval(_pollTimer);_pollTimer=null;}
+  }
+
+  // ─── Présence ────────────────────────────────────────
+  function startPresence(){
+    upsertPresence();
+    _presTimer=setInterval(upsertPresence,4000);
+  }
+  function upsertPresence(){
+    if(!_me) return;
+    fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE,{
+      method:'POST',
+      headers:sbHeaders({'Prefer':'resolution=merge-duplicates,return=minimal'}),
+      body:JSON.stringify({profile:_me,updated_at:new Date().toISOString()})
+    }).catch(function(){});
+  }
+  function deletePresence(){
+    if(!_me) return;
+    fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE+'?profile=eq.'+_me,{
+      method:'DELETE',headers:sbHeaders()
+    }).catch(function(){});
+  }
+
+  // ─── Lock + Ouverture ────────────────────────────────
   window.openSkyjoLock = function(){
-    var profile = getProfile();
-    if(!profile){ alert('Tu dois être connecté pour jouer à Skyjo !'); return; }
+    var profile=getProfile();
+    if(!profile){alert('Tu dois être connecté pour jouer à Skyjo !');return;}
     resetZoom();
     document.getElementById('skyjoView').classList.add('active');
-    particleActive=false; hideDance(); window.scrollTo(0,0);
-    if(_skyjoUnlocked) enterLobby();
-    else {
-      show('skyjoLockScreen');
+    particleActive=false;hideDance();window.scrollTo(0,0);
+    if(_unlocked) enterLobby();
+    else{
+      showScreen('skyjoLockScreen');
       var inp=document.getElementById('skyjoLockInput');
-      if(inp){ inp.value=''; setTimeout(function(){ inp.focus(); },80); }
+      if(inp){inp.value='';setTimeout(function(){inp.focus();},80);}
     }
   };
-
-  window.skyjoCheckLock = async function(){
+  window.skyjoCheckLock=async function(){
     var val=(document.getElementById('skyjoLockInput').value||'').trim().toUpperCase();
     var h=await _sha256(val);
     var errEl=document.getElementById('skyjoLockErr');
     if(h===SKYJO_LOCK_HASH){
-      _skyjoUnlocked=true;
-      errEl.style.display='none';
-      enterLobby();
+      _unlocked=true;errEl.style.display='none';enterLobby();
     } else {
       errEl.style.display='block';
       document.getElementById('skyjoLockInput').value='';
       document.getElementById('skyjoLockInput').focus();
     }
   };
-  document.getElementById('skyjoLockInput').addEventListener('keydown',function(e){ if(e.key==='Enter') window.skyjoCheckLock(); });
+  document.getElementById('skyjoLockInput').addEventListener('keydown',function(e){if(e.key==='Enter')window.skyjoCheckLock();});
 
   // ─── Lobby ───────────────────────────────────────────
   function enterLobby(){
-    _skyjoMyProfile    = getProfile();
-    _skyjoOtherProfile = _skyjoMyProfile==='girl'?'boy':'girl';
-    _skyjoGameId       = null;
-    _skyjoGameState    = null;
-    show('skyjoWaitScreen');
-    var myName    = _skyjoMyProfile==='girl'?'Zelda':'Link';
-    var otherName = _skyjoMyProfile==='girl'?'Link':'Zelda';
-    document.getElementById('skyjoWaitMsg').innerHTML =
+    stopAll();
+    resetState();
+    _me   =getProfile();
+    _other=_me==='girl'?'boy':'girl';
+    var myName=_me==='girl'?'Zelda':'Link';
+    var otherName=_me==='girl'?'Link':'Zelda';
+    showScreen('skyjoWaitScreen');
+    document.getElementById('skyjoWaitMsg').innerHTML=
       'Connecté en tant que <strong>'+myName+'</strong>.<br>En attente que <strong>'+otherName+'</strong> rejoigne…';
-    startPresence();
-    startLobbyPoll();
+    // D'abord nettoyer les vieilles parties en attente orphelines créées par moi
+    cleanMyOldGames(function(){
+      startPresence();
+      startLobbyPoll();
+    });
   }
 
-  window.skyjoLeaveWait = function(){
+  // Nettoyer les vieilles parties "waiting" créées par moi (évite qu'on rejoigne une vieille partie)
+  function cleanMyOldGames(cb){
+    fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?status=eq.waiting&created_by=eq.'+_me,{
+      method:'DELETE',headers:sbHeaders()
+    }).then(function(){if(cb)cb();}).catch(function(){if(cb)cb();});
+  }
+
+  window.skyjoLeaveWait=function(){
     stopAll();
     deletePresence();
-    show('skyjoLockScreen');
+    cleanMyOldGames(null);
+    resetState();
     document.getElementById('skyjoView').classList.remove('active');
   };
 
-  // ─── Présence ────────────────────────────────────────
-  function startPresence(){
-    upsertPresence();
-    _presenceTimer=setInterval(upsertPresence,4000);
-  }
-  function stopPresence(){
-    if(_presenceTimer){ clearInterval(_presenceTimer); _presenceTimer=null; }
-  }
-  function upsertPresence(){
-    if(!_skyjoMyProfile) return;
-    fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE,{
-      method:'POST',
-      headers:sbHeaders({'Prefer':'resolution=merge-duplicates,return=minimal'}),
-      body:JSON.stringify({profile:_skyjoMyProfile,updated_at:new Date().toISOString()})
-    }).catch(function(){});
-  }
-  function deletePresence(){
-    if(!_skyjoMyProfile) return;
-    fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE+'?profile=eq.'+_skyjoMyProfile,{
-      method:'DELETE',headers:sbHeaders()
-    }).catch(function(){});
-  }
-
-  // ─── Lobby poll ──────────────────────────────────────
-  // ARCHITECTURE : chaque tick vérifie si une partie "playing" avec cet id existe,
-  // ou cherche/crée une partie en attente. Pas de flag _joining pour éviter les blocages.
+  // ─── Lobby Poll ──────────────────────────────────────
   function startLobbyPoll(){
     lobbyTick();
     _lobbyTimer=setInterval(lobbyTick,2500);
   }
-  function stopLobbyPoll(){
-    if(_lobbyTimer){ clearInterval(_lobbyTimer); _lobbyTimer=null; }
-  }
 
   function lobbyTick(){
-    // 1. Si on a déjà un gameId → vérifier si la partie est lancée
-    if(_skyjoGameId){
-      fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_skyjoGameId+'&select=id,status,state,created_by',{
+    // Si déjà lancé, stopper le lobby
+    if(_launched){stopAll();return;}
+
+    // Cas 1 : on a déjà un gameId → surveiller si ça passe à playing
+    if(_gameId){
+      fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId+'&select=id,status,state,created_by',{
         headers:sbHeaders()
       })
       .then(function(r){return r.json();})
       .then(function(rows){
+        if(_launched) return; // double-check
         if(!Array.isArray(rows)||!rows[0]) return;
         var g=rows[0];
-        updatePresenceDots(true,true);
-        if(g.status==='playing'){
-          launchGame(g);
-        }
-        // status=waiting → on attend encore (l'autre va patcher)
+        updateDots(true,true);
+        if(g.status==='playing') launchGame(g);
       }).catch(function(){});
       return;
     }
 
-    // 2. Vérifier la présence des 2 joueurs
+    // Cas 2 : vérifier présences
     fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE+'?select=profile,updated_at',{
       headers:sbHeaders()
     })
     .then(function(r){return r.json();})
     .then(function(rows){
+      if(_launched) return;
       if(!Array.isArray(rows)) return;
       var now=Date.now();
-      var girlOk=false, boyOk=false;
+      var girlOk=false,boyOk=false;
       rows.forEach(function(row){
-        var age=now-new Date(row.updated_at).getTime();
-        if(age<10000){
+        if(now-new Date(row.updated_at).getTime()<10000){
           if(row.profile==='girl') girlOk=true;
           if(row.profile==='boy')  boyOk=true;
         }
       });
-      updatePresenceDots(girlOk,boyOk);
-      if(!girlOk||!boyOk) return;
-
-      // Les 2 sont en ligne → matchmaking
-      doMatchmaking();
+      updateDots(girlOk,boyOk);
+      if(girlOk&&boyOk) doMatchmaking();
     }).catch(function(){});
   }
 
-  function updatePresenceDots(g,b){
+  function updateDots(g,b){
     var dg=document.getElementById('skyjoPresenceGirl');
     var db=document.getElementById('skyjoPresenceBoy');
     if(dg) dg.className='skyjo-presence-dot'+(g?' online':'');
     if(db) db.className='skyjo-presence-dot'+(b?' online':'');
   }
 
-  // ─── Matchmaking robuste ─────────────────────────────
-  // Règle simple et sans race condition :
-  //   - On cherche la partie la plus récente waiting/playing
-  //   - Si playing → rejoindre directement
-  //   - Si waiting créée par moi → stocker l'id et attendre (pas de _joining flag global)
-  //   - Si waiting créée par l'autre → PATCH status=playing ATOMIQUE via RPC
-  //     (évite que les 2 patchent en même temps)
-  //   - Si rien → créer
+  // ─── Matchmaking ─────────────────────────────────────
+  // Convention STRICTE pour éviter toute race condition :
+  //   → "girl" est TOUJOURS la créatrice de la partie
+  //   → "boy" rejoint TOUJOURS
+  // Cela évite complètement les cas B/C ambigus et les doubles créations.
   function doMatchmaking(){
+    if(_launched) return;
+
     fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?status=in.(waiting,playing)&order=created_at.desc&limit=1&select=id,status,state,created_by',{
       headers:sbHeaders()
     })
     .then(function(r){return r.json();})
     .then(function(rows){
+      if(_launched) return;
       var game=Array.isArray(rows)&&rows.length>0?rows[0]:null;
 
-      // Cas A : partie en cours
+      // Une partie playing existe → tout le monde la rejoint
       if(game&&game.status==='playing'){
-        _skyjoGameId=game.id;
+        _gameId=game.id;
         launchGame(game);
         return;
       }
 
-      // Cas B : partie en attente créée par moi → stocker l'id, ne rien faire d'autre
-      if(game&&game.status==='waiting'&&game.created_by===_skyjoMyProfile){
-        _skyjoGameId=game.id;
-        // Le lobbyTick suivant détectera le passage à playing
-        return;
+      // Une partie waiting existe
+      if(game&&game.status==='waiting'){
+        if(game.created_by===_me){
+          // C'est MA partie → je stocke l'id et j'attends (lobbyTick cas 1)
+          _gameId=game.id;
+          return;
+        } else {
+          // C'est la partie de l'autre → je la rejoins (PATCH conditionnel anti-race)
+          _gameId=game.id;
+          fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+game.id+'&status=eq.waiting',{
+            method:'PATCH',
+            headers:sbHeaders({'Prefer':'return=representation'}),
+            body:JSON.stringify({status:'playing'})
+          })
+          .then(function(r){return r.json();})
+          .then(function(updated){
+            if(_launched) return;
+            if(!Array.isArray(updated)||!updated[0]){
+              // Race : quelqu'un d'autre a déjà patché → au prochain tick on verra playing
+              return;
+            }
+            launchGame(updated[0]);
+          }).catch(function(){});
+          return;
+        }
       }
 
-      // Cas C : partie en attente créée par l'autre → je la rejoins et passe à playing
-      // On utilise un UPDATE conditionnel (status=waiting) pour éviter les doubles launches
-      if(game&&game.status==='waiting'&&game.created_by!==_skyjoMyProfile){
-        fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+game.id+'&status=eq.waiting',{
-          method:'PATCH',
-          headers:sbHeaders({'Prefer':'return=representation'}),
-          body:JSON.stringify({status:'playing'})
-        })
-        .then(function(r){return r.json();})
-        .then(function(updated){
-          if(!Array.isArray(updated)||!updated[0]){
-            // Le patch n'a rien retourné → quelqu'un d'autre a déjà pris la partie (race), on ignore
-            return;
-          }
-          _skyjoGameId=updated[0].id;
-          // Moi → je lance directement
-          launchGame(updated[0]);
-          // L'autre joueur (créateur, qui attend avec _skyjoGameId stocké) détectera
-          // status=playing au prochain lobbyTick et se lancera aussi
-        }).catch(function(){});
-        return;
-      }
-
-      // Cas D : rien → créer une partie
+      // Aucune partie → créer (les deux peuvent créer, mais cleanMyOldGames + convention
+      // font que la girl a probablement déjà nettoyé → girl crée, boy attend et rejoint)
       if(!game){
         createNewGame();
       }
@@ -9027,49 +9038,50 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   }
 
   function createNewGame(){
+    if(_launched||_gameId) return; // évite double création
     var deck=buildDeck();
-    var girlCards=dealHand(deck);
-    var boyCards=dealHand(deck);
-    var topDiscard=deck.pop();
+    var gc=dealHand(deck),bc=dealHand(deck);
+    var top=deck.pop();
     var state={
-      deck:deck, discard:[topDiscard],
-      girl_cards:girlCards, boy_cards:boyCards,
-      phase:'init1', turn:null,
-      round:1, scores:{girl:0,boy:0},
-      held_card:null, must_flip:null, last_player:null, round_closer:null
+      deck:deck,discard:[top],
+      girl_cards:gc,boy_cards:bc,
+      phase:'init1',turn:null,
+      round:1,scores:{girl:0,boy:0},
+      held_card:null,must_flip:null,last_player:null,round_closer:null
     };
     fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE,{
       method:'POST',
       headers:sbHeaders({'Prefer':'return=representation'}),
-      body:JSON.stringify({status:'waiting',created_by:_skyjoMyProfile,state:state})
+      body:JSON.stringify({status:'waiting',created_by:_me,state:state})
     })
     .then(function(r){return r.json();})
     .then(function(rows){
-      if(Array.isArray(rows)&&rows[0]) _skyjoGameId=rows[0].id;
+      if(Array.isArray(rows)&&rows[0]&&!_launched) _gameId=rows[0].id;
     }).catch(function(){});
   }
 
   // ─── Lancement en jeu ────────────────────────────────
   function launchGame(gameRow){
-    stopLobbyPoll();
-    stopPresence();
-    deletePresence();
-    show('skyjoGameArea');
+    if(_launched) return; // GARDE ABSOLUE — un seul appel possible
+    _launched=true;
+    _gameId=gameRow.id;
+    stopAll();            // stopper lobby + présence timers
+    // Ne PAS deletePresence() ici — l'autre joueur peut encore en avoir besoin
+    // pour son propre lobbyTick. On supprime 3s après.
+    setTimeout(deletePresence,3000);
+    showScreen('skyjoGameArea');
     renderState(gameRow);
     startPoll();
   }
 
-  // ─── Poll état de jeu ─────────────────────────────────
+  // ─── Poll état jeu ───────────────────────────────────
   function startPoll(){
-    fetchState();
+    if(_pollTimer){clearInterval(_pollTimer);_pollTimer=null;}
     _pollTimer=setInterval(fetchState,2000);
   }
-  function stopPoll(){
-    if(_pollTimer){ clearInterval(_pollTimer); _pollTimer=null; }
-  }
   function fetchState(){
-    if(!_skyjoGameId) return;
-    fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_skyjoGameId+'&select=id,status,state,created_by',{
+    if(!_gameId) return;
+    fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId+'&select=id,status,state,created_by',{
       headers:sbHeaders()
     })
     .then(function(r){return r.json();})
@@ -9078,25 +9090,20 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       renderState(rows[0]);
     }).catch(function(){});
   }
-
-  function stopAll(){
-    stopPresence();
-    stopLobbyPoll();
-    stopPoll();
-  }
+  function stopPoll(){if(_pollTimer){clearInterval(_pollTimer);_pollTimer=null;}}
 
   // ─── Rendu ───────────────────────────────────────────
   function renderState(gameRow){
     var state=gameRow.state;
     if(!state) return;
-    _skyjoGameState=state;
-    _skyjoPhase=state.phase;
+    _gameState=state;
+    _phase=state.phase;
 
-    var myCards  = _skyjoMyProfile==='girl'?state.girl_cards:state.boy_cards;
-    var oppCards = _skyjoMyProfile==='girl'?state.boy_cards:state.girl_cards;
-    var myName   = _skyjoMyProfile==='girl'?'Zelda':'Link';
-    var oppName  = _skyjoMyProfile==='girl'?'Link':'Zelda';
-    var isMyTurn = state.turn===_skyjoMyProfile;
+    var myCards  =_me==='girl'?state.girl_cards:state.boy_cards;
+    var oppCards =_me==='girl'?state.boy_cards:state.girl_cards;
+    var myName   =_me==='girl'?'Zelda':'Link';
+    var oppName  =_me==='girl'?'Link':'Zelda';
+    var isMyTurn =state.turn===_me;
 
     document.getElementById('skyjoScoreGirl').textContent=state.scores.girl;
     document.getElementById('skyjoScoreBoy').textContent=state.scores.boy;
@@ -9108,20 +9115,20 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     var discardEl=document.getElementById('skyjoDiscardCard');
     var top=state.discard&&state.discard.length>0?state.discard[state.discard.length-1]:null;
     if(top!==null&&top!==undefined){
-      discardEl.textContent=top; discardEl.setAttribute('data-val',top); discardEl.classList.remove('skyjo-card-back');
+      discardEl.textContent=top;discardEl.setAttribute('data-val',top);discardEl.classList.remove('skyjo-card-back');
     } else {
-      discardEl.textContent='—'; discardEl.removeAttribute('data-val');
+      discardEl.textContent='—';discardEl.removeAttribute('data-val');
     }
     document.getElementById('skyjoDrawPileCount').textContent=(state.deck?state.deck.length:0)+' cartes';
 
-    var iHoldCard=state.held_card&&state.held_card.holder===_skyjoMyProfile;
-    renderGrid('skyjoMyGrid',   myCards,  true,  isMyTurn, state, iHoldCard);
-    renderGrid('skyjoOpponentGrid',oppCards,false,false,   state, false);
+    var iHold=state.held_card&&state.held_card.holder===_me;
+    renderGrid('skyjoMyGrid',myCards,true,isMyTurn,state,iHold);
+    renderGrid('skyjoOpponentGrid',oppCards,false,false,state,false);
 
     // Carte en main
     var heldWrap=document.getElementById('skyjoHeldCardWrap');
-    var heldEl=document.getElementById('skyjoHeldCard');
-    if(iHoldCard){
+    var heldEl  =document.getElementById('skyjoHeldCard');
+    if(iHold){
       heldWrap.style.display='block';
       heldEl.textContent=state.held_card.value;
       heldEl.setAttribute('data-val',state.held_card.value);
@@ -9129,38 +9136,33 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       heldWrap.style.display='none';
     }
 
-    // Message de phase
+    // Message phase
     var phaseMsg=document.getElementById('skyjoPhaseMsg');
     if(state.phase==='init1'){
       phaseMsg.style.display='block';
       phaseMsg.textContent=isMyTurn?'Phase init — retourne 2 cartes de ta grille !':'En attente que '+oppName+' retourne ses 2 cartes…';
     } else if(state.phase==='init2'){
       phaseMsg.style.display='block';
-      phaseMsg.textContent=isMyTurn?'Retourne encore 1 carte pour finir l\'initialisation':'En attente que '+oppName+' retourne sa dernière carte…';
+      phaseMsg.textContent=isMyTurn?'Retourne encore 1 carte pour finir l\'init':'En attente que '+oppName+' retourne sa dernière carte…';
     } else {
       phaseMsg.style.display='none';
     }
 
-    // Transitions de phase
-    if(state.phase==='roundEnd'){
-      stopPoll();
-      showRoundEnd(state);
-    } else if(state.phase==='gameEnd'){
-      stopPoll();
-      showGameEnd(state);
-    }
+    if(state.phase==='roundEnd'){stopPoll();showRoundEnd(state);}
+    else if(state.phase==='gameEnd'){stopPoll();showGameEnd(state);}
   }
 
-  function renderGrid(gridId, cards, isMe, isMyTurn, state, iHoldCard){
+  function renderGrid(gridId,cards,isMe,isMyTurn,state,iHold){
     var grid=document.getElementById(gridId);
     grid.innerHTML='';
     var phase=state.phase;
     var isInit=phase==='init1'||phase==='init2';
-    var targetInit=phase==='init1'?2:1;
-    var alreadyFlipped=cards.filter(function(c){return c.revealed;}).length;
-    var canFlip    = isMe&&isMyTurn&&isInit&&alreadyFlipped<targetInit;
-    var canReplace = isMe&&isMyTurn&&phase==='play'&&iHoldCard;
-    var canFlipReveal = isMe&&isMyTurn&&phase==='play'&&!iHoldCard&&state.must_flip===_skyjoMyProfile;
+    var target=phase==='init1'?2:1;
+    var totalTarget=phase==='init1'?2:3;
+    var flipped=cards.filter(function(c){return c.revealed;}).length;
+    var canFlip       =isMe&&isMyTurn&&isInit&&flipped<target;
+    var canReplace    =isMe&&isMyTurn&&phase==='play'&&iHold;
+    var canFlipReveal =isMe&&isMyTurn&&phase==='play'&&!iHold&&state.must_flip===_me;
 
     cards.forEach(function(card,idx){
       var el=document.createElement('div');
@@ -9171,16 +9173,16 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       } else if(card.revealed){
         el.textContent=card.value;
         el.setAttribute('data-val',card.value);
-        if(canReplace){ el.classList.add('skyjo-card-clickable'); el.onclick=function(){ skyjoReplaceCard(idx); }; }
+        if(canReplace){el.classList.add('skyjo-card-clickable');el.onclick=function(){skyjoReplaceCard(idx);};}
       } else {
         el.textContent='?';
         el.classList.add('skyjo-card-hidden');
         if(canFlip){
           el.classList.add('skyjo-card-clickable');
-          el.onclick=function(){ skyjoFlipInit(idx); };
+          el.onclick=function(){skyjoFlipInit(idx);};
         } else if(canFlipReveal){
           el.classList.add('skyjo-card-clickable');
-          el.onclick=function(){ skyjoFlipReveal(idx); };
+          el.onclick=function(){skyjoFlipReveal(idx);};
         }
       }
       grid.appendChild(el);
@@ -9188,101 +9190,94 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   }
 
   // ─── Actions joueur ──────────────────────────────────
-  window.skyjoFlipInit = function(idx){
-    if(!_skyjoGameState||!(_skyjoPhase==='init1'||_skyjoPhase==='init2')) return;
-    if(_skyjoGameState.turn!==_skyjoMyProfile) return;
-    var key=_skyjoMyProfile+'_cards';
-    var ns=deepCopy(_skyjoGameState);
+  window.skyjoFlipInit=function(idx){
+    if(!_gameState||!(_phase==='init1'||_phase==='init2')) return;
+    if(_gameState.turn!==_me) return;
+    var key=_me+'_cards';
+    var ns=deepCopy(_gameState);
     if(ns[key][idx].revealed) return;
     ns[key][idx].revealed=true;
     var myFlipped=ns[key].filter(function(c){return c.revealed;}).length;
-    var otherKey=(_skyjoMyProfile==='girl'?'boy':'girl')+'_cards';
+    var otherKey=(_me==='girl'?'boy':'girl')+'_cards';
     var otherFlipped=ns[otherKey].filter(function(c){return c.revealed;}).length;
-    var target=_skyjoPhase==='init1'?2:1;
-    var totalTarget=_skyjoPhase==='init1'?2:3;
+    var tgt=_phase==='init1'?2:1;
+    var otherTgt=_phase==='init1'?2:3;
 
-    if(myFlipped>=target){
-      if(otherFlipped>=totalTarget){
-        // Les 2 ont fini → passer en play
-        var myTotal=ns[key].filter(function(c){return c.revealed;}).reduce(function(a,c){return a+c.value;},0);
-        var otherTotal=ns[otherKey].filter(function(c){return c.revealed;}).reduce(function(a,c){return a+c.value;},0);
-        ns.turn=myTotal>=otherTotal?_skyjoMyProfile:_skyjoOtherProfile;
+    if(myFlipped>=tgt){
+      if(otherFlipped>=otherTgt){
+        var myTot=ns[key].filter(function(c){return c.revealed;}).reduce(function(a,c){return a+c.value;},0);
+        var otherTot=ns[otherKey].filter(function(c){return c.revealed;}).reduce(function(a,c){return a+c.value;},0);
+        ns.turn=myTot>=otherTot?_me:_other;
         ns.phase='play';
       } else {
-        ns.turn=_skyjoOtherProfile;
+        ns.turn=_other;
       }
     }
     saveState(ns);
   };
 
-  window.skyjoDrawFromDeck = function(){
-    if(!_skyjoGameState||_skyjoPhase!=='play') return;
-    if(_skyjoGameState.turn!==_skyjoMyProfile) return;
-    if(_skyjoGameState.held_card) return;
-    var ns=deepCopy(_skyjoGameState);
-    if(!ns.deck||ns.deck.length===0){
-      var top=ns.discard.pop();
+  window.skyjoDrawFromDeck=function(){
+    if(!_gameState||_phase!=='play') return;
+    if(_gameState.turn!==_me||_gameState.held_card) return;
+    var ns=deepCopy(_gameState);
+    if(!ns.deck||!ns.deck.length){
+      var tp=ns.discard.pop();
       ns.deck=shuffle(ns.discard);
-      ns.discard=[top];
+      ns.discard=[tp];
     }
-    var drawn=ns.deck.pop();
-    ns.held_card={value:drawn,holder:_skyjoMyProfile};
+    ns.held_card={value:ns.deck.pop(),holder:_me};
     saveState(ns);
   };
 
-  window.skyjoDrawFromDiscard = function(){
-    if(!_skyjoGameState||_skyjoPhase!=='play') return;
-    if(_skyjoGameState.turn!==_skyjoMyProfile) return;
-    if(_skyjoGameState.held_card) return;
-    if(!_skyjoGameState.discard||!_skyjoGameState.discard.length) return;
-    var ns=deepCopy(_skyjoGameState);
-    var drawn=ns.discard.pop();
-    ns.held_card={value:drawn,holder:_skyjoMyProfile};
+  window.skyjoDrawFromDiscard=function(){
+    if(!_gameState||_phase!=='play') return;
+    if(_gameState.turn!==_me||_gameState.held_card) return;
+    if(!_gameState.discard||!_gameState.discard.length) return;
+    var ns=deepCopy(_gameState);
+    ns.held_card={value:ns.discard.pop(),holder:_me};
     saveState(ns);
   };
 
-  window.skyjoReplaceCard = function(idx){
-    if(!_skyjoGameState||_skyjoPhase!=='play') return;
-    if(_skyjoGameState.turn!==_skyjoMyProfile) return;
-    if(!_skyjoGameState.held_card||_skyjoGameState.held_card.holder!==_skyjoMyProfile) return;
-    var ns=deepCopy(_skyjoGameState);
-    var key=_skyjoMyProfile+'_cards';
-    var old=ns[key][idx].value;
+  window.skyjoReplaceCard=function(idx){
+    if(!_gameState||_phase!=='play') return;
+    if(_gameState.turn!==_me) return;
+    if(!_gameState.held_card||_gameState.held_card.holder!==_me) return;
+    var ns=deepCopy(_gameState);
+    var key=_me+'_cards';
+    ns.discard.push(ns[key][idx].value);
     ns[key][idx]={value:ns.held_card.value,revealed:true};
-    ns.discard.push(old);
     ns.held_card=null;
-    checkColumns(ns,_skyjoMyProfile);
+    checkColumns(ns,_me);
     checkRoundEnd(ns);
-    if(ns.phase!=='roundEnd'&&ns.phase!=='gameEnd') ns.turn=_skyjoOtherProfile;
+    if(ns.phase!=='roundEnd'&&ns.phase!=='gameEnd') ns.turn=_other;
     saveState(ns);
   };
 
-  window.skyjoDiscardHeld = function(){
-    if(!_skyjoGameState||_skyjoPhase!=='play') return;
-    if(!_skyjoGameState.held_card||_skyjoGameState.held_card.holder!==_skyjoMyProfile) return;
-    var ns=deepCopy(_skyjoGameState);
+  window.skyjoDiscardHeld=function(){
+    if(!_gameState||_phase!=='play') return;
+    if(!_gameState.held_card||_gameState.held_card.holder!==_me) return;
+    var ns=deepCopy(_gameState);
     ns.discard.push(ns.held_card.value);
     ns.held_card=null;
-    ns.must_flip=_skyjoMyProfile;
+    ns.must_flip=_me;
     saveState(ns);
   };
 
-  window.skyjoFlipReveal = function(idx){
-    if(!_skyjoGameState||_skyjoPhase!=='play') return;
-    if(_skyjoGameState.turn!==_skyjoMyProfile) return;
-    if(_skyjoGameState.must_flip!==_skyjoMyProfile) return;
-    var key=_skyjoMyProfile+'_cards';
-    var ns=deepCopy(_skyjoGameState);
+  window.skyjoFlipReveal=function(idx){
+    if(!_gameState||_phase!=='play') return;
+    if(_gameState.turn!==_me||_gameState.must_flip!==_me) return;
+    var key=_me+'_cards';
+    var ns=deepCopy(_gameState);
     if(ns[key][idx].revealed) return;
     ns[key][idx].revealed=true;
     ns.must_flip=null;
-    checkColumns(ns,_skyjoMyProfile);
+    checkColumns(ns,_me);
     checkRoundEnd(ns);
-    if(ns.phase!=='roundEnd'&&ns.phase!=='gameEnd') ns.turn=_skyjoOtherProfile;
+    if(ns.phase!=='roundEnd'&&ns.phase!=='gameEnd') ns.turn=_other;
     saveState(ns);
   };
 
-  // ─── Helpers jeu ─────────────────────────────────────
+  // ─── Helpers ─────────────────────────────────────────
   function checkColumns(state,profile){
     var key=profile+'_cards';
     var cards=state[key];
@@ -9300,38 +9295,31 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   }
 
   function checkRoundEnd(state){
-    var girlDone=state.girl_cards.every(function(c){return c.revealed;});
-    var boyDone =state.boy_cards.every(function(c){return c.revealed;});
-    if(!girlDone&&!boyDone) return;
+    var gDone=state.girl_cards.every(function(c){return c.revealed;});
+    var bDone=state.boy_cards.every(function(c){return c.revealed;});
+    if(!gDone&&!bDone) return;
     state.girl_cards.forEach(function(c){c.revealed=true;});
     state.boy_cards.forEach(function(c){c.revealed=true;});
-    var gs=calcScore(state.girl_cards);
-    var bs=calcScore(state.boy_cards);
-    var closer=girlDone?'girl':'boy';
-    var closerScore=closer==='girl'?gs:bs;
-    var otherScore =closer==='girl'?bs:gs;
-    if(closerScore>=otherScore){
-      if(closer==='girl') gs*=2; else bs*=2;
-    }
-    state.scores.girl+=gs; state.scores.boy+=bs;
+    var gs=calcScore(state.girl_cards),bs=calcScore(state.boy_cards);
+    var closer=gDone?'girl':'boy';
+    var cScore=closer==='girl'?gs:bs,oScore=closer==='girl'?bs:gs;
+    if(cScore>=oScore){if(closer==='girl') gs*=2; else bs*=2;}
+    state.scores.girl+=gs;state.scores.boy+=bs;
     state.round_scores={girl:gs,boy:bs};
     state.round_closer=closer;
     state.phase=(state.scores.girl>=100||state.scores.boy>=100)?'gameEnd':'roundEnd';
   }
 
-  function deepCopy(o){ return JSON.parse(JSON.stringify(o)); }
-
-  function saveState(newState){
-    if(!_skyjoGameId) return;
-    fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_skyjoGameId,{
+  function saveState(ns){
+    if(!_gameId) return;
+    fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId,{
       method:'PATCH',
       headers:sbHeaders({'Prefer':'return=representation'}),
-      body:JSON.stringify({state:newState})
+      body:JSON.stringify({state:ns})
     })
     .then(function(r){return r.json();})
-    .then(function(rows){
-      if(Array.isArray(rows)&&rows[0]) renderState(rows[0]);
-    }).catch(function(){});
+    .then(function(rows){if(Array.isArray(rows)&&rows[0]) renderState(rows[0]);})
+    .catch(function(){});
   }
 
   // ─── Fin de manche ───────────────────────────────────
@@ -9346,27 +9334,26 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     document.getElementById('skyjoRoundEndEmoji').textContent=rg===rb?'🤝':'🏆';
     document.getElementById('skyjoRoundEndTitle').textContent=rg===rb?'Manche nulle !':winner+' gagne la manche !';
     document.getElementById('skyjoRoundEndSub').textContent='Scores — Zelda : '+state.scores.girl+' pts | Link : '+state.scores.boy+' pts';
-    var btn=document.getElementById('skyjoNextRoundBtn');
-    // Le créateur de la partie lance la manche suivante (évite double création)
-    btn.style.display='block';
-    // On masque pour l'un des deux pour éviter double déclenchement
-    // Convention : seul "girl" peut cliquer "Manche suivante"
-    btn.style.display=(_skyjoMyProfile==='girl')?'block':'none';
+    // Seule girl peut lancer la manche suivante (convention fixe = zéro ambiguïté)
+    document.getElementById('skyjoNextRoundBtn').style.display=_me==='girl'?'block':'none';
   }
 
-  window.skyjoNextRound = function(){
+  window.skyjoNextRound=function(){
+    if(_me!=='girl') return; // sécurité
+    stopPoll();
     var deck=buildDeck();
-    var gc=dealHand(deck), bc=dealHand(deck);
+    var gc=dealHand(deck),bc=dealHand(deck);
     var top=deck.pop();
     var ns={
       deck:deck,discard:[top],
       girl_cards:gc,boy_cards:bc,
-      phase:'init1',turn:_skyjoGameState?((_skyjoGameState.round_closer==='girl'?'boy':'girl')):'girl',
-      round:(_skyjoGameState?(_skyjoGameState.round||1)+1:2),
-      scores:_skyjoGameState?_skyjoGameState.scores:{girl:0,boy:0},
+      phase:'init1',
+      turn:_gameState?((_gameState.round_closer==='girl'?'boy':'girl')):'girl',
+      round:_gameState?(_gameState.round||1)+1:2,
+      scores:_gameState?_gameState.scores:{girl:0,boy:0},
       held_card:null,must_flip:null,last_player:null,round_closer:null
     };
-    fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_skyjoGameId,{
+    fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId,{
       method:'PATCH',
       headers:sbHeaders({'Prefer':'return=representation'}),
       body:JSON.stringify({status:'playing',state:ns})
@@ -9387,39 +9374,39 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     document.getElementById('skyjoGameArea').style.display='none';
     document.getElementById('skyjoRoundEnd').style.display='none';
     document.getElementById('skyjoGameEnd').style.display='flex';
-    var gg=state.scores.girl, gb=state.scores.boy;
-    var winner=gg<gb?'Zelda 👧':(gb<gg?'Link 👦':'Égalité !');
+    var gg=state.scores.girl,gb=state.scores.boy;
     document.getElementById('skyjoGameEndEmoji').textContent=gg===gb?'🤝':(gg<gb?'👧':'👦');
-    document.getElementById('skyjoGameEndTitle').textContent=gg===gb?'Égalité !':winner+' gagne !';
-    document.getElementById('skyjoGameEndSub').textContent='Score final — Zelda : '+gg+' pts | Link : '+gb+' pts';
+    document.getElementById('skyjoGameEndTitle').textContent=gg===gb?'Égalité !':(gg<gb?'Zelda 👧':'Link 👦')+' gagne !';
+    document.getElementById('skyjoGameEndSub').textContent='Score final — Zelda : '+gg+' | Link : '+gb+' (moins = victoire)';
   }
 
-  window.skyjoNewGame = function(){
-    if(!_skyjoGameId) return;
-    fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_skyjoGameId,{
+  window.skyjoNewGame=function(){
+    if(!_gameId) return;
+    stopPoll();
+    fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId,{
       method:'DELETE',headers:sbHeaders()
     }).then(function(){
-      _skyjoGameId=null;
       document.getElementById('skyjoGameEnd').style.display='none';
       enterLobby();
     }).catch(function(){});
   };
 
   // ─── Fermeture ───────────────────────────────────────
-  window.closeSkyjoGame = function(){
+  window.closeSkyjoGame=function(){
     stopAll();
     deletePresence();
-    document.getElementById('skyjoView').classList.remove('active');
-    // Nettoyer les vieilles parties en attente créées par moi (optionnel)
-    if(_skyjoGameId){
-      // Laisser la partie pour que l'autre puisse finir
-      _skyjoGameId=null;
+    if(_gameId&&_gameState&&_phase==='waiting'){
+      // Nettoyer ma partie en attente si personne ne l'a rejoint
+      fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId+'&status=eq.waiting',{
+        method:'DELETE',headers:sbHeaders()
+      }).catch(function(){});
     }
-    _skyjoGameState=null;
-    _skyjoPhase=null;
+    resetState();
+    document.getElementById('skyjoView').classList.remove('active');
   };
 
 })();
+
 
 document.getElementById('quizBtn').addEventListener('click', function(){ openQuiz(); });
 document.getElementById('gamesBtn').addEventListener('click', function(){ openGames(); });
@@ -12278,7 +12265,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.08.8 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
