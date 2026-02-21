@@ -3831,10 +3831,28 @@ body.light #counterBlock.glowing .c-num-big {
         <svg id="top50IconPlay" viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px;margin-left:2px"><path d="M8 5v14l11-7z"/></svg>
         <svg id="top50IconPause" viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px;display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
       </button>
-      <button class="top50-mode-btn" id="top50ModeBtn" title="Mode de lecture">
-        <svg id="modeIconOrder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-        <svg id="modeIconShuffle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
-        <svg id="modeIconRepeat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/><text x="9" y="19" font-size="7" fill="currentColor" stroke="none" font-weight="700" font-family="sans-serif">1</text></svg>
+      <button class="top50-mode-btn" id="top50ModeBtn" title="Répéter tout">
+        <!-- Ordre -->
+        <svg id="modeIconOrder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>
+          <polyline points="16 9 20 6 16 3"/>
+        </svg>
+        <!-- Aléatoire -->
+        <svg id="modeIconShuffle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/>
+          <polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/>
+        </svg>
+        <!-- Répéter tout -->
+        <svg id="modeIconRepeatAll" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+        <!-- Répéter une -->
+        <svg id="modeIconRepeatOne" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+          <text x="10.5" y="14.5" font-size="6.5" fill="currentColor" stroke="none" font-weight="800" font-family="sans-serif" text-anchor="middle">1</text>
+        </svg>
       </button>
       <div class="top50-stats"><span id="top50Count">13</span> titres</div>
       <div id="nlOtherIndicator" style="display:none;margin-left:auto;align-items:center;gap:6px;">
@@ -4663,10 +4681,24 @@ body.light #counterBlock.glowing .c-num-big {
     </div>
     <div class="mp-controls">
       <!-- Bouton mode (ordre/aléatoire/répéter) -->
-      <button class="mp-btn mp-btn-mode" id="mpModeBtn" title="Mode de lecture" onclick="mpCycleMode()">
-        <svg id="mpModeIconOrder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-        <svg id="mpModeIconShuffle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
-        <svg id="mpModeIconRepeat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/><text x="9" y="19" font-size="7" fill="currentColor" stroke="none" font-weight="700" font-family="sans-serif">1</text></svg>
+      <button class="mp-btn mp-btn-mode" id="mpModeBtn" title="Répéter tout" onclick="mpCycleMode()">
+        <svg id="mpModeIconOrder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>
+          <polyline points="16 9 20 6 16 3"/>
+        </svg>
+        <svg id="mpModeIconShuffle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/>
+          <polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/>
+        </svg>
+        <svg id="mpModeIconRepeatAll" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+        <svg id="mpModeIconRepeatOne" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+          <text x="10.5" y="14.5" font-size="6.5" fill="currentColor" stroke="none" font-weight="800" font-family="sans-serif" text-anchor="middle">1</text>
+        </svg>
       </button>
       <!-- Précédent -->
       <button class="mp-btn" id="mpPrevBtn" title="Précédent" onclick="mpPrev()">
@@ -6857,32 +6889,54 @@ document.getElementById('top50Expand').addEventListener('click',function(){
 });
 
 // ── PLAY MODE ──
-var playMode = 'order';
-var modeIcons = {
-  order:   document.getElementById('modeIconOrder'),
-  shuffle: document.getElementById('modeIconShuffle'),
-  repeat:  document.getElementById('modeIconRepeat')
+var playMode = 'repeatAll';
+var _modeList = ['repeatAll','order','shuffle','repeatOne'];
+var _modeTitles = {
+  order:     "Dans l'ordre",
+  shuffle:   'Aléatoire',
+  repeatAll: 'Répéter tout',
+  repeatOne: 'Répéter ce titre'
+};
+var _modeIconIds = {
+  order:     'modeIconOrder',
+  shuffle:   'modeIconShuffle',
+  repeatAll: 'modeIconRepeatAll',
+  repeatOne: 'modeIconRepeatOne'
 };
 function setPlayMode(mode) {
   playMode = mode;
-  Object.keys(modeIcons).forEach(function(k){ modeIcons[k].style.display = k === mode ? '' : 'none'; });
+  Object.keys(_modeIconIds).forEach(function(k){
+    var el = document.getElementById(_modeIconIds[k]);
+    if(el) el.style.display = k === mode ? '' : 'none';
+  });
   var btn = document.getElementById('top50ModeBtn');
-  btn.classList.toggle('active', mode !== 'order');
-  btn.title = mode === "order" ? "Lecture dans l'ordre" : mode === "shuffle" ? "Lecture aléatoire" : "Répéter ce titre";
+  if(btn){
+    btn.title = _modeTitles[mode] || mode;
+    btn.classList.toggle('active', mode !== 'order');
+
+  }
 }
-setPlayMode('order');
+setPlayMode('repeatAll');
 document.getElementById('top50ModeBtn').addEventListener('click', function(){
-  if(playMode === 'order') setPlayMode('shuffle');
-  else if(playMode === 'shuffle') setPlayMode('repeat');
-  else setPlayMode('order');
+  var idx = _modeList.indexOf(playMode);
+  setPlayMode(_modeList[(idx + 1) % _modeList.length]);
 });
 function playNext(currentDiv) {
   var songs = Array.from(document.querySelectorAll('#Love .sp-song'));
   if(!songs.length) return;
-  if(playMode === 'repeat') { var btn=currentDiv.querySelector('.sp-btn-play'); if(btn) setTimeout(function(){btn.click();},80); return; }
-  if(playMode === 'shuffle') { var idx=Math.floor(Math.random()*songs.length); var btn=songs[idx].querySelector('.sp-btn-play'); if(btn) setTimeout(function(){btn.click();},80); return; }
+  if(playMode === 'repeatOne') {
+    var btn=currentDiv.querySelector('.sp-btn-play'); if(btn) setTimeout(function(){btn.click();},80); return;
+  }
+  if(playMode === 'shuffle') {
+    var idx=Math.floor(Math.random()*songs.length); var btn=songs[idx].querySelector('.sp-btn-play'); if(btn) setTimeout(function(){btn.click();},80); return;
+  }
   var idx=songs.indexOf(currentDiv), next=songs[idx+1];
-  if(next) { var btn=next.querySelector('.sp-btn-play'); if(btn) setTimeout(function(){btn.click();},80); }
+  if(next){
+    var btn=next.querySelector('.sp-btn-play'); if(btn) setTimeout(function(){btn.click();},80);
+  } else if(playMode === 'repeatAll'){
+    // Retourne au début
+    var btn=songs[0].querySelector('.sp-btn-play'); if(btn) setTimeout(function(){btn.click();},80);
+  }
 }
 document.getElementById('top50PlayAll').addEventListener('click', function(){
   if(currentRow) { var btn=currentRow.querySelector('.sp-btn-play'); if(btn){btn.click();return;} }
@@ -8500,9 +8554,6 @@ function filterSongs(q){
   var mpArtist = document.getElementById('mpArtist');
   var mpIconPlay = document.getElementById('mpIconPlay');
   var mpIconPause = document.getElementById('mpIconPause');
-  var mpModeIconOrder = document.getElementById('mpModeIconOrder');
-  var mpModeIconShuffle = document.getElementById('mpModeIconShuffle');
-  var mpModeIconRepeat = document.getElementById('mpModeIconRepeat');
   var mpModeBtn = document.getElementById('mpModeBtn');
 
   // Track if we're in a game (to hide mini player)
@@ -8592,11 +8643,25 @@ function filterSongs(q){
   document.addEventListener('touchend', function(){ if(_seeking){ _seeking=false; mpSeek.classList.remove('dragging'); } });
 
   window.mpUpdateMode = function(){
-    var mode = typeof playMode !== 'undefined' ? playMode : 'order';
-    mpModeIconOrder.style.display = mode === 'order' ? '' : 'none';
-    mpModeIconShuffle.style.display = mode === 'shuffle' ? '' : 'none';
-    mpModeIconRepeat.style.display = mode === 'repeat' ? '' : 'none';
+    var mode = typeof playMode !== 'undefined' ? playMode : 'repeatAll';
+    var mpIconIds = {
+      order:     'mpModeIconOrder',
+      shuffle:   'mpModeIconShuffle',
+      repeatAll: 'mpModeIconRepeatAll',
+      repeatOne: 'mpModeIconRepeatOne'
+    };
+    var titles = {
+      order:     "Dans l'ordre",
+      shuffle:   'Aléatoire',
+      repeatAll: 'Répéter tout',
+      repeatOne: 'Répéter ce titre'
+    };
+    Object.keys(mpIconIds).forEach(function(k){
+      var el = document.getElementById(mpIconIds[k]);
+      if(el) el.style.display = k === mode ? '' : 'none';
+    });
     mpModeBtn.classList.toggle('active', mode !== 'order');
+    mpModeBtn.title = titles[mode] || mode;
   };
 
   // Actions
@@ -8624,7 +8689,7 @@ function filterSongs(q){
   window.mpNext = function(){
     if(!currentRow) return;
     var songs = Array.from(document.querySelectorAll('#Love .sp-song'));
-    if(typeof playMode !== 'undefined' && playMode === 'repeat'){
+    if(typeof playMode !== 'undefined' && playMode === 'repeatOne'){
       var btn = currentRow.querySelector('.sp-btn-play'); if(btn) btn.click();
     } else if(typeof playMode !== 'undefined' && playMode === 'shuffle'){
       var idx = Math.floor(Math.random()*songs.length);
@@ -8646,7 +8711,7 @@ function filterSongs(q){
 
   window.mpCycleMode = function(){
     var mode = typeof playMode !== 'undefined' ? playMode : 'order';
-    var next = mode === 'order' ? 'shuffle' : mode === 'shuffle' ? 'repeat' : 'order';
+    var idx = _modeList ? _modeList.indexOf(mode) : 0; var next = _modeList ? _modeList[(idx+1)%_modeList.length] : 'order';
     setPlayMode(next);
     mpUpdateMode();
   };
