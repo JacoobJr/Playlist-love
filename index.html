@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://zjmbyjpxqrojnuymnpcf.supabase.co; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src * data: blob:; media-src * blob: data:; connect-src https://zjmbyjpxqrojnuymnpcf.supabase.co; frame-ancestors 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://zjmbyjpxqrojnuymnpcf.supabase.co; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src * data: blob:; media-src * blob: data:; connect-src https://zjmbyjpxqrojnuymnpcf.supabase.co wss://zjmbyjpxqrojnuymnpcf.supabase.co; frame-ancestors 'none'; object-src 'none'; base-uri 'self';">
+<!-- NOTE SÉCURITÉ : script-src conserve 'unsafe-inline' car tous les scripts sont inline dans ce fichier HTML.
+     Pour supprimer définitivement unsafe-inline, il faudrait extraire tous les <script> dans des fichiers .js externes.
+     En attendant, les autres vecteurs XSS sont bloqués par : object-src 'none', base-uri 'self', frame-ancestors 'none'.
+     Le vrai gain XSS repose sur l'échappement systématique des données (escHtml) appliqué ci-dessous. -->
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <script>
 // Fix clavier iOS — couvre la page principale derrière InstaLove
@@ -4859,6 +4863,15 @@ var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 // URL publique du bucket Storage Supabase
 var SB_IMG = SB_URL + '/storage/v1/object/public/images/';
 
+// ── Lecture sécurisée du profil ──────────────────────────────────────────────
+// localStorage peut être modifié par n'importe qui depuis la console.
+// Cette fonction valide que la valeur est bien 'boy' ou 'girl' (liste blanche).
+// NOTE : la vraie protection des données (écriture BDD, upload) doit reposer
+// sur les Row-Level Security Supabase basées sur le JWT, pas sur cette valeur.
+function getProfile(){
+  var v = localStorage.getItem('jayana_profile');
+  return (v === 'boy' || v === 'girl') ? v : null;
+}
 // SÉCURITÉ — Fonction globale d'échappement HTML
 // À utiliser PARTOUT où des données Supabase sont injectées via innerHTML
 function escHtml(str){
@@ -5010,7 +5023,7 @@ _subviewIds.forEach(function(id) {
 
 // ── BETISES ──
 document.getElementById('betisesBtn').addEventListener('click', function() {
-  var profile = localStorage.getItem('jayana_profile');
+  var profile = getProfile();
   if(profile === 'girl' || profile === 'boy'){
     openPrankMenu();
   } else {
@@ -5087,7 +5100,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
 
   /* ── Ouverture menu auteur ── */
   window.openPrankMenu = function(){
-    var profile = localStorage.getItem('jayana_profile');
+    var profile = getProfile();
     if(!profile){ showPrankToast('🔒 Connecte-toi d\'abord !'); return; }
     var victim = profile === 'boy' ? 'Zelda' : 'Link';
     var el = document.getElementById('prankVictimName');
@@ -5116,7 +5129,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
 
   /* ── Annuler toutes les bêtises en attente ── */
   window.prankCancelAll = function(){
-    var profile = localStorage.getItem('jayana_profile');
+    var profile = getProfile();
     if(!profile) return;
     var victim = profile === 'boy' ? 'girl' : 'boy';
     var btn = document.getElementById('prankCancelAllBtn');
@@ -5184,7 +5197,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
   };
 
   function sendPrankDirect(type){
-    var profile = localStorage.getItem('jayana_profile');
+    var profile = getProfile();
     if(!profile) return;
     var victim = profile === 'boy' ? 'girl' : 'boy';
     var body = { type: type, author: profile, victim: victim, message: '', active: true };
@@ -5215,7 +5228,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
 
   /* ── Envoi de la bêtise en base ── */
   window.prankSend = function(){
-    var profile = localStorage.getItem('jayana_profile');
+    var profile = getProfile();
     if(!profile) return;
     var victim   = profile === 'boy' ? 'girl' : 'boy';
     var msg      = document.getElementById('prankMsgText').value.trim();
@@ -6128,7 +6141,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
   };
 
   // Vérifier aussi au démarrage si déjà connecté + lancer le poll
-  var _savedProfile = localStorage.getItem('jayana_profile');
+  var _savedProfile = getProfile();
   if(_savedProfile){
     setTimeout(function(){ window.checkActivePrank(_savedProfile); }, 2000);
     startPrankPoll(_savedProfile);
@@ -6214,7 +6227,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
   // ── Afficher/masquer les boutons selon profil ──
   function elleSyncEditMode(){
-    var profile = localStorage.getItem('jayana_profile');
+    var profile = getProfile();
     var isLink = (profile === 'boy');
     SLOTS.forEach(function(slot){
       var btn = document.getElementById('elle-btn-' + slot);
@@ -6229,7 +6242,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
   // ── Clic upload ──
   window.elleUploadClick = function(slot){
-    if(localStorage.getItem('jayana_profile') !== 'boy') return;
+    if(getProfile() !== 'boy') return;
     _currentSlot = slot;
     var input = document.getElementById('elleFileInput');
     input.value = '';
@@ -6330,7 +6343,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
   var SLOT_LABELS = { animal:'Son animal', fleurs:'Ses fleurs', personnage:'Son personnage', saison:'Sa saison', repas:'Son repas' };
   window.elleEditDesc = function(slot){
-    if(localStorage.getItem('jayana_profile') !== 'boy') return;
+    if(getProfile() !== 'boy') return;
     var el = document.getElementById('elle-desc-' + slot);
     if(!el) return;
     descEditOpen(el.textContent.trim(), 'Légende · ' + (SLOT_LABELS[slot] || slot), function(val){
@@ -6389,7 +6402,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
   // ── Afficher/masquer les boutons selon profil ──
   function luiSyncEditMode(){
-    var profile = localStorage.getItem('jayana_profile');
+    var profile = getProfile();
     var isZelda = (profile === 'girl');
     SLOTS.forEach(function(slot){
       var btn = document.getElementById('lui-btn-' + slot);
@@ -6399,7 +6412,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
   // ── Clic sur une pochette ──
   window.luiUploadClick = function(slot){
-    var profile = localStorage.getItem('jayana_profile');
+    var profile = getProfile();
     if(profile !== 'girl'){
       return; // sécurité
     }
@@ -6524,7 +6537,7 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 
   window.luiEditDesc = function(slot){
-    if(localStorage.getItem('jayana_profile') !== 'girl') return;
+    if(getProfile() !== 'girl') return;
     var el = document.getElementById('lui-desc-' + slot);
     if(!el) return;
     var SLOT_LABELS_LUI = { animal:'Son animal', fleurs:'Ses fleurs', personnage:'Son personnage', saison:'Sa saison', repas:'Son repas' };
@@ -6536,7 +6549,7 @@ document.addEventListener('DOMContentLoaded', function(){
   };
 
   function luiSyncDescs(){
-    var profile = localStorage.getItem('jayana_profile');
+    var profile = getProfile();
     var isZelda = (profile === 'girl');
     SLOTS.forEach(function(slot){
       var el = document.getElementById('lui-desc-' + slot);
@@ -6864,7 +6877,7 @@ buildStack();
   function checkUnread(){
     // Ne pas vérifier si InstaLove est ouvert (il gère lui-même)
     if(document.getElementById('hiddenPage').classList.contains('active')) return;
-    var profile = localStorage.getItem('jayana_profile');
+    var profile = getProfile();
     if(!profile) return; // pas connecté, rien à vérifier
     var other = profile === 'girl' ? 'boy' : 'girl';
     // Récupérer les messages non lus envoyés par l'autre
@@ -6963,7 +6976,8 @@ function stopCurrent(){
 function createSongEl(song, num) {
   var div = document.createElement('div'); div.className = 'song';
   var newBadge = song.isNew ? '<span class="badge-new">new</span>' : '';
-  div.innerHTML = '<div class="song-num">'+num+'</div><div class="song-info"><div class="song-title">'+song.title+newBadge+'</div><div class="song-artist">'+song.artist+'</div></div><div class="song-actions"><button class="btn-heart" data-file="'+song.file+'">♡</button><button class="btn-play">&#9654;</button><button class="btn-yt">YT</button><audio src="'+song.file+'"></audio></div>';
+  var safeTitle = escHtml(song.title), safeArtist = escHtml(song.artist), safeFile = escHtml(song.file);
+  div.innerHTML = '<div class="song-num">'+num+'</div><div class="song-info"><div class="song-title">'+safeTitle+newBadge+'</div><div class="song-artist">'+safeArtist+'</div></div><div class="song-actions"><button class="btn-heart" data-file="'+safeFile+'">♡</button><button class="btn-play">&#9654;</button><button class="btn-yt">YT</button><audio src="'+safeFile+'"></audio></div>';
   var btn=div.querySelector('.btn-play'), audio=div.querySelector('audio');
   var heartBtn = div.querySelector('.btn-heart');
   heartBtn.addEventListener('click', function(e){ e.stopPropagation(); toggleFavorite(song.file, heartBtn); });
@@ -7004,14 +7018,15 @@ function renderTop50() {
     var div = document.createElement('div');
     div.className = 'sp-song' + (hidden ? ' hidden-row' : '');
     div.dataset.file = song.file;
+    var _t = escHtml(song.title), _a = escHtml(song.artist), _f = escHtml(song.file);
     div.innerHTML =
       '<div class="sp-rank"><span class="sp-rank-num">'+rank+'</span>'+trendHtml+
       '<div class="sp-rank-wave"><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div></div></div>'+
-      '<div class="sp-info"><div class="sp-title">'+song.title+(song.isNew?'<span class="badge-new">new</span>':'')+'</div><div class="sp-artist">'+song.artist+'</div></div>'+
-      '<button class="sp-heart" data-file="'+song.file+'">♡</button>'+
+      '<div class="sp-info"><div class="sp-title">'+_t+(song.isNew?'<span class="badge-new">new</span>':'')+'</div><div class="sp-artist">'+_a+'</div></div>'+
+      '<button class="sp-heart" data-file="'+_f+'">♡</button>'+
       '<div class="sp-plays">'+fmtPlays(song.plays)+'</div>'+
       '<div class="sp-actions"><button class="sp-btn-play">&#9654;</button><button class="sp-btn-yt">YT</button>'+
-      '<audio src="'+song.file+'"></audio></div>';
+      '<audio src="'+_f+'"></audio></div>';
 
     var btn = div.querySelector('.sp-btn-play');
     var ytb = div.querySelector('.sp-btn-yt');
@@ -7435,7 +7450,11 @@ function toggleLockPopup(){
 }
 var _HASH_NEMO='eb38eebd7bef45d49aef46835c8460fc98c9af3f68f6af759a08173709cd76ea';
 var _HASH_KEVIN='a586ffe3acf28484d17760d1ddaa2af699666c870aaaa66f8cfc826a528429ce';
-var _S=atob('UGxAeWxpc3RfSjR5YW5hXzIwMjUheEs5');
+// SÉCURITÉ : le sel ci-dessous est une protection côté client contre le brute-force offline.
+// Il ralentit l'attaque mais ne la rend pas impossible car le code source est public.
+// La vraie sécurité des codes repose sur : (1) le rate-limiting (5 essais / 30s), (2) les RLS Supabase.
+// Pour une sécurité maximale, déplacer la vérification des codes vers une Edge Function Supabase.
+var _S=(function(){var p=['Pl@','ylis','t_J4','yana','_202','5!xK','9'];return p.join('');})();
 async function _sha256(str){var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str+_S));return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');}
 var _lockFailCount=0, _lockBlocked=false;
 async function checkCode(){
@@ -8526,7 +8545,7 @@ function goTo(id){resetZoom();closeAllViews();document.getElementById('libraryPo
 function spawnHeart(){
   var h=document.createElement('div');h.className='like-heart';h.textContent='🤍';document.body.appendChild(h);setTimeout(function(){h.remove();},600);
   // Incrémenter le compteur Supabase
-  var profile = localStorage.getItem('jayana_profile') || null;
+  var profile = getProfile() || null;
   if(!profile) return; // pas de profil = animation only
   fetch(SB_URL+'/rest/v1/rpc/increment_like_counter', {
     method:'POST',
@@ -8578,7 +8597,7 @@ function filterSongs(q){
     var row=document.createElement('div');
     row.className='sp-song';
     row.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;';
-    row.innerHTML='<div class="sp-info"><div class="sp-title">'+s.title+'</div><div class="sp-artist">'+s.artist+'</div></div><div style="font-size:11px;color:var(--green);font-weight:600;flex-shrink:0">▶</div>';
+    row.innerHTML='<div class="sp-info"><div class="sp-title">'+escHtml(s.title)+'</div><div class="sp-artist">'+escHtml(s.artist)+'</div></div><div style="font-size:11px;color:var(--green);font-weight:600;flex-shrink:0">▶</div>';
     row.addEventListener('click', function(){
       closeSearch();
       // Trouver la vraie ligne dans le top50 et la jouer
@@ -9186,7 +9205,7 @@ function filterSongs(q){
   var sgUnlocked = false;
   var _sgAuthCb = null;
 
-  function escSg(str){ return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function escSg(str){ return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
 
   // Auth modal
   function openSgAuth(cb){
@@ -9470,7 +9489,7 @@ function loadFavorites(){
 }
 
 function applyHeartState(file, btn){
-  var profile = localStorage.getItem('jayana_profile');
+  var profile = getProfile();
   btn.className = btn.className.replace(/heart-girl|heart-boy/g,'').trim();
   if(favoritesCache['girl'] === file) btn.classList.add('heart-girl');
   if(favoritesCache['boy']  === file) btn.classList.add('heart-boy');
@@ -9487,7 +9506,7 @@ function refreshAllHearts(){
 }
 
 function toggleFavorite(file, btn){
-  var profile = localStorage.getItem('jayana_profile');
+  var profile = getProfile();
   if(!profile) return; // pas de profil = rien
 
   var current = favoritesCache[profile];
@@ -10140,7 +10159,7 @@ loadFavorites();
 
   /* ══ CLIC LOGO → ouvre le chat ══ */
   window.dmOpenMessaging = function(){
-    var saved = localStorage.getItem('jayana_profile');
+    var saved = getProfile();
     if(saved === 'girl' || saved === 'boy'){
       identity = saved;
       showScreen('chat');
@@ -11144,7 +11163,7 @@ loadFavorites();
     syncTheme();
     var fb = document.getElementById('floatingThemeBtn');
     if(fb){ fb.style.opacity = '0'; fb.style.pointerEvents = 'none'; }
-    var saved = localStorage.getItem('jayana_profile');
+    var saved = getProfile();
     if(saved === 'girl' || saved === 'boy') identity = saved;
     attached = false;
     showScreen('home');
@@ -11176,7 +11195,7 @@ loadFavorites();
     syncTheme();
     var fb = document.getElementById('floatingThemeBtn');
     if(fb){ fb.style.opacity = '0'; fb.style.pointerEvents = 'none'; }
-    var saved = localStorage.getItem('jayana_profile');
+    var saved = getProfile();
     if(saved === 'girl' || saved === 'boy') identity = saved;
     attached = false;
     if(window._dmUpdateVP) window._dmUpdateVP();
@@ -11197,7 +11216,7 @@ loadFavorites();
     loadHomePreview();
   };
   window._dmRawShowChat = function(){
-    var saved = localStorage.getItem('jayana_profile');
+    var saved = getProfile();
     if(saved === 'girl' || saved === 'boy'){
       identity = saved;
       showScreen('chat');
@@ -11369,7 +11388,7 @@ loadFavorites();
 
   /* ── Applique le glow sur les lignes de la playlist ── */
   function applyGlow(){
-    var myProfile = localStorage.getItem('jayana_profile');
+    var myProfile = getProfile();
     var boyBase   = basename(_nlBoyFile);
     var girlBase  = basename(_nlGirlFile);
     var sameSong  = !!(boyBase && girlBase && boyBase === girlBase);
@@ -11464,7 +11483,7 @@ loadFavorites();
 
   /* ── Push mon état vers Supabase ── */
   function nlPush(file){
-    var profile = localStorage.getItem('jayana_profile');
+    var profile = getProfile();
     if(!profile) return;
 
     var normalized = basename(file);
@@ -11545,7 +11564,7 @@ loadFavorites();
 
   /* ── Efface le statut à la fermeture ── */
   window.addEventListener('beforeunload', function(){
-    var profile = localStorage.getItem('jayana_profile');
+    var profile = getProfile();
     if(!profile) return;
     fetch(SB_URL + '/rest/v1/' + NL_TABLE, {
       method: 'POST',
