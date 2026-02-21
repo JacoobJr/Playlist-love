@@ -3019,6 +3019,7 @@ body.anniv-mode .counter-block-top {
     <!-- Avatar de l'autre (secondaire, bas-gauche) -->
     <div id="profileAvatarOther">
       <span id="profileAvatarOtherEmoji">👤</span>
+      <div id="presenceDot"></div>
     </div>
     <!-- Bulle emoji humeur — positionnée en haut-gauche de l'avatar -->
     <div id="profileMoodOther"></div>
@@ -3256,8 +3257,28 @@ body.light #profileAvatar.boy  { background: rgba(59,125,216,0.10);  border-colo
   user-select: none;
   cursor: pointer;
   pointer-events: all;
+  overflow: visible;
 }
 #profileAvatarOther.visible { display: flex; }
+
+/* ── Indicateur présence ── */
+#presenceDot {
+  display: none;
+  position: absolute;
+  bottom: -3px; right: -3px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid var(--bg);
+  z-index: 5;
+  animation: presencePulse 2s ease-in-out infinite;
+}
+#presenceDot.visible { display: block; }
+@keyframes presencePulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); }
+  50%     { box-shadow: 0 0 0 4px rgba(34,197,94,0); }
+}
+body.light #presenceDot { border-color: var(--bg); }
 @keyframes otherAvatarPing {
   0%,100% { box-shadow: 0 0 0px rgba(232,121,160,0); border-color: var(--border); }
   50%     { box-shadow: 0 0 10px rgba(232,121,160,0.8), 0 0 20px rgba(232,121,160,0.3); border-color: #e879a0; }
@@ -11636,6 +11657,110 @@ loadFavorites();
 
   window._nlPush = nlPush;
 
+})();
+
+/* ════════════════════════════════════════════
+   PRÉSENCE EN LIGNE
+   - Heartbeat toutes les 20s → table "presence"
+   - Poll toutes les 15s pour afficher l'état de l'autre
+   - Offline après 45s sans signal (120s si musique en cours)
+   - visibilitychange : pause heartbeat quand page cachée
+════════════════════════════════════════════ */
+(function(){
+  var PRESENCE_TABLE  = 'presence';
+  var HEARTBEAT_MS    = 20000;   // envoyer toutes les 20s
+  var POLL_MS         = 15000;   // lire toutes les 15s
+  var OFFLINE_AFTER   = 45000;   // ms sans signal = offline
+  var OFFLINE_PLAYING = 120000;  // ms si is_playing = true
+
+  var _heartbeatIv = null;
+  var _pollIv      = null;
+  var _dot         = null;
+
+  function isAudioPlaying() {
+    var playing = false;
+    document.querySelectorAll('audio').forEach(function(a){ if(!a.paused) playing = true; });
+    return playing;
+  }
+
+  /* Envoie mon heartbeat */
+  function presencePush() {
+    var profile = getProfile();
+    if (!profile) return;
+    fetch(SB_URL + '/rest/v1/' + PRESENCE_TABLE, {
+      method: 'POST',
+      headers: sbHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+      body: JSON.stringify({
+        player:     profile,
+        last_seen:  new Date().toISOString(),
+        is_playing: isAudioPlaying()
+      })
+    }).catch(function(){});
+  }
+
+  /* Lit l'état de l'autre et met à jour le point */
+  function presencePoll() {
+    var profile = getProfile();
+    if (!profile) return;
+    var other = profile === 'girl' ? 'boy' : 'girl';
+    fetch(SB_URL + '/rest/v1/' + PRESENCE_TABLE + '?player=eq.' + other + '&select=last_seen,is_playing', {
+      headers: sbHeaders()
+    })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(rows) {
+      if (!Array.isArray(rows) || !rows.length) { setDot(false); return; }
+      var row       = rows[0];
+      var lastSeen  = new Date(row.last_seen).getTime();
+      var elapsed   = Date.now() - lastSeen;
+      var threshold = row.is_playing ? OFFLINE_PLAYING : OFFLINE_AFTER;
+      setDot(elapsed < threshold);
+    }).catch(function(){ setDot(false); });
+  }
+
+  /* Affiche ou cache le point vert */
+  function setDot(online) {
+    if (!_dot) _dot = document.getElementById('presenceDot');
+    if (!_dot) return;
+    // Le point n'a de sens que si l'avatar de l'autre est visible
+    var avOther = document.getElementById('profileAvatarOther');
+    if (avOther && avOther.classList.contains('visible')) {
+      _dot.classList.toggle('visible', online);
+    } else {
+      _dot.classList.remove('visible');
+    }
+  }
+
+  /* Démarrage */
+  function start() {
+    if (_heartbeatIv) return;
+    presencePush();
+    _heartbeatIv = setInterval(presencePush, HEARTBEAT_MS);
+    presencePoll();
+    _pollIv = setInterval(presencePoll, POLL_MS);
+  }
+
+  /* Pause heartbeat quand page cachée — le timeout 45s fera le reste */
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+      clearInterval(_heartbeatIv); _heartbeatIv = null;
+    } else {
+      presencePush(); // signal immédiat au retour
+      _heartbeatIv = setInterval(presencePush, HEARTBEAT_MS);
+    }
+  });
+
+  /* Démarrer quand un profil est choisi */
+  var _origSetProfile = window.setProfile;
+  window.setProfile = function(g) {
+    if (_origSetProfile) _origSetProfile.apply(this, arguments);
+    setTimeout(start, 300);
+  };
+
+  /* Si profil déjà choisi au chargement */
+  if (getProfile()) start();
+
+  window._presencePoll = presencePoll;
+  window._presencePush = presencePush;
 })();
 </script>
 
