@@ -3059,7 +3059,7 @@ body.anniv-mode .counter-block-top {
 
 <script>
 async function nativeLogout(){
-  localStorage.removeItem('jayana_sb_session');
+  sessionStorage.removeItem('jayana_sb_session');
   localStorage.removeItem('jayana_profile');
   _sbAccessToken = null;
   await fetch(SB_URL+'/auth/v1/logout', {
@@ -4853,6 +4853,18 @@ var SB_URL = 'https://zjmbyjpxqrojnuymnpcf.supabase.co';
 var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqbWJ5anB4cXJvam51eW1ucGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0MzEzNjcsImV4cCI6MjA4NzAwNzM2N30.vNRgLgCNqZ9g351YmodZoXYDqars-thVDFmri2Z3oxE';
 // URL publique du bucket Storage Supabase
 var SB_IMG = SB_URL + '/storage/v1/object/public/images/';
+
+// SÉCURITÉ — Fonction globale d'échappement HTML
+// À utiliser PARTOUT où des données Supabase sont injectées via innerHTML
+function escHtml(str){
+  if(str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 // ── Init images Supabase Storage ──
 (function(){
   document.querySelectorAll('img[src^="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/"]').forEach(function(img){
@@ -4860,16 +4872,18 @@ var SB_IMG = SB_URL + '/storage/v1/object/public/images/';
   });
 })();
 
-// ── Auth via Edge Function sécurisée (credentials jamais dans le HTML) ──
+// ── Auth via Edge Function sécurisée ──
+// SÉCURITÉ : APP_SECRET retiré du code client.
+// Le secret est désormais vérifié uniquement côté Edge Function
+// via la variable d'environnement Deno.env.get('APP_SECRET').
 var _sbAccessToken = null;
 var SB_SESSION_KEY = 'jayana_sb_session';
 var SB_EDGE_FN     = SB_URL + '/functions/v1/get-token';
-var APP_SECRET     = 'jayana_secret_2026';
 
-// Charge session depuis localStorage (si non expirée)
+// Charge session depuis sessionStorage (plus sûr que localStorage)
 function sbLoadSession(gender){
   try{
-    var sessions = JSON.parse(localStorage.getItem(SB_SESSION_KEY)||'{}');
+    var sessions = JSON.parse(sessionStorage.getItem(SB_SESSION_KEY)||'{}');
     var s = sessions[gender];
     if(s && s.access_token && s.expires_at && Date.now()/1000 < s.expires_at - 60){
       _sbAccessToken = s.access_token;
@@ -4879,22 +4893,22 @@ function sbLoadSession(gender){
   return false;
 }
 
-// Sauvegarde session dans localStorage
+// Sauvegarde session dans sessionStorage
 function sbSaveSession(gender, data){
   try{
-    var sessions = JSON.parse(localStorage.getItem(SB_SESSION_KEY)||'{}');
+    var sessions = JSON.parse(sessionStorage.getItem(SB_SESSION_KEY)||'{}');
     sessions[gender] = { access_token: data.access_token, expires_at: data.expires_at };
-    localStorage.setItem(SB_SESSION_KEY, JSON.stringify(sessions));
+    sessionStorage.setItem(SB_SESSION_KEY, JSON.stringify(sessions));
     _sbAccessToken = data.access_token;
   }catch(e){}
 }
 
-// Login via Edge Function — credentials 100% côté serveur
+// Login via Edge Function — sans secret côté client
 function sbLogin(gender){
   if(sbLoadSession(gender)) return Promise.resolve(true);
   return fetch(SB_EDGE_FN, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-app-secret': APP_SECRET },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ gender: gender })
   }).then(function(r){ return r.json(); }).then(function(data){
     if(data.access_token){ sbSaveSession(gender, data); return true; }
@@ -6223,6 +6237,15 @@ document.addEventListener('DOMContentLoaded', function(){
     var file = input.files[0];
     var slot = _currentSlot;
     if(!slot) return;
+
+    // SÉCURITÉ : validation du type MIME avant upload
+    var ALLOWED_TYPES = ['image/jpeg','image/jpg','image/png','image/webp','image/gif'];
+    if(ALLOWED_TYPES.indexOf(file.type) === -1){
+      alert('Format non autorisé. Utilise une image JPEG, PNG ou WebP.');
+      input.value = '';
+      return;
+    }
+
     if(file.size > 5 * 1024 * 1024){ alert('Image trop lourde (max 5 Mo)'); return; }
 
     var loading = document.getElementById('elle-loading-' + slot);
@@ -6387,6 +6410,14 @@ document.addEventListener('DOMContentLoaded', function(){
     var file = input.files[0];
     var slot = _currentSlot;
     if(!slot) return;
+
+    // SÉCURITÉ : validation du type MIME avant upload
+    var ALLOWED_TYPES = ['image/jpeg','image/jpg','image/png','image/webp','image/gif'];
+    if(ALLOWED_TYPES.indexOf(file.type) === -1){
+      alert('Format non autorisé. Utilise une image JPEG, PNG ou WebP.');
+      input.value = '';
+      return;
+    }
 
     // Vérif taille max 5 Mo
     if(file.size > 5 * 1024 * 1024){
@@ -11690,16 +11721,11 @@ document.querySelectorAll('.album-image').forEach(function(el){
   sections.forEach(function(s){ obsClean.observe(s); });
 })();
 
-/* ── 8. SÉCURITÉ — avertissement console désactivé ── */
+/* ── 8. SÉCURITÉ — note console ── */
 (function(){
-  /* Masque la clé dans la console dev si inspectée */
-  if(typeof SB_KEY !== 'undefined'){
-    Object.defineProperty(window, '_sbKeyNote', {
-      get: function(){ return '⚠️ Cette clé est publique (anon). Utilise RLS Supabase pour protéger tes données.'; },
-      enumerable: false
-    });
-  }
-  /* Note : SB_PASS est une var globale (non redéfinissable via defineProperty) */
+  // Rappel : SB_KEY est la clé anon publique Supabase.
+  // La vraie protection des données repose sur les Row-Level Security (RLS) en base.
+  // Voir le fichier supabase-audit.sql pour les vérifications à effectuer.
 })();
 
 /* ── 9. DEBOUNCE resize events ── */
