@@ -8863,7 +8863,6 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
   // ── Présence via Supabase ──
   function startPresencePolling(){
-    // Marquer comme présent
     updateMyPresence(true);
     checkPresence();
     _skyjoPresenceInterval = setInterval(function(){
@@ -8893,6 +8892,11 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   }
 
   function checkPresence(){
+    // Si on a déjà un gameId, on poll directement la partie (plus besoin de chercher)
+    if(_skyjoGameId){
+      pollGameReady();
+      return;
+    }
     fetch(SB_URL + '/rest/v1/skyjo_presence?select=profile,updated_at', {
       headers: sbHeaders()
     })
@@ -8905,15 +8909,34 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
         var age = now - new Date(row.updated_at).getTime();
         if(age < 8000){
           if(row.profile === 'girl') girlOnline = true;
-          if(row.profile === 'boy') boyOnline = true;
+          if(row.profile === 'boy')  boyOnline  = true;
         }
       });
       updatePresenceDots(girlOnline, boyOnline);
-      // Si les 2 sont présents → tenter de rejoindre/créer la partie
-      if(girlOnline && boyOnline){
-        // Reset du flag à chaque tick pour permettre un nouveau check
-        if(!_skyjoJoining) checkOrCreateGame();
+      if(girlOnline && boyOnline && !_skyjoJoining){
+        checkOrCreateGame();
       }
+    }).catch(function(){});
+  }
+
+  // Poll la partie spécifique une fois qu'on a son ID
+  function pollGameReady(){
+    fetch(SB_URL + '/rest/v1/' + SKYJO_TABLE + '?id=eq.' + _skyjoGameId, {
+      headers: sbHeaders()
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(rows){
+      if(!Array.isArray(rows) || !rows[0]) return;
+      var row = rows[0];
+      if(row.status === 'playing'){
+        // Les 2 joueurs lancent le jeu
+        stopPresencePolling();
+        startGameStatePolling();
+        showSkyjoScreen('skyjoGameArea');
+        document.getElementById('skyjoGameArea').style.display = 'block';
+        renderGameState(row);
+      }
+      // Si encore waiting → on attend le prochain tick
     }).catch(function(){});
   }
 
@@ -8925,64 +8948,57 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   }
 
   // ── Gestion de la partie ──
-  var _skyjoJoining = false; // anti-doublon
-
-  function launchGame(gameRow){
-    _skyjoGameId = gameRow.id;
-    stopPresencePolling();
-    startGameStatePolling();
-    showSkyjoScreen('skyjoGameArea');
-    document.getElementById('skyjoGameArea').style.display = 'block';
-    renderGameState(gameRow);
-  }
+  var _skyjoJoining = false;
 
   function checkOrCreateGame(){
-    if(_skyjoJoining) return; // déjà en train de traiter
     _skyjoJoining = true;
 
-    // Chercher toute partie waiting OU playing récente (< 30s)
+    // Chercher une partie waiting OU playing existante
     fetch(SB_URL + '/rest/v1/' + SKYJO_TABLE + '?status=in.(waiting,playing)&order=created_at.desc&limit=1', {
       headers: sbHeaders()
     })
     .then(function(r){ return r.json(); })
     .then(function(rows){
-      // Cas 1 : une partie playing existe → les 2 joueurs la rejoignent directement
+
+      // Partie playing → on la rejoint directement
       if(Array.isArray(rows) && rows.length > 0 && rows[0].status === 'playing'){
-        launchGame(rows[0]);
+        _skyjoGameId = rows[0].id;
+        stopPresencePolling();
+        startGameStatePolling();
+        showSkyjoScreen('skyjoGameArea');
+        document.getElementById('skyjoGameArea').style.display = 'block';
+        renderGameState(rows[0]);
+        _skyjoJoining = false;
         return;
       }
 
-      // Cas 2 : une partie waiting existe créée par l'AUTRE joueur → je la rejoins et la passe en playing
+      // Partie waiting créée par l'AUTRE → je la rejoins (PATCH playing)
       if(Array.isArray(rows) && rows.length > 0 && rows[0].status === 'waiting' && rows[0].created_by !== _skyjoMyProfile){
         var gameId = rows[0].id;
+        _skyjoGameId = gameId;
         fetch(SB_URL + '/rest/v1/' + SKYJO_TABLE + '?id=eq.' + gameId, {
           method: 'PATCH',
-          headers: sbHeaders({'Prefer':'return=representation'}),
+          headers: sbHeaders({'Prefer':'return=minimal'}),
           body: JSON.stringify({ status: 'playing' })
         })
-        .then(function(r){ return r.json(); })
-        .then(function(updated){
-          if(Array.isArray(updated) && updated[0]){
-            launchGame(updated[0]);
-          } else {
-            _skyjoJoining = false;
-          }
+        .then(function(){
+          // Les 2 joueurs vont détecter le passage en playing via pollGameReady
+          _skyjoJoining = false;
         }).catch(function(){ _skyjoJoining = false; });
         return;
       }
 
-      // Cas 3 : une partie waiting existe créée par MOI → je l'attends (poll géré par l'interval)
+      // Partie waiting créée par MOI → j'ai déjà mon gameId, rien à faire
       if(Array.isArray(rows) && rows.length > 0 && rows[0].status === 'waiting' && rows[0].created_by === _skyjoMyProfile){
         _skyjoGameId = rows[0].id;
-        _skyjoJoining = false; // permettre un re-check au prochain tick
+        _skyjoJoining = false;
         return;
       }
 
-      // Cas 4 : aucune partie → seule la girl crée (pour éviter création simultanée)
+      // Aucune partie → seule la girl crée pour éviter la double création
       if(_skyjoMyProfile === 'girl'){
         createGame();
       } else {
-        // Le boy attend que la girl crée
         _skyjoJoining = false;
       }
     }).catch(function(){ _skyjoJoining = false; });
@@ -8990,21 +9006,15 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
   function createGame(){
     var deck = buildAndShuffleDeck();
-    var girlCards = [];
-    var boyCards  = [];
+    var girlCards = [], boyCards = [];
     for(var i = 0; i < 12; i++) girlCards.push({value: deck.pop(), revealed: false});
     for(var i = 0; i < 12; i++) boyCards.push({value: deck.pop(), revealed: false});
     var topDiscard = deck.pop();
     var state = {
-      deck: deck,
-      discard: [topDiscard],
-      girl_cards: girlCards,
-      boy_cards: boyCards,
-      phase: 'init1',
-      turn: null,
-      round: 1,
-      scores: { girl: 0, boy: 0 },
-      last_player: null
+      deck: deck, discard: [topDiscard],
+      girl_cards: girlCards, boy_cards: boyCards,
+      phase: 'init1', turn: null,
+      round: 1, scores: { girl: 0, boy: 0 }, last_player: null
     };
     fetch(SB_URL + '/rest/v1/' + SKYJO_TABLE, {
       method: 'POST',
@@ -9013,10 +9023,8 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     })
     .then(function(r){ return r.json(); })
     .then(function(rows){
-      if(Array.isArray(rows) && rows[0]){
-        _skyjoGameId = rows[0].id;
-      }
-      _skyjoJoining = false; // permettre re-check
+      if(Array.isArray(rows) && rows[0]) _skyjoGameId = rows[0].id;
+      _skyjoJoining = false;
     }).catch(function(){ _skyjoJoining = false; });
   }
 
