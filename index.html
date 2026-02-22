@@ -2326,14 +2326,12 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 }
 .skyjo-player-zone.zone-me.active-zone::before { opacity: 1; }
 
-/* ─── Badge de tour — collé au bord droit de la zone centrale ─── */
+/* ─── Badge de tour — position absolue à droite, hors flux ─── */
 #skyjoTurnBadgeSlot {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 4px;
-  flex-shrink: 0;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 /* Badge "TON TOUR" : cercle lumineux, rien à voir avec une carte */
@@ -2465,6 +2463,7 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   background: linear-gradient(135deg, var(--s1) 0%, var(--s2) 100%);
   border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
   box-shadow: 0 2px 12px rgba(0,0,0,0.15) inset;
+  position: relative;
 }
 .skyjo-pile-slot { display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .skyjo-pile-label {
