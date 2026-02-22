@@ -2529,6 +2529,38 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 #skyjoDiscardBtn:active { transform: scale(0.94); }
 #skyjoDrawPileCount { font-size: 8px; color: var(--muted); text-align: center; font-variant-numeric: tabular-nums; }
 
+/* ══ CARTE EN MAIN ADVERSAIRE (live spectateur) ══ */
+#skyjoOppHeldWrap {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  visibility: hidden; opacity: 0;
+  transition: opacity 0.22s cubic-bezier(.4,0,.2,1);
+  pointer-events: none;
+  /* Positionné dans la zone opp, à gauche de la grille */
+}
+#skyjoOppHeldWrap.sj-held-visible {
+  visibility: visible; opacity: 1;
+}
+#skyjoOppHeldCard {
+  animation: sjOppHeldFloat 2s ease-in-out infinite;
+  position: relative; overflow: hidden;
+}
+@keyframes sjOppHeldFloat {
+  0%,100% { transform: translateY(0) rotateZ(0.5deg); box-shadow: 0 3px 12px rgba(239,83,80,0.35), var(--sj-shadow); }
+  50%     { transform: translateY(-2px) rotateZ(-0.5deg); box-shadow: 0 6px 18px rgba(239,83,80,0.45), var(--sj-shadow); }
+}
+#skyjoOppHeldCard::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.14) 0%, transparent 60%);
+  border-radius: inherit; pointer-events: none;
+}
+#skyjoOppHeldLabel {
+  font-size: 8px; font-weight: 800; color: #f87171;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+/* Pause si page cachée */
+body.skyjo-bg-paused #skyjoOppHeldCard { animation-play-state: paused !important; }
+
 /* ══════════════════════════════════════════════════
    CARTES — Design inspiré Skyjo avec motif hexa
 ══════════════════════════════════════════════════ */
@@ -5503,6 +5535,11 @@ body.light #counterBlock.glowing .c-num-big {
             <span class="skyjo-player-score-badge" id="skyjoScoreGirl">0</span>
           </div>
           <div style="display:flex;align-items:center;gap:6px;">
+            <!-- Carte en main adversaire (visible en live) -->
+            <div id="skyjoOppHeldWrap">
+              <div id="skyjoOppHeldLabel">En main</div>
+              <div id="skyjoOppHeldCard" class="skyjo-card skyjo-card-held"></div>
+            </div>
             <div id="skyjoOppTotal" class="sj-total-badge opp">—</div>
             <div class="skyjo-grid" id="skyjoOpponentGrid"></div>
           </div>
@@ -10165,6 +10202,12 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     var prevTurn = prevState ? prevState.turn : null;
     var turnChanged = prevTurn !== state.turn;
 
+    // Détecter si le tour vient de passer à moi → masquer la carte en main opp
+    if(turnChanged && isMyTurn){
+      var _ohw = document.getElementById('skyjoOppHeldWrap');
+      if(_ohw) _ohw.classList.remove('sj-held-visible');
+    }
+
     // Détecter si une nouvelle carte est arrivée en main
     var prevHeld = prevState ? (prevState.held_card && prevState.held_card.holder===_me) : false;
     var newHeld  = iHoldCard && !prevHeld;
@@ -10200,6 +10243,9 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     if(oppAvEl) oppAvEl.textContent = _me==='girl'?'👦':'👧';
     if(myLbEl)  myLbEl.textContent  = myName;
     if(oppLbEl) oppLbEl.textContent = oppName;
+    // Label carte en main adversaire
+    var oppHeldLbl = document.getElementById('skyjoOppHeldLabel');
+    if(oppHeldLbl) oppHeldLbl.textContent = 'En main – ' + oppName;
     // ── Pulse doré sur l'avatar du joueur actif ──
     var myAvEl2  = document.getElementById('skyjoAvatarMe');
     var oppAvEl2 = document.getElementById('skyjoAvatarOpp');
@@ -10309,6 +10355,109 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       if(canPickFromPiles && discardHasCard) discardEl2.classList.add('sj-selectable');
       else                                   discardEl2.classList.remove('sj-selectable');
     }
+
+    // ── Live spectateur : animations du tour adversaire ──────────────────
+    var oppKey2    = _me==='girl' ? 'boy' : 'girl';
+    var prevLive   = prevState ? prevState.live : null;
+    var curLive    = state.live;
+    var oppHeldWrap= document.getElementById('skyjoOppHeldWrap');
+    var oppHeldEl  = document.getElementById('skyjoOppHeldCard');
+    var deckElLv   = document.getElementById('skyjoDeckCard');
+    var discardElLv= document.getElementById('skyjoDiscardCard');
+
+    // L'adversaire tient une carte (état stable, pas d'animation)
+    var oppHoldsCard = state.held_card && state.held_card.holder === oppKey2;
+
+    // Nouveau signal live de l'adversaire ?
+    var isNewLive = curLive && (!prevLive || curLive.ts !== prevLive.ts);
+
+    if(isNewLive && !isMyTurn){
+      var lv = curLive;
+
+      if(lv.action === 'draw_deck' || lv.action === 'draw_discard'){
+        // ── L'adversaire pioche ──
+        // Animation : carte vole depuis pioche/défausse → zone opp held
+        if(oppHeldEl && (deckElLv || discardElLv)){
+          var srcEl = lv.action==='draw_deck' ? deckElLv : discardElLv;
+          if(srcEl){
+            var sR = srcEl.getBoundingClientRect();
+            // destination = oppHeldEl (peut être invisible, on prend son rect ou fallback)
+            var dR = oppHeldEl.getBoundingClientRect();
+            if(!dR || dR.width===0){
+              // fallback : décaler depuis la source
+              dR = {left:sR.left, top:sR.top - 70, width:sR.width, height:sR.height};
+            }
+            // val : connu pour draw_discard, inconnu pour draw_deck → on montre dos
+            var flyVal = lv.action==='draw_discard' ? lv.val : null;
+            sjAnimFly(sR, dR, flyVal, {duration:420, flip: lv.action==='draw_deck'});
+          }
+        }
+        // Préparer et afficher la carte en main adversaire
+        if(oppHeldWrap && oppHeldEl){
+          setTimeout(function(){
+            if(!_gameState) return;
+            var liveHeld = _gameState.held_card;
+            if(liveHeld && liveHeld.holder===oppKey2){
+              oppHeldEl.innerHTML='<div class="sj-pip-top">'+liveHeld.value+'</div><span class="sj-num">'+liveHeld.value+'</span><div class="sj-pip-bot">'+liveHeld.value+'</div>';
+              oppHeldEl.setAttribute('data-val', liveHeld.value);
+            }
+            oppHeldWrap.classList.add('sj-held-visible');
+            oppHeldEl.classList.remove('sj-held-appear');
+            void oppHeldEl.offsetWidth;
+            oppHeldEl.classList.add('sj-held-appear');
+            setTimeout(function(){ oppHeldEl.classList.remove('sj-held-appear'); }, 420);
+          }, 430);
+        }
+
+      } else if(lv.action === 'replace'){
+        // ── L'adversaire place sa carte en main sur sa grille ──
+        var targetOppEl = sjGetCardEl('skyjoOpponentGrid', lv.idx);
+        if(oppHeldEl && targetOppEl){
+          var sR2  = oppHeldEl.getBoundingClientRect();
+          var dR2  = targetOppEl.getBoundingClientRect();
+          if(sR2.width > 0 && dR2.width > 0){
+            oppHeldEl.style.visibility='hidden';
+            sjAnimFly(sR2, dR2, lv.val, {duration:440, flip:false, onDone:function(){
+              oppHeldEl.style.visibility='';
+            }});
+          }
+        }
+        // Cacher la carte en main opp
+        if(oppHeldWrap){
+          setTimeout(function(){ oppHeldWrap.classList.remove('sj-held-visible'); }, 380);
+        }
+
+      } else if(lv.action === 'discard_held'){
+        // ── L'adversaire défausse sa carte en main ──
+        if(oppHeldEl && discardElLv){
+          var sR3 = oppHeldEl.getBoundingClientRect();
+          var dR3 = discardElLv.getBoundingClientRect();
+          if(sR3.width > 0 && dR3.width > 0){
+            oppHeldEl.style.visibility='hidden';
+            sjAnimFly(sR3, dR3, lv.val, {duration:380, flip:false, onDone:function(){
+              oppHeldEl.style.visibility='';
+            }});
+          }
+        }
+        // Cacher la carte en main opp
+        if(oppHeldWrap){
+          setTimeout(function(){ oppHeldWrap.classList.remove('sj-held-visible'); }, 320);
+        }
+      }
+    }
+
+    // Sync silencieux : si l'adversaire tient déjà une carte au chargement (rejoin mid-game)
+    // → afficher directement sans animation
+    if(!isNewLive && oppHoldsCard && oppHeldWrap && oppHeldEl){
+      if(!oppHeldWrap.classList.contains('sj-held-visible')){
+        oppHeldEl.innerHTML='<div class="sj-pip-top">'+state.held_card.value+'</div><span class="sj-num">'+state.held_card.value+'</span><div class="sj-pip-bot">'+state.held_card.value+'</div>';
+        oppHeldEl.setAttribute('data-val', state.held_card.value);
+        oppHeldWrap.classList.add('sj-held-visible');
+      }
+    } else if(!oppHoldsCard && oppHeldWrap && !isNewLive){
+      oppHeldWrap.classList.remove('sj-held-visible');
+    }
+    // ────────────────────────────────────────────────────────────────────
 
     renderGrid('skyjoMyGrid',myCards,true,isMyTurn,state,iHoldCard);
     renderGrid('skyjoOpponentGrid',oppCards,false,false,state,false);
@@ -10876,6 +11025,9 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       sjAnimFly(sRect, dRect, null, { duration: 440, flip: false });
     }
 
+    // Signal live : l'adversaire verra la pioche depuis le deck
+    _writeLive({action:'draw_deck', ts:Date.now()});
+
     setTimeout(function(){
       callRpc('skyjo_draw_deck',{p_game_id:_gameId, p_player:_me});
     }, 180);
@@ -10903,6 +11055,9 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
         : { left: sRect.left - 70, top: sRect.top, width: sRect.width, height: sRect.height };
       sjAnimFly(sRect, dRect, topVal, { duration: 440, flip: false });
     }
+
+    // Signal live : l'adversaire verra la pioche depuis la défausse (valeur connue)
+    _writeLive({action:'draw_discard', val:topVal, ts:Date.now()});
 
     setTimeout(function(){
       callRpc('skyjo_draw_discard',{p_game_id:_gameId, p_player:_me});
@@ -10944,6 +11099,9 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       });
     }
 
+    // Signal live : carte en main placée sur la grille (effacera la carte en main opp)
+    _writeLive({action:'replace', idx:idx, val:heldVal, ts:Date.now()});
+
     setTimeout(function(){
       callRpc('skyjo_replace_card',{p_game_id:_gameId, p_player:_me, p_idx:idx});
     }, 80);
@@ -10961,6 +11119,9 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     if(heldEl && discardEl){
       sjAnimHeldToDiscard(heldEl, discardEl, heldVal, null);
     }
+
+    // Signal live : carte en main défaussée
+    _writeLive({action:'discard_held', val:heldVal, ts:Date.now()});
 
     setTimeout(function(){
       callRpc('skyjo_discard_held',{p_game_id:_gameId, p_player:_me});
@@ -11003,6 +11164,33 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     })
     .then(function(rows){if(rows&&Array.isArray(rows)&&rows[0]) renderState(rows[0]);})
     .catch(function(e){ console.error('[SKYJO] saveState err', e); });
+  }
+
+  /* ── Live signal : écrit un événement instantané dans le state pour que
+        l'adversaire le voie via son poll et joue l'animation correspondante.
+        Fire-and-forget, pas de callback. ── */
+  function _writeLive(liveObj){
+    if(!_gameId||!_gameState) return;
+    // Merge le champ live dans le state courant et PATCH
+    var patch = JSON.parse(JSON.stringify(_gameState));
+    patch.live = liveObj; // ex: {action:'draw_deck', val:7, ts:Date.now()}
+    fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId,{
+      method:'PATCH',
+      headers:sbHeaders({'Prefer':'return=minimal'}),
+      body:JSON.stringify({state:patch})
+    }).catch(function(){});
+  }
+
+  /* ── Efface le champ live (après que l'action finale a été jouée) ── */
+  function _clearLive(){
+    if(!_gameId||!_gameState) return;
+    var patch = JSON.parse(JSON.stringify(_gameState));
+    delete patch.live;
+    fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId,{
+      method:'PATCH',
+      headers:sbHeaders({'Prefer':'return=minimal'}),
+      body:JSON.stringify({state:patch})
+    }).catch(function(){});
   }
 
   // ─── Fin de manche ───────────────────────────────────
