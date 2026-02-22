@@ -2182,219 +2182,161 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 :root { --sj-cw: 44px; --sj-ch: 62px; --sj-fs: 15px; }
 
 /* ══════════════════════════════════════════════════
-   SKYJO — layout inspiré screenshot, plein écran
+   SKYJO — plein écran, layout serré, no-scroll
 ══════════════════════════════════════════════════ */
-
-/* Vue racine : flex colonne, plein écran, sans scroll */
 #skyjoView {
-  display: none;
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 600;
-  overflow: hidden !important;
-  flex-direction: column;
-  background: var(--bg);
+  display: none; position: fixed !important; inset: 0 !important;
+  z-index: 600; overflow: hidden !important;
+  flex-direction: column; background: var(--bg);
   font-family: 'DM Sans', sans-serif;
 }
 #skyjoView.active { display: flex !important; animation: slideUp 0.25s ease; }
 
-/* Header compact */
+/* Header ultra-compact */
 #skyjoView .game-view-header {
-  flex-shrink: 0;
-  padding: 8px 12px 6px;
+  flex-shrink: 0; padding: 6px 12px;
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
-  background: var(--bg);
+  min-height: 0;
 }
+#skyjoView .game-view-header .game-view-title { font-size: 16px; }
+#skyjoView .game-view-header .game-view-back  { padding: 5px 10px; font-size: 11px; }
+
 #skyjoView .game-view-body {
   flex: 1; min-height: 0;
-  display: flex; flex-direction: column;
-  overflow: hidden; padding: 0;
+  display: flex; flex-direction: column; overflow: hidden; padding: 0;
 }
 
-/* ── Écrans secondaires (lock, attente, fin) ── */
+/* Écrans secondaires */
 #skyjoLockScreen, #skyjoWaitScreen, #skyjoRoundEnd, #skyjoGameEnd {
   flex: 1; display: none; flex-direction: column;
   align-items: center; justify-content: center;
   padding: 24px; overflow-y: auto; gap: 14px;
 }
 
-/* ── Zone de jeu principale ── */
-#skyjoGameArea {
-  flex: 1; min-height: 0;
-  display: none; flex-direction: column;
-  overflow: hidden;
-}
+/* Zone de jeu */
+#skyjoGameArea { flex: 1; min-height: 0; display: none; flex-direction: column; overflow: hidden; }
 #skyjoGameArea.sja-visible { display: flex !important; }
 
-/* ── Bannière de tour (tout en haut, bien visible) ── */
+/* Bannière de tour — fine mais visible */
 #skyjoTurnBanner {
-  flex-shrink: 0;
-  padding: 7px 16px;
-  font-size: 13px; font-weight: 700; text-align: center;
-  letter-spacing: 0.3px;
+  flex-shrink: 0; padding: 5px 12px;
+  font-size: 12px; font-weight: 700; text-align: center; line-height: 1.3;
 }
-.skyjo-turn-banner.my-turn {
-  background: rgba(0,201,167,0.18);
-  color: var(--green);
-  border-bottom: 2px solid rgba(0,201,167,0.4);
-}
-.skyjo-turn-banner.their-turn {
-  background: var(--s1);
-  color: var(--muted);
-  border-bottom: 1px solid var(--border);
-}
+.skyjo-turn-banner.my-turn   { background: rgba(0,201,167,0.15); color: var(--green); border-bottom: 2px solid rgba(0,201,167,0.35); }
+.skyjo-turn-banner.their-turn{ background: var(--s1); color: var(--muted); border-bottom: 1px solid var(--border); }
 
-/* ── Terrain : flex colonne, distribue l'espace ── */
+/* Terrain vertical : 2 zones joueur + 1 zone centrale */
 #skyjoPlayField {
   flex: 1; min-height: 0;
-  display: flex; flex-direction: column;
-  align-items: stretch;
-  overflow: hidden;
+  display: flex; flex-direction: column; align-items: stretch; overflow: hidden;
 }
 
-/* ── Zones joueur (haut = adversaire, bas = moi) ── */
+/* Zones joueur */
 .skyjo-player-zone {
   flex: 1; min-height: 0;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  padding: 6px 10px 4px;
-  position: relative;
+  padding: 4px 8px; position: relative; gap: 4px;
 }
-/* Fond coloré : adversaire = teinte froide, moi = teinte chaude */
-.skyjo-player-zone.zone-opp {
-  background: linear-gradient(160deg, rgba(99,102,241,0.13) 0%, rgba(59,130,246,0.07) 100%);
-  border-bottom: 1px solid rgba(99,102,241,0.18);
-}
-.skyjo-player-zone.zone-me {
-  background: linear-gradient(160deg, rgba(0,201,167,0.13) 0%, rgba(16,185,129,0.06) 100%);
-  border-top: 1px solid rgba(0,201,167,0.2);
-}
+.skyjo-player-zone.zone-opp { background: rgba(79,70,229,0.08); border-bottom: 1px solid rgba(79,70,229,0.15); }
+.skyjo-player-zone.zone-me  { background: rgba(5,150,105,0.08); border-top:    1px solid rgba(5,150,105,0.15); }
 
-/* Info joueur (avatar + nom + score) */
-.skyjo-player-info {
-  display: flex; align-items: center; gap: 8px;
-  margin-bottom: 6px;
-}
+/* Infos joueur — ligne compacte */
+.skyjo-player-info { display: flex; align-items: center; gap: 6px; }
 .skyjo-avatar {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: var(--s2); border: 2px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 17px; flex-shrink: 0;
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+  background: var(--s2); border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
 }
-.skyjo-player-name {
-  font-size: 12px; font-weight: 700; color: var(--text);
-}
+.skyjo-player-name  { font-size: 11px; font-weight: 700; color: var(--text); }
 .skyjo-player-score-badge {
   background: var(--s2); border: 1px solid var(--border);
-  border-radius: 20px; padding: 2px 8px;
+  border-radius: 20px; padding: 1px 7px;
   font-size: 11px; font-weight: 700; color: var(--text);
 }
 .skyjo-manche-badge {
-  position: absolute; top: 6px; right: 10px;
-  font-size: 10px; font-weight: 700; color: var(--muted);
+  position: absolute; top: 4px; right: 8px;
+  font-size: 9px; font-weight: 700; color: var(--muted);
   background: var(--s1); border: 1px solid var(--border);
-  border-radius: 6px; padding: 2px 7px;
+  border-radius: 5px; padding: 1px 6px;
 }
 
-/* ── Zone centrale : pioche / carte en main / défausse ── */
+/* Zone centrale : pioche + carte-en-main (à gauche) / défausse (à droite) */
 #skyjoMidZone {
   flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  gap: 14px;
-  padding: 6px 10px;
+  gap: 16px; padding: 4px 12px;
   background: var(--s1);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
 }
-.skyjo-pile-slot {
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
-}
-.skyjo-pile-label {
-  font-size: 9px; font-weight: 700; color: var(--muted);
-  text-transform: uppercase; letter-spacing: 1px;
-}
+.skyjo-pile-slot { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.skyjo-pile-label { font-size: 8px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
 
-/* ── Carte en main : affichée SUR la pioche (position relative au slot) ── */
-#skyjoDrawSlot {
-  position: relative;
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
-}
+/* Carte en main : à GAUCHE de la pioche, clignotante, pas de label sous elle */
+#skyjoDrawSlot { display: flex; align-items: center; gap: 8px; }
 #skyjoHeldCardWrap {
-  display: none;
-  position: absolute; top: 0; left: 0; right: 0;
-  flex-direction: column; align-items: center; gap: 0;
-  z-index: 2;
+  display: none; flex-direction: column; align-items: center; gap: 2px;
 }
-#skyjoHeldCard {
-  box-shadow: 0 4px 16px rgba(167,139,250,0.5);
+#skyjoHeldCard { animation: sjHeldPulse 1s ease-in-out infinite; }
+@keyframes sjHeldPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(167,139,250,0.7); transform: scale(1); }
+  50%     { box-shadow: 0 0 0 5px rgba(167,139,250,0); transform: scale(1.04); }
 }
+#skyjoHeldLabel { font-size: 8px; font-weight: 700; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.8px; }
 #skyjoDiscardBtn {
-  margin-top: 3px;
-  padding: 3px 7px;
-  background: rgba(239,83,80,0.12); color: #ef5350;
-  border: 1px solid rgba(239,83,80,0.35); border-radius: 5px;
-  font-size: 9px; font-weight: 700; font-family: 'DM Sans', sans-serif;
-  cursor: pointer; white-space: nowrap; letter-spacing: 0.3px;
+  padding: 2px 6px; background: rgba(239,83,80,0.12); color: #ef5350;
+  border: 1px solid rgba(239,83,80,0.35); border-radius: 4px;
+  font-size: 8px; font-weight: 700; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; white-space: nowrap;
 }
+#skyjoDrawPileCount { font-size: 8px; color: var(--muted); text-align: center; }
 
-/* ── Cartes (taille via CSS vars calculées dynamiquement) ── */
+/* ── CARTES ── */
 .skyjo-card {
   width: var(--sj-cw); height: var(--sj-ch);
   border-radius: 8px;
   display: inline-flex; align-items: center; justify-content: center;
   font-size: var(--sj-fs); font-weight: 800;
-  border: none;
-  cursor: default; user-select: none;
-  flex-shrink: 0;
-  transition: transform 0.12s, box-shadow 0.12s;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-  position: relative;
+  border: none; cursor: default; user-select: none; flex-shrink: 0;
+  transition: transform 0.12s; box-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
-/* Cartes dos (pioche, cachées) : vert comme dans le vrai jeu */
+/* Dos vert sobre */
 .skyjo-card-back,
-.skyjo-card.skyjo-card-hidden {
-  background: linear-gradient(145deg, #2ecc71, #27ae60);
-  color: rgba(255,255,255,0.5);
-}
-/* Carte en main : violet */
-.skyjo-card-held {
-  background: linear-gradient(145deg, #a78bfa, #7c3aed);
-  color: #fff;
-}
+.skyjo-card.skyjo-card-hidden { background: #3a7d52; color: rgba(255,255,255,0.4); }
 
-/* Cartes retournées : couleur selon valeur (comme le vrai Skyjo) */
-.skyjo-card[data-val="-2"] { background: linear-gradient(145deg,#3b82f6,#1d4ed8); color:#fff; }
-.skyjo-card[data-val="-1"] { background: linear-gradient(145deg,#60a5fa,#2563eb); color:#fff; }
-.skyjo-card[data-val="0"]  { background: linear-gradient(145deg,#a78bfa,#7c3aed); color:#fff; }
-.skyjo-card[data-val="1"]  { background: linear-gradient(145deg,#f97316,#ea580c); color:#fff; }
-.skyjo-card[data-val="2"]  { background: linear-gradient(145deg,#fb923c,#f97316); color:#fff; }
-.skyjo-card[data-val="3"]  { background: linear-gradient(145deg,#fbbf24,#f59e0b); color:#fff; }
-.skyjo-card[data-val="4"]  { background: linear-gradient(145deg,#a3e635,#65a30d); color:#fff; }
-.skyjo-card[data-val="5"]  { background: linear-gradient(145deg,#4ade80,#16a34a); color:#fff; }
-.skyjo-card[data-val="6"]  { background: linear-gradient(145deg,#34d399,#059669); color:#fff; }
-.skyjo-card[data-val="7"]  { background: linear-gradient(145deg,#2dd4bf,#0d9488); color:#fff; }
-.skyjo-card[data-val="8"]  { background: linear-gradient(145deg,#38bdf8,#0284c7); color:#fff; }
-.skyjo-card[data-val="9"]  { background: linear-gradient(145deg,#f87171,#dc2626); color:#fff; }
-.skyjo-card[data-val="10"] { background: linear-gradient(145deg,#f43f5e,#be123c); color:#fff; }
-.skyjo-card[data-val="11"] { background: linear-gradient(145deg,#e11d48,#9f1239); color:#fff; }
-.skyjo-card[data-val="12"] { background: linear-gradient(145deg,#ec4899,#be185d); color:#fff; }
+/* Carte en main */
+.skyjo-card-held { background: #6d5acd; color: #fff; }
 
-/* Interactions */
-.skyjo-card.skyjo-card-clickable {
-  cursor: pointer;
-  outline: 3px solid rgba(0,201,167,0.8);
-  outline-offset: 2px;
-}
-.skyjo-card.skyjo-card-clickable:active { transform: scale(1.08); box-shadow: 0 6px 18px rgba(0,201,167,0.4); }
-.skyjo-card.skyjo-card-hidden:active { transform: scale(1.06); }
-.skyjo-card.skyjo-col-complete {
-  opacity: 0.3; pointer-events: none;
-  filter: grayscale(60%);
-}
+/* Valeurs négatives → bleu ardoise */
+.skyjo-card[data-val="-2"] { background: #2563a8; color: #fff; }
+.skyjo-card[data-val="-1"] { background: #3b7dd8; color: #fff; }
+/* 0 → violet doux */
+.skyjo-card[data-val="0"]  { background: #7c5cbf; color: #fff; }
+/* 1-4 → orange/ambre, bien contrasté */
+.skyjo-card[data-val="1"]  { background: #c45e10; color: #fff; }
+.skyjo-card[data-val="2"]  { background: #d4730f; color: #fff; }
+.skyjo-card[data-val="3"]  { background: #b8870a; color: #fff; }
+.skyjo-card[data-val="4"]  { background: #7a8e12; color: #fff; }
+/* 5-8 → vert, tons différents */
+.skyjo-card[data-val="5"]  { background: #237a3c; color: #fff; }
+.skyjo-card[data-val="6"]  { background: #1d8c56; color: #fff; }
+.skyjo-card[data-val="7"]  { background: #167a6e; color: #fff; }
+.skyjo-card[data-val="8"]  { background: #0e6b8a; color: #fff; }
+/* 9-12 → rouge/bordeaux */
+.skyjo-card[data-val="9"]  { background: #b02020; color: #fff; }
+.skyjo-card[data-val="10"] { background: #961b2e; color: #fff; }
+.skyjo-card[data-val="11"] { background: #7d1535; color: #fff; }
+.skyjo-card[data-val="12"] { background: #9b1a5e; color: #fff; }
 
-/* ── Grille 4×3 ── */
+/* Interactif */
+.skyjo-card.skyjo-card-clickable { cursor: pointer; outline: 2.5px solid rgba(0,201,167,0.85); outline-offset: 2px; }
+.skyjo-card.skyjo-card-clickable:active { transform: scale(1.07); }
+.skyjo-card.skyjo-card-hidden:active    { transform: scale(1.05); }
+.skyjo-card.skyjo-col-complete { opacity: 0.28; pointer-events: none; filter: grayscale(50%); }
+
+/* Grille 4×3 */
 .skyjo-grid {
   display: grid;
   grid-template-columns: repeat(4, var(--sj-cw));
@@ -2402,25 +2344,19 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   gap: 4px;
 }
 
-/* ── Message phase (bas de l'écran) ── */
+/* Message phase bas */
 #skyjoPhaseMsg {
-  flex-shrink: 0; padding: 5px 14px;
-  background: rgba(0,201,167,0.1);
-  border-top: 1px solid rgba(0,201,167,0.25);
-  font-size: 11px; color: var(--sub); text-align: center;
-  display: none; font-weight: 600;
+  flex-shrink: 0; padding: 4px 12px;
+  background: rgba(0,201,167,0.1); border-top: 1px solid rgba(0,201,167,0.2);
+  font-size: 10px; color: var(--sub); text-align: center; font-weight: 600; display: none;
 }
 
-/* ── Bulles présence (écran attente) ── */
+/* Bulles présence */
 .skyjo-player-bubble {
   display: flex; flex-direction: row; align-items: center; gap: 10px;
-  background: var(--s1); border: 1px solid var(--border);
-  border-radius: 14px; padding: 12px 18px;
+  background: var(--s1); border: 1px solid var(--border); border-radius: 14px; padding: 12px 18px;
 }
-.skyjo-presence-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--muted); transition: background 0.3s; flex-shrink: 0;
-}
+.skyjo-presence-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); transition: background 0.3s; flex-shrink: 0; }
 .skyjo-presence-dot.online { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); animation: presencePulse 2s ease-in-out infinite; }
 @keyframes presencePulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
 
@@ -4893,19 +4829,21 @@ body.light #counterBlock.glowing .c-num-big {
           <div class="skyjo-grid" id="skyjoOpponentGrid"></div>
         </div>
 
-        <!-- ═══ ZONE CENTRALE : pioche / carte en main / défausse ═══ -->
+        <!-- ═══ ZONE CENTRALE ═══ -->
         <div id="skyjoMidZone">
 
-          <!-- Pioche (avec carte en main par-dessus si pioché) -->
+          <!-- Carte en main (à gauche, cachée si absent) -->
+          <div id="skyjoHeldCardWrap">
+            <div id="skyjoHeldLabel">En main</div>
+            <div id="skyjoHeldCard" class="skyjo-card skyjo-card-held"></div>
+            <button id="skyjoDiscardBtn" onclick="skyjoDiscardHeld()">🗑 Défausser</button>
+          </div>
+
+          <!-- Pioche -->
           <div class="skyjo-pile-slot" id="skyjoDrawSlot">
             <div class="skyjo-pile-label">Pioche</div>
             <div id="skyjoDeckCard" class="skyjo-card skyjo-card-back" onclick="skyjoDrawFromDeck()" style="cursor:pointer;"></div>
-            <div style="font-size:8px;color:var(--muted);text-align:center;" id="skyjoDrawPileCount">—</div>
-            <!-- Carte en main : se superpose à la pioche -->
-            <div id="skyjoHeldCardWrap">
-              <div id="skyjoHeldCard" class="skyjo-card skyjo-card-held"></div>
-              <button id="skyjoDiscardBtn" onclick="skyjoDiscardHeld()">🗑 Défausser</button>
-            </div>
+            <div id="skyjoDrawPileCount">—</div>
           </div>
 
           <!-- Défausse -->
@@ -9030,24 +8968,35 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     if(!el) return;
     if(id==='skyjoGameArea'){
       el.classList.add('sja-visible');
-      // Calcul taille cartes pour tenir sur 1 écran
+      // Calcul taille cartes : tout doit tenir sans scroll
       requestAnimationFrame(function(){
+        var vw = window.innerWidth;
         var vh = window.innerHeight;
-        var headerH = (document.querySelector('#skyjoView .game-view-header')||{}).offsetHeight || 40;
-        var bannerH = (document.getElementById('skyjoTurnBanner')||{}).offsetHeight || 32;
-        var midH    = 72; // zone centrale fixe estimée
-        var phaseH  = 24;
-        var padding = 40; // marges internes zones joueur (labels, avatars, gaps)
-        var avail   = vh - headerH - bannerH - midH - phaseH - padding;
-        // avail = espace pour les 2 grilles de 3 rangées
-        var cardH = Math.floor((avail - 4*2) / 6); // 6 rangées au total, gap 4px
-        var cardW = Math.floor(cardH / 1.4);
-        cardH = Math.min(68, Math.max(38, cardH));
-        cardW = Math.min(50, Math.max(28, cardW));
-        // Vérifier aussi que 4 cartes + gaps rentrent en largeur
-        var maxW = Math.floor((window.innerWidth - 24 - 3*4) / 4);
-        if(cardW > maxW){ cardW = maxW; cardH = Math.floor(cardW * 1.4); }
-        var fs = Math.max(10, Math.floor(cardW * 0.38));
+
+        // Hauteurs fixes estimées (on mesure après rendu si possible)
+        var headerEl = document.querySelector('#skyjoView .game-view-header');
+        var bannerEl = document.getElementById('skyjoTurnBanner');
+        var headerH  = headerEl ? headerEl.offsetHeight : 38;
+        var bannerH  = bannerEl ? bannerEl.offsetHeight : 28;
+        var midH     = 64;  // zone centrale (pioche/défausse) en px
+        var phaseH   = 0;   // message phase (souvent caché)
+        var infoH    = 30;  // ligne avatar+nom par zone joueur × 2 = 60
+        var gapH     = 16;  // gaps et paddings divers
+
+        var availH = vh - headerH - bannerH - midH - phaseH - (infoH*2) - gapH;
+        // availH = espace pour 6 rangées de cartes (2 grilles × 3 rangées)
+        var cardH = Math.floor((availH - 5*4) / 6); // 5 gaps de 4px
+
+        // Contrainte largeur : 4 cartes + 3 gaps de 4px + paddings latéraux 16px
+        var maxByW = Math.floor((vw - 16 - 3*4) / 4);
+        var cardW  = Math.floor(cardH / 1.42);
+        if(cardW > maxByW){ cardW = maxByW; cardH = Math.floor(cardW * 1.42); }
+
+        // Bornes de sécurité
+        cardH = Math.min(64, Math.max(34, cardH));
+        cardW = Math.min(46, Math.max(24, cardW));
+        var fs = Math.max(10, Math.min(16, Math.floor(cardW * 0.4)));
+
         document.documentElement.style.setProperty('--sj-cw', cardW+'px');
         document.documentElement.style.setProperty('--sj-ch', cardH+'px');
         document.documentElement.style.setProperty('--sj-fs', fs+'px');
@@ -12510,7 +12459,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.10.8 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
