@@ -9787,14 +9787,15 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   }
   function _refreshPresenceRate(){
     if(!_presTimer) return;
-    var newInterval = document.hidden ? 30000 : 4000;
-    clearInterval(_presTimer); _presTimer=null;
-    _presTimer=setInterval(upsertPresence, newInterval);
+    // Plus besoin de ralentir : upsertPresence() skippe si page cachée.
+    // Au retour au premier plan, on envoie un heartbeat immédiat.
+    if(!document.hidden) upsertPresence();
   }
   var _lastPresenceSent = 0; // timestamp local du dernier heartbeat envoyé
 
   function upsertPresence(){
     if(!_me) return;
+    if(document.hidden) return; // page cachée → on arrête le heartbeat pour que updated_at gèle dans Supabase
     _lastPresenceSent = Date.now(); // toujours mis à jour, même si fetch échoue
     function doPost(){
       fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE,{
@@ -14597,7 +14598,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.10 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
