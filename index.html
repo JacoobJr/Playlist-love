@@ -9798,19 +9798,10 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     if(document.hidden) return; // page cachée → updated_at gèle dans Supabase, détection d'absence OK
     _lastPresenceSent = Date.now();
     function doPost(){
-      var now = new Date().toISOString();
-      // On fait DELETE puis INSERT au lieu de merge-duplicates (UPSERT/UPDATE)
-      // car le trigger set_updated_at écrase updated_at à chaque UPDATE,
-      // ce qui empêche le freeze de présence quand la page est cachée.
-      // Un INSERT n'est pas concerné par ce trigger BEFORE UPDATE.
-      fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE+'?profile=eq.'+_me,{
-        method:'DELETE', headers:sbHeaders()
-      }).then(function(){
-        fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE,{
-          method:'POST',
-          headers:sbHeaders({'Prefer':'return=minimal'}),
-          body:JSON.stringify({profile:_me, updated_at:now})
-        }).catch(function(){});
+      fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE,{
+        method:'POST',
+        headers:sbHeaders({'Prefer':'resolution=merge-duplicates,return=minimal'}),
+        body:JSON.stringify({profile:_me,updated_at:new Date().toISOString()})
       }).catch(function(){});
     }
     if(_sbAccessToken){
@@ -14606,7 +14597,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.50 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
