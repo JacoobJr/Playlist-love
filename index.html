@@ -9786,10 +9786,11 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     _presTimer=setInterval(upsertPresence, interval);
   }
   function _refreshPresenceRate(){
-    if(!_presTimer) return;
-    // Ne pas envoyer de heartbeat immédiat au retour :
-    // fetchState() doit s'exécuter EN PREMIER pour évaluer bothAbsent
-    // avec les vieux timestamps. Le heartbeat repartira au prochain tick du setInterval.
+    // Le heartbeat ne doit pas envoyer de signal immédiat au retour :
+    // fetchState() s'exécute d'abord (via _refreshPollRate) avec les vieux timestamps.
+    // Le heartbeat repartira naturellement au prochain tick du setInterval existant.
+    // (Pas de guard sur _presTimer : le setInterval continue de tourner en arrière-plan,
+    //  mais upsertPresence() skippe si document.hidden — donc pas de heartbeat envoyé.)
   }
   var _lastPresenceSent = 0; // timestamp local du dernier heartbeat envoyé
 
@@ -10084,13 +10085,16 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     _pollTimer=setInterval(fetchState, interval);
   }
   function _refreshPollRate(){
-    if(!_pollTimer) return; // pas de poll actif, rien à faire
+    // Ne pas bloquer si _pollTimer est null (stopPoll() a pu être appelé par oppGoneTimer)
     var newInterval = document.hidden ? 15000 : 2000;
-    clearInterval(_pollTimer); _pollTimer=null;
-    _pollTimer=setInterval(fetchState, newInterval);
-    // Au retour au premier plan : fetchState IMMÉDIAT avant que le heartbeat
-    // ne remette updated_at à now() et empêche la détection bothAbsent.
-    if(!document.hidden) fetchState();
+    if(_pollTimer){ clearInterval(_pollTimer); _pollTimer=null; }
+    if(!document.hidden && _launched){
+      // Retour au premier plan : fetchState IMMÉDIAT d'abord (avant que le heartbeat
+      // ne remette updated_at à now() et empêche la détection bothAbsent),
+      // puis on relance le poll normal.
+      fetchState();
+      _pollTimer = setInterval(fetchState, newInterval);
+    }
   }
   var BOTH_ABSENT_TIMEOUT_MS = 40000; // 40s sans heartbeat des deux = clôture
   var _bothAbsentHandled = false; // évite double déclenchement
@@ -14600,7 +14604,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.24 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.80 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
