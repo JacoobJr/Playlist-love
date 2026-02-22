@@ -10119,9 +10119,9 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
       // ── Les DEUX joueurs absents depuis +40s → clôture automatique ─────
       var now = Date.now();
-      var myLastSeen  = _lastPresenceSent > 0
-        ? now - _lastPresenceSent   // timestamp local (plus fiable que Supabase pour soi-même)
-        : (myPresRows[0] ? now - new Date(myPresRows[0].updated_at).getTime() : 99999999);
+      var myLastSeen  = myPresRows[0]
+        ? now - new Date(myPresRows[0].updated_at).getTime()  // Supabase = source de vérité pour les deux
+        : 99999999;
       var oppLastSeen = presRows[0]
         ? now - new Date(presRows[0].updated_at).getTime()
         : 99999999;
