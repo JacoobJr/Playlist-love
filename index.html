@@ -2289,68 +2289,97 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 }
 /* Zone adverse (haut) */
 .skyjo-player-zone.zone-opp {
-  background: rgba(79,70,229,0.05);
-  border-bottom: 1px solid rgba(79,70,229,0.14);
+  background: rgba(79,70,229,0.04);
+  border-bottom: 1px solid rgba(79,70,229,0.12);
 }
 .skyjo-player-zone.zone-opp::before {
   background: linear-gradient(180deg, rgba(79,70,229,0) 0%, #7c6df5 50%, rgba(79,70,229,0) 100%);
+  width: 4px;
 }
 .skyjo-player-zone.zone-opp.active-zone {
-  background: rgba(79,70,229,0.12);
-  box-shadow: inset 0 0 40px rgba(79,70,229,0.08);
-  border-bottom: 1px solid rgba(79,70,229,0.32);
+  animation: sjZoneOppBreath 2.8s ease-in-out infinite;
+  border-bottom: 1px solid rgba(79,70,229,0.5);
+}
+@keyframes sjZoneOppBreath {
+  0%,100% { background: rgba(79,70,229,0.10); box-shadow: inset 0 0 50px rgba(79,70,229,0.10); }
+  50%     { background: rgba(79,70,229,0.20); box-shadow: inset 0 0 80px rgba(79,70,229,0.18); }
 }
 .skyjo-player-zone.zone-opp.active-zone::before { opacity: 1; }
 
 /* Zone moi (bas) */
 .skyjo-player-zone.zone-me {
-  background: rgba(5,150,105,0.05);
-  border-top: 1px solid rgba(5,150,105,0.14);
+  background: rgba(5,150,105,0.04);
+  border-top: 1px solid rgba(5,150,105,0.12);
   padding-bottom: max(8px, env(safe-area-inset-bottom, 8px));
 }
 .skyjo-player-zone.zone-me::before {
   background: linear-gradient(180deg, rgba(5,150,105,0) 0%, #00c9a7 50%, rgba(5,150,105,0) 100%);
+  width: 4px;
 }
 .skyjo-player-zone.zone-me.active-zone {
-  background: rgba(5,150,105,0.12);
-  box-shadow: inset 0 0 40px rgba(5,150,105,0.08);
-  border-top: 1px solid rgba(5,150,105,0.32);
+  animation: sjZoneMeBreath 2.8s ease-in-out infinite;
+  border-top: 1px solid rgba(0,201,167,0.5);
+}
+@keyframes sjZoneMeBreath {
+  0%,100% { background: rgba(5,150,105,0.12); box-shadow: inset 0 0 50px rgba(0,201,167,0.10); }
+  50%     { background: rgba(5,150,105,0.22); box-shadow: inset 0 0 80px rgba(0,201,167,0.20); }
 }
 .skyjo-player-zone.zone-me.active-zone::before { opacity: 1; }
 
-/* ─── Badge "TON TOUR" flottant sur la zone active ─── */
+/* ─── Badge "★ TON TOUR" — grand, visible, pulse lent et fort ─── */
 .sj-your-turn-badge {
   position: absolute;
-  top: 6px; right: 8px;
-  background: linear-gradient(135deg, rgba(0,201,167,0.22), rgba(0,229,189,0.32));
-  border: 1px solid rgba(0,201,167,0.55);
-  border-radius: 20px;
-  padding: 2px 9px;
-  font-size: 8px; font-weight: 900;
-  color: #00e5bd;
-  letter-spacing: 1.2px;
+  top: 50%; right: 10px;
+  transform: translateY(-50%);
+  background: linear-gradient(135deg, rgba(0,201,167,0.28), rgba(0,229,189,0.42));
+  border: 1.5px solid rgba(0,201,167,0.75);
+  border-radius: 22px;
+  padding: 5px 13px;
+  font-size: 10px; font-weight: 900;
+  color: #00ffda;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   pointer-events: none;
-  animation: sjYourTurnBadge 1.8s ease-in-out infinite;
-  box-shadow: 0 0 10px rgba(0,201,167,0.25);
+  animation: sjYourTurnBadge 2.6s ease-in-out infinite;
+  box-shadow: 0 0 14px rgba(0,201,167,0.35), 0 2px 8px rgba(0,0,0,0.3);
+  text-shadow: 0 0 10px rgba(0,229,189,0.8);
+  white-space: nowrap;
 }
 .sj-their-turn-badge {
   position: absolute;
-  top: 6px; right: 8px;
-  background: rgba(79,70,229,0.12);
-  border: 1px solid rgba(79,70,229,0.28);
-  border-radius: 20px;
-  padding: 2px 9px;
-  font-size: 8px; font-weight: 700;
-  color: rgba(160,150,240,0.8);
+  top: 50%; right: 10px;
+  transform: translateY(-50%);
+  background: rgba(79,70,229,0.14);
+  border: 1px solid rgba(79,70,229,0.32);
+  border-radius: 22px;
+  padding: 5px 13px;
+  font-size: 9px; font-weight: 700;
+  color: rgba(180,170,255,0.75);
   letter-spacing: 0.8px;
   text-transform: uppercase;
   pointer-events: none;
   font-style: italic;
+  white-space: nowrap;
 }
 @keyframes sjYourTurnBadge {
-  0%,100% { opacity: 1; transform: scale(1); box-shadow: 0 0 8px rgba(0,201,167,0.2); }
-  50%     { opacity: 0.8; transform: scale(0.97); box-shadow: 0 0 16px rgba(0,201,167,0.4); }
+  0%,100% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+    box-shadow: 0 0 10px rgba(0,201,167,0.25), 0 2px 8px rgba(0,0,0,0.3);
+    border-color: rgba(0,201,167,0.65);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.06);
+    box-shadow: 0 0 22px rgba(0,201,167,0.6), 0 0 40px rgba(0,201,167,0.25), 0 2px 8px rgba(0,0,0,0.3);
+    border-color: rgba(0,229,189,1);
+  }
+  80% {
+    opacity: 0.88;
+    transform: translateY(-50%) scale(0.97);
+    box-shadow: 0 0 8px rgba(0,201,167,0.2), 0 2px 8px rgba(0,0,0,0.3);
+    border-color: rgba(0,201,167,0.5);
+  }
 }
 
 /* Infos joueur — ligne compacte */
