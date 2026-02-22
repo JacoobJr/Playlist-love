@@ -9333,7 +9333,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       // Mettre à jour le dot de présence adversaire
       var dot = document.getElementById('skyjoOppPresenceDot');
       var isOnline = Array.isArray(presRows) && presRows[0] &&
-        (Date.now() - new Date(presRows[0].updated_at).getTime()) < 10000;
+        (Date.now() - new Date(presRows[0].updated_at).getTime()) < 15000;
       if(dot){
         dot.style.background = isOnline ? '#22c55e' : '#555';
         dot.style.boxShadow  = isOnline ? '0 0 5px rgba(34,197,94,0.7)' : 'none';
@@ -9372,7 +9372,8 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       }
 
       // ── Adversaire revenu en ligne : annuler le timer de grâce ────────
-      if(isOnline && _oppGoneTimer){
+      // Ne pas annuler si on est déjà en mode "Attendre" (compte à rebours en cours)
+      if(isOnline && _oppGoneTimer && !_waitingForReconnect){
         clearTimeout(_oppGoneTimer);
         _oppGoneTimer = null;
       }
@@ -12808,7 +12809,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.08.8 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.1 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
