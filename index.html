@@ -2530,8 +2530,15 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 #skyjoDrawPileCount { font-size: 8px; color: var(--muted); text-align: center; font-variant-numeric: tabular-nums; }
 
 /* ══════════════════════════════════════════════════
-   CARTES — Design premium avec couleurs assorties
+   CARTES — Design inspiré Skyjo avec motif hexa
 ══════════════════════════════════════════════════ */
+
+/* SVG hexagonal encodé — réutilisé sur toutes les cartes face */
+:root {
+  --sj-hexa: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='32'%3E%3Cpolygon points='14,1 27,8 27,23 14,30 1,23 1,8' fill='none' stroke='rgba(255,255,255,0.10)' stroke-width='1'/%3E%3C/svg%3E");
+  --sj-hexa-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='32'%3E%3Cpolygon points='14,1 27,8 27,23 14,30 1,23 1,8' fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='1'/%3E%3C/svg%3E");
+}
+
 .skyjo-card {
   width: var(--sj-cw); height: var(--sj-ch);
   border-radius: var(--sj-radius);
@@ -2541,37 +2548,72 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   transition: transform 0.15s cubic-bezier(.17,.89,.32,1.28), box-shadow 0.15s;
   box-shadow: var(--sj-shadow);
   position: relative; overflow: hidden;
-  /* Inlay lumineux sur le bord haut */
-  outline: 1px solid rgba(255,255,255,0.07);
+  outline: 1px solid rgba(255,255,255,0.10);
+  letter-spacing: -0.5px;
 }
+
+/* Motif hexagonal sur toutes les cartes face visible */
+.skyjo-card:not(.skyjo-card-back):not(.skyjo-card-hidden)::after {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: var(--sj-hexa);
+  background-size: 18px 20px;
+  opacity: 1;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+}
+
 /* Reflet haut sur toutes les cartes */
 .skyjo-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 45%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.13) 0%, transparent 100%);
+  height: 42%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.16) 0%, transparent 100%);
   border-radius: var(--sj-radius) var(--sj-radius) 0 0;
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
 }
 
-/* ── Dos de carte — vert foncé texturé ── */
+/* Chiffre au-dessus du motif */
+.skyjo-card > span.sj-num {
+  position: relative;
+  z-index: 3;
+  line-height: 1;
+}
+
+/* Pastille ovale haut-gauche */
+.skyjo-card > .sj-pip-top,
+.skyjo-card > .sj-pip-bot {
+  position: absolute;
+  z-index: 3;
+  background: rgba(255,255,255,0.88);
+  border-radius: 50%;
+  width: 38%; height: 22%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: calc(var(--sj-fs) * 0.52);
+  font-weight: 900;
+  color: #1a1a2e;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.skyjo-card > .sj-pip-top { top: 5%; left: 8%; }
+.skyjo-card > .sj-pip-bot { bottom: 5%; right: 8%; transform: rotate(180deg); }
+
+/* ── Dos de carte — vert foncé avec motif hexa ── */
 .skyjo-card-back,
 .skyjo-card.skyjo-card-hidden {
   background-color: #163d28;
   background-image:
-    radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.06) 0%, transparent 60%),
-    repeating-linear-gradient(
-      42deg,
-      transparent 0px,
-      transparent 5px,
-      rgba(255,255,255,0.04) 5px,
-      rgba(255,255,255,0.04) 6px
-    );
+    var(--sj-hexa-dark),
+    radial-gradient(ellipse at 35% 30%, rgba(255,255,255,0.07) 0%, transparent 60%);
+  background-size: 18px 20px, cover;
   color: transparent;
   border: 1.5px solid rgba(255,255,255,0.09);
 }
+.skyjo-card-back::after,
+.skyjo-card.skyjo-card-hidden::after { display: none; }
 
 /* ── Carte en main (violette) ── */
 .skyjo-card-held {
@@ -2582,119 +2624,23 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 }
 
 /* ════════════════════════════════════
-   Palette de couleurs — numéros assortis
-   Principe : fond riche + texte clair légèrement teinté
-   pour que le chiffre "appartienne" à la carte
+   Palette de couleurs par valeur
 ════════════════════════════════════ */
-
-/* -2 : bleu profond — chiffre bleu glacé */
-.skyjo-card[data-val="-2"] {
-  background: linear-gradient(145deg, #1a56a0 0%, #0d3873 100%);
-  color: #a8d4ff;
-  text-shadow: 0 0 12px rgba(100,180,255,0.7), 0 1px 3px rgba(0,0,0,0.5);
-  border: 1.5px solid rgba(100,180,255,0.18);
-}
-/* -1 : bleu vif — chiffre bleu ciel */
-.skyjo-card[data-val="-1"] {
-  background: linear-gradient(145deg, #2563c0 0%, #1445a0 100%);
-  color: #bddcff;
-  text-shadow: 0 0 12px rgba(130,195,255,0.65), 0 1px 3px rgba(0,0,0,0.45);
-  border: 1.5px solid rgba(130,195,255,0.16);
-}
-/* 0 : violet indigo — chiffre lavande */
-.skyjo-card[data-val="0"] {
-  background: linear-gradient(145deg, #6044b0 0%, #42308a 100%);
-  color: #d4c4ff;
-  text-shadow: 0 0 12px rgba(200,170,255,0.6), 0 1px 3px rgba(0,0,0,0.45);
-  border: 1.5px solid rgba(200,170,255,0.15);
-}
-/* 1 : ambre chaud — chiffre orange clair */
-.skyjo-card[data-val="1"] {
-  background: linear-gradient(145deg, #c46010 0%, #8f4008 100%);
-  color: #ffd28a;
-  text-shadow: 0 0 12px rgba(255,190,80,0.6), 0 1px 3px rgba(0,0,0,0.45);
-  border: 1.5px solid rgba(255,190,80,0.15);
-}
-/* 2 : orange — chiffre jaune-pêche */
-.skyjo-card[data-val="2"] {
-  background: linear-gradient(145deg, #d4700f 0%, #a05008 100%);
-  color: #ffe0a0;
-  text-shadow: 0 0 12px rgba(255,210,100,0.6), 0 1px 3px rgba(0,0,0,0.45);
-  border: 1.5px solid rgba(255,210,100,0.15);
-}
-/* 3 : ambre doré — chiffre jaune miel */
-.skyjo-card[data-val="3"] {
-  background: linear-gradient(145deg, #b88508 0%, #836005 100%);
-  color: #ffe890;
-  text-shadow: 0 0 12px rgba(255,225,80,0.6), 0 1px 3px rgba(0,0,0,0.45);
-  border: 1.5px solid rgba(255,225,80,0.14);
-}
-/* 4 : olive/chartreuse — chiffre vert-jaune */
-.skyjo-card[data-val="4"] {
-  background: linear-gradient(145deg, #7a8e10 0%, #556210 100%);
-  color: #dcf060;
-  text-shadow: 0 0 12px rgba(200,235,50,0.6), 0 1px 3px rgba(0,0,0,0.45);
-  border: 1.5px solid rgba(200,235,50,0.14);
-}
-/* 5 : vert forêt — chiffre vert menthe */
-.skyjo-card[data-val="5"] {
-  background: linear-gradient(145deg, #1d7838 0%, #0f5228 100%);
-  color: #80f0a0;
-  text-shadow: 0 0 12px rgba(80,230,120,0.6), 0 1px 3px rgba(0,0,0,0.45);
-  border: 1.5px solid rgba(80,230,120,0.14);
-}
-/* 6 : vert émeraude — chiffre vert eau */
-.skyjo-card[data-val="6"] {
-  background: linear-gradient(145deg, #178a50 0%, #0c5e38 100%);
-  color: #70f0c0;
-  text-shadow: 0 0 12px rgba(60,230,170,0.6), 0 1px 3px rgba(0,0,0,0.45);
-  border: 1.5px solid rgba(60,230,170,0.14);
-}
-/* 7 : vert-sarcelle — chiffre cyan */
-.skyjo-card[data-val="7"] {
-  background: linear-gradient(145deg, #0e7868 0%, #085248 100%);
-  color: #5cf0e0;
-  text-shadow: 0 0 12px rgba(50,220,210,0.6), 0 1px 3px rgba(0,0,0,0.45);
-  border: 1.5px solid rgba(50,220,210,0.14);
-}
-/* 8 : bleu-pétrole — chiffre bleu-vert */
-.skyjo-card[data-val="8"] {
-  background: linear-gradient(145deg, #0a6888 0%, #064860 100%);
-  color: #50d8f8;
-  text-shadow: 0 0 12px rgba(40,200,240,0.6), 0 1px 3px rgba(0,0,0,0.45);
-  border: 1.5px solid rgba(40,200,240,0.14);
-}
-/* 9 : rouge brique — chiffre orange-rouge */
-.skyjo-card[data-val="9"] {
-  background: linear-gradient(145deg, #b01c1c 0%, #7c0f0f 100%);
-  color: #ffb0a0;
-  text-shadow: 0 0 12px rgba(255,130,100,0.65), 0 1px 3px rgba(0,0,0,0.45);
-  border: 1.5px solid rgba(255,130,100,0.15);
-}
-/* 10 : rouge-bordeaux — chiffre rose-rouge */
-.skyjo-card[data-val="10"] {
-  background: linear-gradient(145deg, #981824 0%, #6a0d18 100%);
-  color: #ffaab8;
-  text-shadow: 0 0 12px rgba(255,120,140,0.65), 0 1px 3px rgba(0,0,0,0.45);
-  border: 1.5px solid rgba(255,120,140,0.15);
-  font-size: 14px; /* légèrement plus petit pour "10" */
-}
-/* 11 : pourpre — chiffre rose chaud */
-.skyjo-card[data-val="11"] {
-  background: linear-gradient(145deg, #7c1030 0%, #560822 100%);
-  color: #ffa0c0;
-  text-shadow: 0 0 12px rgba(255,100,160,0.65), 0 1px 3px rgba(0,0,0,0.45);
-  border: 1.5px solid rgba(255,100,160,0.15);
-  font-size: 14px;
-}
-/* 12 : magenta-bordeaux — chiffre rose fuchsia */
-.skyjo-card[data-val="12"] {
-  background: linear-gradient(145deg, #981558 0%, #6a0a3e 100%);
-  color: #ff90d8;
-  text-shadow: 0 0 12px rgba(255,80,200,0.65), 0 1px 3px rgba(0,0,0,0.45);
-  border: 1.5px solid rgba(255,80,200,0.15);
-  font-size: 14px;
-}
+.skyjo-card[data-val="-2"] { background: linear-gradient(145deg, #1a56a0 0%, #0d3873 100%); color: #a8d4ff; text-shadow: 0 0 10px rgba(100,180,255,0.7), 0 1px 3px rgba(0,0,0,0.5); }
+.skyjo-card[data-val="-1"] { background: linear-gradient(145deg, #2563c0 0%, #1445a0 100%); color: #bddcff; text-shadow: 0 0 10px rgba(130,195,255,0.65), 0 1px 3px rgba(0,0,0,0.45); }
+.skyjo-card[data-val="0"]  { background: linear-gradient(145deg, #6044b0 0%, #42308a 100%); color: #d4c4ff; text-shadow: 0 0 10px rgba(200,170,255,0.6), 0 1px 3px rgba(0,0,0,0.45); }
+.skyjo-card[data-val="1"]  { background: linear-gradient(145deg, #c46010 0%, #8f4008 100%); color: #ffd28a; text-shadow: 0 0 10px rgba(255,190,80,0.6), 0 1px 3px rgba(0,0,0,0.45); }
+.skyjo-card[data-val="2"]  { background: linear-gradient(145deg, #d4700f 0%, #a05008 100%); color: #ffe0a0; text-shadow: 0 0 10px rgba(255,210,100,0.6), 0 1px 3px rgba(0,0,0,0.45); }
+.skyjo-card[data-val="3"]  { background: linear-gradient(145deg, #b88508 0%, #836005 100%); color: #ffe890; text-shadow: 0 0 10px rgba(255,225,80,0.6), 0 1px 3px rgba(0,0,0,0.45); }
+.skyjo-card[data-val="4"]  { background: linear-gradient(145deg, #7a8e10 0%, #556210 100%); color: #dcf060; text-shadow: 0 0 10px rgba(200,235,50,0.6), 0 1px 3px rgba(0,0,0,0.45); }
+.skyjo-card[data-val="5"]  { background: linear-gradient(145deg, #1d7838 0%, #0f5228 100%); color: #80f0a0; text-shadow: 0 0 10px rgba(80,230,120,0.6), 0 1px 3px rgba(0,0,0,0.45); }
+.skyjo-card[data-val="6"]  { background: linear-gradient(145deg, #178a50 0%, #0c5e38 100%); color: #70f0c0; text-shadow: 0 0 10px rgba(60,230,170,0.6), 0 1px 3px rgba(0,0,0,0.45); }
+.skyjo-card[data-val="7"]  { background: linear-gradient(145deg, #0e7868 0%, #085248 100%); color: #5cf0e0; text-shadow: 0 0 10px rgba(50,220,210,0.6), 0 1px 3px rgba(0,0,0,0.45); }
+.skyjo-card[data-val="8"]  { background: linear-gradient(145deg, #0a6888 0%, #064860 100%); color: #50d8f8; text-shadow: 0 0 10px rgba(40,200,240,0.6), 0 1px 3px rgba(0,0,0,0.45); }
+.skyjo-card[data-val="9"]  { background: linear-gradient(145deg, #b01c1c 0%, #7c0f0f 100%); color: #ffb0a0; text-shadow: 0 0 10px rgba(255,130,100,0.65), 0 1px 3px rgba(0,0,0,0.45); }
+.skyjo-card[data-val="10"] { background: linear-gradient(145deg, #981824 0%, #6a0d18 100%); color: #ffaab8; text-shadow: 0 0 10px rgba(255,120,140,0.65), 0 1px 3px rgba(0,0,0,0.45); font-size: calc(var(--sj-fs) * 0.88); }
+.skyjo-card[data-val="11"] { background: linear-gradient(145deg, #7c1030 0%, #560822 100%); color: #ffa0c0; text-shadow: 0 0 10px rgba(255,100,160,0.65), 0 1px 3px rgba(0,0,0,0.45); font-size: calc(var(--sj-fs) * 0.88); }
+.skyjo-card[data-val="12"] { background: linear-gradient(145deg, #981558 0%, #6a0a3e 100%); color: #ff90d8; text-shadow: 0 0 10px rgba(255,80,200,0.65), 0 1px 3px rgba(0,0,0,0.45); font-size: calc(var(--sj-fs) * 0.88); }
 
 /* ── Cartes interactives (clickables) ── */
 .skyjo-card.skyjo-card-clickable {
@@ -10256,7 +10202,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     var discardEl=document.getElementById('skyjoDiscardCard');
     var top=state.discard&&state.discard.length>0?state.discard[state.discard.length-1]:null;
     if(top!==null&&top!==undefined){
-      discardEl.textContent=top;discardEl.setAttribute('data-val',top);discardEl.classList.remove('skyjo-card-back');
+      discardEl.innerHTML='<div class="sj-pip-top">'+top+'</div><span class="sj-num">'+top+'</span><div class="sj-pip-bot">'+top+'</div>';discardEl.setAttribute('data-val',top);discardEl.classList.remove('skyjo-card-back');
       if(discardChanged){
         discardEl.classList.remove('sj-discard-slide');
         void discardEl.offsetWidth;
@@ -10277,7 +10223,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     var discardBtn = document.getElementById('skyjoDiscardBtn');
     if(iHoldCard){
       heldWrap.classList.add('sj-held-visible');
-      heldEl.textContent=state.held_card.value;
+      heldEl.innerHTML='<div class="sj-pip-top">'+state.held_card.value+'</div><span class="sj-num">'+state.held_card.value+'</span><div class="sj-pip-bot">'+state.held_card.value+'</div>';
       heldEl.setAttribute('data-val',state.held_card.value);
       // FIX : toujours réactiver le bouton Défausser (il peut avoir été disabled dans skyjoReplaceCard)
       if(discardBtn){ discardBtn.disabled = false; discardBtn.style.opacity = ''; discardBtn.style.pointerEvents = ''; }
@@ -10356,7 +10302,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
       if(card.removed){
         el.classList.add('skyjo-col-complete');
-        el.textContent='';
+        el.innerHTML='';
         if(!prev.removed && !isFirstRender){
           // Carte retirée : animation d'explosion
           el.classList.remove('skyjo-col-complete');
@@ -10372,8 +10318,11 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
         }
 
       } else if(card.revealed){
-        el.textContent=card.value;
         el.setAttribute('data-val',card.value);
+        el.innerHTML =
+          '<div class="sj-pip-top">'+card.value+'</div>'+
+          '<span class="sj-num">'+card.value+'</span>'+
+          '<div class="sj-pip-bot">'+card.value+'</div>';
 
         // ── Nouvellement révélée par l'adversaire (via poll) : flip animé ──
         if(prev.hidden && !isFirstRender && !isMe){
@@ -10471,7 +10420,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     ].join(';');
 
     if(cardVal !== null && cardVal !== undefined){
-      card.textContent = cardVal;
+      card.innerHTML = '<span class="sj-num">'+cardVal+'</span>';
       card.setAttribute('data-val', cardVal);
     } else {
       card.classList.add('skyjo-card-back');
@@ -10501,7 +10450,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
         if(!card.parentNode) return;
         card.classList.remove('skyjo-card-back');
         if(cardVal !== null && cardVal !== undefined){
-          card.textContent = cardVal;
+          card.innerHTML = '<span class="sj-num">'+cardVal+'</span>';
           card.setAttribute('data-val', cardVal);
         }
       }, delay + dur * 0.35);
@@ -10577,7 +10526,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       if(!card.parentNode) return;
       card.classList.remove('skyjo-card-hidden');
       if(newVal !== null && newVal !== undefined){
-        card.textContent = newVal;
+        card.innerHTML = '<span class="sj-num">'+newVal+'</span>';
         card.setAttribute('data-val', newVal);
       }
     }, dur * 0.37);
@@ -10663,7 +10612,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     var card = document.createElement('div');
     card.className = 'skyjo-card';
     card.style.cssText = 'position:fixed;left:'+srcRect.left+'px;top:'+srcRect.top+'px;width:'+srcRect.width+'px;height:'+srcRect.height+'px;z-index:9999;pointer-events:none;will-change:transform,opacity;transform-style:preserve-3d;';
-    card.textContent = heldVal;
+    card.innerHTML = '<span class="sj-num">'+heldVal+'</span>';
     card.setAttribute('data-val', heldVal);
     document.body.appendChild(card);
 
