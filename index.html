@@ -2466,11 +2466,19 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   text-transform: uppercase; letter-spacing: 1.2px;
 }
 
-/* Carte en main */
+/* Carte en main — toujours dans le flux pour éviter les décalages */
 #skyjoDrawSlot { display: flex; align-items: center; gap: 8px; }
 #skyjoHeldCardWrap {
-  display: none; flex-direction: column; align-items: center; gap: 3px;
-  transition: opacity 0.22s cubic-bezier(.4,0,.2,1), transform 0.22s cubic-bezier(.4,0,.2,1);
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.22s cubic-bezier(.4,0,.2,1);
+  pointer-events: none;
+}
+#skyjoHeldCardWrap.sj-held-visible {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
 }
 #skyjoHeldCard {
   animation: sjHeldFloat 2s ease-in-out infinite;
@@ -10263,7 +10271,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     var heldEl     = document.getElementById('skyjoHeldCard');
     var discardBtn = document.getElementById('skyjoDiscardBtn');
     if(iHoldCard){
-      heldWrap.style.display='flex';
+      heldWrap.classList.add('sj-held-visible');
       heldEl.textContent=state.held_card.value;
       heldEl.setAttribute('data-val',state.held_card.value);
       // FIX : toujours réactiver le bouton Défausser (il peut avoir été disabled dans skyjoReplaceCard)
@@ -10276,7 +10284,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
         setTimeout(function(){ heldEl.classList.remove('sj-held-appear'); }, 420);
       }
     } else {
-      heldWrap.style.display='none';
+      heldWrap.classList.remove('sj-held-visible');
       if(discardBtn){ discardBtn.disabled = false; }
     }
 
@@ -10799,31 +10807,15 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     }
 
     // Vol de la pioche → held
-    // IMPORTANT : rendre le wrap visible AVANT de mesurer sa position
+    // Le wrap est toujours dans le flux (visibility:hidden), getBoundingClientRect() est valide directement
     if(deckEl && heldEl && wrap){
       var sRect = deckEl.getBoundingClientRect();
-
-      // Rendre la destination visible pour pouvoir la mesurer
-      wrap.style.display      = 'flex';
-      wrap.style.opacity      = '0';
-      wrap.style.visibility   = 'visible';
-      wrap.style.pointerEvents = 'none';
-
-      // forcer le layout pour obtenir un getBoundingClientRect() valide
-      void wrap.offsetWidth;
-
       var dRect = heldEl.getBoundingClientRect();
 
-      // Si la destination n'est toujours pas dispo (taille 0), fallback à gauche du deck
+      // Fallback si taille 0 pour une raison quelconque
       if(!dRect || dRect.width === 0){
         dRect = { left: sRect.left - 80, top: sRect.top, width: sRect.width, height: sRect.height };
       }
-
-      // Remettre le wrap invisible — c'est renderState() qui l'affichera proprement après le RPC
-      wrap.style.display      = 'none';
-      wrap.style.opacity      = '';
-      wrap.style.visibility   = '';
-      wrap.style.pointerEvents = '';
 
       sjAnimFly(sRect, dRect, null, { duration: 440, flip: false });
     }
