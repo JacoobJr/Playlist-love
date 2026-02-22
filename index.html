@@ -4843,6 +4843,7 @@ body.light #counterBlock.glowing .c-num-big {
           <div class="skyjo-player-info">
             <div class="skyjo-avatar" id="skyjoAvatarOpp">👧</div>
             <span class="skyjo-player-name" id="skyjoOpponentLabel">Zelda</span>
+            <div id="skyjoOppPresenceDot" style="width:8px;height:8px;border-radius:50%;background:#555;transition:background 0.3s,box-shadow 0.3s;flex-shrink:0;" title="Hors ligne"></div>
             <span class="skyjo-player-score-badge" id="skyjoScoreGirl">0</span>
           </div>
           <div class="skyjo-grid" id="skyjoOpponentGrid"></div>
@@ -9109,6 +9110,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
         // Partie en cours trouvée → retour en jeu direct
         _gameId = rows[0].id;
         _launched = true;
+        startPresence(); // démarrer le heartbeat de présence en jeu
         showScreen('skyjoGameArea');
         var btn=document.getElementById('skyjoAbandonBtn');
         if(btn) btn.style.display='block';
@@ -9293,8 +9295,12 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     if(_launched) return;
     _launched=true;
     _gameId=gameRow.id;
-    stopAll();
-    setTimeout(deletePresence,3000);
+    // Stopper lobby + ancien poll, mais CONSERVER le heartbeat de présence (_presTimer)
+    // pour que l'adversaire puisse voir si on est en ligne pendant la partie
+    if(_lobbyTimer){clearInterval(_lobbyTimer);_lobbyTimer=null;}
+    if(_pollTimer){clearInterval(_pollTimer);_pollTimer=null;}
+    // Si le heartbeat n'est pas encore actif (ex: rejoindre une partie en cours), le démarrer
+    if(!_presTimer){ upsertPresence(); _presTimer=setInterval(upsertPresence,4000); }
     showScreen('skyjoGameArea');
     var btn=document.getElementById('skyjoAbandonBtn');
     if(btn) btn.style.display='block';
