@@ -4791,6 +4791,7 @@ body.light #counterBlock.glowing .c-num-big {
   <div class="game-view-header">
     <div class="game-view-back" onclick="closeSkyjoGame()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Retour aux jeux</div>
     <div class="game-view-title">Skyjo 🃏</div>
+    <button id="skyjoAbandonBtn" onclick="skyjoAbandon()" style="display:none;padding:4px 10px;background:rgba(239,83,80,0.12);color:#ef5350;border:1px solid rgba(239,83,80,0.35);border-radius:6px;font-size:11px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;">Abandon</button>
   </div>
   <div class="game-view-body" style="padding:16px">
 
@@ -9260,14 +9261,14 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
   // ─── Lancement en jeu ────────────────────────────────
   function launchGame(gameRow){
-    if(_launched) return; // GARDE ABSOLUE — un seul appel possible
+    if(_launched) return;
     _launched=true;
     _gameId=gameRow.id;
-    stopAll();            // stopper lobby + présence timers
-    // Ne PAS deletePresence() ici — l'autre joueur peut encore en avoir besoin
-    // pour son propre lobbyTick. On supprime 3s après.
+    stopAll();
     setTimeout(deletePresence,3000);
     showScreen('skyjoGameArea');
+    var btn=document.getElementById('skyjoAbandonBtn');
+    if(btn) btn.style.display='block';
     renderState(gameRow);
     startPoll();
   }
@@ -9278,14 +9279,47 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     _pollTimer=setInterval(fetchState,2000);
   }
   function fetchState(){
-    if(!_gameId||_saving) return; // ne pas ecraser un state en cours de sauvegarde
+    if(!_gameId||_saving) return;
     fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId+'&select=id,status,state,created_by',{
       headers:sbHeaders()
     })
     .then(function(r){return r.json();})
     .then(function(rows){
-      if(_saving) return; // verif post-fetch aussi
-      if(!Array.isArray(rows)||!rows[0]) return;
+      if(_saving) return;
+      // Partie introuvable → l'autre a quitté (volontairement ou déconnexion)
+      if(!Array.isArray(rows)||!rows[0]){
+        stopPoll();
+        // Ne pas afficher le modal plusieurs fois
+        if(document.getElementById('skyjoWaitModal')) return;
+        var oppName=_me==='girl'?'Link':'Zelda';
+        showSkyjoChoice(
+          '😔',
+          oppName+' a quitté',
+          'Déconnexion ou abandon. Tu peux attendre son retour ou quitter la partie.',
+          'Attendre',
+          function(){
+            // Reprendre le poll — si la partie réapparaît (reconnexion), on la retrouve
+            // Si elle n'existe plus, le prochain tick redemandera
+            _waitingForReconnect = true;
+            startReconnectWait();
+          },
+          'Quitter',
+          function(){
+            _waitingForReconnect = false;
+            resetState();
+            document.getElementById('skyjoView').classList.remove('active');
+            document.querySelector('.bottom-nav').style.display='';
+          }
+        );
+        return;
+      }
+      // Si on attendait une reconnexion et que la partie est revenue → reprendre
+      if(_waitingForReconnect){
+        _waitingForReconnect = false;
+        stopReconnectWait();
+        var wb=document.getElementById('skyjoWaitModal');
+        if(wb) document.body.removeChild(wb);
+      }
       renderState(rows[0]);
     }).catch(function(){});
   }
@@ -9408,7 +9442,6 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
           el.onclick=function(){skyjoReplaceCard(idx);};
         }
       } else {
-        el.textContent='?';
         el.classList.add('skyjo-card-hidden');
         if(canFlipInit){
           el.classList.add('skyjo-card-clickable');
@@ -9589,6 +9622,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     document.getElementById('skyjoGameArea').style.display='none';
     document.getElementById('skyjoRoundEnd').style.display='none';
     document.getElementById('skyjoGameEnd').style.display='flex';
+    var btn=document.getElementById('skyjoAbandonBtn'); if(btn) btn.style.display='none';
     var gg=state.scores.girl,gb=state.scores.boy;
     document.getElementById('skyjoGameEndEmoji').textContent=gg===gb?'🤝':(gg<gb?'👧':'👦');
     document.getElementById('skyjoGameEndTitle').textContent=gg===gb?'Égalité !':(gg<gb?'Zelda 👧':'Link 👦')+' gagne !';
@@ -9607,12 +9641,156 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   };
 
   // ─── Fermeture ───────────────────────────────────────
+  // ─── Alerte modale légère ───────────────────────────
+  var _waitingForReconnect = false;
+  var _reconnectTimer = null;
+  var _reconnectSeconds = 0;
+
+  function startReconnectWait(){
+    _reconnectSeconds = 0;
+    _reconnectTimer = setInterval(function(){
+      _reconnectSeconds++;
+      var el = document.getElementById('skyjoWaitModalTimer');
+      if(el) el.textContent = 'Attente : ' + _reconnectSeconds + 's\u2026';
+      if(_reconnectSeconds % 3 === 0) fetchStateForReconnect();
+    }, 1000);
+  }
+  function stopReconnectWait(){
+    if(_reconnectTimer){ clearInterval(_reconnectTimer); _reconnectTimer = null; }
+  }
+  function fetchStateForReconnect(){
+    if(!_gameId) return;
+    fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId+'&select=id,status,state,created_by',{
+      headers: sbHeaders()
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(rows){
+      if(!_waitingForReconnect) return;
+      if(!Array.isArray(rows) || !rows[0]) return;
+      // La partie est de retour : reprendre
+      _waitingForReconnect = false;
+      stopReconnectWait();
+      var wb = document.getElementById('skyjoWaitModal');
+      if(wb) document.body.removeChild(wb);
+      startPoll();
+      renderState(rows[0]);
+    }).catch(function(){});
+  }
+
+  /* Modale simple — un seul bouton OK */
+  function showSkyjoAlert(msg, cb){
+    _buildModal(
+      msg.split(' ')[0],
+      msg.split(' ').slice(1).join(' '),
+      '',
+      [{ label: 'OK', primary: true, action: cb }]
+    );
+  }
+
+  /* Modale avec deux boutons */
+  function showSkyjoChoice(emoji, title, subtitle, btnA, cbA, btnB, cbB){
+    _buildModal(emoji, title, subtitle, [
+      { label: btnA, primary: false, action: cbA },
+      { label: btnB, primary: false, danger: true, action: cbB }
+    ]);
+  }
+
+  /* Constructeur DOM commun — zéro apostrophe imbriquée */
+  function _buildModal(emoji, title, subtitle, buttons){
+    var overlay = document.createElement('div');
+    overlay.id = 'skyjoWaitModal';
+    overlay.style.cssText = [
+      'position:fixed','inset:0','background:rgba(0,0,0,0.72)',
+      'z-index:1200','display:flex','align-items:center',
+      'justify-content:center','padding:24px'
+    ].join(';');
+
+    var box = document.createElement('div');
+    box.style.cssText = [
+      'background:var(--s1)','border:1px solid var(--border)',
+      'border-radius:16px','padding:24px 20px','max-width:300px',
+      'width:100%','text-align:center','font-family:DM Sans,sans-serif'
+    ].join(';');
+
+    var emojiEl = document.createElement('div');
+    emojiEl.textContent = emoji;
+    emojiEl.style.cssText = 'font-size:32px;margin-bottom:8px';
+    box.appendChild(emojiEl);
+
+    var titleEl = document.createElement('div');
+    titleEl.textContent = title;
+    titleEl.style.cssText = 'font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px';
+    box.appendChild(titleEl);
+
+    if(subtitle){
+      var subEl = document.createElement('div');
+      subEl.textContent = subtitle;
+      subEl.style.cssText = 'font-size:12px;color:var(--muted);margin-bottom:6px;line-height:1.5';
+      box.appendChild(subEl);
+    }
+
+    var timerEl = document.createElement('div');
+    timerEl.id = 'skyjoWaitModalTimer';
+    timerEl.style.cssText = 'font-size:11px;color:var(--muted);margin-bottom:18px;min-height:16px';
+    box.appendChild(timerEl);
+
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:10px;justify-content:center';
+    buttons.forEach(function(b){
+      var btn = document.createElement('button');
+      btn.textContent = b.label;
+      var bg = b.primary ? 'var(--green)' : b.danger ? 'rgba(239,83,80,0.12)' : 'var(--s2)';
+      var col = b.primary ? '#000' : b.danger ? '#ef5350' : 'var(--text)';
+      var border = b.danger ? '1px solid rgba(239,83,80,0.35)' : '1px solid var(--border)';
+      btn.style.cssText = [
+        'flex:1','padding:10px 0','background:'+bg,'color:'+col,
+        'font-weight:700','font-size:13px','font-family:DM Sans,sans-serif',
+        'border:'+border,'border-radius:50px','cursor:pointer'
+      ].join(';');
+      btn.onclick = function(){
+        document.body.removeChild(overlay);
+        if(b.action) b.action();
+      };
+      row.appendChild(btn);
+    });
+    box.appendChild(row);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+  }
+
+  // ─── Abandon en cours de partie ──────────────────────
+  window.skyjoAbandon=function(){
+    showSkyjoChoice(
+      '🏳️', 'Abandonner ?', 'La partie sera supprimée, l’autre joueur en sera informé.',
+      'Annuler', null,
+      'Confirmer', function(){
+        stopAll(); stopReconnectWait(); _waitingForReconnect=false;
+        deletePresence();
+        if(_gameId){
+          fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId,{
+            method:'DELETE',headers:sbHeaders()
+          }).catch(function(){});
+        }
+        resetState();
+        document.getElementById('skyjoView').classList.remove('active');
+        document.querySelector('.bottom-nav').style.display='';
+        var btn=document.getElementById('skyjoAbandonBtn');
+        if(btn) btn.style.display='none';
+      }
+    );
+  };
+
+  // ─── Afficher/cacher le bouton Abandon selon l'écran ─
+  var _origShowScreen = showScreen;
+  // (déjà défini plus haut — on patch renderState pour afficher le bouton en jeu)
+
   window.closeSkyjoGame=function(){
     stopAll();
     deletePresence();
-    if(_gameId&&_gameState&&_phase==='waiting'){
-      // Nettoyer ma partie en attente si personne ne l'a rejoint
-      fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId+'&status=eq.waiting',{
+    // Toujours supprimer la partie de Supabase (waiting OU playing)
+    // → évite l'accumulation de données et notifie l'autre joueur via fetchState
+    if(_gameId){
+      fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId,{
         method:'DELETE',headers:sbHeaders()
       }).catch(function(){});
     }
