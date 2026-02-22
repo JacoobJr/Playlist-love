@@ -5564,14 +5564,14 @@ body.light #counterBlock.glowing .c-num-big {
       <!-- Scores de la manche -->
       <div style="display:flex;gap:12px;width:100%;max-width:280px;">
         <div style="flex:1;background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center;">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">👧 Zelda</div>
+          <div id="skyjoRoundLabelLeft" style="font-size:11px;color:var(--muted);margin-bottom:4px">👧 Zelda</div>
           <div style="font-size:13px;color:var(--muted);margin-bottom:2px">Cette manche</div>
           <div style="font-size:28px;font-weight:800;color:var(--text)" id="skyjoRoundScoreGirl">0</div>
           <div style="font-size:11px;color:var(--muted);margin-top:6px">Total</div>
           <div style="font-size:16px;font-weight:700;color:var(--green)" id="skyjoTotalScoreGirl">0</div>
         </div>
         <div style="flex:1;background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center;">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">👦 Link</div>
+          <div id="skyjoRoundLabelRight" style="font-size:11px;color:var(--muted);margin-bottom:4px">👦 Link</div>
           <div style="font-size:13px;color:var(--muted);margin-bottom:2px">Cette manche</div>
           <div style="font-size:28px;font-weight:800;color:var(--text)" id="skyjoRoundScoreBoy">0</div>
           <div style="font-size:11px;color:var(--muted);margin-top:6px">Total</div>
@@ -5593,14 +5593,14 @@ body.light #counterBlock.glowing .c-num-big {
       <!-- Scores finaux -->
       <div style="display:flex;gap:12px;width:100%;max-width:280px;">
         <div style="flex:1;background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center;">
-          <div style="font-size:20px;margin-bottom:4px">👧</div>
-          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Zelda</div>
+          <div id="skyjoFinalEmojiLeft" style="font-size:20px;margin-bottom:4px">👧</div>
+          <div id="skyjoFinalLabelLeft" style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Zelda</div>
           <div style="font-size:32px;font-weight:800;color:var(--text)" id="skyjoFinalScoreGirl">0</div>
           <div style="font-size:10px;color:var(--muted);margin-top:2px">pts</div>
         </div>
         <div style="flex:1;background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center;">
-          <div style="font-size:20px;margin-bottom:4px">👦</div>
-          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Link</div>
+          <div id="skyjoFinalEmojiRight" style="font-size:20px;margin-bottom:4px">👦</div>
+          <div id="skyjoFinalLabelRight" style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Link</div>
           <div style="font-size:32px;font-weight:800;color:var(--text)" id="skyjoFinalScoreBoy">0</div>
           <div style="font-size:10px;color:var(--muted);margin-top:2px">pts</div>
         </div>
@@ -10174,8 +10174,14 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     var newDiscardTop = state.discard && state.discard.length > 0 ? state.discard[state.discard.length-1] : null;
     var discardChanged = prevDiscard !== newDiscardTop;
 
-    document.getElementById('skyjoScoreGirl').textContent=state.scores.girl;
-    document.getElementById('skyjoScoreBoy').textContent=state.scores.boy;
+    // Scores : affecter selon le rôle (_me = profil local)
+    // skyjoScoreGirl est dans la zone-opp, skyjoScoreBoy dans zone-me
+    // → si _me==='girl' : moi=boy-slot, adversaire=girl-slot → INVERSÉ
+    // On corrige : myScore dans zone-me, oppScore dans zone-opp
+    var myScore  = state.scores[_me];
+    var oppScore = state.scores[_me==='girl'?'boy':'girl'];
+    document.getElementById('skyjoScoreBoy').textContent=myScore;   // zone-me  (bas)
+    document.getElementById('skyjoScoreGirl').textContent=oppScore; // zone-opp (haut)
     document.getElementById('skyjoRound').textContent=state.round||1;
     // Score de la manche précédente — lu depuis state.round_scores (persisté en base, visible pour les deux)
     var lrBadge = document.getElementById('skyjoLastRoundBadge');
@@ -11073,10 +11079,22 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     document.getElementById('skyjoRoundEndEmoji').textContent=!winner?'🤝':'🏆';
     document.getElementById('skyjoRoundEndTitle').textContent=!winner?'Manche nulle !':(winner+' gagne la manche !');
     document.getElementById('skyjoRoundEndSub').textContent='Manche '+(state.round||1);
-    document.getElementById('skyjoRoundScoreGirl').textContent='+'+rg;
-    document.getElementById('skyjoRoundScoreBoy').textContent='+'+rb;
-    document.getElementById('skyjoTotalScoreGirl').textContent=tg+' pts';
-    document.getElementById('skyjoTotalScoreBoy').textContent=tb+' pts';
+    // Afficher MOI à gauche (Girl-slot), ADVERSAIRE à droite (Boy-slot), selon _me
+    var myR   = _me==='girl' ? rg : rb;
+    var oppR  = _me==='girl' ? rb : rg;
+    var myT   = _me==='girl' ? tg : tb;
+    var oppT  = _me==='girl' ? tb : tg;
+    var myName2  = _me==='girl' ? '👧 Zelda' : '👦 Link';
+    var oppName2 = _me==='girl' ? '👦 Link'  : '👧 Zelda';
+    // Mettre à jour les labels du popup (moi à gauche, adversaire à droite)
+    var lblLeft  = document.getElementById('skyjoRoundLabelLeft');
+    var lblRight = document.getElementById('skyjoRoundLabelRight');
+    if(lblLeft)  lblLeft.textContent  = myName2;
+    if(lblRight) lblRight.textContent = oppName2;
+    document.getElementById('skyjoRoundScoreGirl').textContent='+'+myR;
+    document.getElementById('skyjoRoundScoreBoy').textContent='+'+oppR;
+    document.getElementById('skyjoTotalScoreGirl').textContent=myT+' pts';
+    document.getElementById('skyjoTotalScoreBoy').textContent=oppT+' pts';
     var btn=document.getElementById('skyjoNextRoundBtn');
     var msg=document.getElementById('skyjoWaitNextMsg');
     if(btn){ btn.disabled=false; btn.textContent='Manche suivante →'; btn.style.display='block'; }
@@ -11131,14 +11149,30 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     var girlWins=gg<gb;
     document.getElementById('skyjoGameEndEmoji').textContent=isDraw?'🤝':(girlWins?'👧':'👦');
     document.getElementById('skyjoGameEndTitle').textContent=isDraw?'Égalité !':(girlWins?'Zelda 👧':'Link 👦')+' gagne la partie !';
-    document.getElementById('skyjoFinalScoreGirl').textContent=gg;
-    document.getElementById('skyjoFinalScoreBoy').textContent=gb;
-    // Mettre en valeur le gagnant
+    // Afficher MOI à gauche (Girl-slot), ADVERSAIRE à droite (Boy-slot)
+    var myFinal  = _me==='girl' ? gg : gb;
+    var oppFinal = _me==='girl' ? gb : gg;
+    var myFinalWins  = myFinal < oppFinal;
+    var oppFinalWins = oppFinal < myFinal;
+    document.getElementById('skyjoFinalScoreGirl').textContent=myFinal;
+    document.getElementById('skyjoFinalScoreBoy').textContent=oppFinal;
+    // Labels fin de partie (moi à gauche, adversaire à droite)
+    var fLblLeft  = document.getElementById('skyjoFinalLabelLeft');
+    var fLblRight = document.getElementById('skyjoFinalLabelRight');
+    if(fLblLeft)  fLblLeft.textContent  = _me==='girl'?'Zelda':'Link';
+    if(fLblRight) fLblRight.textContent = _me==='girl'?'Link':'Zelda';
+    var fEmoLeft  = document.getElementById('skyjoFinalEmojiLeft');
+    var fEmoRight = document.getElementById('skyjoFinalEmojiRight');
+    if(fEmoLeft)  fEmoLeft.textContent  = _me==='girl'?'👧':'👦';
+    if(fEmoRight) fEmoRight.textContent = _me==='girl'?'👦':'👧';
+    // Mettre en valeur le gagnant (score le plus bas)
     var cardG=document.getElementById('skyjoFinalScoreGirl').parentElement;
     var cardB=document.getElementById('skyjoFinalScoreBoy').parentElement;
+    cardG.style.borderColor=''; cardG.style.background='';
+    cardB.style.borderColor=''; cardB.style.background='';
     if(!isDraw){
-      if(girlWins){ cardG.style.borderColor='var(--green)'; cardG.style.background='rgba(0,201,167,0.1)'; }
-      else { cardB.style.borderColor='var(--green)'; cardB.style.background='rgba(0,201,167,0.1)'; }
+      if(myFinalWins)  { cardG.style.borderColor='var(--green)'; cardG.style.background='rgba(0,201,167,0.1)'; }
+      else             { cardB.style.borderColor='var(--green)'; cardB.style.background='rgba(0,201,167,0.1)'; }
     }
     document.getElementById('skyjoGameEnd').style.display='flex';
   }
