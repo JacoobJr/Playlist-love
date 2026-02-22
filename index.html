@@ -9332,37 +9332,21 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
       // Mettre à jour le dot de présence adversaire
       var dot = document.getElementById('skyjoOppPresenceDot');
+      var isOnline = Array.isArray(presRows) && presRows[0] &&
+        (Date.now() - new Date(presRows[0].updated_at).getTime()) < 10000;
       if(dot){
-        var isOnline = Array.isArray(presRows) && presRows[0] &&
-          (Date.now() - new Date(presRows[0].updated_at).getTime()) < 10000;
-        dot.style.background  = isOnline ? '#22c55e' : '#555';
-        dot.style.boxShadow   = isOnline ? '0 0 5px rgba(34,197,94,0.7)' : 'none';
-        dot.title             = isOnline ? 'En ligne' : 'Hors ligne';
+        dot.style.background = isOnline ? '#22c55e' : '#555';
+        dot.style.boxShadow  = isOnline ? '0 0 5px rgba(34,197,94,0.7)' : 'none';
+        dot.title            = isOnline ? 'En ligne' : 'Hors ligne';
       }
 
-      // ── Abandon volontaire : status = 'abandoned' ──────────────────────
-      if(Array.isArray(rows) && rows[0] && rows[0].status === 'abandoned'){
-        stopPoll();
-        if(_oppGoneTimer){clearTimeout(_oppGoneTimer);_oppGoneTimer=null;}
-        if(document.getElementById('skyjoWaitModal')) return;
-        resetState();
-        showSkyjoAlert('🏳️', 'Partie abandonnée', function(){ enterLobby(); });
-        return;
-      }
-
-      // ── Partie introuvable : déco réseau ou fermeture ──────────────────
-      if(!Array.isArray(rows)||!rows[0]){
-        // Mode "Attendre" actif : on continue à poller silencieusement sans rien afficher
-        if(_waitingForReconnect) return;
-        // Si le timer de grâce tourne déjà, laisser faire
-        if(_oppGoneTimer) return;
-        if(document.getElementById('skyjoWaitModal')) return;
-        // Démarrer le délai de grâce (OPP_GRACE_MS) avant d'afficher le popup
+      // ── Adversaire hors-ligne : démarrer le timer de grâce ────────────
+      if(!isOnline && !_waitingForReconnect && !_oppGoneTimer && !document.getElementById('skyjoWaitModal') && !document.getElementById('skyjoCountdownModal')){
         _oppGoneTimer = setTimeout(function(){
           _oppGoneTimer = null;
-          if(!_launched) return; // partie déjà résolue
-          if(_waitingForReconnect) return; // déjà en mode attente manuel
-          if(document.getElementById('skyjoWaitModal')) return;
+          if(!_launched) return;
+          if(_waitingForReconnect) return;
+          if(document.getElementById('skyjoWaitModal') || document.getElementById('skyjoCountdownModal')) return;
           stopPoll();
           var oppName = _me==='girl' ? 'Link' : 'Zelda';
           showSkyjoChoice(
@@ -9373,7 +9357,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
             function(){
               _waitingForReconnect = true;
               startPoll();
-              startReconnectWait(); // compte à rebours 20s
+              startReconnectWait();
             },
             'Quitter',
             function(){
@@ -9385,16 +9369,38 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
             }
           );
         }, OPP_GRACE_MS);
+      }
+
+      // ── Adversaire revenu en ligne : annuler le timer de grâce ────────
+      if(isOnline && _oppGoneTimer){
+        clearTimeout(_oppGoneTimer);
+        _oppGoneTimer = null;
+      }
+
+      // ── Abandon volontaire : status = 'abandoned' ──────────────────────
+      if(Array.isArray(rows) && rows[0] && rows[0].status === 'abandoned'){
+        stopPoll();
+        stopReconnectWait();
+        _waitingForReconnect = false;
+        if(_oppGoneTimer){clearTimeout(_oppGoneTimer);_oppGoneTimer=null;}
+        var wm = document.getElementById('skyjoCountdownModal') || document.getElementById('skyjoWaitModal');
+        if(wm) document.body.removeChild(wm);
+        resetState();
+        showSkyjoAlert('🏳️', 'Partie abandonnée', function(){ enterLobby(); });
         return;
       }
 
-      // ── Partie retrouvée : annuler le timer de grâce si actif ──────────
-      if(_oppGoneTimer){clearTimeout(_oppGoneTimer);_oppGoneTimer=null;}
-      // Si on attendait une reconnexion et que la partie est revenue → reprendre sans bruit
+      // ── Partie introuvable (supprimée) ────────────────────────────────
+      if(!Array.isArray(rows)||!rows[0]){
+        if(_waitingForReconnect) return; // le compte à rebours gère la suite
+        return; // déjà géré par le timer de présence
+      }
+
+      // ── Partie retrouvée : si on attendait une reconnexion → reprendre ─
       if(_waitingForReconnect){
         _waitingForReconnect = false;
-        stopReconnectWait(); // annuler le compte à rebours
-        var wb = document.getElementById('skyjoWaitModal');
+        stopReconnectWait();
+        var wb = document.getElementById('skyjoCountdownModal');
         if(wb) document.body.removeChild(wb);
       }
       renderState(rows[0]);
@@ -9727,32 +9733,81 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
   function startReconnectWait(){
     _reconnectSeconds = RECONNECT_GRACE_S;
-    _updateReconnectTimer();
+    // Créer un modal dédié au compte à rebours (l'ancien modal "Attendre/Quitter" est déjà fermé)
+    _showCountdownModal(_reconnectSeconds);
     _reconnectTimer = setInterval(function(){
       _reconnectSeconds--;
-      _updateReconnectTimer();
+      // Mettre à jour l'affichage du compte à rebours
+      var el = document.getElementById('skyjoCountdownLabel');
+      if(el) el.textContent = 'Retour en jeu dans : ' + _reconnectSeconds + 's…';
       if(_reconnectSeconds <= 0){
         // Temps écoulé → abandon forcé
         stopReconnectWait();
         _waitingForReconnect = false;
         stopAll();
+        var gid = _gameId; // sauvegarder avant resetState
+        var wb = document.getElementById('skyjoCountdownModal');
+        if(wb) document.body.removeChild(wb);
+        resetState();
         // Supprimer la partie côté Supabase
-        if(_gameId){
-          var gid = _gameId;
+        if(gid){
           fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+gid,{
             method:'DELETE', headers:sbHeaders()
           }).catch(function(){});
         }
-        var wb = document.getElementById('skyjoWaitModal');
-        if(wb) document.body.removeChild(wb);
-        resetState();
-        showSkyjoAlert('\u23f0', 'Temps écoulé', function(){ enterLobby(); });
+        showSkyjoAlert('\u23f0', 'Temps écoulé — Partie terminée', function(){ enterLobby(); });
       }
     }, 1000);
   }
-  function _updateReconnectTimer(){
-    var el = document.getElementById('skyjoWaitModalTimer');
-    if(el) el.textContent = 'Retour en jeu dans : ' + _reconnectSeconds + 's\u2026';
+  function _showCountdownModal(seconds){
+    // Supprimer un éventuel modal précédent
+    var old = document.getElementById('skyjoCountdownModal');
+    if(old) document.body.removeChild(old);
+
+    var overlay = document.createElement('div');
+    overlay.id = 'skyjoCountdownModal';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:1200;display:flex;align-items:center;justify-content:center;padding:24px';
+
+    var box = document.createElement('div');
+    box.style.cssText = 'background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:24px 20px;max-width:300px;width:100%;text-align:center;font-family:DM Sans,sans-serif';
+
+    var emojiEl = document.createElement('div');
+    emojiEl.textContent = '⏳';
+    emojiEl.style.cssText = 'font-size:32px;margin-bottom:8px';
+    box.appendChild(emojiEl);
+
+    var titleEl = document.createElement('div');
+    titleEl.textContent = 'En attente…';
+    titleEl.style.cssText = 'font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px';
+    box.appendChild(titleEl);
+
+    var countEl = document.createElement('div');
+    countEl.id = 'skyjoCountdownLabel';
+    countEl.textContent = 'Retour en jeu dans : ' + seconds + 's…';
+    countEl.style.cssText = 'font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.5';
+    box.appendChild(countEl);
+
+    var btn = document.createElement('button');
+    btn.textContent = 'Abandonner';
+    btn.style.cssText = 'padding:10px 24px;background:rgba(239,83,80,0.12);color:#ef5350;border:1px solid rgba(239,83,80,0.35);border-radius:50px;font-size:13px;font-weight:700;font-family:DM Sans,sans-serif;cursor:pointer';
+    btn.onclick = function(){
+      stopReconnectWait();
+      _waitingForReconnect = false;
+      stopAll();
+      var gid = _gameId;
+      document.body.removeChild(overlay);
+      resetState();
+      if(gid){
+        fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+gid,{
+          method:'DELETE', headers:sbHeaders()
+        }).catch(function(){});
+      }
+      document.getElementById('skyjoView').classList.remove('active');
+      document.querySelector('.bottom-nav').style.display='';
+    };
+    box.appendChild(btn);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
   }
   function stopReconnectWait(){
     if(_reconnectTimer){ clearInterval(_reconnectTimer); _reconnectTimer = null; }
@@ -12753,7 +12808,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.08.8 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
