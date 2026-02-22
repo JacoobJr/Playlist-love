@@ -2326,59 +2326,89 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 }
 .skyjo-player-zone.zone-me.active-zone::before { opacity: 1; }
 
-/* ─── Badge "★ TON TOUR" — grand, visible, pulse lent et fort ─── */
+/* ─── Badge de tour dans la zone centrale (à droite de la défausse) ─── */
+#skyjoTurnBadgeSlot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  flex-shrink: 0;
+}
 .sj-your-turn-badge {
-  position: absolute;
-  top: 50%; right: 10px;
-  transform: translateY(-50%);
-  background: linear-gradient(135deg, rgba(0,201,167,0.28), rgba(0,229,189,0.42));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(160deg, rgba(0,201,167,0.22), rgba(0,229,189,0.38));
   border: 1.5px solid rgba(0,201,167,0.75);
-  border-radius: 22px;
-  padding: 5px 13px;
-  font-size: 10px; font-weight: 900;
+  border-radius: 14px;
+  padding: 7px 10px;
+  font-size: 9px; font-weight: 900;
   color: #00ffda;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
   pointer-events: none;
   animation: sjYourTurnBadge 2.6s ease-in-out infinite;
   box-shadow: 0 0 14px rgba(0,201,167,0.35), 0 2px 8px rgba(0,0,0,0.3);
   text-shadow: 0 0 10px rgba(0,229,189,0.8);
   white-space: nowrap;
+  text-align: center;
+  line-height: 1.3;
+}
+.sj-your-turn-badge .sj-badge-icon {
+  font-size: 20px;
+  line-height: 1;
+  animation: sjBadgeIconPulse 2.6s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px rgba(0,229,189,0.7));
+}
+@keyframes sjBadgeIconPulse {
+  0%,100% { transform: scale(1);    filter: drop-shadow(0 0 4px rgba(0,229,189,0.5)); }
+  40%     { transform: scale(1.18); filter: drop-shadow(0 0 12px rgba(0,229,189,0.9)); }
+  80%     { transform: scale(0.94); filter: drop-shadow(0 0 3px rgba(0,229,189,0.3)); }
 }
 .sj-their-turn-badge {
-  position: absolute;
-  top: 50%; right: 10px;
-  transform: translateY(-50%);
-  background: rgba(79,70,229,0.14);
-  border: 1px solid rgba(79,70,229,0.32);
-  border-radius: 22px;
-  padding: 5px 13px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: rgba(79,70,229,0.12);
+  border: 1px solid rgba(79,70,229,0.28);
+  border-radius: 14px;
+  padding: 7px 10px;
   font-size: 9px; font-weight: 700;
-  color: rgba(180,170,255,0.75);
+  color: rgba(180,170,255,0.7);
   letter-spacing: 0.8px;
   text-transform: uppercase;
   pointer-events: none;
   font-style: italic;
   white-space: nowrap;
+  text-align: center;
+  line-height: 1.3;
+}
+.sj-their-turn-badge .sj-badge-icon {
+  font-size: 18px;
+  line-height: 1;
+  opacity: 0.6;
 }
 @keyframes sjYourTurnBadge {
   0%,100% {
     opacity: 1;
-    transform: translateY(-50%) scale(1);
+    transform: scale(1);
     box-shadow: 0 0 10px rgba(0,201,167,0.25), 0 2px 8px rgba(0,0,0,0.3);
     border-color: rgba(0,201,167,0.65);
   }
   40% {
     opacity: 1;
-    transform: translateY(-50%) scale(1.06);
-    box-shadow: 0 0 22px rgba(0,201,167,0.6), 0 0 40px rgba(0,201,167,0.25), 0 2px 8px rgba(0,0,0,0.3);
+    transform: scale(1.05);
+    box-shadow: 0 0 24px rgba(0,201,167,0.6), 0 0 44px rgba(0,201,167,0.22), 0 2px 8px rgba(0,0,0,0.3);
     border-color: rgba(0,229,189,1);
   }
   80% {
     opacity: 0.88;
-    transform: translateY(-50%) scale(0.97);
-    box-shadow: 0 0 8px rgba(0,201,167,0.2), 0 2px 8px rgba(0,0,0,0.3);
-    border-color: rgba(0,201,167,0.5);
+    transform: scale(0.97);
+    box-shadow: 0 0 8px rgba(0,201,167,0.18), 0 2px 8px rgba(0,0,0,0.3);
+    border-color: rgba(0,201,167,0.45);
   }
 }
 
@@ -5482,7 +5512,8 @@ body.light #counterBlock.glowing .c-num-big {
             <div id="skyjoDiscardCard" class="skyjo-card skyjo-card-hidden" onclick="skyjoDrawFromDiscard()" style="cursor:pointer;">—</div>
           </div>
 
-
+          <!-- Badge de tour — à droite de la défausse -->
+          <div id="skyjoTurnBadgeSlot"></div>
 
         </div>
 
@@ -10144,31 +10175,31 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       if(oppTurnActive) oppAvEl2.classList.add('active-turn');
       else oppAvEl2.classList.remove('active-turn');
     }
-    // ── Highlight de zone active + badges de tour ──
+    // ── Highlight de zone active (fond respirant) ──
     var zoneMe  = document.querySelector('.skyjo-player-zone.zone-me');
     var zoneOpp = document.querySelector('.skyjo-player-zone.zone-opp');
-    // Nettoyer les anciens badges
-    [zoneMe, zoneOpp].forEach(function(z){ if(!z) return; z.querySelectorAll('.sj-your-turn-badge,.sj-their-turn-badge').forEach(function(b){ b.remove(); }); });
     if(zoneMe){
-      if(myTurnActive){
-        zoneMe.classList.add('active-zone');
-        var b = document.createElement('div');
-        b.className = 'sj-your-turn-badge';
-        b.textContent = '★ Ton tour';
-        zoneMe.appendChild(b);
-      } else {
-        zoneMe.classList.remove('active-zone');
-      }
+      if(myTurnActive) zoneMe.classList.add('active-zone');
+      else             zoneMe.classList.remove('active-zone');
     }
     if(zoneOpp){
-      if(oppTurnActive){
-        zoneOpp.classList.add('active-zone');
+      if(oppTurnActive) zoneOpp.classList.add('active-zone');
+      else              zoneOpp.classList.remove('active-zone');
+    }
+    // ── Badge de tour dans le slot central (à droite de la défausse) ──
+    var badgeSlot = document.getElementById('skyjoTurnBadgeSlot');
+    if(badgeSlot){
+      badgeSlot.innerHTML = '';
+      if(myTurnActive){
+        var b = document.createElement('div');
+        b.className = 'sj-your-turn-badge';
+        b.innerHTML = '<span class="sj-badge-icon">⬇️</span>TON<br>TOUR';
+        badgeSlot.appendChild(b);
+      } else if(oppTurnActive){
         var b2 = document.createElement('div');
         b2.className = 'sj-their-turn-badge';
-        b2.textContent = 'Son tour…';
-        zoneOpp.appendChild(b2);
-      } else {
-        zoneOpp.classList.remove('active-zone');
+        b2.innerHTML = '<span class="sj-badge-icon">⬆️</span>Son<br>tour…';
+        badgeSlot.appendChild(b2);
       }
     }
 
