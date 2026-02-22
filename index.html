@@ -9695,8 +9695,17 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     .then(function(r){ return r.json(); })
     .then(function(rows){
       if(!_waitingForReconnect) return;
-      if(!Array.isArray(rows) || !rows[0]) return;
-      // La partie est de retour : reprendre
+      // Partie introuvable = l'autre a abandonné
+      if(!Array.isArray(rows) || !rows[0]){
+        _waitingForReconnect = false;
+        stopReconnectWait();
+        var wb = document.getElementById('skyjoWaitModal');
+        if(wb) document.body.removeChild(wb);
+        resetState();
+        showSkyjoAlert('🏳️', 'Partie abandonnée.', function(){ enterLobby(); });
+        return;
+      }
+      // La partie est revenue : reprendre
       _waitingForReconnect = false;
       stopReconnectWait();
       var wb = document.getElementById('skyjoWaitModal');
@@ -9706,14 +9715,16 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     }).catch(function(){});
   }
 
-  /* Modale simple — un seul bouton OK */
-  function showSkyjoAlert(msg, cb){
-    _buildModal(
-      msg.split(' ')[0],
-      msg.split(' ').slice(1).join(' '),
-      '',
-      [{ label: 'OK', primary: true, action: cb }]
-    );
+  /* Modale simple — showSkyjoAlert('emoji', 'titre', cb) ou ('emoji titre', cb) */
+  function showSkyjoAlert(emojiOrMsg, titleOrCb, cb){
+    var emoji, title, callback;
+    if(typeof titleOrCb === 'function' || titleOrCb == null){
+      var parts = emojiOrMsg.split(' ');
+      emoji = parts[0]; title = parts.slice(1).join(' '); callback = titleOrCb;
+    } else {
+      emoji = emojiOrMsg; title = titleOrCb; callback = cb;
+    }
+    _buildModal(emoji, title, '', [{ label: 'OK', primary: true, action: callback }]);
   }
 
   /* Modale avec deux boutons */
