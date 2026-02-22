@@ -9047,6 +9047,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     if(!profile){alert('Tu dois être connecté pour jouer à Skyjo !');return;}
     resetZoom();
     document.getElementById('skyjoView').classList.add('active');
+    document.querySelector('.bottom-nav').style.display='none';
     particleActive=false;hideDance();window.scrollTo(0,0);
     if(_unlocked) enterLobby();
     else{
@@ -9100,6 +9101,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     cleanMyOldGames(null);
     resetState();
     document.getElementById('skyjoView').classList.remove('active');
+    document.querySelector('.bottom-nav').style.display='';
   };
 
   // ─── Lobby Poll ──────────────────────────────────────
@@ -9597,6 +9599,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     }
     resetState();
     document.getElementById('skyjoView').classList.remove('active');
+    document.querySelector('.bottom-nav').style.display='';
   };
 
 })();
