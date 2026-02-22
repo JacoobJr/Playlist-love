@@ -2313,18 +2313,7 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 .skyjo-card-back,
 .skyjo-card.skyjo-card-hidden {
   background: #1e4d34;
-  color: rgba(255,255,255,0.0); /* texte invisible par défaut */
-  font-size: calc(var(--sj-fs) * 1.5);
-  font-weight: 900;
-  letter-spacing: -1px;
-}
-/* Le "?" s'affiche via pseudo-element pour être toujours visible */
-.skyjo-card.skyjo-card-hidden::after {
-  content: '?';
-  color: rgba(255,255,255,0.55);
-  font-size: calc(var(--sj-fs) * 1.4);
-  font-weight: 900;
-  position: absolute;
+  color: transparent;
 }
 
 /* Carte en main */
