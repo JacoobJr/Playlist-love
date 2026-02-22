@@ -2761,6 +2761,25 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 .skyjo-presence-dot.online { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); animation: presencePulse 2s ease-in-out infinite; }
 @keyframes presencePulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
 
+/* ══ SKYJO — Pause animations quand page cachée ══ */
+body.skyjo-bg-paused #skyjoView .skyjo-avatar.active-turn,
+body.skyjo-bg-paused #skyjoView .skyjo-presence-dot.online,
+body.skyjo-bg-paused #skyjoView .skyjo-player-zone.active-zone::before,
+body.skyjo-bg-paused #skyjoView .skyjo-player-zone.zone-me.active-zone::before,
+body.skyjo-bg-paused #skyjoView .skyjo-player-zone.zone-opp.active-zone::before,
+body.skyjo-bg-paused #skyjoView .skyjo-card,
+body.skyjo-bg-paused #skyjoView #skyjoTurnBanner,
+body.skyjo-bg-paused #skyjoView #skyjoDeckCard,
+body.skyjo-bg-paused #skyjoView #skyjoDiscardCard {
+  animation-play-state: paused !important;
+  transition: none !important;
+}
+/* Stoppe aussi les particules volantes clones */
+body.skyjo-bg-paused .sj-fly-clone,
+body.skyjo-bg-paused .sj-particle {
+  animation-play-state: paused !important;
+}
+
 /* ══════════════════════════════════════════════════
    SKYJO — ANIMATIONS ENRICHIES v3
 ══════════════════════════════════════════════════ */
@@ -9687,7 +9706,14 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   // ─── Présence ────────────────────────────────────────
   function startPresence(){
     upsertPresence();
-    _presTimer=setInterval(upsertPresence,4000);
+    var interval = document.hidden ? 30000 : 4000;
+    _presTimer=setInterval(upsertPresence, interval);
+  }
+  function _refreshPresenceRate(){
+    if(!_presTimer) return;
+    var newInterval = document.hidden ? 30000 : 4000;
+    clearInterval(_presTimer); _presTimer=null;
+    _presTimer=setInterval(upsertPresence, newInterval);
   }
   function upsertPresence(){
     if(!_me) return;
@@ -9975,7 +10001,14 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   // ─── Poll état jeu ───────────────────────────────────
   function startPoll(){
     if(_pollTimer){clearInterval(_pollTimer);_pollTimer=null;}
-    _pollTimer=setInterval(fetchState,2000);
+    var interval = document.hidden ? 15000 : 2000; // ralenti si page cachée
+    _pollTimer=setInterval(fetchState, interval);
+  }
+  function _refreshPollRate(){
+    if(!_pollTimer) return; // pas de poll actif, rien à faire
+    var newInterval = document.hidden ? 15000 : 2000;
+    clearInterval(_pollTimer); _pollTimer=null;
+    _pollTimer=setInterval(fetchState, newInterval);
   }
   function fetchState(){
     if(!_gameId||_saving) return;
@@ -11268,6 +11301,12 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   var _origShowScreen = showScreen;
   // (déjà défini plus haut — on patch renderState pour afficher le bouton en jeu)
 
+  // Expose les fonctions de refresh de taux pour le module bg-pause externe
+  window._skyjoRefreshRates = function(){
+    _refreshPollRate();
+    _refreshPresenceRate();
+  };
+
   window.closeSkyjoGame=function(){
     stopAll(); stopReconnectWait(); _waitingForReconnect=false;
     deletePresence();
@@ -11283,6 +11322,90 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     document.querySelector('.bottom-nav').style.display='';
   };
 
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   SKYJO — OPTIMISATION CPU : pause complète quand page cachée
+   - Animations CSS pausées via body.skyjo-bg-paused
+   - Poll jeu : 2s → 15s (ou stop si pas de partie active)
+   - Heartbeat présence : 4s → 30s
+   - Reprend immédiatement au retour sur la page
+   v3.6
+══════════════════════════════════════════════════════════════ */
+(function(){
+  var _skyjoView = null;
+  function getSkyjoView(){ return _skyjoView || (_skyjoView = document.getElementById('skyjoView')); }
+  var _isSkyjoOpen = false;
+
+  // Surveille l'état du jeu pour savoir si Skyjo est actif
+  var _skyjoViewObs = new MutationObserver(function(){
+    _isSkyjoOpen = getSkyjoView() ? getSkyjoView().classList.contains('active') : false;
+  });
+  var sv = document.getElementById('skyjoView');
+  if(sv) _skyjoViewObs.observe(sv, { attributes:true, attributeFilter:['class'] });
+
+  function isSkyjoActive(){
+    return sv ? sv.classList.contains('active') : false;
+  }
+
+  function pauseSkyjo(){
+    // Classe CSS → pause toutes les animations Skyjo infinies
+    document.body.classList.add('skyjo-bg-paused');
+
+    // Stoppe également les clones volants en cours (suppression propre)
+    document.querySelectorAll('.sj-fly-clone, .sj-particle').forEach(function(el){
+      el.style.animationPlayState = 'paused';
+    });
+
+    // Ralentit les timers via les fonctions exposées par le module Skyjo
+    if(typeof window._skyjoRefreshRates === 'function') window._skyjoRefreshRates();
+  }
+
+  function resumeSkyjo(){
+    document.body.classList.remove('skyjo-bg-paused');
+
+    // Rétablit les clones si encore dans le DOM
+    document.querySelectorAll('.sj-fly-clone, .sj-particle').forEach(function(el){
+      el.style.animationPlayState = '';
+    });
+
+    // Remet les timers à vitesse normale
+    if(typeof window._skyjoRefreshRates === 'function') window._skyjoRefreshRates();
+  }
+
+  // visibilitychange : déclenché sur onglet caché, changement d'app, veille écran
+  document.addEventListener('visibilitychange', function(){
+    if(!isSkyjoActive()) return;
+    if(document.hidden){
+      pauseSkyjo();
+    } else {
+      resumeSkyjo();
+    }
+  });
+
+  // pagehide : déclenché quand on quitte le navigateur, ou navigation BFCache (iOS Safari/Chrome)
+  window.addEventListener('pagehide', function(){
+    if(!isSkyjoActive()) return;
+    pauseSkyjo();
+  });
+
+  // pageshow : retour depuis BFCache
+  window.addEventListener('pageshow', function(e){
+    if(!isSkyjoActive()) return;
+    if(!document.hidden) resumeSkyjo();
+  });
+
+  // blur/focus : Chrome mobile sur Android quitte sans déclencher visibilitychange parfois
+  window.addEventListener('blur', function(){
+    if(!isSkyjoActive()) return;
+    pauseSkyjo();
+  });
+  window.addEventListener('focus', function(){
+    if(!isSkyjoActive()) return;
+    if(!document.hidden) resumeSkyjo();
+  });
+
+  console.log('⚡ [v3.6] Skyjo bg-pause: visibilitychange+pagehide+blur/focus installés');
 })();
 
 
@@ -15197,7 +15320,8 @@ console.log('✨ Jayana UX v.UX1 chargé');
       '  ✓ [v3.5] particules + danse stoppées à l\'ouverture de toutes les vues\n' +
       '  ✓ [v3.5] abortActivePrank: _kbHintInterval/_kbHintTimer/_shakeMaxTimer nettoyés\n' +
       '  ✓ [v3.5] closeAllViews + visibilitychange → abortActivePrank systématique\n' +
-      '  ✓ [v3.5] canvas anniv: RAF stoppe si page cachée'
+      '  ✓ [v3.5] canvas anniv: RAF stoppe si page cachée\n' +
+      '  ✓ [v3.6] Skyjo bg-pause: anim pausées + poll/heartbeat ralentis (visibilitychange+pagehide+blur)'
     );
   }, 2000);
 
