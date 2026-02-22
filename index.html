@@ -4904,7 +4904,10 @@ body.light #counterBlock.glowing .c-num-big {
 
         <!-- ═══ ADVERSAIRE (haut) ═══ -->
         <div class="skyjo-player-zone zone-opp">
-          <div class="skyjo-manche-badge">Manche <span id="skyjoRound">1</span></div>
+          <div class="skyjo-manche-badge" style="display:flex;flex-direction:column;align-items:flex-end;gap:1px;">
+            <span>Manche <span id="skyjoRound">1</span></span>
+            <span id="skyjoLastRoundBadge" style="display:none;font-size:8px;font-weight:700;color:var(--muted);white-space:nowrap;"></span>
+          </div>
           <div class="skyjo-player-info">
             <div class="skyjo-avatar" id="skyjoAvatarOpp">👧</div>
             <span class="skyjo-player-name" id="skyjoOpponentLabel">Zelda</span>
@@ -4940,11 +4943,7 @@ body.light #counterBlock.glowing .c-num-big {
             <div id="skyjoDiscardCard" class="skyjo-card skyjo-card-hidden" onclick="skyjoDrawFromDiscard()" style="cursor:pointer;">—</div>
           </div>
 
-          <!-- Score manche précédente -->
-          <div id="skyjoLastRoundScore" style="display:none;flex-direction:column;align-items:center;gap:1px;">
-            <div style="font-size:7px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;">Manche préc.</div>
-            <div id="skyjoLastRoundText" style="font-size:9px;font-weight:700;color:var(--muted);white-space:nowrap;"></div>
-          </div>
+
 
         </div>
 
@@ -9542,6 +9541,14 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     document.getElementById('skyjoScoreGirl').textContent=state.scores.girl;
     document.getElementById('skyjoScoreBoy').textContent=state.scores.boy;
     document.getElementById('skyjoRound').textContent=state.round||1;
+    // Score de la manche précédente — lu depuis state.round_scores (persisté en base, visible pour les deux)
+    var lrBadge = document.getElementById('skyjoLastRoundBadge');
+    if(lrBadge && state.round_scores && (state.round||1) > 1){
+      lrBadge.textContent = 'Préc. 👧'+state.round_scores.girl+' | 👦'+state.round_scores.boy;
+      lrBadge.style.display='block';
+    } else if(lrBadge){
+      lrBadge.style.display='none';
+    }
     // Noms et avatars selon le rôle
     var myAvEl=document.getElementById('skyjoAvatarMe');
     var oppAvEl=document.getElementById('skyjoAvatarOpp');
@@ -9800,16 +9807,22 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
     // 1) Révéler toutes les cartes cachées avec animation en cascade
     _flipAllHiddenCards(state, function(){
-      // 2) Animer les badges de total
+      // 2) Agrandir + animer les badges de total
       var myTotEl  = document.getElementById('skyjoMyTotal');
       var oppTotEl = document.getElementById('skyjoOppTotal');
-      if(myTotEl)  { myTotEl.classList.remove('sj-score-pop');  void myTotEl.offsetWidth;  myTotEl.classList.add('sj-score-pop'); }
-      if(oppTotEl) { oppTotEl.classList.remove('sj-score-pop'); void oppTotEl.offsetWidth; oppTotEl.classList.add('sj-score-pop'); }
+      [myTotEl, oppTotEl].forEach(function(el){
+        if(!el) return;
+        el.classList.remove('sj-score-pop');
+        void el.offsetWidth;
+        el.classList.add('sj-score-pop');
+        // Agrandir pendant la phase de révélation
+        el.style.width='44px'; el.style.height='44px'; el.style.fontSize='16px';
+      });
 
-      // 3) Après 3s de vue globale → afficher le popup
+      // 3) Après 10s de vue globale → afficher le popup
       setTimeout(function(){
         _showRoundEndPopup(state);
-      }, 3000);
+      }, 10000);
     });
   }
 
@@ -9856,6 +9869,10 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   }
 
   function _showRoundEndPopup(state){
+    // Remettre les badges à taille normale
+    var myTotEl=document.getElementById('skyjoMyTotal');
+    var oppTotEl=document.getElementById('skyjoOppTotal');
+    [myTotEl,oppTotEl].forEach(function(el){ if(el){ el.style.width=''; el.style.height=''; el.style.fontSize=''; } });
     var rg=state.round_scores?state.round_scores.girl:0;
     var rb=state.round_scores?state.round_scores.boy:0;
     var tg=state.scores?state.scores.girl:0;
@@ -9906,15 +9923,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       if(Array.isArray(rows)&&rows[0]){
         _waitingNextRound=false;
         document.getElementById('skyjoRoundEnd').style.display='none';
-        // Afficher le score de la manche précédente discrètement
-        if(prevRg!==null){
-          var lrs=document.getElementById('skyjoLastRoundScore');
-          var lrt=document.getElementById('skyjoLastRoundText');
-          if(lrs&&lrt){
-            lrt.textContent='👧 +'+prevRg+' | 👦 +'+prevRb;
-            lrs.style.display='flex';
-          }
-        }
+        // Score manche préc. géré par renderState depuis state.round_scores
         startPoll();
         renderState(rows[0]);
       }
@@ -13040,7 +13049,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.20.5 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
