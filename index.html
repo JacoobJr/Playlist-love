@@ -9309,26 +9309,37 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   }
   function fetchState(){
     if(!_gameId||_saving) return;
-    fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId+'&select=id,status,state,created_by',{
-      headers:sbHeaders()
-    })
-    .then(function(r){return r.json();})
-    .then(function(rows){
+    var oppKey = _me==='girl' ? 'boy' : 'girl';
+    Promise.all([
+      fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId+'&select=id,status,state,created_by',{headers:sbHeaders()}).then(function(r){return r.json();}),
+      fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE+'?profile=eq.'+oppKey+'&select=updated_at',{headers:sbHeaders()}).then(function(r){return r.json();})
+    ])
+    .then(function(results){
       if(_saving) return;
+      var rows     = results[0];
+      var presRows = results[1];
+
+      // Mettre à jour le dot de présence adversaire
+      var dot = document.getElementById('skyjoOppPresenceDot');
+      if(dot){
+        var isOnline = Array.isArray(presRows) && presRows[0] &&
+          (Date.now() - new Date(presRows[0].updated_at).getTime()) < 10000;
+        dot.style.background  = isOnline ? '#22c55e' : '#555';
+        dot.style.boxShadow   = isOnline ? '0 0 5px rgba(34,197,94,0.7)' : 'none';
+        dot.title             = isOnline ? 'En ligne' : 'Hors ligne';
+      }
+
       // Partie introuvable → l'autre a quitté (volontairement ou déconnexion)
       if(!Array.isArray(rows)||!rows[0]){
         stopPoll();
-        // Ne pas afficher le modal plusieurs fois
         if(document.getElementById('skyjoWaitModal')) return;
-        var oppName=_me==='girl'?'Link':'Zelda';
+        var oppName = _me==='girl' ? 'Link' : 'Zelda';
         showSkyjoChoice(
           '😔',
           oppName+' a quitté',
           'Déconnexion ou abandon. Tu peux attendre son retour ou quitter la partie.',
           'Attendre',
           function(){
-            // Reprendre le poll — si la partie réapparaît (reconnexion), on la retrouve
-            // Si elle n'existe plus, le prochain tick redemandera
             _waitingForReconnect = true;
             startReconnectWait();
           },
@@ -9346,7 +9357,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       if(_waitingForReconnect){
         _waitingForReconnect = false;
         stopReconnectWait();
-        var wb=document.getElementById('skyjoWaitModal');
+        var wb = document.getElementById('skyjoWaitModal');
         if(wb) document.body.removeChild(wb);
       }
       renderState(rows[0]);
