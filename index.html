@@ -9149,11 +9149,19 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   }
   function upsertPresence(){
     if(!_me) return;
-    fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE,{
-      method:'POST',
-      headers:sbHeaders({'Prefer':'resolution=merge-duplicates,return=minimal'}),
-      body:JSON.stringify({profile:_me,updated_at:new Date().toISOString()})
-    }).catch(function(){});
+    function doPost(){
+      fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE,{
+        method:'POST',
+        headers:sbHeaders({'Prefer':'resolution=merge-duplicates,return=minimal'}),
+        body:JSON.stringify({profile:_me,updated_at:new Date().toISOString()})
+      }).catch(function(){});
+    }
+    // Même pattern que les autres modules : charger le token si absent
+    if(_sbAccessToken){
+      doPost();
+    } else {
+      sbLogin(_me).then(function(ok){ if(ok) doPost(); });
+    }
   }
   function deletePresence(){
     if(!_me) return;
@@ -9168,11 +9176,8 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     resetZoom();
     particleActive=false; hideDance(); window.scrollTo(0,0);
     if(profile){
-      // Connecté → s'assurer que le token Supabase est chargé avant d'entrer
-      // (sbLogin fait sbLoadSession en priorité, sans redemander le code)
-      sbLogin(profile).then(function(){
-        _openSkyjoWithProfile(profile);
-      });
+      // Connecté → charger le token Supabase avant d'entrer (évite 403 sur skyjo_presence)
+      sbLogin(profile).then(function(){ _openSkyjoWithProfile(profile); });
     } else {
       // Pas connecté → afficher le choix de profil
       document.getElementById('skyjoAuthModal').style.display='flex';
@@ -9181,26 +9186,19 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
   window.skyjoAuthSelect = function(profile){
     document.getElementById('skyjoAuthModal').style.display='none';
-    // Connexion réelle obligatoire : sans token Supabase valide, skyjo_presence renvoie 403.
-    // Si session existante → sbLogin la restaure immédiatement (pas de modal code).
-    // Sinon → demande le code via showProfileCodeModal, puis charge le token.
+    // Connexion réelle obligatoire : le token Supabase est requis pour skyjo_presence
     if(typeof sbLoadSession === 'function' && sbLoadSession(profile)){
-      // Session valide en sessionStorage → token restauré, entrer directement
+      // Session valide → token chargé, entrer directement
       if(window._profileSave) window._profileSave(profile);
       if(window._profileApply) window._profileApply(profile);
       _openSkyjoWithProfile(profile);
     } else if(window.showProfileCodeModal){
-      // Pas de session → demander le vrai code (établit sbLogin + token)
+      // Pas de session → vrai login avec code
       window.showProfileCodeModal(profile, function(){
         if(window._profileSave) window._profileSave(profile);
         if(window._profileApply) window._profileApply(profile);
         if(window._profileLoadMoods) window._profileLoadMoods();
         _openSkyjoWithProfile(profile);
-      });
-    } else {
-      // Fallback : tenter sbLogin silencieux (ne devrait pas arriver)
-      sbLogin(profile).then(function(ok){
-        if(ok) _openSkyjoWithProfile(profile);
       });
     }
   };
@@ -14142,4 +14140,3 @@ console.log('✨ Jayana UX v.UX1 chargé');
 
 </body>
 </html>
-        
