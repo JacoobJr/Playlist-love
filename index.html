@@ -2225,7 +2225,15 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   flex-shrink: 0; padding: 5px 12px;
   font-size: 12px; font-weight: 700; text-align: center; line-height: 1.3;
 }
-.skyjo-turn-banner.my-turn   { background: rgba(0,201,167,0.15); color: var(--green); border-bottom: 2px solid rgba(0,201,167,0.35); }
+.skyjo-turn-banner.my-turn   {
+  background: rgba(0,201,167,0.15); color: var(--green);
+  border-bottom: 2px solid rgba(0,201,167,0.35);
+  animation: sjBannerPulse 1.4s ease-in-out infinite;
+}
+@keyframes sjBannerPulse {
+  0%,100% { background: rgba(0,201,167,0.12); }
+  50%     { background: rgba(0,201,167,0.28); }
+}
 .skyjo-turn-banner.their-turn{ background: var(--s1); color: var(--muted); border-bottom: 1px solid var(--border); }
 
 /* Terrain vertical : 2 zones joueur + 1 zone centrale */
@@ -2374,6 +2382,24 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   flex-shrink: 0; padding: 4px 12px;
   background: rgba(0,201,167,0.1); border-top: 1px solid rgba(0,201,167,0.2);
   font-size: 10px; color: var(--sub); text-align: center; font-weight: 600; display: none;
+}
+
+/* ── Badge total cartes révélées ── */
+.sj-total-badge {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+.sj-total-badge.mine {
+  background: rgba(5,150,105,0.25);
+  border: 2px solid rgba(5,150,105,0.6);
+  color: #34d399;
+}
+.sj-total-badge.opp {
+  background: rgba(79,70,229,0.22);
+  border: 2px solid rgba(79,70,229,0.5);
+  color: #a5b4fc;
 }
 
 /* ── Pulse doré avatar tour actif ── */
@@ -4864,7 +4890,7 @@ body.light #counterBlock.glowing .c-num-big {
             <span class="skyjo-player-score-badge" id="skyjoScoreGirl">0</span>
           </div>
           <div style="display:flex;align-items:center;gap:6px;">
-            <div id="skyjoOppTotal" style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;font-weight:800;color:rgba(79,70,229,0.7);min-width:14px;text-align:center;letter-spacing:0.5px;">—</div>
+            <div id="skyjoOppTotal" class="sj-total-badge opp">—</div>
             <div class="skyjo-grid" id="skyjoOpponentGrid"></div>
           </div>
         </div>
@@ -4902,7 +4928,7 @@ body.light #counterBlock.glowing .c-num-big {
             <span class="skyjo-player-score-badge" id="skyjoScoreBoy">0</span>
           </div>
           <div style="display:flex;align-items:center;gap:6px;">
-            <div id="skyjoMyTotal" style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;font-weight:800;color:rgba(5,150,105,0.8);min-width:14px;text-align:center;letter-spacing:0.5px;">—</div>
+            <div id="skyjoMyTotal" class="sj-total-badge mine">—</div>
             <div class="skyjo-grid" id="skyjoMyGrid"></div>
           </div>
         </div>
@@ -12857,7 +12883,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.02.2 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.02.3 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
