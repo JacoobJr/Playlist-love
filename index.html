@@ -2233,20 +2233,20 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 
 /* ── Bannière de tour ── */
 #skyjoTurnBanner {
-  flex-shrink: 0; padding: 8px 14px;
-  font-size: 12px; font-weight: 700; text-align: center; line-height: 1.3;
+  flex-shrink: 0; padding: 7px 14px;
+  font-size: 11px; font-weight: 700; text-align: center; line-height: 1.3;
   overflow: hidden;
   letter-spacing: 0.3px;
-  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s, color 0.3s;
   position: relative;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
 }
 .skyjo-turn-banner.my-turn {
-  background: linear-gradient(90deg, rgba(0,201,167,0.10) 0%, rgba(0,201,167,0.26) 50%, rgba(0,201,167,0.10) 100%);
+  background: linear-gradient(90deg, rgba(0,201,167,0.08) 0%, rgba(0,201,167,0.22) 50%, rgba(0,201,167,0.08) 100%);
   background-size: 200% 100%;
   color: #00e5bd;
-  border-bottom: 2px solid rgba(0,201,167,0.5);
-  text-shadow: 0 0 16px rgba(0,201,167,0.6);
-  box-shadow: 0 2px 12px rgba(0,201,167,0.12) inset;
+  border-bottom: 2px solid rgba(0,201,167,0.45);
+  text-shadow: 0 0 12px rgba(0,201,167,0.5);
   animation: sjBannerFlow 3s ease-in-out infinite;
 }
 @keyframes sjBannerFlow {
@@ -2254,11 +2254,10 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   50%     { background-position: 100% 0; }
 }
 .skyjo-turn-banner.their-turn {
-  background: rgba(79,70,229,0.08);
-  color: rgba(180,170,255,0.75);
-  border-bottom: 1px solid rgba(79,70,229,0.22);
+  background: rgba(79,70,229,0.06);
+  color: rgba(160,150,240,0.7);
+  border-bottom: 1px solid rgba(79,70,229,0.18);
   font-style: italic;
-  letter-spacing: 0.1px;
 }
 
 /* Terrain vertical : 2 zones joueur + 1 zone centrale */
@@ -2269,30 +2268,89 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   overscroll-behavior: none;
 }
 
-/* Zones joueur */
+/* ─── Zones joueur avec indicateur de tour fort ─── */
 .skyjo-player-zone {
   flex: 1; min-height: 0;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   padding: 4px 8px; position: relative; gap: 4px;
-  transition: background 0.4s ease, border-color 0.4s ease;
+  transition: background 0.4s ease, box-shadow 0.4s ease;
+  overflow: hidden;
 }
+/* Trait lumineux bord gauche — indicateur de tour */
+.skyjo-player-zone::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  transition: opacity 0.4s ease, background 0.4s ease;
+  opacity: 0;
+}
+/* Zone adverse (haut) */
 .skyjo-player-zone.zone-opp {
-  background: linear-gradient(180deg, rgba(79,70,229,0.10) 0%, rgba(79,70,229,0.04) 100%);
-  border-bottom: 1px solid rgba(79,70,229,0.18);
+  background: rgba(79,70,229,0.05);
+  border-bottom: 1px solid rgba(79,70,229,0.14);
+}
+.skyjo-player-zone.zone-opp::before {
+  background: linear-gradient(180deg, rgba(79,70,229,0) 0%, #7c6df5 50%, rgba(79,70,229,0) 100%);
 }
 .skyjo-player-zone.zone-opp.active-zone {
-  background: linear-gradient(180deg, rgba(79,70,229,0.20) 0%, rgba(79,70,229,0.08) 100%);
-  border-bottom: 1px solid rgba(79,70,229,0.38);
+  background: rgba(79,70,229,0.12);
+  box-shadow: inset 0 0 40px rgba(79,70,229,0.08);
+  border-bottom: 1px solid rgba(79,70,229,0.32);
 }
-.skyjo-player-zone.zone-me  {
-  background: linear-gradient(0deg, rgba(5,150,105,0.10) 0%, rgba(5,150,105,0.04) 100%);
-  border-top: 1px solid rgba(5,150,105,0.18);
+.skyjo-player-zone.zone-opp.active-zone::before { opacity: 1; }
+
+/* Zone moi (bas) */
+.skyjo-player-zone.zone-me {
+  background: rgba(5,150,105,0.05);
+  border-top: 1px solid rgba(5,150,105,0.14);
   padding-bottom: max(8px, env(safe-area-inset-bottom, 8px));
 }
+.skyjo-player-zone.zone-me::before {
+  background: linear-gradient(180deg, rgba(5,150,105,0) 0%, #00c9a7 50%, rgba(5,150,105,0) 100%);
+}
 .skyjo-player-zone.zone-me.active-zone {
-  background: linear-gradient(0deg, rgba(5,150,105,0.20) 0%, rgba(5,150,105,0.08) 100%);
-  border-top: 1px solid rgba(5,150,105,0.38);
+  background: rgba(5,150,105,0.12);
+  box-shadow: inset 0 0 40px rgba(5,150,105,0.08);
+  border-top: 1px solid rgba(5,150,105,0.32);
+}
+.skyjo-player-zone.zone-me.active-zone::before { opacity: 1; }
+
+/* ─── Badge "TON TOUR" flottant sur la zone active ─── */
+.sj-your-turn-badge {
+  position: absolute;
+  top: 6px; right: 8px;
+  background: linear-gradient(135deg, rgba(0,201,167,0.22), rgba(0,229,189,0.32));
+  border: 1px solid rgba(0,201,167,0.55);
+  border-radius: 20px;
+  padding: 2px 9px;
+  font-size: 8px; font-weight: 900;
+  color: #00e5bd;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  pointer-events: none;
+  animation: sjYourTurnBadge 1.8s ease-in-out infinite;
+  box-shadow: 0 0 10px rgba(0,201,167,0.25);
+}
+.sj-their-turn-badge {
+  position: absolute;
+  top: 6px; right: 8px;
+  background: rgba(79,70,229,0.12);
+  border: 1px solid rgba(79,70,229,0.28);
+  border-radius: 20px;
+  padding: 2px 9px;
+  font-size: 8px; font-weight: 700;
+  color: rgba(160,150,240,0.8);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  pointer-events: none;
+  font-style: italic;
+}
+@keyframes sjYourTurnBadge {
+  0%,100% { opacity: 1; transform: scale(1); box-shadow: 0 0 8px rgba(0,201,167,0.2); }
+  50%     { opacity: 0.8; transform: scale(0.97); box-shadow: 0 0 16px rgba(0,201,167,0.4); }
 }
 
 /* Infos joueur — ligne compacte */
@@ -2301,7 +2359,7 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
   background: var(--s2); border: 2px solid var(--border);
   display: flex; align-items: center; justify-content: center; font-size: 15px;
-  transition: border-color 0.35s, box-shadow 0.35s;
+  transition: border-color 0.35s, box-shadow 0.35s, transform 0.35s;
 }
 .skyjo-player-name  {
   font-size: 11px; font-weight: 700; color: var(--text);
@@ -2315,20 +2373,20 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   border-radius: 20px; padding: 1px 8px;
   font-size: 11px; font-weight: 800; color: var(--text);
   font-variant-numeric: tabular-nums;
-  transition: background 0.3s, color 0.3s, border-color 0.3s;
+  transition: background 0.35s, color 0.35s, border-color 0.35s;
 }
 .skyjo-player-zone.zone-me.active-zone .skyjo-player-score-badge {
   background: rgba(5,150,105,0.18);
-  border-color: rgba(5,150,105,0.45);
+  border-color: rgba(5,150,105,0.5);
   color: #4eeebb;
 }
 .skyjo-player-zone.zone-opp.active-zone .skyjo-player-score-badge {
   background: rgba(79,70,229,0.18);
-  border-color: rgba(79,70,229,0.45);
+  border-color: rgba(79,70,229,0.5);
   color: #b0c4ff;
 }
 .skyjo-manche-badge {
-  position: absolute; top: 4px; right: 8px;
+  position: absolute; top: 4px; left: 8px;
   font-size: 9px; font-weight: 700; color: var(--muted);
   background: var(--s1); border: 1px solid var(--border);
   border-radius: 5px; padding: 1px 6px;
@@ -2663,11 +2721,12 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 
 /* ── Pulse doré avatar tour actif ── */
 @keyframes sjAvatarPulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(234,179,8,0.6); border-color: rgba(234,179,8,0.9); }
-  50%     { box-shadow: 0 0 0 5px rgba(234,179,8,0); border-color: rgba(234,179,8,0.45); }
+  0%,100% { box-shadow: 0 0 0 0 rgba(234,179,8,0.55), 0 0 10px rgba(234,179,8,0.2); border-color: rgba(234,179,8,0.9); }
+  50%     { box-shadow: 0 0 0 4px rgba(234,179,8,0), 0 0 16px rgba(234,179,8,0.35); border-color: rgba(234,179,8,0.5); }
 }
 .skyjo-avatar.active-turn {
   border-color: #fbbf24 !important;
+  transform: scale(1.12);
   animation: sjAvatarPulse 1.8s ease-in-out infinite;
 }
 
@@ -10056,16 +10115,32 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       if(oppTurnActive) oppAvEl2.classList.add('active-turn');
       else oppAvEl2.classList.remove('active-turn');
     }
-    // ── Highlight de zone active ──
+    // ── Highlight de zone active + badges de tour ──
     var zoneMe  = document.querySelector('.skyjo-player-zone.zone-me');
     var zoneOpp = document.querySelector('.skyjo-player-zone.zone-opp');
+    // Nettoyer les anciens badges
+    [zoneMe, zoneOpp].forEach(function(z){ if(!z) return; z.querySelectorAll('.sj-your-turn-badge,.sj-their-turn-badge').forEach(function(b){ b.remove(); }); });
     if(zoneMe){
-      if(myTurnActive) zoneMe.classList.add('active-zone');
-      else zoneMe.classList.remove('active-zone');
+      if(myTurnActive){
+        zoneMe.classList.add('active-zone');
+        var b = document.createElement('div');
+        b.className = 'sj-your-turn-badge';
+        b.textContent = '★ Ton tour';
+        zoneMe.appendChild(b);
+      } else {
+        zoneMe.classList.remove('active-zone');
+      }
     }
     if(zoneOpp){
-      if(oppTurnActive) zoneOpp.classList.add('active-zone');
-      else zoneOpp.classList.remove('active-zone');
+      if(oppTurnActive){
+        zoneOpp.classList.add('active-zone');
+        var b2 = document.createElement('div');
+        b2.className = 'sj-their-turn-badge';
+        b2.textContent = 'Son tour…';
+        zoneOpp.appendChild(b2);
+      } else {
+        zoneOpp.classList.remove('active-zone');
+      }
     }
 
     // ── Totaux cartes révélées ──
@@ -10124,12 +10199,15 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     renderGrid('skyjoOpponentGrid',oppCards,false,false,state,false);
 
     // Carte en main
-    var heldWrap=document.getElementById('skyjoHeldCardWrap');
-    var heldEl  =document.getElementById('skyjoHeldCard');
+    var heldWrap   = document.getElementById('skyjoHeldCardWrap');
+    var heldEl     = document.getElementById('skyjoHeldCard');
+    var discardBtn = document.getElementById('skyjoDiscardBtn');
     if(iHoldCard){
       heldWrap.style.display='flex';
       heldEl.textContent=state.held_card.value;
       heldEl.setAttribute('data-val',state.held_card.value);
+      // FIX : toujours réactiver le bouton Défausser (il peut avoir été disabled dans skyjoReplaceCard)
+      if(discardBtn){ discardBtn.disabled = false; discardBtn.style.opacity = ''; discardBtn.style.pointerEvents = ''; }
       // Animation d'apparition si nouvelle carte
       if(newHeld){
         heldEl.classList.remove('sj-held-appear');
@@ -10139,6 +10217,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       }
     } else {
       heldWrap.style.display='none';
+      if(discardBtn){ discardBtn.disabled = false; }
     }
 
     // Message init uniquement (le reste est géré par la bannière)
