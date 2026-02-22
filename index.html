@@ -2233,26 +2233,32 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 
 /* ── Bannière de tour ── */
 #skyjoTurnBanner {
-  flex-shrink: 0; padding: 6px 14px;
+  flex-shrink: 0; padding: 8px 14px;
   font-size: 12px; font-weight: 700; text-align: center; line-height: 1.3;
   overflow: hidden;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.3px;
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+  position: relative;
 }
 .skyjo-turn-banner.my-turn {
-  background: linear-gradient(90deg, rgba(0,201,167,0.08) 0%, rgba(0,201,167,0.22) 50%, rgba(0,201,167,0.08) 100%);
+  background: linear-gradient(90deg, rgba(0,201,167,0.10) 0%, rgba(0,201,167,0.26) 50%, rgba(0,201,167,0.10) 100%);
   background-size: 200% 100%;
   color: #00e5bd;
-  border-bottom: 2px solid rgba(0,201,167,0.4);
-  text-shadow: 0 0 20px rgba(0,201,167,0.5);
-  animation: sjBannerFlow 2.5s ease-in-out infinite;
+  border-bottom: 2px solid rgba(0,201,167,0.5);
+  text-shadow: 0 0 16px rgba(0,201,167,0.6);
+  box-shadow: 0 2px 12px rgba(0,201,167,0.12) inset;
+  animation: sjBannerFlow 3s ease-in-out infinite;
 }
 @keyframes sjBannerFlow {
   0%,100% { background-position: 0% 0; }
   50%     { background-position: 100% 0; }
 }
 .skyjo-turn-banner.their-turn {
-  background: var(--s1); color: var(--muted);
-  border-bottom: 1px solid var(--border);
+  background: rgba(79,70,229,0.08);
+  color: rgba(180,170,255,0.75);
+  border-bottom: 1px solid rgba(79,70,229,0.22);
+  font-style: italic;
+  letter-spacing: 0.1px;
 }
 
 /* Terrain vertical : 2 zones joueur + 1 zone centrale */
@@ -2269,15 +2275,24 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   padding: 4px 8px; position: relative; gap: 4px;
+  transition: background 0.4s ease, border-color 0.4s ease;
 }
 .skyjo-player-zone.zone-opp {
-  background: linear-gradient(180deg, rgba(79,70,229,0.12) 0%, rgba(79,70,229,0.05) 100%);
-  border-bottom: 1px solid rgba(79,70,229,0.2);
+  background: linear-gradient(180deg, rgba(79,70,229,0.10) 0%, rgba(79,70,229,0.04) 100%);
+  border-bottom: 1px solid rgba(79,70,229,0.18);
+}
+.skyjo-player-zone.zone-opp.active-zone {
+  background: linear-gradient(180deg, rgba(79,70,229,0.20) 0%, rgba(79,70,229,0.08) 100%);
+  border-bottom: 1px solid rgba(79,70,229,0.38);
 }
 .skyjo-player-zone.zone-me  {
-  background: linear-gradient(0deg, rgba(5,150,105,0.12) 0%, rgba(5,150,105,0.05) 100%);
-  border-top: 1px solid rgba(5,150,105,0.2);
+  background: linear-gradient(0deg, rgba(5,150,105,0.10) 0%, rgba(5,150,105,0.04) 100%);
+  border-top: 1px solid rgba(5,150,105,0.18);
   padding-bottom: max(8px, env(safe-area-inset-bottom, 8px));
+}
+.skyjo-player-zone.zone-me.active-zone {
+  background: linear-gradient(0deg, rgba(5,150,105,0.20) 0%, rgba(5,150,105,0.08) 100%);
+  border-top: 1px solid rgba(5,150,105,0.38);
 }
 
 /* Infos joueur — ligne compacte */
@@ -2286,15 +2301,31 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
   background: var(--s2); border: 2px solid var(--border);
   display: flex; align-items: center; justify-content: center; font-size: 15px;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  transition: border-color 0.35s, box-shadow 0.35s;
 }
-.skyjo-player-name  { font-size: 11px; font-weight: 700; color: var(--text); }
+.skyjo-player-name  {
+  font-size: 11px; font-weight: 700; color: var(--text);
+  transition: color 0.35s;
+}
+.skyjo-player-zone.active-zone .skyjo-player-name {
+  color: var(--green);
+}
 .skyjo-player-score-badge {
   background: var(--s2); border: 1px solid var(--border);
   border-radius: 20px; padding: 1px 8px;
   font-size: 11px; font-weight: 800; color: var(--text);
   font-variant-numeric: tabular-nums;
-  transition: background 0.3s, color 0.3s;
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+}
+.skyjo-player-zone.zone-me.active-zone .skyjo-player-score-badge {
+  background: rgba(5,150,105,0.18);
+  border-color: rgba(5,150,105,0.45);
+  color: #4eeebb;
+}
+.skyjo-player-zone.zone-opp.active-zone .skyjo-player-score-badge {
+  background: rgba(79,70,229,0.18);
+  border-color: rgba(79,70,229,0.45);
+  color: #b0c4ff;
 }
 .skyjo-manche-badge {
   position: absolute; top: 4px; right: 8px;
@@ -2329,8 +2360,8 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   position: relative; overflow: hidden;
 }
 @keyframes sjHeldFloat {
-  0%,100% { transform: translateY(0) rotateZ(-1deg); box-shadow: 0 4px 18px rgba(109,90,205,0.5), var(--sj-shadow); }
-  50%     { transform: translateY(-3px) rotateZ(1deg); box-shadow: 0 8px 28px rgba(109,90,205,0.65), var(--sj-shadow); }
+  0%,100% { transform: translateY(0) rotateZ(-0.5deg); box-shadow: 0 3px 12px rgba(109,90,205,0.35), var(--sj-shadow); }
+  50%     { transform: translateY(-2px) rotateZ(0.5deg); box-shadow: 0 6px 18px rgba(109,90,205,0.45), var(--sj-shadow); }
 }
 #skyjoHeldCard::before {
   content: '';
@@ -2344,8 +2375,8 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   position: absolute;
   top: -60%; left: -60%;
   width: 220%; height: 220%;
-  background: linear-gradient(110deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%);
-  animation: sjHeldShine 3s ease-in-out infinite;
+  background: linear-gradient(110deg, transparent 35%, rgba(255,255,255,0.12) 50%, transparent 65%);
+  animation: sjHeldShine 5s ease-in-out infinite;
   pointer-events: none;
 }
 @keyframes sjHeldShine {
@@ -2538,27 +2569,27 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 /* ── Cartes interactives (clickables) ── */
 .skyjo-card.skyjo-card-clickable {
   cursor: pointer;
-  animation: sjCardPulseV3 1.6s ease-in-out infinite;
-  transition: transform 0.15s cubic-bezier(.17,.89,.32,1.28), box-shadow 0.15s;
+  animation: sjCardPulseV3 2.2s ease-in-out infinite;
+  transition: transform 0.18s cubic-bezier(.17,.89,.32,1.15), box-shadow 0.18s;
 }
 @keyframes sjCardPulseV3 {
   0%,100% {
-    box-shadow: 0 0 0 0 rgba(0,229,189,0.7), var(--sj-shadow);
+    box-shadow: 0 0 0 0 rgba(0,229,189,0.45), var(--sj-shadow);
     transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 0 5px rgba(0,229,189,0), var(--sj-shadow-hover);
-    transform: scale(1.028);
+    box-shadow: 0 0 0 4px rgba(0,229,189,0), var(--sj-shadow-hover);
+    transform: scale(1.018);
   }
 }
 .skyjo-card.skyjo-card-clickable:hover {
-  transform: scale(1.10) translateY(-3px) !important;
-  box-shadow: 0 10px 28px rgba(0,229,189,0.35), var(--sj-shadow) !important;
+  transform: scale(1.06) translateY(-2px) !important;
+  box-shadow: 0 8px 22px rgba(0,229,189,0.28), var(--sj-shadow) !important;
   z-index: 5;
   animation-play-state: paused;
 }
 .skyjo-card.skyjo-card-clickable:active {
-  transform: scale(1.01) translateY(-1px) !important;
+  transform: scale(0.97) translateY(0) !important;
   box-shadow: var(--sj-shadow) !important;
 }
 
@@ -2588,13 +2619,14 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 
 /* ── Animation flip carte fin de manche ── */
 @keyframes sjFlipReveal {
-  0%   { transform: rotateY(0deg); }
-  49%  { transform: rotateY(90deg); }
-  50%  { transform: rotateY(90deg); }
-  100% { transform: rotateY(0deg); }
+  0%   { transform: rotateY(0deg)   scaleX(1);    filter: brightness(1); }
+  40%  { transform: rotateY(90deg)  scaleX(0.92); filter: brightness(0.6); }
+  41%  { transform: rotateY(-90deg) scaleX(0.92); filter: brightness(0.6); }
+  85%  { transform: rotateY(-8deg)  scaleX(1.02); filter: brightness(1.15); }
+  100% { transform: rotateY(0deg)   scaleX(1);    filter: brightness(1); }
 }
 .skyjo-card.sj-flipping {
-  animation: sjFlipReveal 0.45s ease-in-out forwards;
+  animation: sjFlipReveal 0.5s ease-in-out forwards;
   transform-style: preserve-3d;
 }
 /* Score total qui pulse en fin de manche */
@@ -2631,12 +2663,12 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 
 /* ── Pulse doré avatar tour actif ── */
 @keyframes sjAvatarPulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(234,179,8,0.85); border-color: rgba(234,179,8,1); }
-  50%     { box-shadow: 0 0 0 6px rgba(234,179,8,0); border-color: rgba(234,179,8,0.5); }
+  0%,100% { box-shadow: 0 0 0 0 rgba(234,179,8,0.6); border-color: rgba(234,179,8,0.9); }
+  50%     { box-shadow: 0 0 0 5px rgba(234,179,8,0); border-color: rgba(234,179,8,0.45); }
 }
 .skyjo-avatar.active-turn {
   border-color: #fbbf24 !important;
-  animation: sjAvatarPulse 1.4s ease-in-out infinite;
+  animation: sjAvatarPulse 1.8s ease-in-out infinite;
 }
 
 /* Bulles présence */
@@ -2748,12 +2780,20 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 
 /* ── Bannière tour : slide-in dramatique ── */
 @keyframes sjBannerMyTurn {
-  0%   { transform: translateY(-110%) scaleX(0.9); opacity: 0; }
-  55%  { transform: translateY(3px) scaleX(1.01); opacity: 1; }
+  0%   { transform: translateY(-110%) scaleX(0.94); opacity: 0; }
+  55%  { transform: translateY(2px) scaleX(1.005); opacity: 1; }
+  100% { transform: translateY(0) scaleX(1); opacity: 1; }
+}
+@keyframes sjBannerTheirTurn {
+  0%   { transform: translateY(-80%) scaleX(0.96); opacity: 0; }
+  60%  { transform: translateY(1px) scaleX(1); opacity: 1; }
   100% { transform: translateY(0) scaleX(1); opacity: 1; }
 }
 #skyjoTurnBanner.sj-banner-enter {
-  animation: sjBannerMyTurn 0.34s cubic-bezier(.17,.89,.32,1.28) forwards;
+  animation: sjBannerMyTurn 0.32s cubic-bezier(.17,.89,.32,1.18) forwards;
+}
+#skyjoTurnBanner.sj-banner-enter-opp {
+  animation: sjBannerTheirTurn 0.28s cubic-bezier(.4,0,.2,1) forwards;
 }
 
 /* ── Particules colonne complète ── */
@@ -10016,6 +10056,17 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       if(oppTurnActive) oppAvEl2.classList.add('active-turn');
       else oppAvEl2.classList.remove('active-turn');
     }
+    // ── Highlight de zone active ──
+    var zoneMe  = document.querySelector('.skyjo-player-zone.zone-me');
+    var zoneOpp = document.querySelector('.skyjo-player-zone.zone-opp');
+    if(zoneMe){
+      if(myTurnActive) zoneMe.classList.add('active-zone');
+      else zoneMe.classList.remove('active-zone');
+    }
+    if(zoneOpp){
+      if(oppTurnActive) zoneOpp.classList.add('active-zone');
+      else zoneOpp.classList.remove('active-zone');
+    }
 
     // ── Totaux cartes révélées ──
     var myRevTotal  = myCards.reduce(function(s,c){ return c.revealed&&!c.removed ? s+c.value : s; }, 0);
@@ -10047,8 +10098,8 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     banner.textContent = newBannerText;
     if(banner.className !== newBannerClass || turnChanged){
       banner.className = newBannerClass;
-      if(newBannerClass.indexOf('my-turn') >= 0 && turnChanged){
-        sjAnimBanner(banner);
+      if(turnChanged){
+        sjAnimBanner(banner, newBannerClass.indexOf('my-turn') >= 0);
       }
     }
     document.getElementById('skyjoOpponentLabel').textContent='Grille de '+oppName;
@@ -10530,11 +10581,13 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   }
 
   // Animation bannière de tour
-  function sjAnimBanner(el){
+  function sjAnimBanner(el, isMyTurn){
     if(!el) return;
-    el.classList.remove('sj-banner-enter');
+    el.classList.remove('sj-banner-enter', 'sj-banner-enter-opp');
     void el.offsetWidth;
-    el.classList.add('sj-banner-enter');
+    el.classList.add(isMyTurn ? 'sj-banner-enter' : 'sj-banner-enter-opp');
+    var cls = isMyTurn ? 'sj-banner-enter' : 'sj-banner-enter-opp';
+    setTimeout(function(){ el.classList.remove(cls); }, 400);
   }
 
   // Retourne l'élément DOM d'une case de grille par index
@@ -10594,6 +10647,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
     var deckEl  = document.getElementById('skyjoDeckCard');
     var heldEl  = document.getElementById('skyjoHeldCard');
+    var wrap    = document.getElementById('skyjoHeldCardWrap');
 
     // Rebond sur la pioche
     if(deckEl){
@@ -10602,24 +10656,37 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
         { transform: 'scale(0.87) translateY(4px) rotateZ(2deg)' },
         { transform: 'scale(1.06) translateY(-3px) rotateZ(-1deg)' },
         { transform: 'scale(1) translateY(0)' }
-      ], { duration: 340, easing: 'cubic-bezier(.4,0,.2,1)' });
+      ], { duration: 300, easing: 'cubic-bezier(.4,0,.2,1)' });
     }
 
-    // Vol de la pioche → held (dos de carte, puis sera retournée par renderState)
-    if(deckEl && heldEl){
-      // On vole vers la zone HeldCardWrap (visible ou non)
-      var wrap = document.getElementById('skyjoHeldCardWrap');
-      var destEl = wrap || heldEl;
-      // On force la heldWrap visible le temps de la cible
-      wrap.style.visibility = 'visible';
-      if(wrap.style.display === 'none') wrap.style.opacity = '0';
-
+    // Vol de la pioche → held
+    // IMPORTANT : rendre le wrap visible AVANT de mesurer sa position
+    if(deckEl && heldEl && wrap){
       var sRect = deckEl.getBoundingClientRect();
-      var dRect = heldEl.getBoundingClientRect && heldEl.getBoundingClientRect().width > 0
-        ? heldEl.getBoundingClientRect()
-        : { left: sRect.left - 70, top: sRect.top, width: sRect.width, height: sRect.height };
 
-      sjAnimFly(sRect, dRect, null, { duration: 520, flip: false });
+      // Rendre la destination visible pour pouvoir la mesurer
+      wrap.style.display      = 'flex';
+      wrap.style.opacity      = '0';
+      wrap.style.visibility   = 'visible';
+      wrap.style.pointerEvents = 'none';
+
+      // forcer le layout pour obtenir un getBoundingClientRect() valide
+      void wrap.offsetWidth;
+
+      var dRect = heldEl.getBoundingClientRect();
+
+      // Si la destination n'est toujours pas dispo (taille 0), fallback à gauche du deck
+      if(!dRect || dRect.width === 0){
+        dRect = { left: sRect.left - 80, top: sRect.top, width: sRect.width, height: sRect.height };
+      }
+
+      // Remettre le wrap invisible — c'est renderState() qui l'affichera proprement après le RPC
+      wrap.style.display      = 'none';
+      wrap.style.opacity      = '';
+      wrap.style.visibility   = '';
+      wrap.style.pointerEvents = '';
+
+      sjAnimFly(sRect, dRect, null, { duration: 440, flip: false });
     }
 
     setTimeout(function(){
