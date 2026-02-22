@@ -9098,13 +9098,42 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     _other=_me==='girl'?'boy':'girl';
     var myName=_me==='girl'?'Zelda':'Link';
     var otherName=_me==='girl'?'Link':'Zelda';
-    showScreen('skyjoWaitScreen');
-    document.getElementById('skyjoWaitMsg').innerHTML=
-      'Connecté en tant que <strong>'+myName+'</strong>.<br>En attente que <strong>'+otherName+'</strong> rejoigne…';
-    // D'abord nettoyer les vieilles parties en attente orphelines créées par moi
-    cleanMyOldGames(function(){
-      startPresence();
-      startLobbyPoll();
+
+    // Vérifier d'abord si une partie playing existe → rejoindre directement
+    fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?status=eq.playing&order=created_at.desc&limit=1&select=id,status,state,created_by',{
+      headers:sbHeaders()
+    })
+    .then(function(r){return r.json();})
+    .then(function(rows){
+      if(Array.isArray(rows) && rows[0]){
+        // Partie en cours trouvée → retour en jeu direct
+        _gameId = rows[0].id;
+        _launched = true;
+        showScreen('skyjoGameArea');
+        var btn=document.getElementById('skyjoAbandonBtn');
+        if(btn) btn.style.display='block';
+        renderState(rows[0]);
+        startPoll();
+      } else {
+        // Pas de partie en cours → salle d'attente normale
+        showScreen('skyjoWaitScreen');
+        document.getElementById('skyjoWaitMsg').innerHTML=
+          'Connecté en tant que <strong>'+myName+'</strong>.<br>En attente que <strong>'+otherName+'</strong> rejoigne…';
+        cleanMyOldGames(function(){
+          startPresence();
+          startLobbyPoll();
+        });
+      }
+    })
+    .catch(function(){
+      // En cas d'erreur réseau → salle d'attente normale
+      showScreen('skyjoWaitScreen');
+      document.getElementById('skyjoWaitMsg').innerHTML=
+        'Connecté en tant que <strong>'+myName+'</strong>.<br>En attente que <strong>'+otherName+'</strong> rejoigne…';
+      cleanMyOldGames(function(){
+        startPresence();
+        startLobbyPoll();
+      });
     });
   }
 
@@ -9785,12 +9814,12 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   // (déjà défini plus haut — on patch renderState pour afficher le bouton en jeu)
 
   window.closeSkyjoGame=function(){
-    stopAll();
+    stopAll(); stopReconnectWait(); _waitingForReconnect=false;
     deletePresence();
-    // Toujours supprimer la partie de Supabase (waiting OU playing)
-    // → évite l'accumulation de données et notifie l'autre joueur via fetchState
-    if(_gameId){
-      fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId,{
+    // Supprimer UNIQUEMENT les parties en attente (waiting)
+    // Les parties en cours (playing) restent dans Supabase → l'autre peut attendre le retour
+    if(_gameId && _phase !== 'play' && _phase !== 'init1' && _phase !== 'roundEnd'){
+      fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId+'&status=eq.waiting',{
         method:'DELETE',headers:sbHeaders()
       }).catch(function(){});
     }
