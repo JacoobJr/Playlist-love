@@ -2665,44 +2665,20 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   pointer-events: none;
 }
 
-/* ── Carte volante (pioche → main) ── */
-#sjFlyCard {
-  position: fixed;
-  z-index: 9999;
-  pointer-events: none;
-  border-radius: var(--sj-radius);
-  display: flex; align-items: center; justify-content: center;
-  font-size: var(--sj-fs); font-weight: 900;
-  box-shadow: 0 12px 36px rgba(0,0,0,0.65), 0 0 0 1.5px rgba(255,255,255,0.12);
-  will-change: transform, opacity;
-  overflow: hidden;
+/* ── Cartes volantes clones (Web Animations API) ── */
+.sj-fly-clone {
+  box-shadow: 0 14px 40px rgba(0,0,0,0.65), 0 0 0 1.5px rgba(255,255,255,0.14) !important;
+  filter: brightness(1.08);
 }
-#sjFlyCard::before {
+.sj-fly-clone::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 45%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%);
+  background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%);
   border-radius: inherit;
   pointer-events: none;
-}
-@keyframes sjFlyToHand {
-  0%   { transform: translate(0,0) scale(1) rotateY(0deg) rotateZ(-5deg) perspective(400px); opacity:1; filter: brightness(1.1); }
-  30%  { transform: translate(calc(var(--fly-dx)*0.35), calc(var(--fly-dy)*0.2)) scale(1.22) rotateY(90deg) rotateZ(3deg); opacity:1; filter: brightness(1.3); }
-  55%  { transform: translate(calc(var(--fly-dx)*0.72), calc(var(--fly-dy)*0.7)) scale(1.1) rotateY(0deg) rotateZ(1deg); opacity:1; filter: brightness(1.15); }
-  100% { transform: translate(var(--fly-dx), var(--fly-dy)) scale(0.94) rotateY(0deg) rotateZ(0deg); opacity:0; filter: brightness(1); }
-}
-#sjFlyCard.flying {
-  animation: sjFlyToHand 0.54s cubic-bezier(.25,.6,.3,.95) forwards;
-}
-
-@keyframes sjFlyFromDiscard {
-  0%   { transform: translate(0,0) scale(1.05) rotateY(0deg) rotateZ(5deg); opacity:1; filter: brightness(1.15); }
-  28%  { transform: translate(calc(var(--fly-dx)*0.3), calc(var(--fly-dy)*0.2)) scale(1.18) rotateY(40deg) rotateZ(-4deg); opacity:1; filter: brightness(1.2); }
-  100% { transform: translate(var(--fly-dx), var(--fly-dy)) scale(0.95) rotateY(0deg) rotateZ(0deg); opacity:0; filter: brightness(1); }
-}
-#sjFlyCard.flying-discard {
-  animation: sjFlyFromDiscard 0.46s cubic-bezier(.25,.6,.3,.95) forwards;
+  z-index: 1;
 }
 
 /* ── Apparition carte en main ── */
@@ -2716,20 +2692,7 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   animation: sjHeldAppear 0.42s cubic-bezier(.17,.89,.32,1.28) forwards !important;
 }
 
-/* ── Flip 3D complet (révélation) ── */
-@keyframes sjFlipRevealFull {
-  0%   { transform: rotateY(0deg) scale(1); filter: brightness(1); }
-  28%  { transform: rotateY(90deg) scale(1.08); filter: brightness(0.5); }
-  29%  { transform: rotateY(-90deg) scale(1.08); filter: brightness(0.5); }
-  75%  { transform: rotateY(-6deg) scale(1.02); filter: brightness(1.15); }
-  100% { transform: rotateY(0deg) scale(1); filter: brightness(1); }
-}
-.skyjo-card.sj-flip-full {
-  animation: sjFlipRevealFull 0.46s cubic-bezier(.4,0,.2,1) forwards;
-  transform-style: preserve-3d;
-}
-
-/* ── Atterrissage carte sur grille ── */
+/* ── Atterrissage carte sur grille (pop-in) ── */
 @keyframes sjCardLand {
   0%   { transform: scale(0.68) translateY(-18px) rotateZ(-10deg); opacity: 0.4; filter: brightness(1.4); }
   45%  { transform: scale(1.12) translateY(3px) rotateZ(3deg); opacity: 1; filter: brightness(1.2); }
@@ -5337,9 +5300,6 @@ body.light #counterBlock.glowing .c-num-big {
       <div style="font-size:11px;color:var(--muted);margin-top:4px">Le jeu se lance automatiquement quand vous êtes tous les deux connectés 🎮</div>
       <button onclick="skyjoLeaveWait()" style="margin-top:8px;padding:10px 24px;background:var(--s2);color:var(--sub);border:1px solid var(--border);border-radius:50px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">Annuler</button>
     </div>
-
-    <!-- Carte volante (animation pioche→main) -->
-    <div id="sjFlyCard" class="skyjo-card" style="display:none;width:var(--sj-cw);height:var(--sj-ch);"></div>
 
     <!-- Overlay chargement pendant RPC -->
     <div id="sjLoadingOverlay"><div id="sjLoadingDot"></div></div>
@@ -10151,66 +10111,78 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
   function renderGrid(gridId,cards,isMe,isMyTurn,state,iHold){
     var grid=document.getElementById(gridId);
-    // Garde les éléments précédents pour détecter les nouvelles révélations
-    var prevEls = Array.from(grid.querySelectorAll('.skyjo-card'));
+    // Snapshot des éléments existants AVANT de vider la grille
+    var prevEls    = Array.from(grid.querySelectorAll('.skyjo-card'));
+    var prevStates = prevEls.map(function(el){
+      return {
+        hidden:   el.classList.contains('skyjo-card-hidden'),
+        removed:  el.classList.contains('skyjo-col-complete'),
+        val:      el.getAttribute('data-val'),
+        rect:     el.getBoundingClientRect()
+      };
+    });
     var isFirstRender = prevEls.length === 0;
+
     grid.innerHTML='';
     var phase=state.phase;
     var isInit=phase==='init1';
     var flipped=cards.filter(function(c){return c.revealed;}).length;
 
-    // Init : retourner 2 cartes librement, sans notion de tour
     var canFlipInit    = isMe && isInit && flipped<2;
-    // En jeu avec carte en main : echanger avec N'IMPORTE quelle carte (revele ou cachee)
     var canReplaceAny  = isMe && isMyTurn && phase==='play' && iHold;
-    // Apres defausse : doit retourner une carte cachee
     var mustFlipHidden = isMe && isMyTurn && phase==='play' && !iHold && state.must_flip===_me;
 
     cards.forEach(function(card,idx){
-      var prevEl = prevEls[idx];
-      var wasHidden = prevEl && prevEl.classList.contains('skyjo-card-hidden');
-      var wasRemoved = prevEl && prevEl.classList.contains('skyjo-col-complete');
+      var prev = prevStates[idx] || {};
 
       var el=document.createElement('div');
       el.className='skyjo-card';
 
-      // Stagger d'entrée au premier rendu
+      // ── Stagger d'entrée au premier rendu ──
       if(isFirstRender){
-        el.style.opacity = '0';
-        el.style.transform = 'scale(0.6) translateY(10px)';
-        el.style.transition = 'opacity 0.3s ease, transform 0.3s cubic-bezier(.17,.89,.32,1.28)';
-        el.style.transitionDelay = (idx * 40) + 'ms';
+        el.style.opacity   = '0';
+        el.style.transform = 'scale(0.6) translateY(12px) rotateZ('+(Math.random()*8-4)+'deg)';
+        el.style.transition = 'opacity 0.32s ease, transform 0.32s cubic-bezier(.17,.89,.32,1.28)';
+        el.style.transitionDelay = (idx * 38) + 'ms';
         setTimeout(function(e){
-          e.style.opacity = '';
-          e.style.transform = '';
-        }(el), 50 + idx * 40 + 350);
-        setTimeout(function(e){ e.style.transition = ''; e.style.transitionDelay = ''; }(el), 50 + idx * 40 + 650);
+          e.style.opacity   = '1';
+          e.style.transform = 'scale(1) translateY(0) rotateZ(0deg)';
+          setTimeout(function(){ e.style.transition=''; e.style.transitionDelay=''; }, 380);
+        }(el), 30 + idx * 38);
       }
 
       if(card.removed){
         el.classList.add('skyjo-col-complete');
         el.textContent='';
-        // Si la carte vient d'être retirée → animation de suppression
-        if(prevEl && !wasRemoved){
+        if(!prev.removed && !isFirstRender){
+          // Carte retirée : animation d'explosion
           el.classList.remove('skyjo-col-complete');
           el.classList.add('sj-col-remove');
-          setTimeout(function(e){ e.classList.remove('sj-col-remove'); e.classList.add('skyjo-col-complete'); }(el), 520);
-          // Particules
-          var rect = grid.getBoundingClientRect();
-          var col = idx % 4;
-          var row = Math.floor(idx / 4);
-          var cw = 46, ch = 64, gap = 5;
-          var fakeEl = { getBoundingClientRect: function(){ return { left: rect.left + col*(cw+gap), top: rect.top + row*(ch+gap), width: cw, height: ch }; } };
-          sjSpawnParticles(fakeEl);
+          setTimeout(function(e){
+            e.classList.remove('sj-col-remove');
+            e.classList.add('skyjo-col-complete');
+          }(el), 540);
+          // Particules à la position de la carte
+          if(prev.rect){
+            sjSpawnParticles({ getBoundingClientRect: function(){ return prev.rect; } });
+          }
         }
+
       } else if(card.revealed){
         el.textContent=card.value;
         el.setAttribute('data-val',card.value);
-        // Carte nouvellement révélée → animation de flip
-        if(wasHidden && !isFirstRender){
-          el.classList.add('sj-flip-full');
-          setTimeout(function(e){ e.classList.remove('sj-flip-full'); sjPlaceGlow(e); }(el), 460);
+
+        // ── Nouvellement révélée par l'adversaire (via poll) : flip animé ──
+        if(prev.hidden && !isFirstRender && !isMe){
+          // L'adversaire a retourné cette carte → on l'anime
+          el.style.visibility = 'hidden';
+          setTimeout(function(targetEl, val){
+            if(!targetEl || !targetEl.isConnected) return;
+            sjAnimFlipInPlace(targetEl, val, null);
+          }(el, card.value), idx * 55 + 80);
         }
+        // Révélation côté moi déjà animée dans l'action (skyjoFlipInit / skyjoFlipReveal)
+
         if(canReplaceAny){
           el.classList.add('skyjo-card-clickable');
           el.onclick=function(){skyjoReplaceCard(idx);};
@@ -10221,7 +10193,6 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
           el.classList.add('skyjo-card-clickable');
           el.onclick=function(){skyjoFlipInit(idx);};
         } else if(canReplaceAny){
-          // On peut aussi remplacer une carte cachee (elle sera alors revelee)
           el.classList.add('skyjo-card-clickable');
           el.onclick=function(){skyjoReplaceCard(idx);};
         } else if(mustFlipHidden){
@@ -10230,16 +10201,6 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
         }
       }
       grid.appendChild(el);
-
-      // Déclenche le stagger d'entrée
-      if(isFirstRender){
-        (function(e, delay){
-          setTimeout(function(){
-            e.style.opacity = '1';
-            e.style.transform = 'scale(1) translateY(0)';
-          }, 60 + delay);
-        })(el, idx * 40);
-      }
     });
   }
 
@@ -10269,97 +10230,306 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   };
 
   // ─── Helpers animations ──────────────────────────────
+
   function sjShowLoader(){ var o=document.getElementById('sjLoadingOverlay'); if(o) o.classList.add('visible'); }
   function sjHideLoader(){ var o=document.getElementById('sjLoadingOverlay'); if(o) o.classList.remove('visible'); }
 
-  // Fait voler une carte depuis un élément source vers un élément dest
-  function sjFlyCard(srcEl, destEl, cardVal, isFromDiscard, onDone){
-    var fly = document.getElementById('sjFlyCard');
-    if(!fly || !srcEl || !destEl){ if(onDone) onDone(); return; }
+  /* ═══════════════════════════════════════════════════════════
+     SYSTÈME DE CARTES VOLANTES — clones absolus en position fixe
+     Toutes les animations passent par sjAnimate() qui crée un
+     clone de carte qui vole en CSS entre deux rectangles réels.
+  ═══════════════════════════════════════════════════════════ */
 
-    var sRect = srcEl.getBoundingClientRect();
-    var dRect = destEl.getBoundingClientRect();
+  /**
+   * Crée une carte clone qui vole de srcRect → destRect puis disparaît.
+   * @param srcRect   - DOMRect source (position de départ)
+   * @param destRect  - DOMRect destination
+   * @param cardVal   - valeur de la carte (null = dos)
+   * @param opts      - { flip: bool, delay: ms, duration: ms, onDone: fn }
+   */
+  function sjAnimFly(srcRect, destRect, cardVal, opts){
+    opts = opts || {};
+    var dur   = opts.duration || 480;
+    var delay = opts.delay    || 0;
 
-    // Positionnement initial
-    fly.style.display = 'flex';
-    fly.style.left    = sRect.left + 'px';
-    fly.style.top     = sRect.top  + 'px';
-    fly.style.width   = sRect.width + 'px';
-    fly.style.height  = sRect.height + 'px';
-    fly.style.animation = 'none';
-    fly.style.opacity = '1';
-    fly.style.transform = 'translate(0,0)';
-    fly.className = 'skyjo-card';
+    var card = document.createElement('div');
+    card.className = 'skyjo-card sj-fly-clone';
+    card.style.cssText = [
+      'position:fixed',
+      'left:' + srcRect.left + 'px',
+      'top:'  + srcRect.top  + 'px',
+      'width:' + srcRect.width  + 'px',
+      'height:'+ srcRect.height + 'px',
+      'z-index:9999',
+      'pointer-events:none',
+      'will-change:transform,opacity',
+      'transform-origin:center center',
+      'transform-style:preserve-3d',
+    ].join(';');
 
-    if(isFromDiscard){
-      // Carte connue → couleur directe
-      fly.textContent = cardVal;
-      fly.setAttribute('data-val', cardVal);
+    if(cardVal !== null && cardVal !== undefined){
+      card.textContent = cardVal;
+      card.setAttribute('data-val', cardVal);
     } else {
-      // Dos de pioche
-      fly.textContent = '';
-      fly.removeAttribute('data-val');
-      fly.classList.add('skyjo-card-back');
+      card.classList.add('skyjo-card-back');
     }
 
-    // Delta vers la destination
-    var dx = (dRect.left + dRect.width/2) - (sRect.left + sRect.width/2);
-    var dy = (dRect.top  + dRect.height/2) - (sRect.top + sRect.height/2);
-    fly.style.setProperty('--fly-dx', dx+'px');
-    fly.style.setProperty('--fly-dy', dy+'px');
+    document.body.appendChild(card);
 
-    // Forcer reflow
-    void fly.offsetWidth;
+    var dx = (destRect.left + destRect.width/2)  - (srcRect.left + srcRect.width/2);
+    var dy = (destRect.top  + destRect.height/2) - (srcRect.top  + srcRect.height/2);
 
-    fly.classList.add(isFromDiscard ? 'flying-discard' : 'flying');
+    // === Construire l'animation via Web Animations API ===
+    var scaleX = destRect.width  / srcRect.width;
+    var scaleY = destRect.height / srcRect.height;
 
-    var dur = isFromDiscard ? 440 : 520;
+    var keyframes;
+
+    if(opts.flip){
+      // Vol avec retournement 3D : dos → face
+      keyframes = [
+        { transform: 'translate(0,0) scale(1) rotateZ(-4deg) rotateY(0deg)',    opacity: 1,    offset: 0    },
+        { transform: 'translate('+dx*0.4+'px,'+dy*0.25+'px) scale(1.2) rotateZ(2deg) rotateY(90deg)',  opacity: 1,    offset: 0.35 },
+        { transform: 'translate('+dx*0.7+'px,'+dy*0.6+'px) scale(1.1) rotateZ(1deg) rotateY(0deg)',   opacity: 1,    offset: 0.6  },
+        { transform: 'translate('+dx+'px,'+dy+'px) scale('+scaleX+','+scaleY+') rotateZ(0deg) rotateY(0deg)', opacity: 0.1, offset: 1 }
+      ];
+      // Change l'aspect au milieu du flip (offset 0.35 = 90°)
+      setTimeout(function(){
+        if(!card.parentNode) return;
+        card.classList.remove('skyjo-card-back');
+        if(cardVal !== null && cardVal !== undefined){
+          card.textContent = cardVal;
+          card.setAttribute('data-val', cardVal);
+        }
+      }, delay + dur * 0.35);
+    } else {
+      // Vol simple (dos → main, ou face → défausse)
+      keyframes = [
+        { transform: 'translate(0,0) scale(1) rotateZ(-5deg)',                                                    opacity: 1,   offset: 0    },
+        { transform: 'translate('+dx*0.38+'px,'+dy*0.22+'px) scale(1.22) rotateZ(4deg)',                         opacity: 1,   offset: 0.28 },
+        { transform: 'translate('+dx*0.72+'px,'+dy*0.68+'px) scale(1.08) rotateZ(1deg)',                         opacity: 1,   offset: 0.65 },
+        { transform: 'translate('+dx+'px,'+dy+'px) scale('+scaleX+','+scaleY+') rotateZ(0deg)',                  opacity: 0.1, offset: 1    }
+      ];
+    }
+
+    var anim = card.animate(keyframes, {
+      duration: dur,
+      delay: delay,
+      easing: 'cubic-bezier(.25,.65,.3,.98)',
+      fill: 'forwards'
+    });
+
+    anim.onfinish = function(){
+      if(card.parentNode) card.parentNode.removeChild(card);
+      if(opts.onDone) opts.onDone();
+    };
+
+    return anim;
+  }
+
+  /**
+   * Retourne visuellement une carte sur place (3D flip, dos → face ou face → face).
+   * Crée un clone par-dessus la carte, fait l'animation, puis retire le clone.
+   * @param targetEl - élément DOM de la carte cible
+   * @param newVal   - la valeur à révéler
+   * @param onDone   - callback
+   */
+  function sjAnimFlipInPlace(targetEl, newVal, onDone){
+    if(!targetEl){ if(onDone) onDone(); return; }
+    var rect = targetEl.getBoundingClientRect();
+
+    var card = document.createElement('div');
+    card.className = 'skyjo-card';
+    card.style.cssText = [
+      'position:fixed',
+      'left:' + rect.left + 'px',
+      'top:'  + rect.top  + 'px',
+      'width:' + rect.width  + 'px',
+      'height:'+ rect.height + 'px',
+      'z-index:9999',
+      'pointer-events:none',
+      'will-change:transform,opacity',
+      'transform-origin:center center',
+      'transform-style:preserve-3d',
+      'perspective:500px',
+    ].join(';');
+    card.classList.add('skyjo-card-hidden'); // dos au départ
+    document.body.appendChild(card);
+
+    // Masquer la carte originale pendant l'animation
+    targetEl.style.visibility = 'hidden';
+
+    var dur = 540;
+    var anim = card.animate([
+      { transform: 'rotateY(0deg)   scale(1)',    filter: 'brightness(1)',   offset: 0    },
+      { transform: 'rotateY(90deg)  scale(1.08)', filter: 'brightness(0.4)', offset: 0.36 },
+      { transform: 'rotateY(-90deg) scale(1.08)', filter: 'brightness(0.4)', offset: 0.37 },
+      { transform: 'rotateY(-10deg) scale(1.04)', filter: 'brightness(1.3)', offset: 0.7  },
+      { transform: 'rotateY(3deg)   scale(1.01)', filter: 'brightness(1.1)', offset: 0.87 },
+      { transform: 'rotateY(0deg)   scale(1)',    filter: 'brightness(1)',   offset: 1    }
+    ], { duration: dur, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' });
+
+    // À mi-chemin → changer l'apparence de la carte
     setTimeout(function(){
-      fly.style.display = 'none';
-      fly.className = 'skyjo-card';
+      if(!card.parentNode) return;
+      card.classList.remove('skyjo-card-hidden');
+      if(newVal !== null && newVal !== undefined){
+        card.textContent = newVal;
+        card.setAttribute('data-val', newVal);
+      }
+    }, dur * 0.37);
+
+    anim.onfinish = function(){
+      // Remettre la vraie carte visible avec la bonne valeur
+      targetEl.style.visibility = '';
+      if(card.parentNode) card.parentNode.removeChild(card);
+      sjPlaceGlow(targetEl);
       if(onDone) onDone();
-    }, dur);
+    };
+  }
+
+  /**
+   * Fait voler une carte depuis "en main" vers une case de la grille.
+   * La heldCard visible disparaît, un clone vole vers la case cible,
+   * la nouvelle carte apparaît avec un pop.
+   * @param heldEl    - élément DOM de la heldCard
+   * @param targetEl  - élément DOM de la case cible dans la grille
+   * @param heldVal   - valeur de la carte en main
+   * @param newVal    - valeur qui remplacera la case (après flip si cachée)
+   * @param wasHidden - la case cible était-elle face cachée
+   * @param onDone    - callback une fois toutes les anim terminées
+   */
+  function sjAnimHeldToGrid(heldEl, targetEl, heldVal, newVal, wasHidden, onDone){
+    if(!heldEl || !targetEl){ if(onDone) onDone(); return; }
+
+    var srcRect  = heldEl.getBoundingClientRect();
+    var destRect = targetEl.getBoundingClientRect();
+
+    // Masquer la held card et la case cible pendant l'animation
+    heldEl.style.visibility   = 'hidden';
+    targetEl.style.visibility = 'hidden';
+
+    var dur = wasHidden ? 560 : 480;
+
+    sjAnimFly(srcRect, destRect, heldVal, {
+      duration: dur,
+      flip: wasHidden, // retournement si la case était cachée
+      onDone: function(){
+        // Remettre la case cible avec pop
+        targetEl.style.visibility = '';
+        if(wasHidden){
+          // La vraie valeur est déjà appliquée par renderState, juste animer l'apparition
+          targetEl.animate([
+            { transform: 'scale(0.8) rotateZ(3deg)', opacity: 0.3, filter: 'brightness(1.4)' },
+            { transform: 'scale(1.1) rotateZ(-1deg)', opacity: 1, filter: 'brightness(1.2)' },
+            { transform: 'scale(1) rotateZ(0deg)', opacity: 1, filter: 'brightness(1)' }
+          ], { duration: 280, easing: 'cubic-bezier(.17,.89,.32,1.28)', fill: 'forwards' })
+          .onfinish = function(){ sjPlaceGlow(targetEl); };
+        } else {
+          // Carte visible → remplacée, simple pop
+          targetEl.animate([
+            { transform: 'scale(0.7) rotateZ(-5deg)', opacity: 0.2 },
+            { transform: 'scale(1.1) rotateZ(1deg)',  opacity: 1 },
+            { transform: 'scale(1) rotateZ(0deg)',    opacity: 1 }
+          ], { duration: 260, easing: 'cubic-bezier(.17,.89,.32,1.28)', fill: 'forwards' })
+          .onfinish = function(){ sjPlaceGlow(targetEl); };
+        }
+        heldEl.style.visibility = '';
+        if(onDone) onDone();
+      }
+    });
+  }
+
+  /**
+   * Fait voler la carte en main vers la défausse.
+   * heldEl → discardEl, avec un spin rotatif au milieu.
+   */
+  function sjAnimHeldToDiscard(heldEl, discardEl, heldVal, onDone){
+    if(!heldEl || !discardEl){ if(onDone) onDone(); return; }
+
+    var srcRect  = heldEl.getBoundingClientRect();
+    var destRect = discardEl.getBoundingClientRect();
+
+    heldEl.style.visibility = 'hidden';
+
+    var dx = (destRect.left + destRect.width/2)  - (srcRect.left + srcRect.width/2);
+    var dy = (destRect.top  + destRect.height/2) - (srcRect.top  + srcRect.height/2);
+    var scaleX = destRect.width  / srcRect.width;
+    var scaleY = destRect.height / srcRect.height;
+
+    var card = document.createElement('div');
+    card.className = 'skyjo-card';
+    card.style.cssText = 'position:fixed;left:'+srcRect.left+'px;top:'+srcRect.top+'px;width:'+srcRect.width+'px;height:'+srcRect.height+'px;z-index:9999;pointer-events:none;will-change:transform,opacity;transform-style:preserve-3d;';
+    card.textContent = heldVal;
+    card.setAttribute('data-val', heldVal);
+    document.body.appendChild(card);
+
+    var dur = 440;
+    var anim = card.animate([
+      { transform: 'translate(0,0) scale(1) rotateZ(0deg) rotateY(0deg)', opacity: 1,   offset: 0    },
+      { transform: 'translate('+dx*0.4+'px,'+dy*0.3+'px) scale(1.15) rotateZ(-8deg) rotateY(40deg)', opacity: 1,   offset: 0.3  },
+      { transform: 'translate('+dx*0.75+'px,'+dy*0.7+'px) scale(1.05) rotateZ(12deg) rotateY(180deg)', opacity: 1,  offset: 0.65 },
+      { transform: 'translate('+dx+'px,'+dy+'px) scale('+scaleX+','+scaleY+') rotateZ(0deg) rotateY(0deg)', opacity: 0.05, offset: 1 }
+    ], { duration: dur, easing: 'cubic-bezier(.25,.6,.3,.98)', fill: 'forwards' });
+
+    anim.onfinish = function(){
+      if(card.parentNode) card.parentNode.removeChild(card);
+      heldEl.style.visibility = '';
+      if(onDone) onDone();
+    };
+  }
+
+  // Fait voler une carte depuis un élément source vers un élément dest (API legacy)
+  function sjFlyCard(srcEl, destEl, cardVal, isFromDiscard, onDone){
+    if(!srcEl || !destEl){ if(onDone) onDone(); return; }
+    var sRect = srcEl.getBoundingClientRect();
+    var dRect = destEl.getBoundingClientRect();
+    sjAnimFly(sRect, dRect, isFromDiscard ? cardVal : null, {
+      duration: isFromDiscard ? 440 : 520,
+      flip: false,
+      onDone: onDone
+    });
   }
 
   // Déclenche des particules depuis un élément (colonne complète)
   function sjSpawnParticles(el){
     if(!el) return;
-    var rect = el.getBoundingClientRect();
+    var rect = el.getBoundingClientRect ? el.getBoundingClientRect() : el;
     var cx = rect.left + rect.width/2;
     var cy = rect.top  + rect.height/2;
-    var emojis = ['✨','⭐','💫','🌟','🎉','🃏','💥'];
-    var count = 8;
+    var emojis = ['✨','⭐','💫','🌟','🎉','🃏','💥','🌈'];
+    var count = 10;
     for(var i=0; i<count; i++){
       (function(i){
         setTimeout(function(){
           var p = document.createElement('div');
           p.className = 'sj-particle';
           p.textContent = emojis[i % emojis.length];
-          var angle = (i / count) * Math.PI * 2 + (Math.random() * 0.5);
-          var dist = 50 + Math.random()*50;
+          var angle = (i / count) * Math.PI * 2 + (Math.random() * 0.6);
+          var dist = 45 + Math.random()*55;
           p.style.left = cx + 'px';
           p.style.top  = cy + 'px';
           p.style.setProperty('--px', (Math.cos(angle)*dist)+'px');
-          p.style.setProperty('--py', (Math.sin(angle)*dist - 40)+'px');
-          p.style.setProperty('--pr', (Math.random()*480-240)+'deg');
-          p.style.fontSize = (14 + Math.random()*8) + 'px';
+          p.style.setProperty('--py', (Math.sin(angle)*dist - 45)+'px');
+          p.style.setProperty('--pr', (Math.random()*540-270)+'deg');
+          p.style.fontSize = (13 + Math.random()*9) + 'px';
           document.body.appendChild(p);
-          setTimeout(function(){ if(p.parentNode) p.parentNode.removeChild(p); }, 1050);
-        }, i * 45 + Math.random()*30);
+          setTimeout(function(){ if(p.parentNode) p.parentNode.removeChild(p); }, 1100);
+        }, i * 40 + Math.random()*25);
       })(i);
     }
   }
 
-  // Flash vert sur une carte après placement
+  // Halo vert après placement
   function sjPlaceGlow(el){
     if(!el) return;
     el.classList.remove('sj-place-glow');
     void el.offsetWidth;
     el.classList.add('sj-place-glow');
-    setTimeout(function(){ el.classList.remove('sj-place-glow'); }, 600);
+    setTimeout(function(){ el.classList.remove('sj-place-glow'); }, 620);
   }
 
-  // Animation entrée bannière de tour
+  // Animation bannière de tour
   function sjAnimBanner(el){
     if(!el) return;
     el.classList.remove('sj-banner-enter');
@@ -10367,11 +10537,15 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     el.classList.add('sj-banner-enter');
   }
 
-  // ─── RPC : appel atomique cote serveur ──────────────────
-  // Chaque action passe par une fonction PostgreSQL :
-  // lecture + modification + ecriture en une seule transaction.
-  // Cela evite toute race condition entre les deux joueurs.
+  // Retourne l'élément DOM d'une case de grille par index
+  function sjGetCardEl(gridId, idx){
+    var grid = document.getElementById(gridId);
+    if(!grid) return null;
+    var cards = grid.querySelectorAll('.skyjo-card');
+    return cards[idx] || null;
+  }
 
+  // ─── RPC : appel atomique côté serveur ──────────────────
   function callRpc(fnName, params){
     sjShowLoader();
     return fetch(SB_URL+'/rest/v1/rpc/'+fnName,{
@@ -10385,7 +10559,6 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     })
     .then(function(state){
       sjHideLoader();
-      // La RPC retourne le state mis a jour directement
       if(state && typeof state === 'object' && !Array.isArray(state)){
         renderState({id:_gameId, state:state});
       }
@@ -10398,34 +10571,60 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     var key=_me+'_cards';
     var flipped=_gameState[key].filter(function(c){return c.revealed;}).length;
     if(flipped>=2) return;
-    callRpc('skyjo_flip_init',{p_game_id:_gameId, p_player:_me, p_idx:idx});
+
+    // Animation flip in-place immédiate (avant RPC)
+    var cardEl = sjGetCardEl('skyjoMyGrid', idx);
+    if(cardEl && cardEl.classList.contains('skyjo-card-hidden')){
+      cardEl.style.pointerEvents = 'none';
+      cardEl.classList.remove('skyjo-card-clickable');
+      // Lancer l'anim flip, puis RPC
+      sjAnimFlipInPlace(cardEl, _gameState[key][idx].value, function(){
+        // La valeur sera correctement rendue par renderState, pas besoin de la pré-appliquer
+      });
+    }
+
+    setTimeout(function(){
+      callRpc('skyjo_flip_init',{p_game_id:_gameId, p_player:_me, p_idx:idx});
+    }, 60);
   };
 
   window.skyjoDrawFromDeck=function(){
     if(!_gameState||_phase!=='play') return;
     if(_gameState.turn!==_me||_gameState.held_card) return;
 
-    // Animation : rebond sur la pioche + vol vers "En main"
-    var deckEl   = document.getElementById('skyjoDeckCard');
-    var heldWrap = document.getElementById('skyjoHeldCardWrap');
-    // Cible : soit le heldCard (s'il est visible), soit le centre de la zone milieu
-    var destEl   = document.getElementById('skyjoHeldCard') || document.getElementById('skyjoMidZone');
+    var deckEl  = document.getElementById('skyjoDeckCard');
+    var heldEl  = document.getElementById('skyjoHeldCard');
 
+    // Rebond sur la pioche
     if(deckEl){
-      deckEl.classList.remove('sj-deck-draw-anim');
-      void deckEl.offsetWidth;
-      deckEl.classList.add('sj-deck-draw-anim');
-      setTimeout(function(){ deckEl.classList.remove('sj-deck-draw-anim'); }, 400);
+      deckEl.animate([
+        { transform: 'scale(1) translateY(0)' },
+        { transform: 'scale(0.87) translateY(4px) rotateZ(2deg)' },
+        { transform: 'scale(1.06) translateY(-3px) rotateZ(-1deg)' },
+        { transform: 'scale(1) translateY(0)' }
+      ], { duration: 340, easing: 'cubic-bezier(.4,0,.2,1)' });
     }
 
-    // Vol visuel (dos de carte)
-    if(deckEl && destEl){
-      sjFlyCard(deckEl, destEl, null, false, null);
+    // Vol de la pioche → held (dos de carte, puis sera retournée par renderState)
+    if(deckEl && heldEl){
+      // On vole vers la zone HeldCardWrap (visible ou non)
+      var wrap = document.getElementById('skyjoHeldCardWrap');
+      var destEl = wrap || heldEl;
+      // On force la heldWrap visible le temps de la cible
+      wrap.style.visibility = 'visible';
+      if(wrap.style.display === 'none') wrap.style.opacity = '0';
+
+      var sRect = deckEl.getBoundingClientRect();
+      var dRect = heldEl.getBoundingClientRect && heldEl.getBoundingClientRect().width > 0
+        ? heldEl.getBoundingClientRect()
+        : { left: sRect.left - 70, top: sRect.top, width: sRect.width, height: sRect.height };
+
+      sjAnimFly(sRect, dRect, null, { duration: 520, flip: false });
     }
 
     setTimeout(function(){
       callRpc('skyjo_draw_deck',{p_game_id:_gameId, p_player:_me});
-    }, 120); // légère latence pour que l'animation commence
+    }, 180);
   };
 
   window.skyjoDrawFromDiscard=function(){
@@ -10434,31 +10633,78 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     if(!_gameState.discard||!_gameState.discard.length) return;
 
     var discardEl = document.getElementById('skyjoDiscardCard');
-    var destEl    = document.getElementById('skyjoHeldCard') || document.getElementById('skyjoMidZone');
+    var heldEl    = document.getElementById('skyjoHeldCard');
     var topVal    = _gameState.discard[_gameState.discard.length-1];
 
-    // Vol depuis la défausse vers la main
-    if(discardEl && destEl){
-      sjFlyCard(discardEl, destEl, topVal, true, null);
+    if(discardEl && heldEl){
+      var sRect = discardEl.getBoundingClientRect();
+      var dRect = heldEl.getBoundingClientRect && heldEl.getBoundingClientRect().width > 0
+        ? heldEl.getBoundingClientRect()
+        : { left: sRect.left - 70, top: sRect.top, width: sRect.width, height: sRect.height };
+      sjAnimFly(sRect, dRect, topVal, { duration: 440, flip: false });
     }
 
     setTimeout(function(){
       callRpc('skyjo_draw_discard',{p_game_id:_gameId, p_player:_me});
-    }, 100);
+    }, 150);
   };
 
   window.skyjoReplaceCard=function(idx){
     if(!_gameState||_phase!=='play') return;
     if(_gameState.turn!==_me) return;
     if(!_gameState.held_card||_gameState.held_card.holder!==_me) return;
-    callRpc('skyjo_replace_card',{p_game_id:_gameId, p_player:_me, p_idx:idx});
+
+    var heldEl   = document.getElementById('skyjoHeldCard');
+    var targetEl = sjGetCardEl('skyjoMyGrid', idx);
+    var heldVal  = _gameState.held_card.value;
+    var key      = _me+'_cards';
+    var wasHidden = _gameState[key][idx] && !_gameState[key][idx].revealed;
+    var targetVal = _gameState[key][idx] ? _gameState[key][idx].value : null;
+
+    // Désactiver les clics pendant l'animation
+    var grid = document.getElementById('skyjoMyGrid');
+    if(grid) grid.querySelectorAll('.skyjo-card').forEach(function(c){ c.style.pointerEvents='none'; c.classList.remove('skyjo-card-clickable'); });
+    var discardBtn = document.getElementById('skyjoDiscardBtn');
+    if(discardBtn) discardBtn.disabled = true;
+
+    if(heldEl && targetEl){
+      // La carte remplacée part vers la défausse APRÈS que la held arrive sur la case
+      sjAnimHeldToGrid(heldEl, targetEl, heldVal, wasHidden ? null : targetVal, wasHidden, function(){
+        // Si la case était déjà révélée, la vieille carte part en défausse
+        if(!wasHidden && targetVal !== null){
+          var newTargetEl = sjGetCardEl('skyjoMyGrid', idx);
+          var discardEl   = document.getElementById('skyjoDiscardCard');
+          if(newTargetEl && discardEl){
+            var sRect = newTargetEl.getBoundingClientRect();
+            var dRect = discardEl.getBoundingClientRect();
+            // Petite carte clone de la vieille valeur part vers défausse
+            sjAnimFly(sRect, dRect, targetVal, { duration: 360, flip: false });
+          }
+        }
+      });
+    }
+
+    setTimeout(function(){
+      callRpc('skyjo_replace_card',{p_game_id:_gameId, p_player:_me, p_idx:idx});
+    }, 80);
   };
 
   window.skyjoDiscardHeld=function(){
     if(!_gameState||_phase!=='play') return;
     if(_gameState.turn!==_me) return;
     if(!_gameState.held_card||_gameState.held_card.holder!==_me) return;
-    callRpc('skyjo_discard_held',{p_game_id:_gameId, p_player:_me});
+
+    var heldEl    = document.getElementById('skyjoHeldCard');
+    var discardEl = document.getElementById('skyjoDiscardCard');
+    var heldVal   = _gameState.held_card.value;
+
+    if(heldEl && discardEl){
+      sjAnimHeldToDiscard(heldEl, discardEl, heldVal, null);
+    }
+
+    setTimeout(function(){
+      callRpc('skyjo_discard_held',{p_game_id:_gameId, p_player:_me});
+    }, 100);
   };
 
   window.skyjoFlipReveal=function(idx){
@@ -10466,7 +10712,18 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     if(_gameState.turn!==_me||_gameState.must_flip!==_me) return;
     var key=_me+'_cards';
     if(_gameState[key][idx].revealed) return;
-    callRpc('skyjo_flip_reveal',{p_game_id:_gameId, p_player:_me, p_idx:idx});
+
+    // Animation flip immédiate
+    var cardEl  = sjGetCardEl('skyjoMyGrid', idx);
+    var cardVal = _gameState[key][idx].value;
+    if(cardEl){
+      cardEl.style.pointerEvents = 'none';
+      sjAnimFlipInPlace(cardEl, cardVal, null);
+    }
+
+    setTimeout(function(){
+      callRpc('skyjo_flip_reveal',{p_game_id:_gameId, p_player:_me, p_idx:idx});
+    }, 60);
   };
 
 
@@ -10521,39 +10778,32 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     var oppGrid = document.getElementById('skyjoOpponentGrid');
     if(!myGrid||!oppGrid){ if(onDone) onDone(); return; }
 
-    var myCards  = Array.from(myGrid.querySelectorAll('.skyjo-card'));
-    var oppCards = Array.from(oppGrid.querySelectorAll('.skyjo-card'));
-    var allCards = myCards.concat(oppCards);
-    var allData  = (state[myKey]||[]).concat(state[oppKey]||[]);
+    var myCardEls  = Array.from(myGrid.querySelectorAll('.skyjo-card'));
+    var oppCardEls = Array.from(oppGrid.querySelectorAll('.skyjo-card'));
+    var allEls     = myCardEls.concat(oppCardEls);
+    var allData    = (state[myKey]||[]).concat(state[oppKey]||[]);
 
-    // Désactiver tous les clics pendant l'animation
-    allCards.forEach(function(el){ el.onclick=null; el.classList.remove('skyjo-card-clickable'); });
+    // Désactiver tous les clics
+    allEls.forEach(function(el){ el.onclick=null; el.classList.remove('skyjo-card-clickable'); el.style.pointerEvents='none'; });
 
-    var delay=0, maxDelay=0;
-    allCards.forEach(function(el, i){
+    var delay  = 0;
+    var maxEnd = 0;
+
+    allEls.forEach(function(el, i){
       var cardData = allData[i];
-      if(!cardData) return;
-      if(!cardData.revealed && !cardData.removed){
-        // Carte encore cachée → flip avec délai en cascade
-        (function(el, cardData, d){
+      if(!cardData || cardData.removed) return;
+      if(!cardData.revealed){
+        (function(el, d, val){
           setTimeout(function(){
-            el.classList.add('sj-flipping');
-            // Au milieu du flip (225ms) → changer l'apparence
-            setTimeout(function(){
-              el.classList.remove('skyjo-card-hidden','sj-flipping');
-              el.textContent = cardData.value;
-              el.setAttribute('data-val', cardData.value);
-              el.style.color = '#fff';
-            }, 225);
+            sjAnimFlipInPlace(el, val, null);
           }, d);
-        })(el, cardData, delay);
-        maxDelay = delay + 450;
-        delay += 80; // cascade : 80ms entre chaque carte
+        })(el, delay, cardData.value);
+        maxEnd = delay + 540 + 80;
+        delay += 90;
       }
     });
 
-    // Callback une fois toutes les animations terminées
-    setTimeout(function(){ if(onDone) onDone(); }, maxDelay + 100);
+    setTimeout(function(){ if(onDone) onDone(); }, maxEnd + 100);
   }
 
   function _showRoundEndPopup(state){
