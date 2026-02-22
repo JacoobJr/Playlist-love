@@ -2956,6 +2956,43 @@ body.skyjo-bg-paused .sj-particle {
   transform: translateY(-1px) scale(0.97);
 }
 
+/* ── Pulse pioche/défausse : indique que c'est sélectionnable ── */
+@keyframes sjSelectPulseDeck {
+  0%,100% {
+    transform: translateY(0) scale(1);
+    box-shadow: var(--sj-shadow), 0 0 0 0 rgba(0,229,189,0.7);
+  }
+  50% {
+    transform: translateY(-3px) scale(1.045);
+    box-shadow: var(--sj-shadow-hover), 0 0 0 7px rgba(0,229,189,0);
+  }
+}
+@keyframes sjSelectPulseDiscard {
+  0%,100% {
+    transform: translateY(0) scale(1);
+    box-shadow: var(--sj-shadow), 0 0 0 0 rgba(255,200,80,0.7);
+  }
+  50% {
+    transform: translateY(-3px) scale(1.045);
+    box-shadow: var(--sj-shadow-hover), 0 0 0 7px rgba(255,200,80,0);
+  }
+}
+#skyjoDeckCard.sj-selectable {
+  animation: sjSelectPulseDeck 1.4s ease-in-out infinite;
+  outline: 2px solid rgba(0,229,189,0.55);
+  outline-offset: 3px;
+}
+#skyjoDiscardCard.sj-selectable {
+  animation: sjSelectPulseDiscard 1.4s ease-in-out infinite 0.2s;
+  outline: 2px solid rgba(255,200,80,0.55);
+  outline-offset: 3px;
+}
+/* Stoppe le pulse si page cachée */
+body.skyjo-bg-paused #skyjoDeckCard.sj-selectable,
+body.skyjo-bg-paused #skyjoDiscardCard.sj-selectable {
+  animation-play-state: paused !important;
+}
+
 /* ── HeldCardWrap transition ── */
 #skyjoHeldCardWrap {
   transition: opacity 0.24s cubic-bezier(.4,0,.2,1), transform 0.24s cubic-bezier(.4,0,.2,1);
@@ -10251,6 +10288,22 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     }
     document.getElementById('skyjoDrawPileCount').textContent=(state.deck?state.deck.length:0)+' cartes';
 
+    // ── Pulse pioche & défausse : uniquement quand c'est mon tour ET que je n'ai pas encore pioché ──
+    var deckEl2    = document.getElementById('skyjoDeckCard');
+    var discardEl2 = document.getElementById('skyjoDiscardCard');
+    // Condition : mon tour, phase play, pas de carte en main, pas de must_flip
+    var canPickFromPiles = isMyTurn && state.phase==='play' && !iHoldCard && state.must_flip!==_me;
+    if(deckEl2){
+      if(canPickFromPiles) deckEl2.classList.add('sj-selectable');
+      else                 deckEl2.classList.remove('sj-selectable');
+    }
+    if(discardEl2){
+      // La défausse n'est sélectionnable que si elle a une carte (pas vide)
+      var discardHasCard = state.discard && state.discard.length > 0;
+      if(canPickFromPiles && discardHasCard) discardEl2.classList.add('sj-selectable');
+      else                                   discardEl2.classList.remove('sj-selectable');
+    }
+
     renderGrid('skyjoMyGrid',myCards,true,isMyTurn,state,iHoldCard);
     renderGrid('skyjoOpponentGrid',oppCards,false,false,state,false);
 
@@ -10783,6 +10836,12 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     if(!_gameState||_phase!=='play') return;
     if(_gameState.turn!==_me||_gameState.held_card) return;
 
+    // Retirer le pulse immédiatement dès le clic
+    var _d1=document.getElementById('skyjoDeckCard');
+    var _d2=document.getElementById('skyjoDiscardCard');
+    if(_d1) _d1.classList.remove('sj-selectable');
+    if(_d2) _d2.classList.remove('sj-selectable');
+
     var deckEl  = document.getElementById('skyjoDeckCard');
     var heldEl  = document.getElementById('skyjoHeldCard');
     var wrap    = document.getElementById('skyjoHeldCardWrap');
@@ -10820,6 +10879,12 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     if(!_gameState||_phase!=='play') return;
     if(_gameState.turn!==_me||_gameState.held_card) return;
     if(!_gameState.discard||!_gameState.discard.length) return;
+
+    // Retirer le pulse immédiatement dès le clic
+    var _d1=document.getElementById('skyjoDeckCard');
+    var _d2=document.getElementById('skyjoDiscardCard');
+    if(_d1) _d1.classList.remove('sj-selectable');
+    if(_d2) _d2.classList.remove('sj-selectable');
 
     var discardEl = document.getElementById('skyjoDiscardCard');
     var heldEl    = document.getElementById('skyjoHeldCard');
