@@ -2207,6 +2207,7 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 #skyjoView .game-view-body {
   flex: 1; min-height: 0;
   display: flex; flex-direction: column; overflow: hidden; padding: 0;
+  position: relative;
 }
 
 /* Écrans secondaires */
@@ -4836,7 +4837,7 @@ body.light #counterBlock.glowing .c-num-big {
     <div class="game-view-title">Skyjo 🃏</div>
     <button id="skyjoAbandonBtn" onclick="skyjoAbandon()" style="display:none;padding:4px 10px;background:rgba(239,83,80,0.12);color:#ef5350;border:1px solid rgba(239,83,80,0.35);border-radius:6px;font-size:11px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;">Abandon</button>
   </div>
-  <div class="game-view-body" style="padding:16px">
+  <div class="game-view-body" style="padding:0;position:relative;">
 
     <!-- ÉCRAN CODE D'ACCÈS -->
     <div id="skyjoLockScreen" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;text-align:center;">
@@ -4918,6 +4919,12 @@ body.light #counterBlock.glowing .c-num-big {
             <div id="skyjoDiscardCard" class="skyjo-card skyjo-card-hidden" onclick="skyjoDrawFromDiscard()" style="cursor:pointer;">—</div>
           </div>
 
+          <!-- Score manche précédente -->
+          <div id="skyjoLastRoundScore" style="display:none;flex-direction:column;align-items:center;gap:1px;">
+            <div style="font-size:7px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;">Manche préc.</div>
+            <div id="skyjoLastRoundText" style="font-size:9px;font-weight:700;color:var(--muted);white-space:nowrap;"></div>
+          </div>
+
         </div>
 
         <!-- ═══ MOI (bas) ═══ -->
@@ -4941,30 +4948,59 @@ body.light #counterBlock.glowing .c-num-big {
     </div>
 
     <!-- FIN DE MANCHE -->
-    <div id="skyjoRoundEnd" style="display:none;flex-direction:column;align-items:center;gap:16px;padding:20px 0;text-align:center;">
-      <div style="font-size:48px" id="skyjoRoundEndEmoji">🏆</div>
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--text)" id="skyjoRoundEndTitle"></div>
-      <div style="font-size:13px;color:var(--sub)" id="skyjoRoundEndSub"></div>
-      <div style="display:flex;gap:12px;">
-        <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px 20px;text-align:center;">
-          <div style="font-size:12px;color:var(--muted)">👧 Zelda</div>
-          <div style="font-size:26px;font-weight:700;color:var(--text)" id="skyjoRoundScoreGirl">0</div>
+    <div id="skyjoRoundEnd" style="display:none;position:absolute;inset:0;z-index:100;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);gap:20px;padding:24px;text-align:center;overflow:hidden;">
+      <div style="font-size:52px" id="skyjoRoundEndEmoji">🏆</div>
+      <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--text);line-height:1.3" id="skyjoRoundEndTitle"></div>
+      <div style="font-size:12px;color:var(--muted);font-weight:600;letter-spacing:0.5px" id="skyjoRoundEndSub"></div>
+      <!-- Scores de la manche -->
+      <div style="display:flex;gap:12px;width:100%;max-width:280px;">
+        <div style="flex:1;background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">👧 Zelda</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:2px">Cette manche</div>
+          <div style="font-size:28px;font-weight:800;color:var(--text)" id="skyjoRoundScoreGirl">0</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px">Total</div>
+          <div style="font-size:16px;font-weight:700;color:var(--green)" id="skyjoTotalScoreGirl">0</div>
         </div>
-        <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px 20px;text-align:center;">
-          <div style="font-size:12px;color:var(--muted)">👦 Link</div>
-          <div style="font-size:26px;font-weight:700;color:var(--text)" id="skyjoRoundScoreBoy">0</div>
+        <div style="flex:1;background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">👦 Link</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:2px">Cette manche</div>
+          <div style="font-size:28px;font-weight:800;color:var(--text)" id="skyjoRoundScoreBoy">0</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px">Total</div>
+          <div style="font-size:16px;font-weight:700;color:var(--green)" id="skyjoTotalScoreBoy">0</div>
         </div>
       </div>
-      <button id="skyjoNextRoundBtn" onclick="skyjoNextRound()" style="padding:12px 28px;background:var(--green);color:#000;font-weight:700;font-size:14px;font-family:'DM Sans',sans-serif;border:none;border-radius:50px;cursor:pointer;">Manche suivante →</button>
+      <!-- Bouton visible pour les deux, mais seul girl déclenche -->
+      <div id="skyjoNextRoundWrap" style="display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;max-width:280px;">
+        <button id="skyjoNextRoundBtn" onclick="skyjoNextRound()" style="width:100%;padding:14px 0;background:var(--green);color:#000;font-weight:700;font-size:15px;font-family:'DM Sans',sans-serif;border:none;border-radius:50px;cursor:pointer;">Manche suivante →</button>
+        <div id="skyjoWaitNextMsg" style="display:none;font-size:12px;color:var(--muted);font-weight:600;">⏳ En attente que l'autre lance la manche…</div>
+      </div>
     </div>
 
     <!-- FIN DE PARTIE -->
-    <div id="skyjoGameEnd" style="display:none;flex-direction:column;align-items:center;gap:16px;padding:20px 0;text-align:center;">
-      <div style="font-size:64px" id="skyjoGameEndEmoji">🏆</div>
-      <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--text)" id="skyjoGameEndTitle">Victoire !</div>
-      <div style="font-size:14px;color:var(--sub)" id="skyjoGameEndSub"></div>
-      <button onclick="skyjoNewGame()" style="padding:12px 28px;background:var(--green);color:#000;font-weight:700;font-size:14px;font-family:'DM Sans',sans-serif;border:none;border-radius:50px;cursor:pointer;">Rejouer 🔄</button>
-      <button onclick="closeSkyjoGame()" style="padding:10px 22px;background:var(--s2);color:var(--sub);border:1px solid var(--border);border-radius:50px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;">Retour aux jeux</button>
+    <div id="skyjoGameEnd" style="display:none;position:absolute;inset:0;z-index:100;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);gap:20px;padding:24px;text-align:center;overflow:hidden;">
+      <div style="font-size:72px" id="skyjoGameEndEmoji">🏆</div>
+      <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--text)" id="skyjoGameEndTitle">Victoire !</div>
+      <div style="font-size:13px;color:var(--muted)" id="skyjoGameEndSub"></div>
+      <!-- Scores finaux -->
+      <div style="display:flex;gap:12px;width:100%;max-width:280px;">
+        <div style="flex:1;background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center;">
+          <div style="font-size:20px;margin-bottom:4px">👧</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Zelda</div>
+          <div style="font-size:32px;font-weight:800;color:var(--text)" id="skyjoFinalScoreGirl">0</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">pts</div>
+        </div>
+        <div style="flex:1;background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center;">
+          <div style="font-size:20px;margin-bottom:4px">👦</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Link</div>
+          <div style="font-size:32px;font-weight:800;color:var(--text)" id="skyjoFinalScoreBoy">0</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">pts</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted)">Le score le plus bas gagne 🏅</div>
+      <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px;">
+        <button onclick="skyjoNewGame()" style="width:100%;padding:14px 0;background:var(--green);color:#000;font-weight:700;font-size:15px;font-family:'DM Sans',sans-serif;border:none;border-radius:50px;cursor:pointer;">Rejouer 🔄</button>
+        <button onclick="closeSkyjoGame()" style="width:100%;padding:12px 0;background:var(--s2);color:var(--sub);border:1px solid var(--border);border-radius:50px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;">Retour aux jeux</button>
+      </div>
     </div>
 
   </div>
@@ -9085,6 +9121,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     _gameState=null;
     _phase=null;
     _launched=false;
+    _waitingNextRound=false;
     if(_oppGoneTimer){clearTimeout(_oppGoneTimer);_oppGoneTimer=null;}
   }
 
@@ -9455,6 +9492,11 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
         var wb = document.getElementById('skyjoCountdownModal');
         if(wb) document.body.removeChild(wb);
       }
+      // Si boy attendait la manche suivante et que la phase est init1 → reprendre
+      if(_waitingNextRound && rows[0].state && rows[0].state.phase==='init1'){
+        _waitingNextRound=false;
+        document.getElementById('skyjoRoundEnd').style.display='none';
+      }
       renderState(rows[0]);
     }).catch(function(){});
   }
@@ -9730,23 +9772,35 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
   // ─── Fin de manche ───────────────────────────────────
   function showRoundEnd(state){
-    document.getElementById('skyjoGameArea').style.display='none';
-    document.getElementById('skyjoRoundEnd').style.display='flex';
     var rg=state.round_scores?state.round_scores.girl:0;
     var rb=state.round_scores?state.round_scores.boy:0;
+    var tg=state.scores?state.scores.girl:0;
+    var tb=state.scores?state.scores.boy:0;
+    var winner=rg<rb?'Zelda 👧':(rb<rg?'Link 👦':null);
+    document.getElementById('skyjoRoundEndEmoji').textContent=!winner?'🤝':'🏆';
+    document.getElementById('skyjoRoundEndTitle').textContent=!winner?'Manche nulle !':(winner+' gagne la manche !');
+    document.getElementById('skyjoRoundEndSub').textContent='Manche '+(state.round||1);
     document.getElementById('skyjoRoundScoreGirl').textContent='+'+rg;
     document.getElementById('skyjoRoundScoreBoy').textContent='+'+rb;
-    var winner=rg<rb?'Zelda 👧':(rb<rg?'Link 👦':'Égalité !');
-    document.getElementById('skyjoRoundEndEmoji').textContent=rg===rb?'🤝':'🏆';
-    document.getElementById('skyjoRoundEndTitle').textContent=rg===rb?'Manche nulle !':winner+' gagne la manche !';
-    document.getElementById('skyjoRoundEndSub').textContent='Scores — Zelda : '+state.scores.girl+' pts | Link : '+state.scores.boy+' pts';
-    // Seule girl peut lancer la manche suivante (convention fixe = zéro ambiguïté)
-    document.getElementById('skyjoNextRoundBtn').style.display=_me==='girl'?'block':'none';
+    document.getElementById('skyjoTotalScoreGirl').textContent=tg+' pts';
+    document.getElementById('skyjoTotalScoreBoy').textContent=tb+' pts';
+    // Les deux voient le bouton — le premier qui clique lance la manche
+    var btn=document.getElementById('skyjoNextRoundBtn');
+    var msg=document.getElementById('skyjoWaitNextMsg');
+    btn.style.display='block'; msg.style.display='none';
+    // Poll actif : si l'autre lance en premier, on détecte init1 et on ferme l'écran
+    _waitingNextRound=true;
+    document.getElementById('skyjoRoundEnd').style.display='flex';
   }
 
   window.skyjoNextRound=function(){
-    if(_me!=='girl') return; // sécurité
+    // Les deux joueurs peuvent lancer la manche suivante (premier arrivé)
+    var btn=document.getElementById('skyjoNextRoundBtn');
+    if(btn){ btn.disabled=true; btn.textContent='Chargement…'; }
     stopPoll();
+    // Sauvegarder le score de la manche pour l'afficher discrètement en jeu
+    var prevRg=_gameState&&_gameState.round_scores?_gameState.round_scores.girl:null;
+    var prevRb=_gameState&&_gameState.round_scores?_gameState.round_scores.boy:null;
     var deck=buildDeck();
     var gc=dealHand(deck),bc=dealHand(deck);
     var top=deck.pop();
@@ -9767,8 +9821,17 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     .then(function(r){return r.json();})
     .then(function(rows){
       if(Array.isArray(rows)&&rows[0]){
+        _waitingNextRound=false;
         document.getElementById('skyjoRoundEnd').style.display='none';
-        document.getElementById('skyjoGameArea').style.display='block';
+        // Afficher le score de la manche précédente discrètement
+        if(prevRg!==null){
+          var lrs=document.getElementById('skyjoLastRoundScore');
+          var lrt=document.getElementById('skyjoLastRoundText');
+          if(lrs&&lrt){
+            lrt.textContent='👧 +'+prevRg+' | 👦 +'+prevRb;
+            lrs.style.display='flex';
+          }
+        }
         startPoll();
         renderState(rows[0]);
       }
@@ -9777,14 +9840,23 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
   // ─── Fin de partie ───────────────────────────────────
   function showGameEnd(state){
-    document.getElementById('skyjoGameArea').style.display='none';
     document.getElementById('skyjoRoundEnd').style.display='none';
-    document.getElementById('skyjoGameEnd').style.display='flex';
     var btn=document.getElementById('skyjoAbandonBtn'); if(btn) btn.style.display='none';
     var gg=state.scores.girl,gb=state.scores.boy;
-    document.getElementById('skyjoGameEndEmoji').textContent=gg===gb?'🤝':(gg<gb?'👧':'👦');
-    document.getElementById('skyjoGameEndTitle').textContent=gg===gb?'Égalité !':(gg<gb?'Zelda 👧':'Link 👦')+' gagne !';
-    document.getElementById('skyjoGameEndSub').textContent='Score final — Zelda : '+gg+' | Link : '+gb+' (moins = victoire)';
+    var isDraw=gg===gb;
+    var girlWins=gg<gb;
+    document.getElementById('skyjoGameEndEmoji').textContent=isDraw?'🤝':(girlWins?'👧':'👦');
+    document.getElementById('skyjoGameEndTitle').textContent=isDraw?'Égalité !':(girlWins?'Zelda 👧':'Link 👦')+' gagne la partie !';
+    document.getElementById('skyjoFinalScoreGirl').textContent=gg;
+    document.getElementById('skyjoFinalScoreBoy').textContent=gb;
+    // Mettre en valeur le gagnant
+    var cardG=document.getElementById('skyjoFinalScoreGirl').parentElement;
+    var cardB=document.getElementById('skyjoFinalScoreBoy').parentElement;
+    if(!isDraw){
+      if(girlWins){ cardG.style.borderColor='var(--green)'; cardG.style.background='rgba(0,201,167,0.1)'; }
+      else { cardB.style.borderColor='var(--green)'; cardB.style.background='rgba(0,201,167,0.1)'; }
+    }
+    document.getElementById('skyjoGameEnd').style.display='flex';
   }
 
   window.skyjoNewGame=function(){
@@ -9803,6 +9875,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   var _waitingForReconnect = false;
   var _reconnectTimer = null;
   var _reconnectSeconds = 0;
+  var _waitingNextRound = false; // boy attend que girl lance la manche suivante
 
   var RECONNECT_GRACE_S = 20; // secondes supplémentaires après "Attendre"
 
@@ -12883,7 +12956,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.02.3 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.22.5 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
