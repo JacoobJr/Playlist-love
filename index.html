@@ -9178,9 +9178,32 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
   window.skyjoAuthSelect = function(profile){
     document.getElementById('skyjoAuthModal').style.display='none';
-    // Sauvegarder le profil choisi
-    localStorage.setItem('jayana_profile', profile);
-    _openSkyjoWithProfile(profile);
+    // Connexion réelle requise : demande le code, établit la session Supabase,
+    // sauvegarde le profil sur le site principal, puis ouvre Skyjo.
+    // Si l'utilisateur est déjà connecté avec ce profil, on entre directement.
+    if(window.showProfileCodeModal){
+      // Vérifier si une session valide existe déjà pour ce profil
+      if(typeof sbLoadSession === 'function' && sbLoadSession(profile)){
+        // Session valide → sauvegarder profil sur le site et entrer
+        if(window._profileSave) window._profileSave(profile);
+        if(window._profileApply) window._profileApply(profile);
+        _openSkyjoWithProfile(profile);
+      } else {
+        // Pas de session → demander le code (vrai login)
+        window.showProfileCodeModal(profile, function(){
+          // Succès : profil sauvegardé par showProfileCodeModal via onSuccess dans setProfile,
+          // mais ici on appelle nous-mêmes save+apply sans reload (on veut ouvrir Skyjo, pas recharger)
+          if(window._profileSave) window._profileSave(profile);
+          if(window._profileApply) window._profileApply(profile);
+          if(window._profileLoadMoods) window._profileLoadMoods();
+          if(window._profileCheckUnread) window._profileCheckUnread();
+          _openSkyjoWithProfile(profile);
+        });
+      }
+    } else {
+      // Fallback si showProfileCodeModal n'est pas encore disponible
+      _openSkyjoWithProfile(profile);
+    }
   };
 
   window.skyjoAuthClose = function(){
