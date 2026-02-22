@@ -2179,7 +2179,12 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 
 /* ══ SKYJO STYLES ══ */
 /* ══ SKYJO CARDS & GRID ══ */
-:root { --sj-cw: 44px; --sj-ch: 62px; --sj-fs: 15px; }
+:root {
+  --sj-cw: 46px; --sj-ch: 64px; --sj-fs: 16px;
+  --sj-radius: 10px;
+  --sj-shadow: 0 2px 8px rgba(0,0,0,0.38), 0 1px 2px rgba(0,0,0,0.22);
+  --sj-shadow-hover: 0 8px 24px rgba(0,0,0,0.52), 0 2px 6px rgba(0,0,0,0.3);
+}
 
 /* ══════════════════════════════════════════════════
    SKYJO — plein écran, layout serré, no-scroll
@@ -2192,7 +2197,11 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   touch-action: none;
   overscroll-behavior: none;
 }
-#skyjoView.active { display: flex !important; animation: slideUp 0.25s ease; }
+#skyjoView.active { display: flex !important; animation: sjViewEnter 0.32s cubic-bezier(.17,.89,.32,1.1); }
+@keyframes sjViewEnter {
+  from { opacity:0; transform: scale(0.97) translateY(12px); }
+  to   { opacity:1; transform: scale(1) translateY(0); }
+}
 
 /* Header ultra-compact */
 #skyjoView .game-view-header {
@@ -2200,6 +2209,7 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
   min-height: 0;
+  background: var(--s1);
 }
 #skyjoView .game-view-header .game-view-title { font-size: 16px; }
 #skyjoView .game-view-header .game-view-back  { padding: 5px 10px; font-size: 11px; }
@@ -2221,21 +2231,29 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 #skyjoGameArea { flex: 1; min-height: 0; display: none; flex-direction: column; overflow: hidden; }
 #skyjoGameArea.sja-visible { display: flex !important; }
 
-/* Bannière de tour — fine mais visible */
+/* ── Bannière de tour ── */
 #skyjoTurnBanner {
-  flex-shrink: 0; padding: 5px 12px;
+  flex-shrink: 0; padding: 6px 14px;
   font-size: 12px; font-weight: 700; text-align: center; line-height: 1.3;
+  overflow: hidden;
+  letter-spacing: 0.2px;
 }
-.skyjo-turn-banner.my-turn   {
-  background: rgba(0,201,167,0.15); color: var(--green);
-  border-bottom: 2px solid rgba(0,201,167,0.35);
-  animation: sjBannerPulse 1.4s ease-in-out infinite;
+.skyjo-turn-banner.my-turn {
+  background: linear-gradient(90deg, rgba(0,201,167,0.08) 0%, rgba(0,201,167,0.22) 50%, rgba(0,201,167,0.08) 100%);
+  background-size: 200% 100%;
+  color: #00e5bd;
+  border-bottom: 2px solid rgba(0,201,167,0.4);
+  text-shadow: 0 0 20px rgba(0,201,167,0.5);
+  animation: sjBannerFlow 2.5s ease-in-out infinite;
 }
-@keyframes sjBannerPulse {
-  0%,100% { background: rgba(0,201,167,0.12); }
-  50%     { background: rgba(0,201,167,0.28); }
+@keyframes sjBannerFlow {
+  0%,100% { background-position: 0% 0; }
+  50%     { background-position: 100% 0; }
 }
-.skyjo-turn-banner.their-turn{ background: var(--s1); color: var(--muted); border-bottom: 1px solid var(--border); }
+.skyjo-turn-banner.their-turn {
+  background: var(--s1); color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
 
 /* Terrain vertical : 2 zones joueur + 1 zone centrale */
 #skyjoPlayField {
@@ -2252,24 +2270,31 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   align-items: center; justify-content: center;
   padding: 4px 8px; position: relative; gap: 4px;
 }
-.skyjo-player-zone.zone-opp { background: rgba(79,70,229,0.08); border-bottom: 1px solid rgba(79,70,229,0.15); }
+.skyjo-player-zone.zone-opp {
+  background: linear-gradient(180deg, rgba(79,70,229,0.12) 0%, rgba(79,70,229,0.05) 100%);
+  border-bottom: 1px solid rgba(79,70,229,0.2);
+}
 .skyjo-player-zone.zone-me  {
-  background: rgba(5,150,105,0.08); border-top: 1px solid rgba(5,150,105,0.15);
+  background: linear-gradient(0deg, rgba(5,150,105,0.12) 0%, rgba(5,150,105,0.05) 100%);
+  border-top: 1px solid rgba(5,150,105,0.2);
   padding-bottom: max(8px, env(safe-area-inset-bottom, 8px));
 }
 
 /* Infos joueur — ligne compacte */
 .skyjo-player-info { display: flex; align-items: center; gap: 6px; }
 .skyjo-avatar {
-  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
-  background: var(--s2); border: 1.5px solid var(--border);
-  display: flex; align-items: center; justify-content: center; font-size: 14px;
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  background: var(--s2); border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center; font-size: 15px;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 .skyjo-player-name  { font-size: 11px; font-weight: 700; color: var(--text); }
 .skyjo-player-score-badge {
   background: var(--s2); border: 1px solid var(--border);
-  border-radius: 20px; padding: 1px 7px;
-  font-size: 11px; font-weight: 700; color: var(--text);
+  border-radius: 20px; padding: 1px 8px;
+  font-size: 11px; font-weight: 800; color: var(--text);
+  font-variant-numeric: tabular-nums;
+  transition: background 0.3s, color 0.3s;
 }
 .skyjo-manche-badge {
   position: absolute; top: 4px; right: 8px;
@@ -2282,107 +2307,283 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 #skyjoMidZone {
   flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  gap: 16px; padding: 4px 12px;
-  background: var(--s1);
+  gap: 14px; padding: 5px 12px;
+  background: linear-gradient(135deg, var(--s1) 0%, var(--s2) 100%);
   border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15) inset;
 }
-.skyjo-pile-slot { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.skyjo-pile-label { font-size: 8px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-
-/* Carte en main : à GAUCHE de la pioche, clignotante, pas de label sous elle */
-#skyjoDrawSlot { display: flex; align-items: center; gap: 8px; }
-#skyjoHeldCardWrap {
-  display: none; flex-direction: column; align-items: center; gap: 2px;
-}
-#skyjoHeldCard { animation: sjHeldPulse 1.4s ease-in-out infinite; }
-@keyframes sjHeldPulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(167,139,250,0.45); transform: scale(1); }
-  50%     { box-shadow: 0 0 0 6px rgba(167,139,250,0); transform: scale(1.02); }
-}
-#skyjoHeldLabel { font-size: 8px; font-weight: 700; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.8px; }
-#skyjoDiscardBtn {
-  padding: 2px 6px; background: rgba(239,83,80,0.12); color: #ef5350;
-  border: 1px solid rgba(239,83,80,0.35); border-radius: 4px;
-  font-size: 8px; font-weight: 700; font-family: 'DM Sans', sans-serif;
-  cursor: pointer; white-space: nowrap;
-}
-#skyjoDrawPileCount { font-size: 8px; color: var(--muted); text-align: center; }
-
-/* ── CARTES ── */
-.skyjo-card {
-  width: var(--sj-cw); height: var(--sj-ch);
-  border-radius: 8px;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-size: var(--sj-fs); font-weight: 800;
-  border: none; cursor: default; user-select: none; flex-shrink: 0;
-  transition: transform 0.12s; box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-}
-
-/* Dos vert sobre avec hachures */
-.skyjo-card-back,
-.skyjo-card.skyjo-card-hidden {
-  background-color: #1e4d34;
-  background-image: repeating-linear-gradient(
-    45deg,
-    rgba(255,255,255,0.07) 0px,
-    rgba(255,255,255,0.07) 1px,
-    transparent 1px,
-    transparent 6px
-  );
-  color: transparent;
+.skyjo-pile-slot { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.skyjo-pile-label {
+  font-size: 8px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1.2px;
 }
 
 /* Carte en main */
-.skyjo-card-held { background: #6d5acd; color: #fff; }
+#skyjoDrawSlot { display: flex; align-items: center; gap: 8px; }
+#skyjoHeldCardWrap {
+  display: none; flex-direction: column; align-items: center; gap: 3px;
+  transition: opacity 0.22s cubic-bezier(.4,0,.2,1), transform 0.22s cubic-bezier(.4,0,.2,1);
+}
+#skyjoHeldCard {
+  animation: sjHeldFloat 2s ease-in-out infinite;
+  position: relative; overflow: hidden;
+}
+@keyframes sjHeldFloat {
+  0%,100% { transform: translateY(0) rotateZ(-1deg); box-shadow: 0 4px 18px rgba(109,90,205,0.5), var(--sj-shadow); }
+  50%     { transform: translateY(-3px) rotateZ(1deg); box-shadow: 0 8px 28px rgba(109,90,205,0.65), var(--sj-shadow); }
+}
+#skyjoHeldCard::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.14) 0%, transparent 60%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+#skyjoHeldCard::after {
+  content: '';
+  position: absolute;
+  top: -60%; left: -60%;
+  width: 220%; height: 220%;
+  background: linear-gradient(110deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%);
+  animation: sjHeldShine 3s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes sjHeldShine {
+  0%,60%,100% { transform: translateX(-60%) rotateZ(10deg); }
+  30%         { transform: translateX(60%) rotateZ(10deg); }
+}
+#skyjoHeldLabel {
+  font-size: 8px; font-weight: 800; color: #b29afa;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+#skyjoDiscardBtn {
+  padding: 3px 8px;
+  background: rgba(239,83,80,0.12); color: #ef5350;
+  border: 1px solid rgba(239,83,80,0.3); border-radius: 5px;
+  font-size: 8px; font-weight: 800; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; white-space: nowrap;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+#skyjoDiscardBtn:hover { background: rgba(239,83,80,0.22); box-shadow: 0 2px 8px rgba(239,83,80,0.2); }
+#skyjoDiscardBtn:active { transform: scale(0.94); }
+#skyjoDrawPileCount { font-size: 8px; color: var(--muted); text-align: center; font-variant-numeric: tabular-nums; }
 
-/* Valeurs négatives → bleu ardoise */
-.skyjo-card[data-val="-2"] { background: #2563a8; color: #fff; }
-.skyjo-card[data-val="-1"] { background: #3b7dd8; color: #fff; }
-/* 0 → violet doux */
-.skyjo-card[data-val="0"]  { background: #7c5cbf; color: #fff; }
-/* 1-4 → orange/ambre, bien contrasté */
-.skyjo-card[data-val="1"]  { background: #c45e10; color: #fff; }
-.skyjo-card[data-val="2"]  { background: #d4730f; color: #fff; }
-.skyjo-card[data-val="3"]  { background: #b8870a; color: #fff; }
-.skyjo-card[data-val="4"]  { background: #7a8e12; color: #fff; }
-/* 5-8 → vert, tons différents */
-.skyjo-card[data-val="5"]  { background: #237a3c; color: #fff; }
-.skyjo-card[data-val="6"]  { background: #1d8c56; color: #fff; }
-.skyjo-card[data-val="7"]  { background: #167a6e; color: #fff; }
-.skyjo-card[data-val="8"]  { background: #0e6b8a; color: #fff; }
-/* 9-12 → rouge/bordeaux */
-.skyjo-card[data-val="9"]  { background: #b02020; color: #fff; }
-.skyjo-card[data-val="10"] { background: #961b2e; color: #fff; }
-.skyjo-card[data-val="11"] { background: #7d1535; color: #fff; }
-.skyjo-card[data-val="12"] { background: #9b1a5e; color: #fff; }
+/* ══════════════════════════════════════════════════
+   CARTES — Design premium avec couleurs assorties
+══════════════════════════════════════════════════ */
+.skyjo-card {
+  width: var(--sj-cw); height: var(--sj-ch);
+  border-radius: var(--sj-radius);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: var(--sj-fs); font-weight: 900;
+  border: none; cursor: default; user-select: none; flex-shrink: 0;
+  transition: transform 0.15s cubic-bezier(.17,.89,.32,1.28), box-shadow 0.15s;
+  box-shadow: var(--sj-shadow);
+  position: relative; overflow: hidden;
+  /* Inlay lumineux sur le bord haut */
+  outline: 1px solid rgba(255,255,255,0.07);
+}
+/* Reflet haut sur toutes les cartes */
+.skyjo-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 45%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.13) 0%, transparent 100%);
+  border-radius: var(--sj-radius) var(--sj-radius) 0 0;
+  pointer-events: none;
+  z-index: 1;
+}
 
-/* Interactif */
-/* Cartes jouables : léger halo vert foncé, rythme lent */
+/* ── Dos de carte — vert foncé texturé ── */
+.skyjo-card-back,
+.skyjo-card.skyjo-card-hidden {
+  background-color: #163d28;
+  background-image:
+    radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.06) 0%, transparent 60%),
+    repeating-linear-gradient(
+      42deg,
+      transparent 0px,
+      transparent 5px,
+      rgba(255,255,255,0.04) 5px,
+      rgba(255,255,255,0.04) 6px
+    );
+  color: transparent;
+  border: 1.5px solid rgba(255,255,255,0.09);
+}
+
+/* ── Carte en main (violette) ── */
+.skyjo-card-held {
+  background: linear-gradient(145deg, #7b68ee 0%, #5b4bcc 100%);
+  color: #e8e0ff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  border: 1.5px solid rgba(200,185,255,0.2);
+}
+
+/* ════════════════════════════════════
+   Palette de couleurs — numéros assortis
+   Principe : fond riche + texte clair légèrement teinté
+   pour que le chiffre "appartienne" à la carte
+════════════════════════════════════ */
+
+/* -2 : bleu profond — chiffre bleu glacé */
+.skyjo-card[data-val="-2"] {
+  background: linear-gradient(145deg, #1a56a0 0%, #0d3873 100%);
+  color: #a8d4ff;
+  text-shadow: 0 0 12px rgba(100,180,255,0.7), 0 1px 3px rgba(0,0,0,0.5);
+  border: 1.5px solid rgba(100,180,255,0.18);
+}
+/* -1 : bleu vif — chiffre bleu ciel */
+.skyjo-card[data-val="-1"] {
+  background: linear-gradient(145deg, #2563c0 0%, #1445a0 100%);
+  color: #bddcff;
+  text-shadow: 0 0 12px rgba(130,195,255,0.65), 0 1px 3px rgba(0,0,0,0.45);
+  border: 1.5px solid rgba(130,195,255,0.16);
+}
+/* 0 : violet indigo — chiffre lavande */
+.skyjo-card[data-val="0"] {
+  background: linear-gradient(145deg, #6044b0 0%, #42308a 100%);
+  color: #d4c4ff;
+  text-shadow: 0 0 12px rgba(200,170,255,0.6), 0 1px 3px rgba(0,0,0,0.45);
+  border: 1.5px solid rgba(200,170,255,0.15);
+}
+/* 1 : ambre chaud — chiffre orange clair */
+.skyjo-card[data-val="1"] {
+  background: linear-gradient(145deg, #c46010 0%, #8f4008 100%);
+  color: #ffd28a;
+  text-shadow: 0 0 12px rgba(255,190,80,0.6), 0 1px 3px rgba(0,0,0,0.45);
+  border: 1.5px solid rgba(255,190,80,0.15);
+}
+/* 2 : orange — chiffre jaune-pêche */
+.skyjo-card[data-val="2"] {
+  background: linear-gradient(145deg, #d4700f 0%, #a05008 100%);
+  color: #ffe0a0;
+  text-shadow: 0 0 12px rgba(255,210,100,0.6), 0 1px 3px rgba(0,0,0,0.45);
+  border: 1.5px solid rgba(255,210,100,0.15);
+}
+/* 3 : ambre doré — chiffre jaune miel */
+.skyjo-card[data-val="3"] {
+  background: linear-gradient(145deg, #b88508 0%, #836005 100%);
+  color: #ffe890;
+  text-shadow: 0 0 12px rgba(255,225,80,0.6), 0 1px 3px rgba(0,0,0,0.45);
+  border: 1.5px solid rgba(255,225,80,0.14);
+}
+/* 4 : olive/chartreuse — chiffre vert-jaune */
+.skyjo-card[data-val="4"] {
+  background: linear-gradient(145deg, #7a8e10 0%, #556210 100%);
+  color: #dcf060;
+  text-shadow: 0 0 12px rgba(200,235,50,0.6), 0 1px 3px rgba(0,0,0,0.45);
+  border: 1.5px solid rgba(200,235,50,0.14);
+}
+/* 5 : vert forêt — chiffre vert menthe */
+.skyjo-card[data-val="5"] {
+  background: linear-gradient(145deg, #1d7838 0%, #0f5228 100%);
+  color: #80f0a0;
+  text-shadow: 0 0 12px rgba(80,230,120,0.6), 0 1px 3px rgba(0,0,0,0.45);
+  border: 1.5px solid rgba(80,230,120,0.14);
+}
+/* 6 : vert émeraude — chiffre vert eau */
+.skyjo-card[data-val="6"] {
+  background: linear-gradient(145deg, #178a50 0%, #0c5e38 100%);
+  color: #70f0c0;
+  text-shadow: 0 0 12px rgba(60,230,170,0.6), 0 1px 3px rgba(0,0,0,0.45);
+  border: 1.5px solid rgba(60,230,170,0.14);
+}
+/* 7 : vert-sarcelle — chiffre cyan */
+.skyjo-card[data-val="7"] {
+  background: linear-gradient(145deg, #0e7868 0%, #085248 100%);
+  color: #5cf0e0;
+  text-shadow: 0 0 12px rgba(50,220,210,0.6), 0 1px 3px rgba(0,0,0,0.45);
+  border: 1.5px solid rgba(50,220,210,0.14);
+}
+/* 8 : bleu-pétrole — chiffre bleu-vert */
+.skyjo-card[data-val="8"] {
+  background: linear-gradient(145deg, #0a6888 0%, #064860 100%);
+  color: #50d8f8;
+  text-shadow: 0 0 12px rgba(40,200,240,0.6), 0 1px 3px rgba(0,0,0,0.45);
+  border: 1.5px solid rgba(40,200,240,0.14);
+}
+/* 9 : rouge brique — chiffre orange-rouge */
+.skyjo-card[data-val="9"] {
+  background: linear-gradient(145deg, #b01c1c 0%, #7c0f0f 100%);
+  color: #ffb0a0;
+  text-shadow: 0 0 12px rgba(255,130,100,0.65), 0 1px 3px rgba(0,0,0,0.45);
+  border: 1.5px solid rgba(255,130,100,0.15);
+}
+/* 10 : rouge-bordeaux — chiffre rose-rouge */
+.skyjo-card[data-val="10"] {
+  background: linear-gradient(145deg, #981824 0%, #6a0d18 100%);
+  color: #ffaab8;
+  text-shadow: 0 0 12px rgba(255,120,140,0.65), 0 1px 3px rgba(0,0,0,0.45);
+  border: 1.5px solid rgba(255,120,140,0.15);
+  font-size: 14px; /* légèrement plus petit pour "10" */
+}
+/* 11 : pourpre — chiffre rose chaud */
+.skyjo-card[data-val="11"] {
+  background: linear-gradient(145deg, #7c1030 0%, #560822 100%);
+  color: #ffa0c0;
+  text-shadow: 0 0 12px rgba(255,100,160,0.65), 0 1px 3px rgba(0,0,0,0.45);
+  border: 1.5px solid rgba(255,100,160,0.15);
+  font-size: 14px;
+}
+/* 12 : magenta-bordeaux — chiffre rose fuchsia */
+.skyjo-card[data-val="12"] {
+  background: linear-gradient(145deg, #981558 0%, #6a0a3e 100%);
+  color: #ff90d8;
+  text-shadow: 0 0 12px rgba(255,80,200,0.65), 0 1px 3px rgba(0,0,0,0.45);
+  border: 1.5px solid rgba(255,80,200,0.15);
+  font-size: 14px;
+}
+
+/* ── Cartes interactives (clickables) ── */
 .skyjo-card.skyjo-card-clickable {
   cursor: pointer;
-  animation: sjCardPulse 1.6s ease-in-out infinite;
+  animation: sjCardPulseV3 1.6s ease-in-out infinite;
+  transition: transform 0.15s cubic-bezier(.17,.89,.32,1.28), box-shadow 0.15s;
 }
-.skyjo-card.skyjo-card-clickable:active { transform: scale(1.07); }
-@keyframes sjCardPulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(22,101,52,0.7), 0 1px 4px rgba(0,0,0,0.3); transform: scale(1); }
-  50%     { box-shadow: 0 0 0 5px rgba(22,101,52,0), 0 1px 4px rgba(0,0,0,0.3);   transform: scale(1.02); }
+@keyframes sjCardPulseV3 {
+  0%,100% {
+    box-shadow: 0 0 0 0 rgba(0,229,189,0.7), var(--sj-shadow);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(0,229,189,0), var(--sj-shadow-hover);
+    transform: scale(1.028);
+  }
 }
-.skyjo-card.skyjo-card-hidden:active    { transform: scale(1.05); }
-.skyjo-card.skyjo-col-complete { opacity: 0.28; pointer-events: none; filter: grayscale(50%); }
+.skyjo-card.skyjo-card-clickable:hover {
+  transform: scale(1.10) translateY(-3px) !important;
+  box-shadow: 0 10px 28px rgba(0,229,189,0.35), var(--sj-shadow) !important;
+  z-index: 5;
+  animation-play-state: paused;
+}
+.skyjo-card.skyjo-card-clickable:active {
+  transform: scale(1.01) translateY(-1px) !important;
+  box-shadow: var(--sj-shadow) !important;
+}
+
+.skyjo-card.skyjo-col-complete {
+  opacity: 0.22;
+  pointer-events: none;
+  filter: grayscale(60%) brightness(0.7);
+  transform: scale(0.93);
+}
 
 /* Grille 4×3 */
 .skyjo-grid {
   display: grid;
   grid-template-columns: repeat(4, var(--sj-cw));
   grid-template-rows: repeat(3, var(--sj-ch));
-  gap: 4px;
+  gap: 5px;
 }
 
 /* Message phase bas */
 #skyjoPhaseMsg {
-  flex-shrink: 0; padding: 4px 12px;
-  background: rgba(0,201,167,0.1); border-top: 1px solid rgba(0,201,167,0.2);
-  font-size: 10px; color: var(--sub); text-align: center; font-weight: 600; display: none;
+  flex-shrink: 0; padding: 5px 12px;
+  background: linear-gradient(90deg, rgba(0,201,167,0.08), rgba(0,201,167,0.14), rgba(0,201,167,0.08));
+  border-top: 1px solid rgba(0,201,167,0.22);
+  font-size: 10px; color: var(--sub); text-align: center; font-weight: 700; display: none;
+  letter-spacing: 0.2px;
 }
 
 /* ── Animation flip carte fin de manche ── */
@@ -2408,29 +2609,33 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 
 /* ── Badge total cartes révélées ── */
 .sj-total-badge {
-  width: 32px; height: 32px; border-radius: 50%;
+  width: 34px; height: 34px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 800; flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  font-size: 13px; font-weight: 900; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  font-variant-numeric: tabular-nums;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 .sj-total-badge.mine {
-  background: rgba(5,150,105,0.25);
-  border: 2px solid rgba(5,150,105,0.6);
-  color: #34d399;
+  background: rgba(5,150,105,0.28);
+  border: 2px solid rgba(5,150,105,0.7);
+  color: #4eeebb;
+  text-shadow: 0 0 10px rgba(0,220,160,0.5);
 }
 .sj-total-badge.opp {
-  background: rgba(79,70,229,0.22);
-  border: 2px solid rgba(79,70,229,0.5);
-  color: #a5b4fc;
+  background: rgba(79,70,229,0.25);
+  border: 2px solid rgba(79,70,229,0.6);
+  color: #b0c4ff;
+  text-shadow: 0 0 10px rgba(120,130,255,0.5);
 }
 
 /* ── Pulse doré avatar tour actif ── */
 @keyframes sjAvatarPulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(234,179,8,0.8); border-color: rgba(234,179,8,0.9); }
-  50%     { box-shadow: 0 0 0 5px rgba(234,179,8,0); border-color: rgba(234,179,8,0.4); }
+  0%,100% { box-shadow: 0 0 0 0 rgba(234,179,8,0.85); border-color: rgba(234,179,8,1); }
+  50%     { box-shadow: 0 0 0 6px rgba(234,179,8,0); border-color: rgba(234,179,8,0.5); }
 }
 .skyjo-avatar.active-turn {
-  border-color: #eab308 !important;
+  border-color: #fbbf24 !important;
   animation: sjAvatarPulse 1.4s ease-in-out infinite;
 }
 
@@ -2444,294 +2649,252 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 @keyframes presencePulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
 
 /* ══════════════════════════════════════════════════
-   SKYJO — ANIMATIONS ENRICHIES v2
+   SKYJO — ANIMATIONS ENRICHIES v3
 ══════════════════════════════════════════════════ */
 
-/* ── Pioche : la carte "décolle" et vole vers la main ── */
-@keyframes sjDeckDraw {
-  0%   { transform: translate(0,0) scale(1) rotateZ(0deg); opacity: 1; }
-  40%  { transform: translate(-4px,-8px) scale(1.12) rotateZ(-8deg); opacity: 1; }
-  100% { transform: translate(var(--sj-draw-dx,0), var(--sj-draw-dy,-40px)) scale(0.9) rotateZ(-12deg); opacity: 0; }
-}
-@keyframes sjDeckDrawBack {
-  0%   { transform: scale(1) rotateY(0deg); }
-  100% { transform: scale(1) rotateY(0deg); }
-}
-/* Effet de "rebond" sur le paquet après tirage */
+/* ── Rebond sur la pioche après tirage ── */
 @keyframes sjDeckBounce {
-  0%   { transform: scale(1); }
-  30%  { transform: scale(0.90) translateY(2px); }
-  60%  { transform: scale(1.04) translateY(-1px); }
-  100% { transform: scale(1); }
+  0%   { transform: scale(1) translateY(0); }
+  25%  { transform: scale(0.88) translateY(3px) rotateZ(2deg); }
+  55%  { transform: scale(1.06) translateY(-2px) rotateZ(-1deg); }
+  80%  { transform: scale(0.98) translateY(0px); }
+  100% { transform: scale(1) translateY(0); }
 }
 #skyjoDeckCard.sj-deck-draw-anim {
-  animation: sjDeckBounce 0.38s cubic-bezier(.4,0,.2,1);
+  animation: sjDeckBounce 0.4s cubic-bezier(.4,0,.2,1);
   pointer-events: none;
 }
 
-/* ── Carte volante (de la pioche vers la main) ── */
+/* ── Carte volante (pioche → main) ── */
 #sjFlyCard {
   position: fixed;
   z-index: 9999;
   pointer-events: none;
-  border-radius: 8px;
+  border-radius: var(--sj-radius);
   display: flex; align-items: center; justify-content: center;
-  font-size: var(--sj-fs); font-weight: 800;
-  box-shadow: 0 8px 28px rgba(0,0,0,0.55), 0 0 0 2px rgba(255,255,255,0.15);
+  font-size: var(--sj-fs); font-weight: 900;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.65), 0 0 0 1.5px rgba(255,255,255,0.12);
   will-change: transform, opacity;
-  transition: none;
+  overflow: hidden;
+}
+#sjFlyCard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 45%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%);
+  border-radius: inherit;
+  pointer-events: none;
 }
 @keyframes sjFlyToHand {
-  0%   { transform: translate(0,0) scale(1) rotateY(0deg) rotateZ(-6deg); opacity:1; }
-  35%  { transform: translate(calc(var(--fly-dx)*0.45), calc(var(--fly-dy)*0.3)) scale(1.18) rotateY(90deg) rotateZ(4deg); opacity:1; }
-  65%  { transform: translate(calc(var(--fly-dx)*0.8), calc(var(--fly-dy)*0.75)) scale(1.05) rotateY(0deg) rotateZ(2deg); opacity:1; }
-  100% { transform: translate(var(--fly-dx), var(--fly-dy)) scale(0.96) rotateY(0deg) rotateZ(0deg); opacity:0; }
+  0%   { transform: translate(0,0) scale(1) rotateY(0deg) rotateZ(-5deg) perspective(400px); opacity:1; filter: brightness(1.1); }
+  30%  { transform: translate(calc(var(--fly-dx)*0.35), calc(var(--fly-dy)*0.2)) scale(1.22) rotateY(90deg) rotateZ(3deg); opacity:1; filter: brightness(1.3); }
+  55%  { transform: translate(calc(var(--fly-dx)*0.72), calc(var(--fly-dy)*0.7)) scale(1.1) rotateY(0deg) rotateZ(1deg); opacity:1; filter: brightness(1.15); }
+  100% { transform: translate(var(--fly-dx), var(--fly-dy)) scale(0.94) rotateY(0deg) rotateZ(0deg); opacity:0; filter: brightness(1); }
 }
 #sjFlyCard.flying {
-  animation: sjFlyToHand 0.52s cubic-bezier(.3,.7,.3,1) forwards;
+  animation: sjFlyToHand 0.54s cubic-bezier(.25,.6,.3,.95) forwards;
 }
 
-/* ── Carte volante depuis la défausse ── */
 @keyframes sjFlyFromDiscard {
-  0%   { transform: translate(0,0) scale(1) rotateY(0deg) rotateZ(4deg); opacity:1; }
-  30%  { transform: translate(calc(var(--fly-dx)*0.35), calc(var(--fly-dy)*0.25)) scale(1.15) rotateY(45deg) rotateZ(-3deg); opacity:1; }
-  100% { transform: translate(var(--fly-dx), var(--fly-dy)) scale(0.96) rotateY(0deg) rotateZ(0deg); opacity:0; }
+  0%   { transform: translate(0,0) scale(1.05) rotateY(0deg) rotateZ(5deg); opacity:1; filter: brightness(1.15); }
+  28%  { transform: translate(calc(var(--fly-dx)*0.3), calc(var(--fly-dy)*0.2)) scale(1.18) rotateY(40deg) rotateZ(-4deg); opacity:1; filter: brightness(1.2); }
+  100% { transform: translate(var(--fly-dx), var(--fly-dy)) scale(0.95) rotateY(0deg) rotateZ(0deg); opacity:0; filter: brightness(1); }
 }
 #sjFlyCard.flying-discard {
-  animation: sjFlyFromDiscard 0.44s cubic-bezier(.3,.7,.3,1) forwards;
+  animation: sjFlyFromDiscard 0.46s cubic-bezier(.25,.6,.3,.95) forwards;
 }
 
-/* ── Apparition de la carte en main (heldCard) ── */
+/* ── Apparition carte en main ── */
 @keyframes sjHeldAppear {
-  0%   { transform: scale(0.6) translateY(-12px) rotateZ(-15deg); opacity: 0; }
-  60%  { transform: scale(1.1) translateY(2px) rotateZ(3deg); opacity: 1; }
-  100% { transform: scale(1) translateY(0) rotateZ(0deg); opacity: 1; }
+  0%   { transform: scale(0.55) translateY(-16px) rotateZ(-18deg); opacity: 0; filter: brightness(0.7); }
+  55%  { transform: scale(1.12) translateY(3px) rotateZ(4deg); opacity: 1; filter: brightness(1.2); }
+  80%  { transform: scale(0.97) translateY(0) rotateZ(-1deg); }
+  100% { transform: scale(1) translateY(0) rotateZ(0); opacity: 1; filter: brightness(1); }
 }
 #skyjoHeldCard.sj-held-appear {
-  animation: sjHeldAppear 0.38s cubic-bezier(.17,.89,.32,1.28) forwards;
+  animation: sjHeldAppear 0.42s cubic-bezier(.17,.89,.32,1.28) forwards !important;
 }
 
-/* ── Flip de carte (retournement lors du placement) ── */
+/* ── Flip 3D complet (révélation) ── */
 @keyframes sjFlipRevealFull {
-  0%   { transform: rotateY(0deg) scale(1); }
-  35%  { transform: rotateY(90deg) scale(1.06); }
-  36%  { transform: rotateY(-90deg) scale(1.06); }
-  100% { transform: rotateY(0deg) scale(1); }
+  0%   { transform: rotateY(0deg) scale(1); filter: brightness(1); }
+  28%  { transform: rotateY(90deg) scale(1.08); filter: brightness(0.5); }
+  29%  { transform: rotateY(-90deg) scale(1.08); filter: brightness(0.5); }
+  75%  { transform: rotateY(-6deg) scale(1.02); filter: brightness(1.15); }
+  100% { transform: rotateY(0deg) scale(1); filter: brightness(1); }
 }
 .skyjo-card.sj-flip-full {
-  animation: sjFlipRevealFull 0.42s cubic-bezier(.4,0,.2,1) forwards;
+  animation: sjFlipRevealFull 0.46s cubic-bezier(.4,0,.2,1) forwards;
   transform-style: preserve-3d;
-  perspective: 600px;
 }
 
-/* ── Placement : la carte "atterrit" sur la grille ── */
+/* ── Atterrissage carte sur grille ── */
 @keyframes sjCardLand {
-  0%   { transform: scale(0.72) translateY(-14px) rotateZ(-8deg); opacity: 0.5; box-shadow: 0 12px 28px rgba(0,0,0,0.5); }
-  55%  { transform: scale(1.1) translateY(2px) rotateZ(2deg); opacity: 1; box-shadow: 0 4px 14px rgba(0,0,0,0.3); }
-  80%  { transform: scale(0.97) translateY(0px) rotateZ(-1deg); }
-  100% { transform: scale(1) translateY(0px) rotateZ(0deg); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+  0%   { transform: scale(0.68) translateY(-18px) rotateZ(-10deg); opacity: 0.4; filter: brightness(1.4); }
+  45%  { transform: scale(1.12) translateY(3px) rotateZ(3deg); opacity: 1; filter: brightness(1.2); }
+  70%  { transform: scale(0.96) translateY(0px) rotateZ(-1.5deg); filter: brightness(1); }
+  88%  { transform: scale(1.02) translateY(0px) rotateZ(0.5deg); }
+  100% { transform: scale(1) translateY(0px) rotateZ(0deg); filter: brightness(1); }
 }
 .skyjo-card.sj-card-land {
-  animation: sjCardLand 0.38s cubic-bezier(.17,.89,.32,1.28) forwards;
+  animation: sjCardLand 0.44s cubic-bezier(.17,.89,.32,1.28) forwards;
 }
 
-/* ── Suppression de colonne complète ── */
+/* ── Suppression colonne complète ── */
 @keyframes sjColRemove {
-  0%   { transform: scale(1) translateY(0); opacity: 1; }
-  25%  { transform: scale(1.08) translateY(-4px); opacity: 1; box-shadow: 0 0 0 3px #eab308, 0 0 16px rgba(234,179,8,0.6); }
-  100% { transform: scale(0) translateY(20px) rotateZ(15deg); opacity: 0; }
+  0%   { transform: scale(1) translateY(0) rotateZ(0deg); opacity: 1; }
+  20%  { transform: scale(1.12) translateY(-5px) rotateZ(-3deg); opacity: 1;
+         box-shadow: 0 0 0 3px #fbbf24, 0 0 24px rgba(251,191,36,0.7); filter: brightness(1.3); }
+  100% { transform: scale(0) translateY(24px) rotateZ(18deg); opacity: 0; filter: brightness(0.8); }
 }
 .skyjo-card.sj-col-remove {
-  animation: sjColRemove 0.48s cubic-bezier(.4,0,1,1) forwards;
+  animation: sjColRemove 0.5s cubic-bezier(.4,0,1,1) forwards;
 }
 
-/* ── Carte de défausse : glissement depuis la pile ── */
+/* ── Défausse : slide-in ── */
 @keyframes sjDiscardSlideIn {
-  0%   { transform: translateY(-10px) scale(0.88) rotateZ(8deg); opacity: 0; }
-  55%  { transform: translateY(2px) scale(1.06) rotateZ(-2deg); opacity: 1; }
-  100% { transform: translateY(0) scale(1) rotateZ(0deg); opacity: 1; }
+  0%   { transform: translateY(-14px) scale(0.82) rotateZ(10deg); opacity: 0; filter: brightness(1.3); }
+  50%  { transform: translateY(3px) scale(1.08) rotateZ(-3deg); opacity: 1; filter: brightness(1.15); }
+  75%  { transform: translateY(-1px) scale(1.01) rotateZ(1deg); }
+  100% { transform: translateY(0) scale(1) rotateZ(0deg); opacity: 1; filter: brightness(1); }
 }
 #skyjoDiscardCard.sj-discard-slide {
-  animation: sjDiscardSlideIn 0.35s cubic-bezier(.17,.89,.32,1.28) forwards;
+  animation: sjDiscardSlideIn 0.38s cubic-bezier(.17,.89,.32,1.28) forwards;
 }
 
-/* ── Halo de confirmation vert sur carte placée ── */
+/* ── Halo vert après placement ── */
 @keyframes sjPlaceGlow {
-  0%   { box-shadow: 0 0 0 0 rgba(0,201,167,0.8), 0 1px 4px rgba(0,0,0,0.3); }
-  50%  { box-shadow: 0 0 0 8px rgba(0,201,167,0), 0 1px 4px rgba(0,0,0,0.3); }
-  100% { box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+  0%   { box-shadow: 0 0 0 0 rgba(0,229,189,0.9), var(--sj-shadow); }
+  40%  { box-shadow: 0 0 0 9px rgba(0,229,189,0), var(--sj-shadow-hover); }
+  100% { box-shadow: var(--sj-shadow); }
 }
 .skyjo-card.sj-place-glow {
-  animation: sjPlaceGlow 0.55s ease-out forwards;
+  animation: sjPlaceGlow 0.58s ease-out forwards;
 }
 
-/* ── Shake (carte non-valide) ── */
+/* ── Shake (feedback d'erreur) ── */
 @keyframes sjShake {
-  0%,100% { transform: translateX(0); }
-  20%      { transform: translateX(-5px) rotateZ(-3deg); }
-  40%      { transform: translateX(5px) rotateZ(3deg); }
-  60%      { transform: translateX(-3px) rotateZ(-2deg); }
-  80%      { transform: translateX(3px) rotateZ(2deg); }
+  0%,100% { transform: translateX(0) rotateZ(0deg); }
+  15%     { transform: translateX(-6px) rotateZ(-4deg); }
+  35%     { transform: translateX(6px) rotateZ(4deg); }
+  55%     { transform: translateX(-4px) rotateZ(-2.5deg); }
+  75%     { transform: translateX(4px) rotateZ(2.5deg); }
 }
-.sj-shake { animation: sjShake 0.35s ease; }
+.sj-shake { animation: sjShake 0.38s ease; }
 
-/* ── Bannière "C'est ton tour" : slide-in dramatique ── */
+/* ── Bannière tour : slide-in dramatique ── */
 @keyframes sjBannerMyTurn {
-  0%   { transform: translateY(-100%); opacity: 0; }
-  60%  { transform: translateY(4px); opacity: 1; }
-  100% { transform: translateY(0); opacity: 1; }
+  0%   { transform: translateY(-110%) scaleX(0.9); opacity: 0; }
+  55%  { transform: translateY(3px) scaleX(1.01); opacity: 1; }
+  100% { transform: translateY(0) scaleX(1); opacity: 1; }
 }
 #skyjoTurnBanner.sj-banner-enter {
-  animation: sjBannerMyTurn 0.32s cubic-bezier(.17,.89,.32,1.28) forwards;
+  animation: sjBannerMyTurn 0.34s cubic-bezier(.17,.89,.32,1.28) forwards;
 }
 
-/* ── Particules de score lors d'une colonne complète ── */
+/* ── Particules colonne complète ── */
 .sj-particle {
   position: fixed;
   pointer-events: none;
-  font-size: 18px;
+  font-size: 16px;
   z-index: 9998;
-  animation: sjParticleFly 0.9s ease-out forwards;
+  animation: sjParticleFly 1s ease-out forwards;
   will-change: transform, opacity;
 }
 @keyframes sjParticleFly {
-  0%   { transform: translate(0,0) scale(1) rotateZ(0deg); opacity: 1; }
-  100% { transform: translate(var(--px), var(--py)) scale(0.4) rotateZ(var(--pr)); opacity: 0; }
+  0%   { transform: translate(0,0) scale(1.2) rotateZ(0deg); opacity: 1; }
+  100% { transform: translate(var(--px), var(--py)) scale(0.2) rotateZ(var(--pr)); opacity: 0; }
 }
 
-/* ── Reflet brillant sur la carte en main ── */
-#skyjoHeldCard {
-  position: relative;
-  overflow: hidden;
-}
-#skyjoHeldCard::after {
-  content: '';
-  position: absolute;
-  top: -50%; left: -50%;
-  width: 200%; height: 200%;
-  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.18) 50%, transparent 60%);
-  animation: sjHeldShine 2.2s ease-in-out infinite;
-  pointer-events: none;
-}
-@keyframes sjHeldShine {
-  0%,70%,100% { transform: translateX(-100%) rotateZ(10deg); }
-  40%         { transform: translateX(100%) rotateZ(10deg); }
-}
-
-/* ── Pile pioche : effet "profondeur" ── */
+/* ── Pile pioche : profondeur 3D ── */
 #skyjoDeckCard {
   position: relative;
+  transition: transform 0.2s cubic-bezier(.17,.89,.32,1.28), box-shadow 0.2s;
 }
 #skyjoDeckCard::before,
 #skyjoDeckCard::after {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 8px;
-  background: #1a4530;
+  border-radius: var(--sj-radius);
   pointer-events: none;
 }
 #skyjoDeckCard::before {
-  transform: translate(-2px, 3px);
+  background: #163d28;
+  transform: translate(-2.5px, 3.5px);
   z-index: -1;
-  opacity: 0.7;
+  opacity: 0.75;
 }
 #skyjoDeckCard::after {
-  transform: translate(-4px, 6px);
+  background: #0f2e1e;
+  transform: translate(-5px, 7px);
   z-index: -2;
-  opacity: 0.4;
+  opacity: 0.45;
 }
-/* Hover sur la pioche — léger lift */
 #skyjoDeckCard:hover {
-  transform: translateY(-3px) scale(1.04);
-  transition: transform 0.18s cubic-bezier(.17,.89,.32,1.28);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.55), 0 0 0 2px rgba(0,229,189,0.25);
 }
 #skyjoDeckCard:active {
-  transform: translateY(0) scale(0.97);
+  transform: translateY(-1px) scale(0.97);
+  box-shadow: var(--sj-shadow);
 }
 
-/* ── Défausse : hover lift ── */
+/* ── Défausse : hover ── */
+#skyjoDiscardCard {
+  transition: transform 0.2s cubic-bezier(.17,.89,.32,1.28), box-shadow 0.2s;
+}
 #skyjoDiscardCard:hover {
-  transform: translateY(-3px) scale(1.04);
-  transition: transform 0.18s cubic-bezier(.17,.89,.32,1.28);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.5), 0 0 0 2px rgba(255,255,255,0.12);
 }
 #skyjoDiscardCard:active {
-  transform: translateY(0) scale(0.97);
+  transform: translateY(-1px) scale(0.97);
 }
 
-/* ── Transition douce de la zone "HeldCard" ── */
+/* ── HeldCardWrap transition ── */
 #skyjoHeldCardWrap {
-  transition: opacity 0.2s, transform 0.2s;
-}
-#skyjoHeldCardWrap[style*="none"] {
-  opacity: 0; transform: scale(0.85);
+  transition: opacity 0.24s cubic-bezier(.4,0,.2,1), transform 0.24s cubic-bezier(.4,0,.2,1);
 }
 
-/* ── "Coup de tonnerre" lors d'un round end ── */
+/* ── Round end : pop-in cinématique ── */
 @keyframes sjRoundEndPop {
-  0%   { transform: scale(0.5) rotateZ(-8deg); opacity: 0; }
-  65%  { transform: scale(1.12) rotateZ(2deg); opacity: 1; }
-  100% { transform: scale(1) rotateZ(0deg); opacity: 1; }
+  0%   { transform: scale(0.45) rotateZ(-10deg) translateY(20px); opacity: 0; }
+  60%  { transform: scale(1.15) rotateZ(2deg) translateY(-3px); opacity: 1; }
+  80%  { transform: scale(0.97) rotateZ(-1deg); }
+  100% { transform: scale(1) rotateZ(0deg) translateY(0); opacity: 1; }
 }
 #skyjoRoundEnd #skyjoRoundEndEmoji {
   display: block;
-  animation: sjRoundEndPop 0.5s cubic-bezier(.17,.89,.32,1.28) both;
-  animation-delay: 0.1s;
+  animation: sjRoundEndPop 0.52s cubic-bezier(.17,.89,.32,1.28) both;
+  animation-delay: 0.08s;
 }
 #skyjoRoundEnd #skyjoRoundEndTitle {
-  animation: sjRoundEndPop 0.5s cubic-bezier(.17,.89,.32,1.28) both;
-  animation-delay: 0.22s;
+  animation: sjRoundEndPop 0.52s cubic-bezier(.17,.89,.32,1.28) both;
+  animation-delay: 0.2s;
   opacity: 0;
 }
 
-/* ── Indicateur "chargement" pendant appel RPC ── */
+/* ── Spinner RPC (discret, coin bas-droite) ── */
 @keyframes sjRpcSpinner {
   to { transform: rotate(360deg); }
 }
 #sjLoadingOverlay {
-  display: none;
-  position: absolute;
-  inset: 0;
-  z-index: 800;
-  background: rgba(0,0,0,0.0);
-  pointer-events: none;
+  display: none; position: absolute; inset: 0; z-index: 800;
+  background: transparent; pointer-events: none;
 }
 #sjLoadingOverlay.visible {
-  display: block;
-  pointer-events: all;
+  display: block; pointer-events: all;
 }
 #sjLoadingDot {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 28px; height: 28px;
-  margin: -14px 0 0 -14px;
-  border: 3px solid rgba(255,255,255,0.1);
+  position: absolute; bottom: 14px; right: 14px;
+  width: 20px; height: 20px;
+  border: 2.5px solid rgba(255,255,255,0.08);
   border-top-color: var(--green);
   border-radius: 50%;
-  animation: sjRpcSpinner 0.7s linear infinite;
-}
-
-/* ── Carte clickable : halo pulsant amélioré (vert vif) ── */
-.skyjo-card.skyjo-card-clickable {
-  cursor: pointer;
-  animation: sjCardPulseV2 1.5s ease-in-out infinite;
-  transition: transform 0.14s cubic-bezier(.17,.89,.32,1.28);
-}
-@keyframes sjCardPulseV2 {
-  0%,100% { box-shadow: 0 0 0 0 rgba(0,201,167,0.7), 0 1px 4px rgba(0,0,0,0.3); transform: scale(1); }
-  50%     { box-shadow: 0 0 0 6px rgba(0,201,167,0), 0 1px 4px rgba(0,0,0,0.3); transform: scale(1.025); }
-}
-.skyjo-card.skyjo-card-clickable:hover {
-  transform: scale(1.09) translateY(-2px);
-  box-shadow: 0 6px 18px rgba(0,201,167,0.4) !important;
-  z-index: 2;
-  position: relative;
-}
-.skyjo-card.skyjo-card-clickable:active {
-  transform: scale(1.02) translateY(0px);
+  animation: sjRpcSpinner 0.65s linear infinite;
+  box-shadow: 0 0 10px rgba(0,201,167,0.3);
 }
 
 .pendu-svg{display:block;margin:0 auto 8px;}
@@ -9990,6 +10153,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     var grid=document.getElementById(gridId);
     // Garde les éléments précédents pour détecter les nouvelles révélations
     var prevEls = Array.from(grid.querySelectorAll('.skyjo-card'));
+    var isFirstRender = prevEls.length === 0;
     grid.innerHTML='';
     var phase=state.phase;
     var isInit=phase==='init1';
@@ -10009,6 +10173,20 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
       var el=document.createElement('div');
       el.className='skyjo-card';
+
+      // Stagger d'entrée au premier rendu
+      if(isFirstRender){
+        el.style.opacity = '0';
+        el.style.transform = 'scale(0.6) translateY(10px)';
+        el.style.transition = 'opacity 0.3s ease, transform 0.3s cubic-bezier(.17,.89,.32,1.28)';
+        el.style.transitionDelay = (idx * 40) + 'ms';
+        setTimeout(function(e){
+          e.style.opacity = '';
+          e.style.transform = '';
+        }(el), 50 + idx * 40 + 350);
+        setTimeout(function(e){ e.style.transition = ''; e.style.transitionDelay = ''; }(el), 50 + idx * 40 + 650);
+      }
+
       if(card.removed){
         el.classList.add('skyjo-col-complete');
         el.textContent='';
@@ -10016,22 +10194,22 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
         if(prevEl && !wasRemoved){
           el.classList.remove('skyjo-col-complete');
           el.classList.add('sj-col-remove');
-          setTimeout(function(e){ e.classList.remove('sj-col-remove'); e.classList.add('skyjo-col-complete'); }(el), 500);
+          setTimeout(function(e){ e.classList.remove('sj-col-remove'); e.classList.add('skyjo-col-complete'); }(el), 520);
           // Particules
           var rect = grid.getBoundingClientRect();
           var col = idx % 4;
           var row = Math.floor(idx / 4);
-          var cw = 44, ch = 62, gap = 4;
+          var cw = 46, ch = 64, gap = 5;
           var fakeEl = { getBoundingClientRect: function(){ return { left: rect.left + col*(cw+gap), top: rect.top + row*(ch+gap), width: cw, height: ch }; } };
           sjSpawnParticles(fakeEl);
         }
       } else if(card.revealed){
         el.textContent=card.value;
         el.setAttribute('data-val',card.value);
-        // Carte nouvellement révélée → animation de placement
-        if(wasHidden){
+        // Carte nouvellement révélée → animation de flip
+        if(wasHidden && !isFirstRender){
           el.classList.add('sj-flip-full');
-          setTimeout(function(e){ e.classList.remove('sj-flip-full'); sjPlaceGlow(e); }(el), 440);
+          setTimeout(function(e){ e.classList.remove('sj-flip-full'); sjPlaceGlow(e); }(el), 460);
         }
         if(canReplaceAny){
           el.classList.add('skyjo-card-clickable');
@@ -10052,6 +10230,16 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
         }
       }
       grid.appendChild(el);
+
+      // Déclenche le stagger d'entrée
+      if(isFirstRender){
+        (function(e, delay){
+          setTimeout(function(){
+            e.style.opacity = '1';
+            e.style.transform = 'scale(1) translateY(0)';
+          }, 60 + delay);
+        })(el, idx * 40);
+      }
     });
   }
 
@@ -10139,23 +10327,25 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     var rect = el.getBoundingClientRect();
     var cx = rect.left + rect.width/2;
     var cy = rect.top  + rect.height/2;
-    var emojis = ['✨','⭐','💫','🌟','🎉'];
-    for(var i=0; i<6; i++){
+    var emojis = ['✨','⭐','💫','🌟','🎉','🃏','💥'];
+    var count = 8;
+    for(var i=0; i<count; i++){
       (function(i){
         setTimeout(function(){
           var p = document.createElement('div');
           p.className = 'sj-particle';
           p.textContent = emojis[i % emojis.length];
-          var angle = (i / 6) * Math.PI * 2;
-          var dist = 55 + Math.random()*35;
+          var angle = (i / count) * Math.PI * 2 + (Math.random() * 0.5);
+          var dist = 50 + Math.random()*50;
           p.style.left = cx + 'px';
           p.style.top  = cy + 'px';
           p.style.setProperty('--px', (Math.cos(angle)*dist)+'px');
-          p.style.setProperty('--py', (Math.sin(angle)*dist - 30)+'px');
-          p.style.setProperty('--pr', (Math.random()*360-180)+'deg');
+          p.style.setProperty('--py', (Math.sin(angle)*dist - 40)+'px');
+          p.style.setProperty('--pr', (Math.random()*480-240)+'deg');
+          p.style.fontSize = (14 + Math.random()*8) + 'px';
           document.body.appendChild(p);
-          setTimeout(function(){ if(p.parentNode) p.parentNode.removeChild(p); }, 950);
-        }, i * 55);
+          setTimeout(function(){ if(p.parentNode) p.parentNode.removeChild(p); }, 1050);
+        }, i * 45 + Math.random()*30);
       })(i);
     }
   }
@@ -13547,7 +13737,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.9 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
