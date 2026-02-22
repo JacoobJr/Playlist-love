@@ -2211,7 +2211,7 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 }
 
 /* Écrans secondaires */
-#skyjoLockScreen, #skyjoWaitScreen, #skyjoRoundEnd, #skyjoGameEnd {
+#skyjoWaitScreen, #skyjoRoundEnd, #skyjoGameEnd {
   flex: 1; display: none; flex-direction: column;
   align-items: center; justify-content: center;
   padding: 24px; overflow-y: auto; gap: 14px;
@@ -4860,16 +4860,7 @@ body.light #counterBlock.glowing .c-num-big {
   </div>
   <div class="game-view-body" style="padding:0;position:relative;">
 
-    <!-- ÉCRAN CODE D'ACCÈS -->
-    <div id="skyjoLockScreen" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;text-align:center;">
-      <div style="font-size:56px">🔒</div>
-      <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--text)">Accès Skyjo</div>
-      <div style="font-size:13px;color:var(--muted);max-width:260px">Ce jeu est en cours de développement — entre le code pour y accéder</div>
-      <input type="password" id="skyjoLockInput" placeholder="Code..." autocomplete="off" style="width:100%;max-width:240px;padding:12px 16px;font-size:16px;border:1.5px solid var(--border);border-radius:10px;background:var(--s2);color:var(--text);font-family:'DM Sans',sans-serif;outline:none;text-align:center;letter-spacing:3px;">
-      <div id="skyjoLockErr" style="font-size:12px;color:#e05555;display:none;">❌ Code incorrect</div>
-      <button onclick="skyjoCheckLock()" style="padding:12px 32px;background:var(--green);color:#000;font-weight:700;font-size:14px;font-family:'DM Sans',sans-serif;border:none;border-radius:50px;cursor:pointer;">Valider</button>
-      <span onclick="closeSkyjoGame()" style="font-size:12px;color:var(--muted);cursor:pointer;padding:4px 0;">Annuler</span>
-    </div>
+    <!-- écran lock supprimé — accès par profil uniquement -->
 
     <!-- ÉCRAN ATTENTE (stand-by, en attente de l'autre joueur) -->
     <div id="skyjoWaitScreen" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:20px;text-align:center;">
@@ -9047,10 +9038,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 (function(){
   var SKYJO_TABLE    = 'skyjo_games';
   var SKYJO_PRESENCE = 'skyjo_presence';
-  var SKYJO_LOCK_HASH = '1efb505088f507510d26dbaa162b373948cd26b7a90782ed195e8058aeceea5c';
-
   // ─── État global ──────────────────────────────────────
-  var _unlocked      = false;
   var _gameId        = null;
   var _me            = null;   // 'girl' | 'boy'
   var _other         = null;
@@ -9086,7 +9074,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
   // ─── Affichage écrans ────────────────────────────────
   function showScreen(id){
-    ['skyjoLockScreen','skyjoWaitScreen','skyjoGameArea','skyjoRoundEnd','skyjoGameEnd'].forEach(function(sid){
+    ['skyjoWaitScreen','skyjoGameArea','skyjoRoundEnd','skyjoGameEnd'].forEach(function(sid){
       var el=document.getElementById(sid);
       if(!el) return;
       if(sid==='skyjoGameArea'){ el.classList.remove('sja-visible'); el.style.display=''; }
@@ -9177,31 +9165,55 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   // ─── Lock + Ouverture ────────────────────────────────
   window.openSkyjoLock = function(){
     var profile=getProfile();
-    if(!profile){alert('Tu dois être connecté pour jouer à Skyjo !');return;}
     resetZoom();
+    particleActive=false; hideDance(); window.scrollTo(0,0);
+    if(profile){
+      // Connecté → s'assurer que le token Supabase est chargé avant d'entrer
+      // (sbLogin fait sbLoadSession en priorité, sans redemander le code)
+      sbLogin(profile).then(function(){
+        _openSkyjoWithProfile(profile);
+      });
+    } else {
+      // Pas connecté → afficher le choix de profil
+      document.getElementById('skyjoAuthModal').style.display='flex';
+    }
+  };
+
+  window.skyjoAuthSelect = function(profile){
+    document.getElementById('skyjoAuthModal').style.display='none';
+    // Connexion réelle obligatoire : sans token Supabase valide, skyjo_presence renvoie 403.
+    // Si session existante → sbLogin la restaure immédiatement (pas de modal code).
+    // Sinon → demande le code via showProfileCodeModal, puis charge le token.
+    if(typeof sbLoadSession === 'function' && sbLoadSession(profile)){
+      // Session valide en sessionStorage → token restauré, entrer directement
+      if(window._profileSave) window._profileSave(profile);
+      if(window._profileApply) window._profileApply(profile);
+      _openSkyjoWithProfile(profile);
+    } else if(window.showProfileCodeModal){
+      // Pas de session → demander le vrai code (établit sbLogin + token)
+      window.showProfileCodeModal(profile, function(){
+        if(window._profileSave) window._profileSave(profile);
+        if(window._profileApply) window._profileApply(profile);
+        if(window._profileLoadMoods) window._profileLoadMoods();
+        _openSkyjoWithProfile(profile);
+      });
+    } else {
+      // Fallback : tenter sbLogin silencieux (ne devrait pas arriver)
+      sbLogin(profile).then(function(ok){
+        if(ok) _openSkyjoWithProfile(profile);
+      });
+    }
+  };
+
+  window.skyjoAuthClose = function(){
+    document.getElementById('skyjoAuthModal').style.display='none';
+  };
+
+  function _openSkyjoWithProfile(profile){
     document.getElementById('skyjoView').classList.add('active');
     document.querySelector('.bottom-nav').style.display='none';
-    particleActive=false;hideDance();window.scrollTo(0,0);
-    if(_unlocked) enterLobby();
-    else{
-      showScreen('skyjoLockScreen');
-      var inp=document.getElementById('skyjoLockInput');
-      if(inp){inp.value='';setTimeout(function(){inp.focus();},80);}
-    }
-  };
-  window.skyjoCheckLock=async function(){
-    var val=(document.getElementById('skyjoLockInput').value||'').trim().toUpperCase();
-    var h=await _sha256(val);
-    var errEl=document.getElementById('skyjoLockErr');
-    if(h===SKYJO_LOCK_HASH){
-      _unlocked=true;errEl.style.display='none';enterLobby();
-    } else {
-      errEl.style.display='block';
-      document.getElementById('skyjoLockInput').value='';
-      document.getElementById('skyjoLockInput').focus();
-    }
-  };
-  document.getElementById('skyjoLockInput').addEventListener('keydown',function(e){if(e.key==='Enter')window.skyjoCheckLock();});
+    enterLobby();
+  }
 
   // ─── Lobby ───────────────────────────────────────────
   function enterLobby(){
@@ -13049,7 +13061,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.20.5 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -14109,5 +14121,25 @@ console.log('✨ Jayana UX v.UX1 chargé');
 
 })();
 </script>
+<div id="skyjoAuthModal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;padding:24px;">
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:28px 24px;max-width:300px;width:100%;text-align:center;font-family:'DM Sans',sans-serif;">
+    <div style="font-size:40px;margin-bottom:10px;">🃏</div>
+    <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;">Skyjo</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px;">Choisis ton profil pour jouer</div>
+    <div style="display:flex;gap:10px;margin-bottom:16px;">
+      <button onclick="skyjoAuthSelect('girl')" style="flex:1;padding:14px 0;background:rgba(232,121,160,0.12);color:#e879a0;border:1.5px solid rgba(232,121,160,0.4);border-radius:14px;font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <span style="font-size:24px;">👧</span>
+        <span>Zelda</span>
+      </button>
+      <button onclick="skyjoAuthSelect('boy')" style="flex:1;padding:14px 0;background:rgba(91,156,246,0.12);color:#5b9cf6;border:1.5px solid rgba(91,156,246,0.4);border-radius:14px;font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <span style="font-size:24px;">👦</span>
+        <span>Link</span>
+      </button>
+    </div>
+    <span onclick="skyjoAuthClose()" style="font-size:12px;color:var(--muted);cursor:pointer;">Annuler</span>
+  </div>
+</div>
+
 </body>
 </html>
+        
