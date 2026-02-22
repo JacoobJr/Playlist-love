@@ -9397,8 +9397,10 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
         return; // déjà géré par le timer de présence
       }
 
-      // ── Partie retrouvée : si on attendait une reconnexion → reprendre ─
+      // ── Partie retrouvée : si on attendait une reconnexion → reprendre
+      // SEULEMENT si l'adversaire est vraiment revenu en ligne
       if(_waitingForReconnect){
+        if(!isOnline) return; // partie toujours là mais adv toujours absent → on attend
         _waitingForReconnect = false;
         stopReconnectWait();
         var wb = document.getElementById('skyjoCountdownModal');
@@ -12809,7 +12811,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.1 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.02.1 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
