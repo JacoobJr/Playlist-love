@@ -9766,6 +9766,8 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     _launched=false;
     _waitingNextRound=false;
     _roundEndShown=false;
+    _bothAbsentHandled=false;
+    _lastPresenceSent=0;
     if(_oppGoneTimer){clearTimeout(_oppGoneTimer);_oppGoneTimer=null;}
   }
 
@@ -9789,8 +9791,11 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     clearInterval(_presTimer); _presTimer=null;
     _presTimer=setInterval(upsertPresence, newInterval);
   }
+  var _lastPresenceSent = 0; // timestamp local du dernier heartbeat envoyé
+
   function upsertPresence(){
     if(!_me) return;
+    _lastPresenceSent = Date.now(); // toujours mis à jour, même si fetch échoue
     function doPost(){
       fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE,{
         method:'POST',
@@ -10084,17 +10089,23 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     clearInterval(_pollTimer); _pollTimer=null;
     _pollTimer=setInterval(fetchState, newInterval);
   }
+  var BOTH_ABSENT_TIMEOUT_MS = 40000; // 40s sans heartbeat des deux = clôture
+  var _bothAbsentHandled = false; // évite double déclenchement
+
   function fetchState(){
     if(!_gameId||_saving) return;
     var oppKey = _me==='girl' ? 'boy' : 'girl';
     Promise.all([
       fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+_gameId+'&select=id,status,state,created_by',{headers:sbHeaders()}).then(function(r){return r.json();}),
-      fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE+'?profile=eq.'+oppKey+'&select=updated_at',{headers:sbHeaders()}).then(function(r){return r.json();})
+      fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE+'?select=profile,updated_at',{headers:sbHeaders()}).then(function(r){return r.json();})
     ])
     .then(function(results){
       if(_saving) return;
       var rows     = results[0];
-      var presRows = results[1];
+      var allPres  = results[1]; // toutes les présences
+      // Séparer présence opp et moi
+      var presRows = Array.isArray(allPres) ? allPres.filter(function(p){ return p.profile===oppKey; }) : [];
+      var myPresRows= Array.isArray(allPres) ? allPres.filter(function(p){ return p.profile===_me; })  : [];
 
       // Mettre à jour le dot de présence adversaire
       var dot = document.getElementById('skyjoOppPresenceDot');
@@ -10104,6 +10115,39 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
         dot.style.background = isOnline ? '#22c55e' : '#555';
         dot.style.boxShadow  = isOnline ? '0 0 5px rgba(34,197,94,0.7)' : 'none';
         dot.title            = isOnline ? 'En ligne' : 'Hors ligne';
+      }
+
+      // ── Les DEUX joueurs absents depuis +40s → clôture automatique ─────
+      var now = Date.now();
+      var myLastSeen  = _lastPresenceSent > 0
+        ? now - _lastPresenceSent   // timestamp local (plus fiable que Supabase pour soi-même)
+        : (myPresRows[0] ? now - new Date(myPresRows[0].updated_at).getTime() : 99999999);
+      var oppLastSeen = presRows[0]
+        ? now - new Date(presRows[0].updated_at).getTime()
+        : 99999999;
+      var bothAbsent  = myLastSeen > BOTH_ABSENT_TIMEOUT_MS && oppLastSeen > BOTH_ABSENT_TIMEOUT_MS;
+
+      if(bothAbsent && !_bothAbsentHandled && _launched){
+        _bothAbsentHandled = true;
+        stopAll();
+        var gid = _gameId;
+        resetState();
+        // Supprimer la partie côté Supabase
+        if(gid){
+          fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+gid,{
+            method:'DELETE', headers:sbHeaders()
+          }).catch(function(){});
+        }
+        // Supprimer les deux présences (nettoyage complet)
+        fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE,{
+          method:'DELETE', headers:sbHeaders()
+        }).catch(function(){});
+        // Afficher le message puis retour au lobby
+        showSkyjoAlert('⏱️', 'Partie expirée — les deux joueurs étaient absents', function(){
+          _bothAbsentHandled = false;
+          enterLobby();
+        });
+        return;
       }
 
       // ── Adversaire hors-ligne : démarrer le timer de grâce ────────────
