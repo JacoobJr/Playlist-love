@@ -2244,7 +2244,10 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   padding: 4px 8px; position: relative; gap: 4px;
 }
 .skyjo-player-zone.zone-opp { background: rgba(79,70,229,0.08); border-bottom: 1px solid rgba(79,70,229,0.15); }
-.skyjo-player-zone.zone-me  { background: rgba(5,150,105,0.08); border-top:    1px solid rgba(5,150,105,0.15); }
+.skyjo-player-zone.zone-me  {
+  background: rgba(5,150,105,0.08); border-top: 1px solid rgba(5,150,105,0.15);
+  padding-bottom: max(8px, env(safe-area-inset-bottom, 8px));
+}
 
 /* Infos joueur — ligne compacte */
 .skyjo-player-info { display: flex; align-items: center; gap: 6px; }
@@ -2282,10 +2285,10 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 #skyjoHeldCardWrap {
   display: none; flex-direction: column; align-items: center; gap: 2px;
 }
-#skyjoHeldCard { animation: sjHeldPulse 1s ease-in-out infinite; }
+#skyjoHeldCard { animation: sjHeldPulse 1.4s ease-in-out infinite; }
 @keyframes sjHeldPulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(167,139,250,0.7); transform: scale(1); }
-  50%     { box-shadow: 0 0 0 5px rgba(167,139,250,0); transform: scale(1.04); }
+  0%,100% { box-shadow: 0 0 0 0 rgba(167,139,250,0.45); transform: scale(1); }
+  50%     { box-shadow: 0 0 0 6px rgba(167,139,250,0); transform: scale(1.02); }
 }
 #skyjoHeldLabel { font-size: 8px; font-weight: 700; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.8px; }
 #skyjoDiscardBtn {
@@ -2308,7 +2311,21 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 
 /* Dos vert sobre */
 .skyjo-card-back,
-.skyjo-card.skyjo-card-hidden { background: #3a7d52; color: rgba(255,255,255,0.4); }
+.skyjo-card.skyjo-card-hidden {
+  background: #1e4d34;
+  color: rgba(255,255,255,0.0); /* texte invisible par défaut */
+  font-size: calc(var(--sj-fs) * 1.5);
+  font-weight: 900;
+  letter-spacing: -1px;
+}
+/* Le "?" s'affiche via pseudo-element pour être toujours visible */
+.skyjo-card.skyjo-card-hidden::after {
+  content: '?';
+  color: rgba(255,255,255,0.55);
+  font-size: calc(var(--sj-fs) * 1.4);
+  font-weight: 900;
+  position: absolute;
+}
 
 /* Carte en main */
 .skyjo-card-held { background: #6d5acd; color: #fff; }
@@ -2335,15 +2352,15 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 .skyjo-card[data-val="12"] { background: #9b1a5e; color: #fff; }
 
 /* Interactif */
-/* Cartes échangeables (carte en main) : pulse blanc doux */
+/* Cartes jouables : léger halo vert foncé, rythme lent */
 .skyjo-card.skyjo-card-clickable {
   cursor: pointer;
-  animation: sjCardPulse 0.9s ease-in-out infinite;
+  animation: sjCardPulse 1.6s ease-in-out infinite;
 }
-.skyjo-card.skyjo-card-clickable:active { transform: scale(1.08); }
+.skyjo-card.skyjo-card-clickable:active { transform: scale(1.07); }
 @keyframes sjCardPulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.55), 0 1px 4px rgba(0,0,0,0.3); transform: scale(1); }
-  50%     { box-shadow: 0 0 0 4px rgba(255,255,255,0), 0 1px 4px rgba(0,0,0,0.3);   transform: scale(1.04); }
+  0%,100% { box-shadow: 0 0 0 0 rgba(22,101,52,0.7), 0 1px 4px rgba(0,0,0,0.3); transform: scale(1); }
+  50%     { box-shadow: 0 0 0 5px rgba(22,101,52,0), 0 1px 4px rgba(0,0,0,0.3);   transform: scale(1.02); }
 }
 .skyjo-card.skyjo-card-hidden:active    { transform: scale(1.05); }
 .skyjo-card.skyjo-col-complete { opacity: 0.28; pointer-events: none; filter: grayscale(50%); }
@@ -8995,7 +9012,8 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
         var infoH    = 30;  // ligne avatar+nom par zone joueur × 2 = 60
         var gapH     = 16;  // gaps et paddings divers
 
-        var availH = vh - headerH - bannerH - midH - phaseH - (infoH*2) - gapH;
+        var safeB  = 12; // safe-area approx (nav cachée, on garde une petite marge)
+        var availH = vh - headerH - bannerH - midH - phaseH - (infoH*2) - gapH - safeB;
         // availH = espace pour 6 rangées de cartes (2 grilles × 3 rangées)
         var cardH = Math.floor((availH - 5*4) / 6); // 5 gaps de 4px
 
