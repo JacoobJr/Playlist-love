@@ -9790,8 +9790,10 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     // Au retour au premier plan : retarder le premier heartbeat de 3s
     // pour laisser fetchState() lire les vrais timestamps Supabase (figés pendant l'absence)
     // avant qu'upsertPresence() les écrase avec now().
-    if(!document.hidden && _presTimer){
-      clearInterval(_presTimer); _presTimer = null;
+    // Note : on ne vérifie plus _presTimer car il a pu être stoppé explicitement par pauseSkyjo().
+    if(!document.hidden){
+      _absenceStart = 0; // reset : évite d'accumuler plusieurs absences courtes
+      if(_presTimer){ clearInterval(_presTimer); _presTimer = null; }
       setTimeout(function(){
         if(!_me) return;
         upsertPresence();
@@ -11654,9 +11656,20 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   // (déjà défini plus haut — on patch renderState pour afficher le bouton en jeu)
 
   // Expose les fonctions de refresh de taux pour le module bg-pause externe
-  window._skyjoRefreshRates = function(){
-    _refreshPollRate();
-    _refreshPresenceRate();
+  // isPausing=true → stoppe heartbeat + poll (gèle les timestamps)
+  // isPausing=false → reprend tout (avec délai 3s sur le heartbeat)
+  window._skyjoRefreshRates = function(isPausing){
+    if(isPausing){
+      // ── PAUSE : stopper explicitement heartbeat et poll ──
+      // On ne peut pas se fier à document.hidden sur mobile (reste false sur certains browsers)
+      // donc on arrête les timers directement, sans condition.
+      if(_presTimer){ clearInterval(_presTimer); _presTimer = null; }
+      stopPoll();
+    } else {
+      // ── REPRISE : relancer poll immédiatement + heartbeat après 3s ──
+      _refreshPollRate();
+      _refreshPresenceRate();
+    }
   };
   // Enregistre l'heure exacte de départ de la page
   window._skyjoMarkAbsence = function(){
@@ -11715,8 +11728,8 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       el.style.animationPlayState = 'paused';
     });
 
-    // Ralentit les timers via les fonctions exposées par le module Skyjo
-    if(typeof window._skyjoRefreshRates === 'function') window._skyjoRefreshRates();
+    // Stoppe heartbeat + poll via le module Skyjo (passe isPausing=true)
+    if(typeof window._skyjoRefreshRates === 'function') window._skyjoRefreshRates(true);
   }
 
   function resumeSkyjo(){
@@ -11727,8 +11740,8 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       el.style.animationPlayState = '';
     });
 
-    // Remet les timers à vitesse normale
-    if(typeof window._skyjoRefreshRates === 'function') window._skyjoRefreshRates();
+    // Remet les timers à vitesse normale (passe isPausing=false)
+    if(typeof window._skyjoRefreshRates === 'function') window._skyjoRefreshRates(false);
   }
 
   // visibilitychange : déclenché sur onglet caché, changement d'app, veille écran
@@ -14624,7 +14637,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.38 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
