@@ -9770,6 +9770,8 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     _lastPresenceSent=0;
     _absenceStart=0;
     window._sjLastSeenLiveTs = 0;
+    _sjAnimPlaying = false;
+    _sjPendingRenderRow = null;
     if(_oppGoneTimer){clearTimeout(_oppGoneTimer);_oppGoneTimer=null;}
   }
 
@@ -10262,7 +10264,28 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   function stopPoll(){if(_pollTimer){clearInterval(_pollTimer);_pollTimer=null;}}
 
   // ─── Rendu ───────────────────────────────────────────
+  var _sjAnimPlaying = false;
+  var _sjPendingRenderRow = null;
+
+  function _sjAnimDone(){
+    _sjAnimPlaying = false;
+    if(_sjPendingRenderRow){
+      var row = _sjPendingRenderRow;
+      _sjPendingRenderRow = null;
+      _doRenderState(row);
+    }
+  }
+
   function renderState(gameRow){
+    // Si une animation live est en cours, mettre en attente et ne pas couper l'animation
+    if(_sjAnimPlaying){
+      _sjPendingRenderRow = gameRow;
+      return;
+    }
+    _doRenderState(gameRow);
+  }
+
+  function _doRenderState(gameRow){
     var state=gameRow.state;
     if(!state) return;
     var prevState = _gameState;
@@ -10551,11 +10574,12 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     if(_pendingLiveAnim){
       var pla = _pendingLiveAnim;
       console.log('[SKYJO-ANIM] pendingLiveAnim type='+pla.type, pla);
+      _sjAnimPlaying = true; // bloquer renderState pendant l'animation
 
       if(pla.type === 'draw'){
-        // Pioche → carte vole vers oppHeldEl
-        sjAnimFly(pla.sR, pla.dR, pla.val, {duration:420, flip: pla.flip});
-        // Afficher oppHeldWrap après l'animation
+        sjAnimFly(pla.sR, pla.dR, pla.val, {duration:420, flip: pla.flip, onDone: function(){
+          _sjAnimDone();
+        }});
         if(oppHeldWrap && oppHeldEl){
           setTimeout(function(){
             if(!_gameState) return;
@@ -10573,20 +10597,20 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
         }
 
       } else if(pla.type === 'replace'){
-        // Même pattern que discard_held : le clone vole vers pla.dR (rect du signal)
-        // On masque la case cible dans le nouveau DOM pour éviter le flash
         var newTargetOppEl = sjGetCardEl('skyjoOpponentGrid', pla.idx);
         if(newTargetOppEl) newTargetOppEl.style.visibility = 'hidden';
         if(!pla.usingFallback && oppHeldEl) oppHeldEl.style.visibility = 'hidden';
         sjAnimFly(pla.sR, pla.dR, pla.val, {duration:440, flip:false, onDone:function(){
           if(newTargetOppEl){ newTargetOppEl.style.visibility = ''; sjPlaceGlow(newTargetOppEl); }
           if(!pla.usingFallback && oppHeldEl) oppHeldEl.style.visibility = '';
+          _sjAnimDone();
         }});
 
       } else if(pla.type === 'discard_held'){
         if(!pla.usingFallback && oppHeldEl) oppHeldEl.style.visibility = 'hidden';
         sjAnimFly(pla.sR, pla.dR, pla.val, {duration:380, flip:false, onDone:function(){
           if(!pla.usingFallback && oppHeldEl) oppHeldEl.style.visibility = '';
+          _sjAnimDone();
         }});
       }
     }
@@ -14693,7 +14717,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.15 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8x - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
