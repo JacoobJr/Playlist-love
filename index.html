@@ -1915,6 +1915,17 @@ body.subview-open #themeToggle { display: none; }
 #hiddenPage.active ~ #floatingThemeBtn,
 body:has(#hiddenPage.active) #floatingThemeBtn { opacity: 0 !important; pointer-events: none !important; }
 body:has(#hiddenPage.active) #themeToggleHome { opacity: 0 !important; pointer-events: none !important; }
+/* Masquer le header principal quand InstaLove est ouvert */
+body:has(#hiddenPage.active) header,
+body:has(#hiddenPage.active) header + div { visibility: hidden !important; pointer-events: none !important; }
+
+/* ══ InstaLove tab card ══ */
+#instaloveTabCard:active #instaloveTabCta { opacity: 0.75; transform: scale(0.97); }
+@keyframes instalovePulse {
+  0%,100% { box-shadow: 0 8px 32px rgba(238,42,123,0.35); }
+  50%     { box-shadow: 0 8px 48px rgba(238,42,123,0.6), 0 0 0 8px rgba(238,42,123,0.08); }
+}
+#instaloveTabCard > div:first-child { animation: instalovePulse 3s ease-in-out infinite; }
 /* Masqué dans Quiz, Jeux et sous-jeux (ils ont leur propre bouton icône) */
 body:has(#quizView.active) #floatingThemeBtn,
 body:has(#gamesView.active) #floatingThemeBtn,
@@ -5296,6 +5307,33 @@ body.light #counterBlock.glowing .c-num-big {
 </div><!-- /yamJeuxTab -->
 
 <!-- ═══════════════════════════════════════════
+     MESSAGES TAB — InstaLove
+═══════════════════════════════════════════ -->
+<div id="yamMessagesTab" class="yam-tab-panel">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;padding:32px 24px;gap:0;">
+
+    <!-- Icône InstaLove -->
+    <div onclick="openHiddenPage()" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:0;-webkit-tap-highlight-color:transparent;" id="instaloveTabCard">
+      <!-- Logo Instagram dégradé -->
+      <div style="width:90px;height:90px;border-radius:22px;background:linear-gradient(135deg,#f9ce34 0%,#ee2a7b 50%,#405de6 100%);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(238,42,123,0.35);margin-bottom:18px;position:relative;overflow:hidden;">
+        <!-- Halo animé -->
+        <div style="position:absolute;inset:0;border-radius:22px;background:linear-gradient(135deg,rgba(255,255,255,0.15) 0%,transparent 60%);pointer-events:none;"></div>
+        <svg viewBox="0 0 58 58" fill="none" width="52" height="52">
+          <rect x="6" y="6" width="46" height="46" rx="13" stroke="white" stroke-width="3" fill="none"/>
+          <circle cx="29" cy="29" r="10" stroke="white" stroke-width="3" fill="none"/>
+          <circle cx="42" cy="16" r="3" fill="white"/>
+        </svg>
+      </div>
+      <!-- Nom -->
+      <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;background:linear-gradient(90deg,#f9ce34,#ee2a7b 50%,#405de6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;line-height:1.1;">InstaLove</div>
+      <!-- Tagline -->
+      <div style="font-size:13px;color:var(--muted);margin-bottom:0;">Messagerie privée ✨</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
      NOUS TAB extra content (books + wheel)
      injected inside yamNousTab above,
      but books/wheel need to come before close
@@ -5377,35 +5415,17 @@ body.light #counterBlock.glowing .c-num-big {
 ══════════════════════════════════════════ */
 (function(){
   var TAB_MAP = {
-    home:    { panel: 'yamHomeTab',    nav: 'navHome' },
-    messages:{ panel: null,            nav: 'navMessages' },  // opens hiddenPage
-    jeux:    { panel: 'yamJeuxTab',    nav: 'navJeux' },
-    musique: { panel: 'yamMusiqueTab', nav: 'navMusique' },
-    nous:    { panel: 'yamNousTab',    nav: 'navNous' }
+    home:    { panel: 'yamHomeTab',     nav: 'navHome' },
+    messages:{ panel: 'yamMessagesTab', nav: 'navMessages' },
+    jeux:    { panel: 'yamJeuxTab',     nav: 'navJeux' },
+    musique: { panel: 'yamMusiqueTab',  nav: 'navMusique' },
+    nous:    { panel: 'yamNousTab',     nav: 'navNous' }
   };
   var _currentTab = 'home';
 
   window.yamSwitchTab = function(tab) {
     // Close all floating views/subviews before switching tabs
     if(window.closeAllViews) window.closeAllViews();
-
-    // Messages = ouvre InstaLove directement (toggleLockPopup)
-    if(tab === 'messages') {
-      // Set messages nav active
-      Object.keys(TAB_MAP).forEach(function(key) {
-        var nav = document.getElementById(TAB_MAP[key].nav);
-        if(nav) nav.classList.remove('nav-active');
-        if(TAB_MAP[key].panel) {
-          var el = document.getElementById(TAB_MAP[key].panel);
-          if(el) el.classList.remove('active');
-        }
-      });
-      var navMsgEl = document.getElementById('navMessages');
-      if(navMsgEl) navMsgEl.classList.add('nav-active');
-      if(window.toggleLockPopup) window.toggleLockPopup();
-      _currentTab = 'messages';
-      return;
-    }
 
     // Hide all panels and nav items
     Object.keys(TAB_MAP).forEach(function(key) {
@@ -5437,22 +5457,20 @@ body.light #counterBlock.glowing .c-num-big {
     if(window.updateFloatingThemeBtn) window.updateFloatingThemeBtn();
   };
 
-  // When hiddenPage closes, remove messages nav active highlight and restore home if needed
+  // When hiddenPage closes, restore messages tab as active
   document.addEventListener('hiddenPageClosed', function() {
     var navMsgEl = document.getElementById('navMessages');
-    if(navMsgEl) navMsgEl.classList.remove('nav-active');
-    // Restore home tab active if no other tab is active
-    var anyActive = Object.keys(TAB_MAP).some(function(key) {
-      var nav = document.getElementById(TAB_MAP[key].nav);
-      return nav && nav.classList.contains('nav-active');
+    if(navMsgEl) navMsgEl.classList.add('nav-active');
+    var msgPanel = document.getElementById('yamMessagesTab');
+    if(msgPanel) msgPanel.classList.add('active');
+    // Hide all other panels
+    ['yamHomeTab','yamJeuxTab','yamMusiqueTab','yamNousTab'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.classList.remove('active');
+      var key = Object.keys(TAB_MAP).find(function(k){ return TAB_MAP[k].panel === id; });
+      if(key){ var nav = document.getElementById(TAB_MAP[key].nav); if(nav) nav.classList.remove('nav-active'); }
     });
-    if(!anyActive) {
-      var navHome = document.getElementById('navHome');
-      if(navHome) navHome.classList.add('nav-active');
-      var homePanel = document.getElementById('yamHomeTab');
-      if(homePanel) homePanel.classList.add('active');
-      _currentTab = 'home';
-    }
+    _currentTab = 'messages';
   });
 
   // Override scrollToTop to go home
@@ -5569,16 +5587,29 @@ body.light #counterBlock.glowing .c-num-big {
 
 <div id="hiddenPage">
 
-  <!-- TOPBAR -->
-  <div class="dm-topbar" id="dmTopbar">
-    <div class="gv-back" id="dmTopbarBack" onclick="dmHandleBack()">
+  <!-- TOPBAR — style header du site -->
+  <div class="dm-topbar" id="dmTopbar" style="height:auto;min-height:60px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--border);">
+    <!-- Bouton retour (caché au départ, visible en sous-écrans) -->
+    <div class="gv-back" id="dmTopbarBack" onclick="dmHandleBack()" style="flex-shrink:0;">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       <span id="dmBackLabel">Retour</span>
     </div>
-    <div class="dm-topbar-center" id="dmTopbarCenter">
-      <span class="dm-topbar-logo-txt">InstaLove</span>
+    <!-- Titre centre (dynamique) -->
+    <div class="dm-topbar-center" id="dmTopbarCenter" style="flex:1;min-width:0;overflow:hidden;">
+      <!-- Contenu logo style site -->
+      <div style="display:flex;flex-direction:column;line-height:1.2;">
+        <span style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--green);">You And Me</span>
+        <span style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--text);line-height:1.1;">YAM</span>
+      </div>
     </div>
-    <div class="dm-topbar-right">
+    <!-- Droite : avatars + thème -->
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+      <!-- Avatars profil (miroir du header principal) -->
+      <div id="dmHeaderAvatars" style="display:flex;align-items:center;gap:-6px;cursor:pointer;" onclick="dmHeaderProfileClick()" title="Changer d'identité">
+        <div id="dmHeaderAvatarOther" style="width:30px;height:30px;border-radius:50%;background:var(--s2);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:15px;margin-right:-8px;opacity:0.6;z-index:1;">👤</div>
+        <div id="dmHeaderAvatarSelf"  style="width:36px;height:36px;border-radius:50%;background:var(--s2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;z-index:2;transition:border-color 0.2s;">👤</div>
+      </div>
+      <!-- Bouton thème -->
       <button class="dm-topbar-theme" onclick="applyThemeToggle()" title="Thème">
         <svg id="dmThemeIconMoon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
         <svg id="dmThemeIconSun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -5588,8 +5619,8 @@ body.light #counterBlock.glowing .c-num-big {
 
   <!-- ÉCRAN 1 : ACCUEIL -->
   <div class="dm-screen" id="dmHomeScreen" style="position:relative;display:none">
-    <!-- Bouton profil flottant en haut à droite -->
-    <div id="dmTopbarProfile" onclick="dmShowIdentityPicker()" title="Changer d'identité" style="position:absolute;top:14px;right:14px;z-index:5;"></div>
+    <!-- Pill profil supprimée — les avatars sont dans la topbar -->
+    <div id="dmTopbarProfile" style="display:none;"></div>
 
     <!-- VUE 1 : juste le logo -->
     <div class="dm-home-inner" id="dmHomeLogo" style="cursor:pointer;" onclick="dmShowConv()">
@@ -6154,6 +6185,7 @@ body.light #counterBlock.glowing .c-num-big {
 <!-- ══ BÊTISES INTERACTIVES ══ -->
 <!-- Menu de choix -->
 <div id="prankMenu">
+  <button onclick="closePrankMenu()" style="position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;flex-shrink:0;">✕</button>
   <div class="prank-menu-title">Choisir une bêtise 🤡</div>
   <div class="prank-menu-sub">Sélectionne ce que <span id="prankVictimName">l'autre</span> devra subir</div>
   <div class="prank-menu-list">
@@ -6708,6 +6740,21 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     document.body.style.overflow = '';
     window.scrollTo(0, scrollY);
   };
+
+  /* ══ SWIPE DROITE pour fermer prankMenu ══ */
+  (function(){
+    var menu = document.getElementById('prankMenu');
+    var startX = 0, startY = 0;
+    menu.addEventListener('touchstart', function(e){
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }, { passive: true });
+    menu.addEventListener('touchend', function(e){
+      var dx = e.changedTouches[0].clientX - startX;
+      var dy = Math.abs(e.changedTouches[0].clientY - startY);
+      if(dx > 80 && dy < 60){ closePrankMenu(); }
+    }, { passive: true });
+  })();
 
   /* ── Annuler toutes les bêtises en attente ── */
   window.prankCancelAll = function(){
@@ -9101,7 +9148,61 @@ async function checkCode(){
   }
 }
 function closePrank(){document.getElementById('prankOverlay').classList.remove('show');lockPopup.style.display='block';lockInput.value='';}
-function openHiddenPage(){document.getElementById('hiddenPage').classList.add('active');particleActive=false;hideDance();window.scrollTo(0,0);}
+function openHiddenPage(){
+  var profile = getProfile ? getProfile() : null;
+  if(!profile){
+    // Pas connecté → modal choix profil
+    document.getElementById('instaloveAuthModal').style.display = 'flex';
+    return;
+  }
+  document.getElementById('hiddenPage').classList.add('active');
+  particleActive=false;hideDance();window.scrollTo(0,0);
+  _dmUpdateHeaderAvatars();
+}
+window.instaloveAuthSelect = function(p){
+  document.getElementById('instaloveAuthModal').style.display='none';
+  function _afterAuth(){
+    document.getElementById('hiddenPage').classList.add('active');
+    particleActive=false;hideDance();window.scrollTo(0,0);
+    _dmUpdateHeaderAvatars();
+    // Aller à l'écran intermédiaire avec la carte conv
+    if(window.dmShowConv) window.dmShowConv();
+  }
+  if(typeof sbLoadSession==='function' && sbLoadSession(p)){
+    if(window._profileSave) window._profileSave(p);
+    if(window._profileApply) window._profileApply(p);
+    _afterAuth();
+  } else if(window.showProfileCodeModal){
+    window.showProfileCodeModal(p, function(){
+      if(window._profileSave) window._profileSave(p);
+      if(window._profileApply) window._profileApply(p);
+      if(window._profileLoadMoods) window._profileLoadMoods();
+      _afterAuth();
+    });
+  } else {
+    _afterAuth();
+  }
+};
+window.instaloveAuthClose = function(){
+  document.getElementById('instaloveAuthModal').style.display='none';
+};
+function _dmUpdateHeaderAvatars(){
+  var profile = getProfile ? getProfile() : null;
+  var self  = document.getElementById('dmHeaderAvatarSelf');
+  var other = document.getElementById('dmHeaderAvatarOther');
+  if(!self) return;
+  if(profile === 'girl'){
+    self.textContent  = '👧'; self.style.borderColor  = '#e879a0';
+    other.textContent = '👦'; other.style.display = 'flex';
+  } else if(profile === 'boy'){
+    self.textContent  = '👦'; self.style.borderColor  = '#5b9cf6';
+    other.textContent = '👧'; other.style.display = 'flex';
+  } else {
+    self.textContent = '👤'; self.style.borderColor = 'var(--border)';
+    other.style.display = 'none';
+  }
+}
+window.dmHeaderProfileClick = function(){ dmShowIdentityPicker ? dmShowIdentityPicker() : null; };
 function closeHiddenPage(){document.getElementById('hiddenPage').classList.remove('active');}
 lockInput.addEventListener('keydown',function(e){if(e.key==='Enter')checkCode();});
 document.addEventListener('click',function(e){
@@ -13925,6 +14026,8 @@ loadFavorites();
     }
     pill.style.display = 'flex';
     pill.style.alignItems = 'center';
+    // Mettre à jour les avatars dans la topbar
+    if(window._dmUpdateHeaderAvatars) window._dmUpdateHeaderAvatars();
   }
 
   /* ══ NAVIGATION ══ */
@@ -13941,8 +14044,12 @@ loadFavorites();
     if(name === 'home'){
       var el = $('dmHomeScreen');
       if(el) el.style.display = 'flex';
-      if(center) center.innerHTML = '';
-      if(backBtn){ backBtn.dataset.dest = 'close'; }
+      if(center) center.innerHTML =
+        '<div style="display:flex;flex-direction:column;line-height:1.2;">' +
+        '<span style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--green);">You And Me</span>' +
+        '<span style="font-family:\'Playfair Display\',serif;font-size:17px;font-weight:700;color:var(--text);line-height:1.1;">YAM</span>' +
+        '</div>';
+      if(backBtn){ backBtn.dataset.dest = 'close'; backBtn.style.visibility = 'hidden'; }
       var lbl = $('dmBackLabel'); if(lbl) lbl.textContent = 'Playlist';
       var logo = $('dmHomeLogo'), conv = $('dmHomeConv');
       if(logo) logo.style.display = '';
@@ -13960,7 +14067,7 @@ loadFavorites();
           '<span class="dm-topbar-title">Nous \u2764\ufe0f</span>' +
           '<span class="dm-topbar-sub" id="dmStatus">\u2022 En ligne</span>' +
         '</div>';
-      if(backBtn){ backBtn.dataset.dest = 'home'; }
+      if(backBtn){ backBtn.dataset.dest = 'home'; backBtn.style.visibility = 'visible'; }
       var lbl2 = $('dmBackLabel'); if(lbl2) lbl2.textContent = 'InstaLove';
       var lockBadge = document.getElementById('lockUnreadBadge');
       var lockBtn   = document.getElementById('lockNavBtn');
@@ -13976,11 +14083,15 @@ loadFavorites();
     if(logo) logo.style.display = 'none';
     if(conv) conv.style.display = 'flex';
     var center = document.getElementById('dmTopbarCenter');
-    if(center) center.innerHTML = '';
+    if(center) center.innerHTML =
+      '<div style="display:flex;flex-direction:column;line-height:1.2;">' +
+      '<span style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--green);">You And Me</span>' +
+      '<span style="font-family:\'Playfair Display\',serif;font-size:17px;font-weight:700;color:var(--text);line-height:1.1;">YAM</span>' +
+      '</div>';
     var btn = document.getElementById('dmTopbarBack');
-    if(btn) btn.dataset.dest = 'logo';
+    if(btn){ btn.dataset.dest = 'close'; btn.style.visibility = 'visible'; }
     var lbl = document.getElementById('dmBackLabel');
-    if(lbl) lbl.textContent = 'Mode caché';
+    if(lbl) lbl.textContent = 'InstaLove';
     loadHomePreview();
   };
 
@@ -13990,7 +14101,7 @@ loadFavorites();
     if(logo) logo.style.display = '';
     if(conv) conv.style.display = 'none';
     var btn = document.getElementById('dmTopbarBack');
-    if(btn) btn.dataset.dest = 'close';
+    if(btn){ btn.dataset.dest = 'close'; btn.style.visibility = 'hidden'; }
     var lbl = document.getElementById('dmBackLabel');
     if(lbl) lbl.textContent = 'Playlist';
   };
@@ -14047,6 +14158,7 @@ loadFavorites();
     var bg = $('dmIdBtnGirl'), bb = $('dmIdBtnBoy');
     if(bg) bg.classList.toggle('selected', identity === 'girl');
     if(bb) bb.classList.toggle('selected', identity === 'boy');
+    if(window._dmUpdateHeaderAvatars) window._dmUpdateHeaderAvatars();
   }
 
   window.dmSetIdentity = function(g){
@@ -15022,11 +15134,19 @@ loadFavorites();
     var saved = getProfile();
     if(saved === 'girl' || saved === 'boy') identity = saved;
     attached = false;
-    showScreen('home');
+    if(window._dmUpdateHeaderAvatars) window._dmUpdateHeaderAvatars();
     if(window._dmUpdateVP) window._dmUpdateVP();
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
+    if(saved === 'girl' || saved === 'boy'){
+      // Aller à l'écran intermédiaire (liste conv) et non directement au chat
+      showScreen('home');
+      // Afficher directement la carte conv (pas le logo)
+      if(window.dmShowConv) window.dmShowConv();
+    } else {
+      showScreen('home');
+    }
   };
 
   var _origClose = window.closeHiddenPage;
@@ -15207,7 +15327,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - yam 3.5 </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - yam 3.6 </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -16270,6 +16390,25 @@ console.log('✨ Jayana UX v.UX1 chargé');
 
 })();
 </script>
+<div id="instaloveAuthModal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;padding:24px;">
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:28px 24px;max-width:300px;width:100%;text-align:center;font-family:'DM Sans',sans-serif;">
+    <div style="font-size:40px;margin-bottom:10px;">💌</div>
+    <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;">InstaLove</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px;">Choisis ton profil pour accéder à la messagerie</div>
+    <div style="display:flex;gap:10px;margin-bottom:16px;">
+      <button onclick="instaloveAuthSelect('girl')" style="flex:1;padding:14px 0;background:rgba(232,121,160,0.12);color:#e879a0;border:1.5px solid rgba(232,121,160,0.4);border-radius:14px;font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <span style="font-size:24px;">👧</span>
+        <span>Zelda</span>
+      </button>
+      <button onclick="instaloveAuthSelect('boy')" style="flex:1;padding:14px 0;background:rgba(91,156,246,0.12);color:#5b9cf6;border:1.5px solid rgba(91,156,246,0.4);border-radius:14px;font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <span style="font-size:24px;">👦</span>
+        <span>Link</span>
+      </button>
+    </div>
+    <span onclick="instaloveAuthClose()" style="font-size:12px;color:var(--muted);cursor:pointer;">Annuler</span>
+  </div>
+</div>
+
 <div id="skyjoAuthModal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;padding:24px;">
   <div style="background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:28px 24px;max-width:300px;width:100%;text-align:center;font-family:'DM Sans',sans-serif;">
     <div style="font-size:40px;margin-bottom:10px;">🃏</div>
