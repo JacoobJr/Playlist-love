@@ -5474,7 +5474,8 @@ body.light #counterBlock.glowing .c-num-big {
 
     // "En ligne" dès qu'on est connecté, même sans humeur définie
     var selfOnline  = !!profile;
-    var otherOnline = !!(moodOther && moodOther.classList.contains('visible'));
+    var dot = document.getElementById('presenceDot');
+    var otherOnline = !!(dot && dot.classList.contains('visible'));
 
     var elleAvatar = document.getElementById('yamMoodElleAvatar');
     var luiAvatar  = document.getElementById('yamMoodLuiAvatar');
@@ -15203,7 +15204,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - Yam 3.1 </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - yam 3.2 </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
