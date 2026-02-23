@@ -918,7 +918,7 @@ body.light .nav-item.nav-active svg {
   justify-content: center;
   gap: 10px;
   position: relative;
-  overflow: hidden;
+  padding-top: 12px;
 }
 .yam-mascotte-zone::before {
   content: '';
@@ -5466,29 +5466,31 @@ body.light #counterBlock.glowing .c-num-big {
   function yamSyncMood() {
     var profile = window.getProfile ? window.getProfile() : null;
 
-    // Try to read mood from existing profileMoodSelf/Other elements
     var moodSelf  = document.getElementById('profileMoodSelf');
     var moodOther = document.getElementById('profileMoodOther');
 
     var selfEmoji  = moodSelf  ? moodSelf.textContent.trim()  : '';
     var otherEmoji = moodOther ? moodOther.textContent.trim() : '';
 
-    // Map profile to elle/lui
+    // "En ligne" dès qu'on est connecté, même sans humeur définie
+    var selfOnline  = !!profile;
+    var otherOnline = !!(moodOther && moodOther.classList.contains('visible'));
+
     var elleAvatar = document.getElementById('yamMoodElleAvatar');
     var luiAvatar  = document.getElementById('yamMoodLuiAvatar');
     var elleState  = document.getElementById('yamMoodElleState');
     var luiState   = document.getElementById('yamMoodLuiState');
 
     if(profile === 'girl') {
-      if(elleAvatar && selfEmoji)  elleAvatar.textContent = selfEmoji || '👧';
-      if(luiAvatar  && otherEmoji) luiAvatar.textContent  = otherEmoji || '👦';
-      if(elleState)  elleState.textContent  = selfEmoji  ? 'En ligne' : '—';
-      if(luiState)   luiState.textContent   = otherEmoji ? 'En ligne' : '—';
+      if(elleAvatar && selfEmoji)  elleAvatar.textContent = selfEmoji;
+      if(luiAvatar  && otherEmoji) luiAvatar.textContent  = otherEmoji;
+      if(elleState)  elleState.textContent  = selfOnline  ? 'En ligne' : '—';
+      if(luiState)   luiState.textContent   = otherOnline ? 'En ligne' : '—';
     } else if(profile === 'boy') {
-      if(luiAvatar  && selfEmoji)  luiAvatar.textContent  = selfEmoji || '👦';
-      if(elleAvatar && otherEmoji) elleAvatar.textContent = otherEmoji || '👧';
-      if(luiState)   luiState.textContent   = selfEmoji  ? 'En ligne' : '—';
-      if(elleState)  elleState.textContent  = otherEmoji ? 'En ligne' : '—';
+      if(luiAvatar  && selfEmoji)  luiAvatar.textContent  = selfEmoji;
+      if(elleAvatar && otherEmoji) elleAvatar.textContent = otherEmoji;
+      if(luiState)   luiState.textContent   = selfOnline  ? 'En ligne' : '—';
+      if(elleState)  elleState.textContent  = otherOnline ? 'En ligne' : '—';
     }
   }
 
@@ -15201,7 +15203,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - Yam 1.0 </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - Yam 3.1 </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
