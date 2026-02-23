@@ -212,9 +212,7 @@ input, textarea, select { font-size: 16px !important; }
 
 header {
   padding: 18px 16px 18px;
-  border-bottom: 1px solid var(--border);
   position: relative;
-  overflow: hidden;
 }
 header::before {
   content: '';
@@ -4149,6 +4147,8 @@ body.anniv-mode .counter-block-top {
   <div class="hdr-name">YAM 🍠</div>
   <div class="hdr-sub">Notre univers en musique</div>
 </header>
+<!-- Ligne de séparation décalée pour ne pas couper les avatars -->
+<div style="height:1px;background:var(--border);margin-top:28px;"></div>
 
 <!-- Bouton thème fixe — sous les avatars profil, toujours visible -->
 <button id="themeToggleHome" onclick="applyThemeToggle()" title="Thème" style="
@@ -4162,7 +4162,7 @@ body.anniv-mode .counter-block-top {
   color:var(--sub);
   display:flex; align-items:center; justify-content:center;
   cursor:pointer;
-  z-index:5;
+  z-index:15;
   transition:background 0.2s, color 0.2s;
   padding:0;
 ">
