@@ -10126,9 +10126,13 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
       // ── Les DEUX joueurs absents depuis +40s → clôture automatique ─────
       var now = Date.now();
-      var myLastSeen  = myPresRows[0]
-        ? now - new Date(myPresRows[0].updated_at).getTime()  // Supabase = source de vérité pour les deux
+      // Pour MOI : on utilise _lastPresenceSent (horloge locale) car au retour
+      // upsertPresence() remet updated_at=now() dans Supabase avant même que
+      // fetchState() ait le temps de lire — la valeur Supabase n'est plus fiable.
+      var myLastSeen  = _lastPresenceSent > 0
+        ? now - _lastPresenceSent
         : 99999999;
+      // Pour l'adversaire : Supabase est la seule source possible
       var oppLastSeen = presRows[0]
         ? now - new Date(presRows[0].updated_at).getTime()
         : 99999999;
@@ -14606,7 +14610,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.28 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
