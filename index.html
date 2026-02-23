@@ -1487,7 +1487,15 @@ body.light #lockNavBtn.has-unread {
 .prank-menu-title { font-family:'Playfair Display',serif; font-size:22px; color:#fff; margin-bottom:6px; text-align:center; }
 .prank-menu-sub { font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:20px; text-align:center; }
 .prank-menu-list { display:flex; flex-direction:column; gap:10px; width:100%; max-width:340px; }
-.prank-menu-item { display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:13px 16px; cursor:pointer; transition:background 0.15s, transform 0.12s; }
+.prank-menu-item { display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:13px 16px; cursor:pointer; transition:background 0.15s, transform 0.12s; position:relative; }
+.prank-fav-btn { margin-left:auto; flex-shrink:0; background:none; border:none; cursor:pointer; padding:6px 2px 6px 10px; line-height:1; display:flex; align-items:center; justify-content:center; -webkit-tap-highlight-color:transparent; }
+.prank-fav-btn svg { width:22px; height:22px; transition:fill 0.2s, filter 0.2s, transform 0.15s; fill:rgba(255,255,255,0.15); }
+.prank-fav-btn:hover svg { fill:rgba(255,100,130,0.5); }
+.prank-fav-btn.active svg { fill:#ff4d78; filter:drop-shadow(0 0 5px rgba(255,77,120,0.6)); }
+.prank-fav-pop { animation: prankFavPop 0.3s cubic-bezier(.4,2,.55,.9); }
+@keyframes prankFavPop { 0%{transform:scale(1)} 50%{transform:scale(1.55)} 100%{transform:scale(1)} }
+.prank-fav-section-label { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:rgba(255,100,130,0.55); margin:4px 0 6px; width:100%; max-width:340px; text-align:left; padding-left:2px; }
+.prank-fav-divider { width:100%; max-width:340px; height:1px; background:rgba(255,255,255,0.08); margin:6px 0 10px; }
 .prank-menu-item:hover { background:rgba(255,255,255,0.13); transform:translateX(3px); }
 .prank-menu-item-icon { font-size:28px; flex-shrink:0; }
 .prank-menu-item-name { font-size:14px; font-weight:600; color:#fff; }
@@ -6196,58 +6204,71 @@ body.light #counterBlock.glowing .c-num-big {
   <button onclick="closePrankMenu()" style="position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;flex-shrink:0;">✕</button>
   <div class="prank-menu-title">Choisir une bêtise 🤡</div>
   <div class="prank-menu-sub">Sélectionne ce que <span id="prankVictimName">l'autre</span> devra subir</div>
-  <div class="prank-menu-list">
-    <div class="prank-menu-item" onclick="prankSelectType('shake')">
+  <div class="prank-menu-list" id="prankMenuList">
+    <div class="prank-menu-item" data-prank-type="shake" onclick="prankSelectType('shake')">
       <div class="prank-menu-item-icon">📳</div>
-      <div><div class="prank-menu-item-name">L'écran qui tremble</div><div class="prank-menu-item-desc">Tape 10 fois vite pour l'arrêter</div></div>
+      <div style="flex:1;min-width:0;"><div class="prank-menu-item-name">L'écran qui tremble</div><div class="prank-menu-item-desc">Tape 10 fois vite pour l'arrêter</div></div>
+      <button class="prank-fav-btn" data-prank-type="shake" onclick="prankToggleFav(event,'shake')" aria-label="Favori"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
     </div>
-    <div class="prank-menu-item" onclick="prankSelectType('curtain')">
+    <div class="prank-menu-item" data-prank-type="curtain" onclick="prankSelectType('curtain')">
       <div class="prank-menu-item-icon">🌧️</div>
-      <div><div class="prank-menu-item-name">Le rideau d'emojis</div><div class="prank-menu-item-desc">Attrape-les tous pour retrouver le site</div></div>
+      <div style="flex:1;min-width:0;"><div class="prank-menu-item-name">Le rideau d'emojis</div><div class="prank-menu-item-desc">Attrape-les tous pour retrouver le site</div></div>
+      <button class="prank-fav-btn" data-prank-type="curtain" onclick="prankToggleFav(event,'curtain')" aria-label="Favori"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
     </div>
-    <div class="prank-menu-item" onclick="prankSelectType('intrus')">
+    <div class="prank-menu-item" data-prank-type="intrus" onclick="prankSelectType('intrus')">
       <div class="prank-menu-item-icon">👾</div>
-      <div><div class="prank-menu-item-name">L'intrus qui esquive</div><div class="prank-menu-item-desc">Touche-le 10 fois pour l'éliminer</div></div>
+      <div style="flex:1;min-width:0;"><div class="prank-menu-item-name">L'intrus qui esquive</div><div class="prank-menu-item-desc">Touche-le 10 fois pour l'éliminer</div></div>
+      <button class="prank-fav-btn" data-prank-type="intrus" onclick="prankToggleFav(event,'intrus')" aria-label="Favori"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
     </div>
-    <div class="prank-menu-item" onclick="prankSelectType('flip')">
+    <div class="prank-menu-item" data-prank-type="flip" onclick="prankSelectType('flip')">
       <div class="prank-menu-item-icon">🔤</div>
-      <div><div class="prank-menu-item-name">Le texte à l'envers</div><div class="prank-menu-item-desc">Maintiens le bouton 3s pour corriger</div></div>
+      <div style="flex:1;min-width:0;"><div class="prank-menu-item-name">Le texte à l'envers</div><div class="prank-menu-item-desc">Maintiens le bouton 3s pour corriger</div></div>
+      <button class="prank-fav-btn" data-prank-type="flip" onclick="prankToggleFav(event,'flip')" aria-label="Favori"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
     </div>
-    <div class="prank-menu-item" onclick="prankSelectType('splash')">
+    <div class="prank-menu-item" data-prank-type="splash" onclick="prankSelectType('splash')">
       <div class="prank-menu-item-icon">🎨</div>
-      <div><div class="prank-menu-item-name">La flaque de peinture</div><div class="prank-menu-item-desc">Nettoie toutes les taches pour libérer le site</div></div>
+      <div style="flex:1;min-width:0;"><div class="prank-menu-item-name">La flaque de peinture</div><div class="prank-menu-item-desc">Nettoie toutes les taches pour libérer le site</div></div>
+      <button class="prank-fav-btn" data-prank-type="splash" onclick="prankToggleFav(event,'splash')" aria-label="Favori"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
     </div>
-    <div class="prank-menu-item" onclick="prankSelectType('lock')">
+    <div class="prank-menu-item" data-prank-type="lock" onclick="prankSelectType('lock')">
       <div class="prank-menu-item-icon">🔐</div>
-      <div><div class="prank-menu-item-name">Le cadenas</div><div class="prank-menu-item-desc">Trouve le mot secret pour déverrouiller</div></div>
+      <div style="flex:1;min-width:0;"><div class="prank-menu-item-name">Le cadenas</div><div class="prank-menu-item-desc">Trouve le mot secret pour déverrouiller</div></div>
+      <button class="prank-fav-btn" data-prank-type="lock" onclick="prankToggleFav(event,'lock')" aria-label="Favori"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
     </div>
-    <div class="prank-menu-item" onclick="prankSelectType('fog')">
+    <div class="prank-menu-item" data-prank-type="fog" onclick="prankSelectType('fog')">
       <div class="prank-menu-item-icon">🌫️</div>
-      <div><div class="prank-menu-item-name">Le brouillard</div><div class="prank-menu-item-desc">Tapote 10 fois pour dissiper le flou</div></div>
+      <div style="flex:1;min-width:0;"><div class="prank-menu-item-name">Le brouillard</div><div class="prank-menu-item-desc">Tapote 10 fois pour dissiper le flou</div></div>
+      <button class="prank-fav-btn" data-prank-type="fog" onclick="prankToggleFav(event,'fog')" aria-label="Favori"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
     </div>
-    <div class="prank-menu-item" onclick="prankSelectType('colors')">
+    <div class="prank-menu-item" data-prank-type="colors" onclick="prankSelectType('colors')">
       <div class="prank-menu-item-icon">🌈</div>
-      <div><div class="prank-menu-item-name">Les couleurs folles</div><div class="prank-menu-item-desc">Maintiens le bouton pour stabiliser les couleurs</div></div>
+      <div style="flex:1;min-width:0;"><div class="prank-menu-item-name">Les couleurs folles</div><div class="prank-menu-item-desc">Maintiens le bouton pour stabiliser les couleurs</div></div>
+      <button class="prank-fav-btn" data-prank-type="colors" onclick="prankToggleFav(event,'colors')" aria-label="Favori"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
     </div>
-    <div class="prank-menu-item" onclick="prankSelectType('keyboard')">
+    <div class="prank-menu-item" data-prank-type="keyboard" onclick="prankSelectType('keyboard')">
       <div class="prank-menu-item-icon">⌨️</div>
-      <div><div class="prank-menu-item-name">Le faux clavier</div><div class="prank-menu-item-desc">Tape le mot affiché avec les touches mélangées</div></div>
+      <div style="flex:1;min-width:0;"><div class="prank-menu-item-name">Le faux clavier</div><div class="prank-menu-item-desc">Tape le mot affiché avec les touches mélangées</div></div>
+      <button class="prank-fav-btn" data-prank-type="keyboard" onclick="prankToggleFav(event,'keyboard')" aria-label="Favori"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
     </div>
-    <div class="prank-menu-item" onclick="prankSelectType('target')">
+    <div class="prank-menu-item" data-prank-type="target" onclick="prankSelectType('target')">
       <div class="prank-menu-item-icon">🎯</div>
-      <div><div class="prank-menu-item-name">La cible qui esquive</div><div class="prank-menu-item-desc">Clique dessus 10 fois — elle accélère !</div></div>
+      <div style="flex:1;min-width:0;"><div class="prank-menu-item-name">La cible qui esquive</div><div class="prank-menu-item-desc">Clique dessus 10 fois — elle accélère !</div></div>
+      <button class="prank-fav-btn" data-prank-type="target" onclick="prankToggleFav(event,'target')" aria-label="Favori"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
     </div>
-    <div class="prank-menu-item" onclick="prankSelectType('memory')">
+    <div class="prank-menu-item" data-prank-type="memory" onclick="prankSelectType('memory')">
       <div class="prank-menu-item-icon">🃏</div>
-      <div><div class="prank-menu-item-name">Memory express</div><div class="prank-menu-item-desc">Mémorise et retrouve les 4 paires</div></div>
+      <div style="flex:1;min-width:0;"><div class="prank-menu-item-name">Memory express</div><div class="prank-menu-item-desc">Mémorise et retrouve les 4 paires</div></div>
+      <button class="prank-fav-btn" data-prank-type="memory" onclick="prankToggleFav(event,'memory')" aria-label="Favori"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
     </div>
-    <div class="prank-menu-item" onclick="prankSelectType('eyes')">
+    <div class="prank-menu-item" data-prank-type="eyes" onclick="prankSelectType('eyes')">
       <div class="prank-menu-item-icon">👁️</div>
-      <div><div class="prank-menu-item-name">Les yeux qui surveillent</div><div class="prank-menu-item-desc">Fixe chaque paire 5s sans bouger</div></div>
+      <div style="flex:1;min-width:0;"><div class="prank-menu-item-name">Les yeux qui surveillent</div><div class="prank-menu-item-desc">Fixe chaque paire 5s sans bouger</div></div>
+      <button class="prank-fav-btn" data-prank-type="eyes" onclick="prankToggleFav(event,'eyes')" aria-label="Favori"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
     </div>
-    <div class="prank-menu-item" onclick="prankSelectType('notif')">
+    <div class="prank-menu-item" data-prank-type="notif" onclick="prankSelectType('notif')">
       <div class="prank-menu-item-icon">📱</div>
-      <div><div class="prank-menu-item-name">Envoyer une notification</div><div class="prank-menu-item-desc">Une notif surprise avec ton message</div></div>
+      <div style="flex:1;min-width:0;"><div class="prank-menu-item-name">Envoyer une notification</div><div class="prank-menu-item-desc">Une notif surprise avec ton message</div></div>
+      <button class="prank-fav-btn" data-prank-type="notif" onclick="prankToggleFav(event,'notif')" aria-label="Favori"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
     </div>
   </div>
   <div class="prank-menu-cancel" onclick="closePrankMenu()">Quitter</div>
@@ -16091,6 +16112,94 @@ document.querySelectorAll('.album-image').forEach(function(el){
       });
     }, 100);
   };
+})();
+
+/* ── PRANK FAVORITES ── */
+(function(){
+  var STORAGE_KEY = 'jayana_prank_favs';
+
+  function getFavs(){
+    try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }catch(e){ return []; }
+  }
+  function saveFavs(arr){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }catch(e){}
+  }
+
+  /* Applique l'état visuel de tous les coeurs */
+  function applyFavStates(){
+    var favs = getFavs();
+    document.querySelectorAll('.prank-fav-btn').forEach(function(btn){
+      var t = btn.dataset.prankType;
+      btn.classList.toggle('active', favs.indexOf(t) !== -1);
+    });
+  }
+
+  /* Réordonne la liste : favoris en haut, séparateur, reste */
+  function rebuildPrankList(){
+    var list = document.getElementById('prankMenuList');
+    if(!list) return;
+    var favs = getFavs();
+    var items = Array.from(list.querySelectorAll('.prank-menu-item'));
+
+    /* Supprimer labels/dividers précédents */
+    list.querySelectorAll('.prank-fav-section-label, .prank-fav-divider').forEach(function(el){ el.remove(); });
+
+    var favItems   = items.filter(function(el){ return favs.indexOf(el.dataset.prankType) !== -1; });
+    var otherItems = items.filter(function(el){ return favs.indexOf(el.dataset.prankType) === -1; });
+
+    /* Vider la liste */
+    items.forEach(function(el){ el.remove(); });
+
+    if(favItems.length > 0){
+      var lblFav = document.createElement('div');
+      lblFav.className = 'prank-fav-section-label';
+      lblFav.textContent = '♥ Favoris';
+      list.appendChild(lblFav);
+      favItems.forEach(function(el){ list.appendChild(el); });
+
+      if(otherItems.length > 0){
+        var div = document.createElement('div');
+        div.className = 'prank-fav-divider';
+        list.appendChild(div);
+      }
+    }
+
+    otherItems.forEach(function(el){ list.appendChild(el); });
+    applyFavStates();
+  }
+
+  /* Toggle favori */
+  window.prankToggleFav = function(e, type){
+    e.stopPropagation();
+    var favs = getFavs();
+    var idx  = favs.indexOf(type);
+    var btn  = e.currentTarget || e.target;
+
+    if(idx === -1){
+      favs.push(type);
+      btn.classList.add('prank-fav-pop');
+      setTimeout(function(){ btn.classList.remove('prank-fav-pop'); }, 350);
+    } else {
+      favs.splice(idx, 1);
+    }
+    saveFavs(favs);
+    rebuildPrankList();
+    if(window.haptic) haptic('light');
+  };
+
+  /* Init au chargement et à l'ouverture du menu */
+  var origOpen = window.openPrankMenu;
+  window.openPrankMenu = function(){
+    if(origOpen) origOpen.apply(this, arguments);
+    setTimeout(rebuildPrankList, 50);
+  };
+
+  /* Aussi lors de la première affichage (le menu peut s'ouvrir via betisesBtn) */
+  document.addEventListener('DOMContentLoaded', function(){
+    rebuildPrankList();
+  });
+  /* Si DOM déjà prêt */
+  if(document.readyState !== 'loading') rebuildPrankList();
 })();
 
 console.log('✨ Jayana UX v.UX1 chargé');
