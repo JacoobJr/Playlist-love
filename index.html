@@ -141,15 +141,15 @@ html { scroll-behavior: smooth; overflow-x: hidden; -webkit-text-size-adjust: 10
 }
 /* ── Animations transition écrans InstaLove ── */
 @keyframes dmSlideInRight {
-  from { opacity: 0; transform: translateX(48px); }
+  from { opacity: 0; transform: translateX(100%); }
   to   { opacity: 1; transform: translateX(0); }
 }
 @keyframes dmSlideInLeft {
-  from { opacity: 0; transform: translateX(-48px); }
+  from { opacity: 0; transform: translateX(-100%); }
   to   { opacity: 1; transform: translateX(0); }
 }
-.dm-slide-forward  { animation: dmSlideInRight 0.26s cubic-bezier(.4,0,.2,1) both; }
-.dm-slide-backward { animation: dmSlideInLeft  0.26s cubic-bezier(.4,0,.2,1) both; }
+.dm-slide-forward  { animation: dmSlideInRight 0.28s cubic-bezier(.4,0,.2,1) both; }
+.dm-slide-backward { animation: dmSlideInLeft  0.28s cubic-bezier(.4,0,.2,1) both; }
 
 /* ══ TOAST NOTIFICATION ══ */
 #uxToast {
@@ -3572,10 +3572,10 @@ body.light .pendu-theme {
 
 /* Screens */
 .dm-screen {
-  flex: 1; display: flex; flex-direction: column;
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   overflow: hidden; width: 100%; background: var(--bg);
-  min-height: 0;
 }
 .dm-chat-screen { justify-content: flex-start; overflow: hidden; align-items: stretch; }
 
@@ -5644,8 +5644,11 @@ body.light #counterBlock.glowing .c-num-big {
     </div>
   </div>
 
+  <!-- WRAPPER DE TRANSITION — clip pour animations slide -->
+  <div id="dmTransitionWrap" style="flex:1;position:relative;overflow:hidden;width:100%;min-height:0;">
+
   <!-- ÉCRAN 1 : ACCUEIL -->
-  <div class="dm-screen" id="dmHomeScreen" style="position:relative;display:none">
+  <div class="dm-screen" id="dmHomeScreen" style="display:none">
     <!-- Pill profil supprimée — les avatars sont dans la topbar -->
     <div id="dmTopbarProfile" style="display:none;"></div>
 
@@ -5684,6 +5687,8 @@ body.light #counterBlock.glowing .c-num-big {
     </div>
 
   </div>
+
+  </div><!-- /dmTransitionWrap -->
 
   <!-- ÉCRAN 2 : CHOIX IDENTITÉ (modal overlay) -->
   <div class="dm-id-overlay" id="dmIdentityScreen" style="display:none" onclick="dmCloseIdentityIfOutside(event)">
@@ -15390,7 +15395,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - yam 3.8 </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - yam 3.5 </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -16559,7 +16564,7 @@ console.log('✨ Jayana UX v.UX1 chargé');
       '.section{contain:layout;}' +
       '.bottom-nav{contain:layout style;}' +
       '.song,.sp-song{contain:layout style;}' +
-      '#gamesView,#quizView,#memoryView,#penduView,#puzzleView,#snakeView,#hiddenPage{contain:layout style;}' +
+      '#gamesView,#quizView,#memoryView,#penduView,#puzzleView,#snakeView{contain:layout style;}' +
 
       /* ── Backdrop-filter désactivé sur iOS (webkit-touch-callout détecte iOS) ── */
       '@supports (-webkit-touch-callout: none){' +
