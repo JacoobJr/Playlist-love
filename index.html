@@ -15204,7 +15204,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - yam 3.2 </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - yam 3.4 </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -15446,10 +15446,10 @@ loadFavorites();
 ════════════════════════════════════════════ */
 (function(){
   var PRESENCE_TABLE  = 'presence';
-  var HEARTBEAT_MS    = 20000;   // envoyer toutes les 20s
-  var POLL_MS         = 15000;   // lire toutes les 15s
-  var OFFLINE_AFTER   = 45000;   // ms sans signal = offline
-  var OFFLINE_PLAYING = 120000;  // ms si is_playing = true
+  var HEARTBEAT_MS    = 10000;   // envoyer toutes les 10s
+  var POLL_MS         = 10000;   // lire toutes les 10s
+  var OFFLINE_AFTER   = 20000;   // ms sans signal = offline
+  var OFFLINE_PLAYING = 60000;   // ms si is_playing = true
 
   var _heartbeatIv = null;
   var _pollIv      = null;
