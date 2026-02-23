@@ -1482,19 +1482,12 @@ body.light #lockNavBtn.has-unread {
 .prank-close:hover { background:#ff85c2; transform:scale(1.04); }
 
 /* ══ SYSTÈME BÊTISES INTERACTIVES ══ */
-#prankMenu { position:fixed; inset:0; background:rgba(0,0,0,0.82); z-index:4000; display:none; flex-direction:column; align-items:center; justify-content:flex-start; padding:40px 24px 40px; backdrop-filter:blur(8px); overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
+#prankMenu { position:fixed; inset:0; background:#0d0d0d; z-index:4000; display:none; flex-direction:column; align-items:center; justify-content:flex-start; padding:40px 24px 40px; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
 #prankMenu.show { display:flex; animation:slideUp 0.25s ease; }
 .prank-menu-title { font-family:'Playfair Display',serif; font-size:22px; color:#fff; margin-bottom:6px; text-align:center; }
 .prank-menu-sub { font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:20px; text-align:center; }
 .prank-menu-list { display:flex; flex-direction:column; gap:10px; width:100%; max-width:340px; }
-.prank-menu-item { display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:13px 16px; cursor:pointer; transition:background 0.15s, transform 0.12s; position:relative; }
-.prank-menu-item:active { transform:scale(0.98); background:rgba(255,255,255,0.11); }
-.prank-fav-btn { position:absolute; top:10px; right:12px; width:28px; height:28px; border:none; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; line-height:1; padding:0; z-index:5; opacity:0.12; transition:opacity 0.15s, transform 0.2s; flex-shrink:0; }
-.prank-fav-btn:active { transform:scale(1.3); }
-.prank-fav-btn.active { opacity:1; }
-.prank-fav-sep { width:100%; display:flex; align-items:center; gap:8px; margin:4px 0 2px; }
-.prank-fav-sep span { font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.3); white-space:nowrap; }
-.prank-fav-sep::before, .prank-fav-sep::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.1); }
+.prank-menu-item { display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:13px 16px; cursor:pointer; transition:background 0.15s, transform 0.12s; }
 .prank-menu-item:hover { background:rgba(255,255,255,0.13); transform:translateX(3px); }
 .prank-menu-item-icon { font-size:28px; flex-shrink:0; }
 .prank-menu-item-name { font-size:14px; font-weight:600; color:#fff; }
@@ -6203,8 +6196,59 @@ body.light #counterBlock.glowing .c-num-big {
   <button onclick="closePrankMenu()" style="position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;flex-shrink:0;">✕</button>
   <div class="prank-menu-title">Choisir une bêtise 🤡</div>
   <div class="prank-menu-sub">Sélectionne ce que <span id="prankVictimName">l'autre</span> devra subir</div>
-  <div class="prank-menu-list" id="prankMenuList">
-    <!-- Rendu dynamique par renderPrankList() -->
+  <div class="prank-menu-list">
+    <div class="prank-menu-item" onclick="prankSelectType('shake')">
+      <div class="prank-menu-item-icon">📳</div>
+      <div><div class="prank-menu-item-name">L'écran qui tremble</div><div class="prank-menu-item-desc">Tape 10 fois vite pour l'arrêter</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('curtain')">
+      <div class="prank-menu-item-icon">🌧️</div>
+      <div><div class="prank-menu-item-name">Le rideau d'emojis</div><div class="prank-menu-item-desc">Attrape-les tous pour retrouver le site</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('intrus')">
+      <div class="prank-menu-item-icon">👾</div>
+      <div><div class="prank-menu-item-name">L'intrus qui esquive</div><div class="prank-menu-item-desc">Touche-le 10 fois pour l'éliminer</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('flip')">
+      <div class="prank-menu-item-icon">🔤</div>
+      <div><div class="prank-menu-item-name">Le texte à l'envers</div><div class="prank-menu-item-desc">Maintiens le bouton 3s pour corriger</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('splash')">
+      <div class="prank-menu-item-icon">🎨</div>
+      <div><div class="prank-menu-item-name">La flaque de peinture</div><div class="prank-menu-item-desc">Nettoie toutes les taches pour libérer le site</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('lock')">
+      <div class="prank-menu-item-icon">🔐</div>
+      <div><div class="prank-menu-item-name">Le cadenas</div><div class="prank-menu-item-desc">Trouve le mot secret pour déverrouiller</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('fog')">
+      <div class="prank-menu-item-icon">🌫️</div>
+      <div><div class="prank-menu-item-name">Le brouillard</div><div class="prank-menu-item-desc">Tapote 10 fois pour dissiper le flou</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('colors')">
+      <div class="prank-menu-item-icon">🌈</div>
+      <div><div class="prank-menu-item-name">Les couleurs folles</div><div class="prank-menu-item-desc">Maintiens le bouton pour stabiliser les couleurs</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('keyboard')">
+      <div class="prank-menu-item-icon">⌨️</div>
+      <div><div class="prank-menu-item-name">Le faux clavier</div><div class="prank-menu-item-desc">Tape le mot affiché avec les touches mélangées</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('target')">
+      <div class="prank-menu-item-icon">🎯</div>
+      <div><div class="prank-menu-item-name">La cible qui esquive</div><div class="prank-menu-item-desc">Clique dessus 10 fois — elle accélère !</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('memory')">
+      <div class="prank-menu-item-icon">🃏</div>
+      <div><div class="prank-menu-item-name">Memory express</div><div class="prank-menu-item-desc">Mémorise et retrouve les 4 paires</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('eyes')">
+      <div class="prank-menu-item-icon">👁️</div>
+      <div><div class="prank-menu-item-name">Les yeux qui surveillent</div><div class="prank-menu-item-desc">Fixe chaque paire 5s sans bouger</div></div>
+    </div>
+    <div class="prank-menu-item" onclick="prankSelectType('notif')">
+      <div class="prank-menu-item-icon">📱</div>
+      <div><div class="prank-menu-item-name">Envoyer une notification</div><div class="prank-menu-item-desc">Une notif surprise avec ton message</div></div>
+    </div>
   </div>
   <div class="prank-menu-cancel" onclick="closePrankMenu()">Quitter</div>
   <div class="prank-menu-cancel" id="prankCancelAllBtn" onclick="prankCancelAll()" style="color:rgba(255,100,100,0.6);margin-top:0;">🗑️ Annuler toutes mes bêtises en attente</div>
@@ -6684,7 +6728,7 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     var el = document.getElementById('prankVictimName');
     if(el) el.textContent = victim;
     document.getElementById('prankMenu').classList.add('show');
-    if(window.renderPrankList) window.renderPrankList();
+    // Bloquer le scroll body (iOS compatible)
     var scrollY = window.scrollY;
     document.body.style.position = 'fixed';
     document.body.style.top = '-' + scrollY + 'px';
@@ -6719,78 +6763,6 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
       if(dx > 80 && dy < 60){ closePrankMenu(); }
     }, { passive: true });
   })();
-
-  /* ══ SYSTÈME DE FAVORIS ══ */
-  var PRANKS_ALL = [
-    { type:'shake',    icon:'📳', name:'L\'écran qui tremble',     desc:'Tape 10 fois vite pour l\'arrêter' },
-    { type:'curtain',  icon:'🌧️', name:'Le rideau d\'emojis',       desc:'Attrape-les tous pour retrouver le site' },
-    { type:'intrus',   icon:'👾', name:'L\'intrus qui esquive',      desc:'Touche-le 10 fois pour l\'éliminer' },
-    { type:'flip',     icon:'🔤', name:'Le texte à l\'envers',       desc:'Maintiens le bouton 3s pour corriger' },
-    { type:'splash',   icon:'🎨', name:'La flaque de peinture',      desc:'Nettoie toutes les taches pour libérer le site' },
-    { type:'lock',     icon:'🔐', name:'Le cadenas',                 desc:'Trouve le mot secret pour déverrouiller' },
-    { type:'fog',      icon:'🌫️', name:'Le brouillard',              desc:'Tapote 10 fois pour dissiper le flou' },
-    { type:'colors',   icon:'🌈', name:'Les couleurs folles',        desc:'Maintiens le bouton pour stabiliser les couleurs' },
-    { type:'keyboard', icon:'⌨️', name:'Le faux clavier',           desc:'Tape le mot affiché avec les touches mélangées' },
-    { type:'target',   icon:'🎯', name:'La cible qui esquive',       desc:'Clique dessus 10 fois — elle accélère !' },
-    { type:'memory',   icon:'🃏', name:'Memory express',             desc:'Mémorise et retrouve les 4 paires' },
-    { type:'eyes',     icon:'👁️', name:'Les yeux qui surveillent',  desc:'Fixe chaque paire 5s sans bouger' },
-    { type:'notif',    icon:'📱', name:'Envoyer une notification',   desc:'Une notif surprise avec ton message' }
-  ];
-
-  function _prankGetFavs(){
-    try { return JSON.parse(localStorage.getItem('prankFavs') || '[]'); } catch(e){ return []; }
-  }
-  function _prankSaveFavs(favs){
-    try { localStorage.setItem('prankFavs', JSON.stringify(favs)); } catch(e){}
-  }
-
-  window.prankToggleFav = function(type, e){
-    e.stopPropagation();
-    var favs = _prankGetFavs();
-    var idx  = favs.indexOf(type);
-    if(idx === -1) favs.push(type); else favs.splice(idx, 1);
-    _prankSaveFavs(favs);
-    renderPrankList();
-  };
-
-  window.renderPrankList = function(){
-    var list = document.getElementById('prankMenuList');
-    if(!list) return;
-    var favs    = _prankGetFavs();
-    var favItems = PRANKS_ALL.filter(function(p){ return favs.indexOf(p.type) !== -1; });
-    var restItems= PRANKS_ALL.filter(function(p){ return favs.indexOf(p.type) === -1; });
-
-    function makeItem(p){
-      var isFav = favs.indexOf(p.type) !== -1;
-      return '<div class="prank-menu-item" onclick="prankSelectType(\''+p.type+'\')" style="padding-right:44px;">' +
-        '<div class="prank-menu-item-icon">'+p.icon+'</div>' +
-        '<div><div class="prank-menu-item-name">'+p.name+'</div><div class="prank-menu-item-desc">'+p.desc+'</div></div>' +
-        '<button class="prank-fav-btn'+(isFav?' active':'')+ '" onclick="prankToggleFav(\''+p.type+'\',event)" title="Favori">'+
-          (isFav ? '❤️' : '🤍')+
-        '</button>' +
-      '</div>';
-    }
-
-    var html = '';
-    if(favItems.length){
-      html += '<div class="prank-fav-sep"><span>Favoris</span></div>';
-      html += favItems.map(makeItem).join('');
-      html += '<div class="prank-fav-sep"><span>Toutes</span></div>';
-    }
-    html += restItems.map(makeItem).join('');
-    list.innerHTML = html;
-  };
-
-  // Rendre la liste au chargement
-  document.addEventListener('DOMContentLoaded', function(){ renderPrankList(); });
-  // Et aussi dès que le menu s'affiche
-  var _origOpenPrankMenu = window.openPrankMenu;
-  window.openPrankMenu = function(){
-    if(_origOpenPrankMenu) _origOpenPrankMenu.apply(this, arguments);
-    renderPrankList();
-  };
-  // Render immédiat si DOM déjà prêt
-  if(document.readyState !== 'loading') renderPrankList();
 
   /* ── Annuler toutes les bêtises en attente ── */
   window.prankCancelAll = function(){
@@ -16016,6 +15988,50 @@ document.querySelectorAll('.album-image').forEach(function(el){
     if(next === current) return;
     var target = document.getElementById(SECTIONS[next]);
     if(target){ haptic('light'); target.scrollIntoView({ behavior:'smooth', block:'start' }); }
+  }, { passive:true });
+})();
+
+/* ── 12b. SWIPE HORIZONTAL dans hiddenPage (InstaLove sous-écrans) ── */
+(function(){
+  var hp = document.getElementById('hiddenPage');
+  if(!hp) return;
+
+  var _sx = 0, _sy = 0;
+
+  hp.addEventListener('touchstart', function(e){
+    _sx = e.touches[0].clientX;
+    _sy = e.touches[0].clientY;
+  }, { passive:true });
+
+  hp.addEventListener('touchend', function(e){
+    if(document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
+    var prankMenu = document.getElementById('prankMenu');
+    if(prankMenu && prankMenu.classList.contains('show')) return;
+
+    var dx = e.changedTouches[0].clientX - _sx;
+    var dy = e.changedTouches[0].clientY - _sy;
+    if(Math.abs(dx) < 60 || Math.abs(dy) > 80) return;
+
+    var chatScreen = document.getElementById('dmChatScreen');
+    var homeScreen = document.getElementById('dmHomeScreen');
+    var chatVisible = chatScreen && chatScreen.style.display !== 'none';
+    var homeVisible = homeScreen && homeScreen.style.display !== 'none';
+
+    if(dx < 0){
+      if(homeVisible){
+        var logo = document.getElementById('dmHomeLogo');
+        var conv = document.getElementById('dmHomeConv');
+        if(logo && logo.style.display !== 'none'){
+          if(window.dmShowConv){ haptic('light'); window.dmShowConv(); }
+        } else if(conv && conv.style.display !== 'none'){
+          if(window.dmOpenMessaging){ haptic('light'); window.dmOpenMessaging(); }
+        }
+      }
+    } else {
+      if(chatVisible || homeVisible){
+        if(window.dmHandleBack){ haptic('light'); window.dmHandleBack(); }
+      }
+    }
   }, { passive:true });
 })();
 
