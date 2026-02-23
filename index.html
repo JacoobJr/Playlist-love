@@ -1916,6 +1916,7 @@ body.subview-open #themeToggle { display: none; }
 /* Masqué quand InstaLove est ouvert (la topbar a son propre bouton thème) */
 #hiddenPage.active ~ #floatingThemeBtn,
 body:has(#hiddenPage.active) #floatingThemeBtn { opacity: 0 !important; pointer-events: none !important; }
+body:has(#hiddenPage.active) #themeToggleHome { opacity: 0 !important; pointer-events: none !important; }
 /* Masqué dans Quiz, Jeux et sous-jeux (ils ont leur propre bouton icône) */
 body:has(#quizView.active) #floatingThemeBtn,
 body:has(#gamesView.active) #floatingThemeBtn,
@@ -1923,6 +1924,12 @@ body:has(#memoryView.active) #floatingThemeBtn,
 body:has(#penduView.active) #floatingThemeBtn,
 body:has(#puzzleView.active) #floatingThemeBtn,
 body:has(#snakeView.active) #floatingThemeBtn { opacity: 0 !important; pointer-events: none !important; }
+body:has(#quizView.active) #themeToggleHome,
+body:has(#gamesView.active) #themeToggleHome,
+body:has(#memoryView.active) #themeToggleHome,
+body:has(#penduView.active) #themeToggleHome,
+body:has(#puzzleView.active) #themeToggleHome,
+body:has(#snakeView.active) #themeToggleHome { opacity: 0 !important; pointer-events: none !important; }
 
 /* ════════════════════════════════════════════
    SUGGESTION SECTION
@@ -4141,10 +4148,27 @@ body.anniv-mode .counter-block-top {
   <div class="hdr-tag">You And Me</div>
   <div class="hdr-name">YAM 🍠</div>
   <div class="hdr-sub">Notre univers en musique</div>
-  <div style="position:absolute;bottom:20px;left:16px;">
-    <div class="bubbleBtn" id="themeToggleHome" onclick="applyThemeToggle()" style="font-size:11px;padding:5px 13px;">🌙 Thème</div>
-  </div>
 </header>
+
+<!-- Bouton thème fixe — sous les avatars profil, toujours visible -->
+<button id="themeToggleHome" onclick="applyThemeToggle()" title="Thème" style="
+  position:fixed;
+  top:calc(32px + env(safe-area-inset-top, 0px));
+  right:16px;
+  width:34px; height:34px;
+  border-radius:50%;
+  background:var(--s2);
+  border:1px solid var(--border);
+  color:var(--sub);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  z-index:5;
+  transition:background 0.2s, color 0.2s;
+  padding:0;
+">
+  <svg id="homeThemeIconMoon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+  <svg id="homeThemeIconSun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
 
 <!-- HIDDEN bubbleMenu refs preserved for JS compatibility — not displayed -->
 <div id="topBubbleMenu" style="display:none;">
@@ -4348,7 +4372,7 @@ async function nativeLogout(){
 /* ── Double avatar profil ── */
 #profileAvatarWrap {
   position: absolute;
-  top: 50%; right: 16px;
+  top: calc(50% + 18px); right: 16px;
   transform: translateY(-50%);
   width: 64px; height: 64px;
   z-index: 10;
@@ -6531,7 +6555,7 @@ function applyThemeToggle() {
   document.getElementById('themeToggle').textContent = isLight ? '🌙 Thème' : '☀️ Thème';
   document.getElementById('floatingThemeBtn').textContent = isLight ? '🌙 Thème' : '☀️ Thème';
   // Sync icônes lune/soleil dans Quiz, Jeux et sous-jeux
-  ['qz','gv'].forEach(function(prefix){
+  ['qz','gv','home'].forEach(function(prefix){
     var moon = document.getElementById(prefix+'ThemeIconMoon');
     var sun  = document.getElementById(prefix+'ThemeIconSun');
     if(moon) moon.style.display = isLight ? 'none' : '';
@@ -15178,7 +15202,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - Yam 2.0 </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - Yam 2.1 </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
