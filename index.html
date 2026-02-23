@@ -9766,9 +9766,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     _launched=false;
     _waitingNextRound=false;
     _roundEndShown=false;
-    _bothAbsentHandled=false;
     _lastPresenceSent=0;
-    _absenceStart=0;
     if(_oppGoneTimer){clearTimeout(_oppGoneTimer);_oppGoneTimer=null;}
   }
 
@@ -9790,10 +9788,8 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     // Au retour au premier plan : retarder le premier heartbeat de 3s
     // pour laisser fetchState() lire les vrais timestamps Supabase (figés pendant l'absence)
     // avant qu'upsertPresence() les écrase avec now().
-    // Note : on ne vérifie plus _presTimer car il a pu être stoppé explicitement par pauseSkyjo().
-    if(!document.hidden){
-      _absenceStart = 0; // reset : évite d'accumuler plusieurs absences courtes
-      if(_presTimer){ clearInterval(_presTimer); _presTimer = null; }
+    if(!document.hidden && _presTimer){
+      clearInterval(_presTimer); _presTimer = null;
       setTimeout(function(){
         if(!_me) return;
         upsertPresence();
@@ -9801,8 +9797,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       }, 3000);
     }
   }
-  var _lastPresenceSent = 0; // timestamp local du dernier heartbeat envoyé
-  var _absenceStart     = 0; // heure exacte où on a quitté la page (visibilitychange)
+  var _lastPresenceSent = 0;
 
   function upsertPresence(){
     if(!_me) return;
@@ -10106,9 +10101,6 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       _pollTimer = setInterval(fetchState, newInterval);
     }
   }
-  var BOTH_ABSENT_TIMEOUT_MS = 40000; // 40s sans heartbeat des deux = clôture
-  var _bothAbsentHandled = false; // évite double déclenchement
-
   function fetchState(){
     if(!_gameId||_saving) return;
     var oppKey = _me==='girl' ? 'boy' : 'girl';
@@ -10134,40 +10126,19 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
         dot.title            = isOnline ? 'En ligne' : 'Hors ligne';
       }
 
-      // ── Les DEUX joueurs absents depuis +40s → clôture automatique ─────
-      var now = Date.now();
-      // Pour les deux : Supabase = source de vérité.
-      // upsertPresence() est retardé de 3s au retour (voir _refreshPresenceRate)
-      // pour laisser fetchState() lire les vrais timestamps avant qu'ils soient écrasés.
-      var myLastSeen = myPresRows[0]
-        ? now - new Date(myPresRows[0].updated_at).getTime()
-        : 99999999;
-      // Pour l'adversaire : Supabase est la seule source possible
-      var oppLastSeen = presRows[0]
-        ? now - new Date(presRows[0].updated_at).getTime()
-        : 99999999;
-      var bothAbsent  = myLastSeen > BOTH_ABSENT_TIMEOUT_MS && oppLastSeen > BOTH_ABSENT_TIMEOUT_MS;
-
-      if(bothAbsent && !_bothAbsentHandled && _launched){
-        _bothAbsentHandled = true;
+      // ── Table de présence vide = les deux joueurs sont partis → retour au lobby ──
+      // Pas de timer ni de délai : si personne n'est dans la table, la partie est terminée.
+      var bothAbsent = Array.isArray(allPres) && allPres.length === 0;
+      if(bothAbsent && _launched){
         stopAll();
         var gid = _gameId;
         resetState();
-        // Supprimer la partie côté Supabase
         if(gid){
           fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+gid,{
             method:'DELETE', headers:sbHeaders()
           }).catch(function(){});
         }
-        // Supprimer les deux présences (nettoyage complet)
-        fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE,{
-          method:'DELETE', headers:sbHeaders()
-        }).catch(function(){});
-        // Afficher le message puis retour au lobby
-        showSkyjoAlert('⏱️', 'Partie expirée — les deux joueurs étaient absents', function(){
-          _bothAbsentHandled = false;
-          enterLobby();
-        });
+        enterLobby();
         return;
       }
 
@@ -11656,25 +11627,13 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   // (déjà défini plus haut — on patch renderState pour afficher le bouton en jeu)
 
   // Expose les fonctions de refresh de taux pour le module bg-pause externe
-  // isPausing=true → stoppe heartbeat + poll (gèle les timestamps)
-  // isPausing=false → reprend tout (avec délai 3s sur le heartbeat)
-  window._skyjoRefreshRates = function(isPausing){
-    if(isPausing){
-      // ── PAUSE : stopper explicitement heartbeat et poll ──
-      // On ne peut pas se fier à document.hidden sur mobile (reste false sur certains browsers)
-      // donc on arrête les timers directement, sans condition.
-      if(_presTimer){ clearInterval(_presTimer); _presTimer = null; }
-      stopPoll();
-    } else {
-      // ── REPRISE : relancer poll immédiatement + heartbeat après 3s ──
-      _refreshPollRate();
-      _refreshPresenceRate();
-    }
+  window._skyjoRefreshRates = function(){
+    _refreshPollRate();
+    _refreshPresenceRate();
   };
-  // Enregistre l'heure exacte de départ de la page
-  window._skyjoMarkAbsence = function(){
-    if(_launched && _absenceStart === 0) _absenceStart = Date.now();
-  };
+  window._skyjoDeletePresence = deletePresence;
+
+  window._skyjoDeletePresence = deletePresence;
 
   window.closeSkyjoGame=function(){
     stopAll(); stopReconnectWait(); _waitingForReconnect=false;
@@ -11718,18 +11677,15 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   }
 
   function pauseSkyjo(){
-    // Classe CSS → pause toutes les animations Skyjo infinies
     document.body.classList.add('skyjo-bg-paused');
-    // Enregistrer l'heure de départ (utilisé pour bothAbsent côté local)
-    if(typeof window._skyjoMarkAbsence === 'function') window._skyjoMarkAbsence();
 
     // Stoppe également les clones volants en cours (suppression propre)
     document.querySelectorAll('.sj-fly-clone, .sj-particle').forEach(function(el){
       el.style.animationPlayState = 'paused';
     });
 
-    // Stoppe heartbeat + poll via le module Skyjo (passe isPausing=true)
-    if(typeof window._skyjoRefreshRates === 'function') window._skyjoRefreshRates(true);
+    // Ralentit les timers via les fonctions exposées par le module Skyjo
+    if(typeof window._skyjoRefreshRates === 'function') window._skyjoRefreshRates();
   }
 
   function resumeSkyjo(){
@@ -11740,8 +11696,8 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       el.style.animationPlayState = '';
     });
 
-    // Remet les timers à vitesse normale (passe isPausing=false)
-    if(typeof window._skyjoRefreshRates === 'function') window._skyjoRefreshRates(false);
+    // Remet les timers à vitesse normale
+    if(typeof window._skyjoRefreshRates === 'function') window._skyjoRefreshRates();
   }
 
   // visibilitychange : déclenché sur onglet caché, changement d'app, veille écran
@@ -11757,6 +11713,9 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   // pagehide : déclenché quand on quitte le navigateur, ou navigation BFCache (iOS Safari/Chrome)
   window.addEventListener('pagehide', function(){
     if(!isSkyjoActive()) return;
+    // Supprimer la présence immédiatement à la fermeture de page
+    // pour que la table devienne vide si les deux quittent → détection dans fetchState
+    if(typeof window._skyjoDeletePresence === 'function') window._skyjoDeletePresence();
     pauseSkyjo();
   });
 
@@ -14637,7 +14596,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.38 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
