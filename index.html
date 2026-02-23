@@ -9769,6 +9769,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     _bothAbsentHandled=false;
     _lastPresenceSent=0;
     _absenceStart=0;
+    window._sjLastSeenLiveTs = 0;
     if(_oppGoneTimer){clearTimeout(_oppGoneTimer);_oppGoneTimer=null;}
   }
 
@@ -10446,12 +10447,17 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     var oppHoldsCard = state.held_card && state.held_card.holder === oppKey2;
 
     // Nouveau signal live de l'adversaire ?
-    var isNewLive = curLive && (!prevLive || curLive.ts !== prevLive.ts);
+    // On compare au dernier ts VU (indépendant de prevState) pour ne jamais rater le signal
+    if(!window._sjLastSeenLiveTs) window._sjLastSeenLiveTs = 0;
+    var isNewLive = curLive && curLive.ts && curLive.ts !== window._sjLastSeenLiveTs;
+    console.log('[SKYJO-LIVE] isNewLive='+isNewLive+' isMyTurn='+isMyTurn+' curLive=',curLive);
 
     // ── Pré-calcul des rects AVANT renderGrid (les éléments existent encore) ──
     var _pendingLiveAnim = null;
     if(isNewLive && !isMyTurn && (!curLive.player || curLive.player === oppKey2)){
       var lv = curLive;
+      window._sjLastSeenLiveTs = lv.ts; // marquer comme vu
+      console.log('[SKYJO-LIVE] reçu action='+lv.action+' isMyTurn='+isMyTurn+' player='+lv.player+' oppKey2='+oppKey2);
 
       if(lv.action === 'draw_deck' || lv.action === 'draw_discard'){
         // Animation pioche : vole depuis deck/défausse → oppHeldEl
@@ -10489,6 +10495,9 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
         }
         if(sR2pre && dR2pre && sR2pre.width>0 && dR2pre.width>0){
           _pendingLiveAnim = { type:'replace', idx:lv.idx, sR:sR2pre, dR:dR2pre, val:lv.val, usingFallback:usingFallbackPre };
+          console.log('[SKYJO-LIVE] replace pendingAnim créé sR=',sR2pre,'dR=',dR2pre);
+        } else {
+          console.warn('[SKYJO-LIVE] replace ABANDONNÉ sR2pre=',sR2pre,'dR2pre=',dR2pre);
         }
 
       } else if(lv.action === 'discard_held'){
@@ -10517,6 +10526,11 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       }
     }
 
+    // Signal émis par nous-mêmes → marquer comme vu sans animer (évite replay parasite)
+    if(isNewLive && curLive.player && curLive.player === _me){
+      window._sjLastSeenLiveTs = curLive.ts;
+    }
+
     // Sync silencieux : si l'adversaire tient déjà une carte au chargement (rejoin mid-game)
     // → afficher directement sans animation
     if(!isNewLive && oppHoldsCard && oppHeldWrap && oppHeldEl){
@@ -10536,6 +10550,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     // ── Lancer les animations live APRÈS renderGrid (nouveaux éléments dans le DOM) ──
     if(_pendingLiveAnim){
       var pla = _pendingLiveAnim;
+      console.log('[SKYJO-ANIM] pendingLiveAnim type='+pla.type, pla);
 
       if(pla.type === 'draw'){
         // Pioche → carte vole vers oppHeldEl
