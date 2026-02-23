@@ -10297,11 +10297,17 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     var myName   =_me==='girl'?'Zelda':'Link';
     var oppName  =_me==='girl'?'Link':'Zelda';
     var isMyTurn =state.turn===_me;
-    var iHoldCard=state.held_card&&state.held_card.holder===_me; // défini ici pour la bannière
+    var iHoldCard=state.held_card&&state.held_card.holder===_me;
 
     // Détecter si le tour vient de changer (pour animer la bannière)
     var prevTurn = prevState ? prevState.turn : null;
     var turnChanged = prevTurn !== state.turn;
+
+    // Si le tour vient de passer à moi, attendre 1s pour laisser les animations adversaire se terminer
+    if(turnChanged && isMyTurn && prevTurn !== null){
+      setTimeout(function(){ _doRenderState(gameRow); }, 1000);
+      return;
+    }
 
     // Détecter si le tour vient de passer à moi → masquer la carte en main opp
     if(turnChanged && isMyTurn){
@@ -14711,7 +14717,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.33 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8x - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
