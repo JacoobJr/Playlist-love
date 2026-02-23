@@ -10477,9 +10477,9 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
     // ── Pré-calcul des rects AVANT renderGrid (les éléments existent encore) ──
     var _pendingLiveAnim = null;
-    if(isNewLive && !isMyTurn && (!curLive.player || curLive.player === oppKey2)){
+    if(isNewLive && curLive.player && curLive.player === oppKey2){
       var lv = curLive;
-      window._sjLastSeenLiveTs = lv.ts; // marquer comme vu
+      window._sjLastSeenLiveTs = lv.ts;
       console.log('[SKYJO-LIVE] reçu action='+lv.action+' isMyTurn='+isMyTurn+' player='+lv.player+' oppKey2='+oppKey2);
 
       if(lv.action === 'draw_deck' || lv.action === 'draw_discard'){
@@ -14711,7 +14711,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8x - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.33 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
