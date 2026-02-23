@@ -45,7 +45,7 @@
   });
 })();
 </script>
-<title>Playlist Jayana 💖</title>
+<title>YAM — You And Me 🍠</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -879,6 +879,173 @@ body.light #loveBox .lb-label { color: rgba(200,24,94,0.65); }
 }
 .bottom-nav-safe {
   height: env(safe-area-inset-bottom, 0px);
+}
+
+/* ══ YAM TAB PANELS ══ */
+.yam-tab-panel {
+  display: none;
+}
+.yam-tab-panel.active {
+  display: block;
+}
+
+/* ══ NAV ACTIVE STATE ══ */
+.nav-item.nav-active {
+  color: var(--green) !important;
+  transform: none !important;
+}
+.nav-item.nav-active svg {
+  filter: drop-shadow(0 0 4px rgba(0,201,167,0.5));
+}
+body.light .nav-item.nav-active {
+  color: var(--green) !important;
+}
+body.light .nav-item.nav-active svg {
+  filter: drop-shadow(0 0 4px rgba(200,24,94,0.4));
+}
+
+/* ══ YAM ACCUEIL ══ */
+#yamHomeTab {
+  padding-bottom: 16px;
+}
+.yam-mascotte-zone {
+  margin: 20px 16px 0;
+  background: linear-gradient(135deg, var(--s1) 0%, rgba(232,130,58,0.07) 100%);
+  border: 1px dashed rgba(232,130,58,0.35);
+  border-radius: 20px;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.yam-mascotte-zone::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 80%, rgba(232,130,58,0.08) 0%, transparent 65%);
+  pointer-events: none;
+}
+.yam-mascotte-placeholder {
+  font-size: 64px;
+  line-height: 1;
+  animation: yamFloat 3s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes yamFloat {
+  0%,100% { transform: translateY(0px); }
+  50%      { transform: translateY(-8px); }
+}
+.yam-mascotte-label {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  opacity: 0.8;
+}
+.yam-mascotte-sub {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+.yam-mood-strip {
+  margin: 14px 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.yam-mood-card {
+  flex: 1;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: border-color 0.2s;
+}
+.yam-mood-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--s2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.yam-mood-info {
+  flex: 1; min-width: 0;
+}
+.yam-mood-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 1px;
+}
+.yam-mood-state {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ══ JEUX TAB ══ */
+#yamJeuxTab {
+  padding: 0 0 16px;
+}
+.yam-jeux-header {
+  padding: 20px 16px 0;
+  margin-bottom: 4px;
+}
+.yam-betises-cta {
+  margin: 14px 16px 0;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(255,110,176,0.08) 0%, rgba(167,139,250,0.08) 100%);
+  border: 1px solid rgba(255,110,176,0.3);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s, background 0.2s;
+}
+.yam-betises-cta:hover {
+  border-color: rgba(255,110,176,0.6);
+  background: linear-gradient(135deg, rgba(255,110,176,0.14) 0%, rgba(167,139,250,0.14) 100%);
+  transform: scale(1.01);
+}
+.yam-betises-cta-icon { font-size: 32px; flex-shrink: 0; }
+.yam-betises-cta-label { font-size: 14px; font-weight: 700; color: var(--text); }
+.yam-betises-cta-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.yam-quiz-cta {
+  margin: 10px 16px 0;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(255,110,176,0.06) 0%, rgba(96,165,250,0.06) 100%);
+  border: 1px solid rgba(255,110,176,0.25);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.yam-quiz-cta:hover {
+  border-color: rgba(255,110,176,0.5);
+  transform: scale(1.01);
+}
+
+/* ══ MUSIQUE TAB ══ */
+#yamMusiqueTab {
+  padding-bottom: 16px;
+}
+
+/* ══ NOUS TAB ══ */
+#yamNousTab {
+  padding-bottom: 16px;
 }
 /* ══════════════════════════════════════════
    MODE CLAIR — OVERRIDES COMPLETS
@@ -3903,7 +4070,7 @@ body.anniv-mode .counter-block-top {
   <div class="anniv-title" id="annivTitle">Bonne mensiversaire mon amour 💑</div>
   <div class="anniv-sub" id="annivSub"></div>
 </div>
-<div id="floatingThemeBtn" title="Changer le thème">🌙 Thème</div>
+<div id="floatingThemeBtn" title="Changer le thème" style="display:none;">🌙 Thème</div>
 
 <header style="position:relative;">
 
@@ -3955,17 +4122,95 @@ body.anniv-mode .counter-block-top {
     <div id="moodPickerDesc"></div>
   </div>
 
-  <div class="hdr-tag">Playlist</div>
-  <div class="hdr-name">Jayana 🩷</div>
+  <div class="hdr-tag">You & Me</div>
+  <div class="hdr-name">YAM 🍠</div>
   <div class="hdr-sub">Notre univers en musique</div>
 </header>
 
-<div id="topBubbleMenu">
+<!-- HIDDEN bubbleMenu refs preserved for JS compatibility — not displayed -->
+<div id="topBubbleMenu" style="display:none;">
   <div class="bubbleBtn" id="themeToggle">🌙 Thème</div>
-  <div class="bubbleBtn" id="quizBtn" style="color:#ff6eb0;border-color:rgba(255,110,176,0.4);background:rgba(255,110,176,0.08);font-weight:600;">Quiz 💖</div>
-  <div class="bubbleBtn" id="gamesBtn" style="color:#60a5fa;border-color:rgba(96,165,250,0.4);background:rgba(96,165,250,0.08);font-weight:600;">Jeux 🎮</div>
+  <div class="bubbleBtn" id="quizBtn">Quiz 💖</div>
+  <div class="bubbleBtn" id="gamesBtn">Jeux 🎮</div>
   <div class="bubbleBtn" id="betisesBtn">Bêtises 🤡</div>
 </div>
+
+<!-- ═══════════════════════════════════════════
+     YAM — ONGLET ACCUEIL
+═══════════════════════════════════════════ -->
+<div id="yamHomeTab" class="yam-tab-panel active">
+
+  <!-- Zone mascotte YAM -->
+  <div class="yam-mascotte-zone">
+    <div class="yam-mascotte-placeholder">🍠</div>
+    <div class="yam-mascotte-label">YAM arrive bientôt</div>
+    <div class="yam-mascotte-sub">Votre compagnon de couple 💑</div>
+  </div>
+
+  <!-- Humeur du couple -->
+  <div class="yam-mood-strip">
+    <div class="yam-mood-card" id="yamMoodElle">
+      <div class="yam-mood-avatar" id="yamMoodElleAvatar">👧</div>
+      <div class="yam-mood-info">
+        <div class="yam-mood-name">Zelda</div>
+        <div class="yam-mood-state" id="yamMoodElleState">—</div>
+      </div>
+    </div>
+    <div class="yam-mood-card" id="yamMoodLui">
+      <div class="yam-mood-avatar" id="yamMoodLuiAvatar">👦</div>
+      <div class="yam-mood-info">
+        <div class="yam-mood-name">Link</div>
+        <div class="yam-mood-state" id="yamMoodLuiState">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compteur -->
+  <div class="section fade-in">
+    <div class="section-label">On compte les jours</div>
+    <div class="counter-block" id="counterBlock">
+      <div class="counter-block-top"></div>
+      <div class="counter-block-inner">
+        <div class="counter-block-unit main-unit">
+          <span class="c-num c-num-big" id="cnt-days">0</span>
+          <span class="c-lbl">Jours</span>
+        </div>
+        <div class="counter-block-sep">:</div>
+        <div class="counter-block-unit">
+          <span class="c-num" id="cnt-hours">00</span>
+          <span class="c-lbl">Heures</span>
+        </div>
+        <div class="counter-block-sep">:</div>
+        <div class="counter-block-unit">
+          <span class="c-num" id="cnt-mins">00</span>
+          <span class="c-lbl">Min</span>
+        </div>
+        <div class="counter-block-sep">:</div>
+        <div class="counter-block-unit">
+          <span class="c-num" id="cnt-secs">00</span>
+          <span class="c-lbl">Sec</span>
+        </div>
+      </div>
+    </div>
+    <div class="counter-since">💑 Depuis le 29 octobre 2024</div>
+  </div>
+
+  <!-- Raison aléatoire -->
+  <div class="section fade-in" id="reasonSection">
+    <div class="section-label">Pourquoi je t'aime</div>
+    <div id="reasonBox">
+      <span class="r-label">Une raison parmi tant d'autres ✨</span>
+      <div id="reasonText">...</div>
+      <span class="r-hint">👆 Tape pour en découvrir une autre</span>
+    </div>
+  </div>
+
+  <!-- Bouton thème -->
+  <div style="padding:14px 16px 0;display:flex;justify-content:flex-end;">
+    <div class="bubbleBtn" id="themeToggleHome" onclick="applyThemeToggle()" style="font-size:12px;">🌙 Thème</div>
+  </div>
+
+</div><!-- /yamHomeTab -->
 
 <script>
 async function nativeLogout(){
@@ -3984,34 +4229,10 @@ async function nativeLogout(){
 
 </script>
 
-<div class="section fade-in">
-  <div class="section-label">On compte les jours</div>
-  <div class="counter-block" id="counterBlock">
-    <div class="counter-block-top"></div>
-    <div class="counter-block-inner">
-      <div class="counter-block-unit main-unit">
-        <span class="c-num c-num-big" id="cnt-days">0</span>
-        <span class="c-lbl">Jours</span>
-      </div>
-      <div class="counter-block-sep">:</div>
-      <div class="counter-block-unit">
-        <span class="c-num" id="cnt-hours">00</span>
-        <span class="c-lbl">Heures</span>
-      </div>
-      <div class="counter-block-sep">:</div>
-      <div class="counter-block-unit">
-        <span class="c-num" id="cnt-mins">00</span>
-        <span class="c-lbl">Min</span>
-      </div>
-      <div class="counter-block-sep">:</div>
-      <div class="counter-block-unit">
-        <span class="c-num" id="cnt-secs">00</span>
-        <span class="c-lbl">Sec</span>
-      </div>
-    </div>
-  </div>
-  <div class="counter-since">💑 Depuis le 29 octobre 2024</div>
-</div>
+<!-- ═══════════════════════════════════════════
+     YAM — ONGLET NOUS
+═══════════════════════════════════════════ -->
+<div id="yamNousTab" class="yam-tab-panel">
 
 <div class="section fade-in" id="timelineSection">
   <div class="section-label">Notre histoire</div>
@@ -4612,15 +4833,6 @@ body.light #counterBlock.glowing .c-num-big {
 })();
 </script>
 
-<div class="section fade-in" id="reasonSection">
-  <div class="section-label">Pourquoi je t'aime</div>
-  <div id="reasonBox">
-    <span class="r-label">Une raison parmi tant d'autres ✨</span>
-    <div id="reasonText">...</div>
-    <span class="r-hint">👆 Tape pour en découvrir une autre</span>
-  </div>
-</div>
-
 <div class="section fade-in" id="elleSection">
   <div class="section-label">Elle</div>
   <div class="slider" id="elleSlider">
@@ -4868,6 +5080,37 @@ body.light #counterBlock.glowing .c-num-big {
   <div class="stack-ctr" id="stackCounter"></div>
 </div>
 
+<div class="section fade-in" id="Books">
+  <div class="section-label">Idées livre 📚</div>
+  <div class="slider">
+    <div class="album-card"><div class="album-image"><a href="https://booknode.com/la_saga_des_impossibles_tome_1_adam_03666756" target="_blank" rel="noopener noreferrer"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-6.jpg" onerror="this.onerror=null;this.src='image-6.jpg'"></a><div class="album-banner">Adam</div></div><div class="album-desc">Une romance qui touche l'âme ✨</div></div>
+    <div class="album-card"><div class="album-image"><a href="https://www.fnac.com/a18261401/Emma-Green-Ce-qui-nous-rend-vivants" target="_blank" rel="noopener noreferrer"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-7.jpg" onerror="this.onerror=null;this.src='image-7.jpg'"></a><div class="album-banner">Ce qui nous rend vivants</div></div><div class="album-desc">Quand l'amour révèle tout 💖</div></div>
+    <div class="album-card"><div class="album-image"><a href="https://www.fnac.com/a17088484/Captive-Tome-1-Captive-Sarah-Rivens" target="_blank" rel="noopener noreferrer"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-8.jpg" onerror="this.onerror=null;this.src='image-8.jpg'"></a><div class="album-banner">Captive</div></div><div class="album-desc">Passion et suspense 🔥</div></div>
+    <div class="album-card"><div class="album-image"><a href="https://booknode.com/avant_toi_0690393" target="_blank" rel="noopener noreferrer"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-9.jpg" onerror="this.onerror=null;this.src='image-9.jpg'"></a><div class="album-banner">Avant toi</div></div><div class="album-desc">Un amour impossible 💔</div></div>
+    <div class="album-card"><div class="album-image"><a href="https://www.fnac.com/a7792857/Katarina-Bivald-La-Bibliotheque-des-coeurs-cabosses" target="_blank" rel="noopener noreferrer"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-10.jpg" onerror="this.onerror=null;this.src='image-10.jpg'"></a><div class="album-banner">La bibliothèque des cœurs cabossés</div></div><div class="album-desc">Émotions à chaque page 📚</div></div>
+  </div>
+</div>
+
+<div id="wheelSection" class="fade-in">
+  <div class="section-label" style="padding:26px 16px 0">On fait quoi ce soir ? 🎲</div>
+  <div style="padding:0 16px">
+    <div class="wheel-container">
+      <div class="wheel-wrap">
+        <canvas id="wheelCanvas"></canvas>
+        <div class="wheel-needle">◀</div>
+        <div class="wheel-center"></div>
+      </div>
+      <button class="wheel-spin-btn" id="spinBtn">Tourner la roue ✨</button>
+      <div id="wheelResult">
+        <span class="result-label">En attente...</span>
+        <span class="result-text">Lance la roue pour décider 🎲</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /yamNousTab -->
+<div id="yamMusiqueTab" class="yam-tab-panel">
 
 <div id="loveSection" class="fade-in">
   <div class="top50-header">
@@ -4955,34 +5198,56 @@ body.light #counterBlock.glowing .c-num-big {
   </div>
 </div>
 
-<div class="section fade-in" id="Books">
-  <div class="section-label">Idées livre 📚</div>
-  <div class="slider">
-    <div class="album-card"><div class="album-image"><a href="https://booknode.com/la_saga_des_impossibles_tome_1_adam_03666756" target="_blank" rel="noopener noreferrer"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-6.jpg" onerror="this.onerror=null;this.src='image-6.jpg'"></a><div class="album-banner">Adam</div></div><div class="album-desc">Une romance qui touche l'âme ✨</div></div>
-    <div class="album-card"><div class="album-image"><a href="https://www.fnac.com/a18261401/Emma-Green-Ce-qui-nous-rend-vivants" target="_blank" rel="noopener noreferrer"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-7.jpg" onerror="this.onerror=null;this.src='image-7.jpg'"></a><div class="album-banner">Ce qui nous rend vivants</div></div><div class="album-desc">Quand l'amour révèle tout 💖</div></div>
-    <div class="album-card"><div class="album-image"><a href="https://www.fnac.com/a17088484/Captive-Tome-1-Captive-Sarah-Rivens" target="_blank" rel="noopener noreferrer"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-8.jpg" onerror="this.onerror=null;this.src='image-8.jpg'"></a><div class="album-banner">Captive</div></div><div class="album-desc">Passion et suspense 🔥</div></div>
-    <div class="album-card"><div class="album-image"><a href="https://booknode.com/avant_toi_0690393" target="_blank" rel="noopener noreferrer"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-9.jpg" onerror="this.onerror=null;this.src='image-9.jpg'"></a><div class="album-banner">Avant toi</div></div><div class="album-desc">Un amour impossible 💔</div></div>
-    <div class="album-card"><div class="album-image"><a href="https://www.fnac.com/a7792857/Katarina-Bivald-La-Bibliotheque-des-coeurs-cabosses" target="_blank" rel="noopener noreferrer"><img src="https://zjmbyjpxqrojnuymnpcf.supabase.co/storage/v1/object/public/images/image-10.jpg" onerror="this.onerror=null;this.src='image-10.jpg'"></a><div class="album-banner">La bibliothèque des cœurs cabossés</div></div><div class="album-desc">Émotions à chaque page 📚</div></div>
-  </div>
-</div>
+</div><!-- /yamMusiqueTab -->
 
-<div id="wheelSection" class="fade-in">
-  <div class="section-label" style="padding:26px 16px 0">On fait quoi ce soir ? 🎲</div>
-  <div style="padding:0 16px">
-    <div class="wheel-container">
-      <div class="wheel-wrap">
-        <canvas id="wheelCanvas"></canvas>
-        <div class="wheel-needle">◀</div>
-        <div class="wheel-center"></div>
-      </div>
-      <button class="wheel-spin-btn" id="spinBtn">Tourner la roue ✨</button>
-      <div id="wheelResult">
-        <span class="result-label">En attente...</span>
-        <span class="result-text">Lance la roue pour décider 🎲</span>
-      </div>
+<!-- ═══════════════════════════════════════════
+     YAM — ONGLET JEUX
+═══════════════════════════════════════════ -->
+<div id="yamJeuxTab" class="yam-tab-panel">
+
+  <div class="yam-jeux-header">
+    <div class="section-label" style="margin-bottom:0">Jouer ensemble 🎮</div>
+  </div>
+
+  <!-- CTA Bêtises -->
+  <div class="yam-betises-cta" onclick="document.getElementById('betisesBtn').click()">
+    <div class="yam-betises-cta-icon">🤡</div>
+    <div>
+      <div class="yam-betises-cta-label">Faire une bêtise</div>
+      <div class="yam-betises-cta-sub">Surprends ton partenaire avec une farce</div>
     </div>
   </div>
-</div>
+
+  <!-- CTA Quiz -->
+  <div class="yam-quiz-cta" onclick="document.getElementById('quizBtn').click()">
+    <div style="font-size:26px;flex-shrink:0;">💖</div>
+    <div>
+      <div style="font-size:14px;font-weight:700;color:var(--text);">Quiz couple</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;">Tu me connais bien ?</div>
+    </div>
+  </div>
+
+  <!-- Mini jeux grid — déclenche gamesView -->
+  <div class="section fade-in" style="padding-top:18px;">
+    <div class="section-label">Mini-jeux</div>
+    <div onclick="document.getElementById('gamesBtn').click()" style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:background 0.15s,transform 0.12s;" onmouseover="this.style.background='var(--s2)'" onmouseout="this.style.background='var(--s1)'">
+      <span style="font-size:32px;">🎮</span>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);">Tous les jeux</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Memory · Snake · Pendu · Puzzle · Skyjo</div>
+      </div>
+      <svg style="margin-left:auto;flex-shrink:0;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+  </div>
+
+</div><!-- /yamJeuxTab -->
+
+<!-- ═══════════════════════════════════════════
+     NOUS TAB extra content (books + wheel)
+     injected inside yamNousTab above,
+     but books/wheel need to come before close
+     — redone below as injection via the tag open
+═══════════════════════════════════════════ -->
 
 <div id="danceZone">
   <span id="dancerGirl">💃</span>
@@ -5028,25 +5293,165 @@ body.light #counterBlock.glowing .c-num-big {
 
 <div class="bottom-nav">
   <div class="bottom-nav-inner">
-  <div class="nav-item" onclick="scrollToTop()">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Accueil
-  </div>
-  <div class="nav-item" id="navSearch" onclick="openSearch()">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM10 14a4 4 0 110-8 4 4 0 010 8z"/></svg>Recherche
-  </div>
-  <div class="nav-item" onclick="toggleLibrary()">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v2H4zm0 6h16v2H4zm0 6h16v2H4z"/></svg>Bibliothèque
-  </div>
-  <div class="nav-item" onclick="spawnHeart()">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>Like
-  </div>
-  <div class="nav-item" id="lockNavBtn" onclick="toggleLockPopup()">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>Caché
-    <div id="lockUnreadBadge"></div>
-  </div>
+    <div class="nav-item nav-active" id="navHome" onclick="yamSwitchTab('home')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      Accueil
+    </div>
+    <div class="nav-item" id="navMessages" onclick="yamSwitchTab('messages')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+      Messages
+      <div id="lockUnreadBadge"></div>
+    </div>
+    <div class="nav-item" id="navJeux" onclick="yamSwitchTab('jeux')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15 7.5V2H9v5.5l3 3 3-3zM7.5 9H2v6h5.5l3-3-3-3zM9 16.5V22h6v-5.5l-3-3-3 3zM16.5 9l-3 3 3 3H22V9h-5.5z"/></svg>
+      Jeux
+    </div>
+    <div class="nav-item" id="navMusique" onclick="yamSwitchTab('musique')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+      Musique
+    </div>
+    <div class="nav-item" id="navNous" onclick="yamSwitchTab('nous')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      Nous
+    </div>
   </div>
   <div class="bottom-nav-safe"></div>
 </div>
+
+<script>
+/* ══════════════════════════════════════════
+   YAM TAB SWITCHING SYSTEM
+══════════════════════════════════════════ */
+(function(){
+  var TAB_MAP = {
+    home:    { panel: 'yamHomeTab',    nav: 'navHome' },
+    messages:{ panel: null,            nav: 'navMessages' },  // opens hiddenPage
+    jeux:    { panel: 'yamJeuxTab',    nav: 'navJeux' },
+    musique: { panel: 'yamMusiqueTab', nav: 'navMusique' },
+    nous:    { panel: 'yamNousTab',    nav: 'navNous' }
+  };
+  var _currentTab = 'home';
+
+  window.yamSwitchTab = function(tab) {
+    // Messages = ouvre InstaLove directement (toggleLockPopup)
+    if(tab === 'messages') {
+      if(window.toggleLockPopup) window.toggleLockPopup();
+      return;
+    }
+
+    // Hide all panels
+    Object.keys(TAB_MAP).forEach(function(key) {
+      var t = TAB_MAP[key];
+      if(t.panel) {
+        var el = document.getElementById(t.panel);
+        if(el) el.classList.remove('active');
+      }
+      var nav = document.getElementById(t.nav);
+      if(nav) nav.classList.remove('nav-active');
+    });
+
+    // Show selected panel
+    var selected = TAB_MAP[tab];
+    if(selected && selected.panel) {
+      var panel = document.getElementById(selected.panel);
+      if(panel) panel.classList.add('active');
+    }
+    if(selected) {
+      var navEl = document.getElementById(selected.nav);
+      if(navEl) navEl.classList.add('nav-active');
+    }
+
+    // Scroll to top of page on tab switch
+    window.scrollTo(0, 0);
+    _currentTab = tab;
+
+    // Update theme toggle sync
+    if(window.updateFloatingThemeBtn) window.updateFloatingThemeBtn();
+  };
+
+  // Override scrollToTop to go home
+  var _origScrollToTop = window.scrollToTop;
+  window.scrollToTop = function() {
+    yamSwitchTab('home');
+    window.scrollTo(0,0);
+  };
+
+  // When hiddenPage closes, restore Messages nav highlight removal
+  var _origCloseAllViews = window.closeAllViews;
+
+  // Sync mood display from profileMood system
+  function yamSyncMood() {
+    var profile = window.getProfile ? window.getProfile() : null;
+
+    // Try to read mood from existing profileMoodSelf/Other elements
+    var moodSelf  = document.getElementById('profileMoodSelf');
+    var moodOther = document.getElementById('profileMoodOther');
+
+    var selfEmoji  = moodSelf  ? moodSelf.textContent.trim()  : '';
+    var otherEmoji = moodOther ? moodOther.textContent.trim() : '';
+
+    // Map profile to elle/lui
+    var elleAvatar = document.getElementById('yamMoodElleAvatar');
+    var luiAvatar  = document.getElementById('yamMoodLuiAvatar');
+    var elleState  = document.getElementById('yamMoodElleState');
+    var luiState   = document.getElementById('yamMoodLuiState');
+
+    if(profile === 'girl') {
+      if(elleAvatar && selfEmoji)  elleAvatar.textContent = selfEmoji || '👧';
+      if(luiAvatar  && otherEmoji) luiAvatar.textContent  = otherEmoji || '👦';
+      if(elleState)  elleState.textContent  = selfEmoji  ? 'En ligne' : '—';
+      if(luiState)   luiState.textContent   = otherEmoji ? 'En ligne' : '—';
+    } else if(profile === 'boy') {
+      if(luiAvatar  && selfEmoji)  luiAvatar.textContent  = selfEmoji || '👦';
+      if(elleAvatar && otherEmoji) elleAvatar.textContent = otherEmoji || '👧';
+      if(luiState)   luiState.textContent   = selfEmoji  ? 'En ligne' : '—';
+      if(elleState)  elleState.textContent  = otherEmoji ? 'En ligne' : '—';
+    }
+  }
+
+  // Sync mood periodically
+  setTimeout(yamSyncMood, 1500);
+  setInterval(yamSyncMood, 15000);
+
+  // Sync theme toggle label in home tab
+  var origApplyTheme = window.applyThemeToggle;
+  window.applyThemeToggle = function() {
+    if(origApplyTheme) origApplyTheme.apply(this, arguments);
+    var homeBtn = document.getElementById('themeToggleHome');
+    if(homeBtn) {
+      var isLight = document.body.classList.contains('light');
+      homeBtn.textContent = isLight ? '🌙 Thème' : '☀️ Thème';
+    }
+  };
+
+  // Lock badge on Messages nav (same as old lockNavBtn)
+  var _origLockNavBtn = document.getElementById('lockNavBtn');
+  // Alias: pulse animation should apply to navMessages when there are unread msgs
+  var _lnbObs = new MutationObserver(function(muts) {
+    var navMsg = document.getElementById('navMessages');
+    if(!navMsg) return;
+    var hasUnread = _origLockNavBtn && _origLockNavBtn.classList.contains('has-unread');
+    if(hasUnread) navMsg.style.color = '#a78bfa';
+    else navMsg.style.color = '';
+  });
+  if(_origLockNavBtn) _lnbObs.observe(_origLockNavBtn, {attributes:true,attributeFilter:['class']});
+
+  // Intercept toggleLockPopup to set nav active state
+  document.addEventListener('DOMContentLoaded', function(){
+    var origToggleLock = window.toggleLockPopup;
+    if(origToggleLock) {
+      window.toggleLockPopup = function() {
+        origToggleLock.apply(this, arguments);
+      };
+    }
+  });
+
+})();
+</script>
+
+<!-- Hidden compat elements for existing JS that references old nav items -->
+<div id="lockNavBtn" style="display:none;"></div>
+<div id="navSearch" style="display:none;"></div>
 
 <div id="searchOverlay" onclick="if(event.target===this)closeSearch()">
   <div class="search-popup">
