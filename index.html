@@ -9768,6 +9768,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     _roundEndShown=false;
     _bothAbsentHandled=false;
     _lastPresenceSent=0;
+    _absenceStart=0;
     if(_oppGoneTimer){clearTimeout(_oppGoneTimer);_oppGoneTimer=null;}
   }
 
@@ -9793,6 +9794,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     //  mais upsertPresence() skippe si document.hidden — donc pas de heartbeat envoyé.)
   }
   var _lastPresenceSent = 0; // timestamp local du dernier heartbeat envoyé
+  var _absenceStart     = 0; // heure exacte où on a quitté la page (visibilitychange)
 
   function upsertPresence(){
     if(!_me) return;
@@ -10126,17 +10128,21 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
       // ── Les DEUX joueurs absents depuis +40s → clôture automatique ─────
       var now = Date.now();
-      // Pour MOI : on utilise _lastPresenceSent (horloge locale) car au retour
-      // upsertPresence() remet updated_at=now() dans Supabase avant même que
-      // fetchState() ait le temps de lire — la valeur Supabase n'est plus fiable.
-      var myLastSeen  = _lastPresenceSent > 0
-        ? now - _lastPresenceSent
-        : 99999999;
+      // Pour MOI : on utilise _absenceStart (horloge locale, figée dès le départ de la page)
+      // car au retour upsertPresence() remet updated_at=now() dans Supabase immédiatement,
+      // rendant la valeur Supabase inutilisable pour détecter notre propre absence.
+      // _absenceStart est remis à 0 uniquement par resetState() (fin de partie).
+      var myLastSeen  = _absenceStart > 0
+        ? now - _absenceStart
+        : (_lastPresenceSent > 0 ? now - _lastPresenceSent : 99999999);
       // Pour l'adversaire : Supabase est la seule source possible
       var oppLastSeen = presRows[0]
         ? now - new Date(presRows[0].updated_at).getTime()
         : 99999999;
       var bothAbsent  = myLastSeen > BOTH_ABSENT_TIMEOUT_MS && oppLastSeen > BOTH_ABSENT_TIMEOUT_MS;
+
+      // Si on est de retour et bothAbsent pas déclenché → réinitialiser _absenceStart
+      if(!bothAbsent && _absenceStart > 0 && !document.hidden) _absenceStart = 0;
 
       if(bothAbsent && !_bothAbsentHandled && _launched){
         _bothAbsentHandled = true;
@@ -11650,6 +11656,10 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     _refreshPollRate();
     _refreshPresenceRate();
   };
+  // Enregistre l'heure exacte de départ de la page
+  window._skyjoMarkAbsence = function(){
+    if(_launched && _absenceStart === 0) _absenceStart = Date.now();
+  };
 
   window.closeSkyjoGame=function(){
     stopAll(); stopReconnectWait(); _waitingForReconnect=false;
@@ -11695,6 +11705,8 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   function pauseSkyjo(){
     // Classe CSS → pause toutes les animations Skyjo infinies
     document.body.classList.add('skyjo-bg-paused');
+    // Enregistrer l'heure de départ (utilisé pour bothAbsent côté local)
+    if(typeof window._skyjoMarkAbsence === 'function') window._skyjoMarkAbsence();
 
     // Stoppe également les clones volants en cours (suppression propre)
     document.querySelectorAll('.sj-fly-clone, .sj-particle').forEach(function(el){
@@ -14610,7 +14622,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.38 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
