@@ -16014,42 +16014,84 @@ document.querySelectorAll('.album-image').forEach(function(el){
 
 /* ── 12b. SWIPE HORIZONTAL dans hiddenPage (InstaLove sous-écrans) ── */
 (function(){
-  var hp = document.getElementById('hiddenPage');
-  if(!hp) return;
+  // On attache les listeners sur document, filtrés quand hiddenPage est active.
+  // Raison : hiddenPage a overflow:hidden + position:fixed, et le body est fixé
+  // lors de l'ouverture, ce qui perturbe les touch events sur l'élément lui-même.
 
-  var _sx = 0, _sy = 0;
+  var _sx = 0, _sy = 0, _sActive = false;
 
-  hp.addEventListener('touchstart', function(e){
+  /* Détecte l'écran DM actuellement visible */
+  function dmCurrentScreen(){
+    var hp = document.getElementById('hiddenPage');
+    if(!hp || !hp.classList.contains('active')) return null;
+
+    // Si le chat est visible
+    var chat = document.getElementById('dmChatScreen');
+    if(chat && chat.style.display !== 'none') return 'chat';
+
+    // Si l'écran home est visible
+    var home = document.getElementById('dmHomeScreen');
+    if(home && home.style.display !== 'none'){
+      // Sous-vue : logo ou conv ?
+      var conv = document.getElementById('dmHomeConv');
+      if(conv && conv.style.display !== 'none') return 'conv';
+      return 'logo';
+    }
+
+    // Fallback : hiddenPage active mais aucun écran explicitement affiché
+    // → on est probablement sur "logo" (état initial)
+    return 'logo';
+  }
+
+  document.addEventListener('touchstart', function(e){
+    var hp = document.getElementById('hiddenPage');
+    if(!hp || !hp.classList.contains('active')){ _sActive = false; return; }
+    // Ignorer si clavier ouvert
+    if(document.activeElement &&
+       (document.activeElement.tagName === 'INPUT' ||
+        document.activeElement.tagName === 'TEXTAREA')){ _sActive = false; return; }
+    // Ignorer si overlay prank ouvert
+    var pm = document.getElementById('prankMenu');
+    if(pm && pm.classList.contains('show')){ _sActive = false; return; }
+
     _sx = e.touches[0].clientX;
     _sy = e.touches[0].clientY;
+    _sActive = true;
   }, { passive:true });
 
-  hp.addEventListener('touchend', function(e){
-    if(document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
-    var prankMenu = document.getElementById('prankMenu');
-    if(prankMenu && prankMenu.classList.contains('show')) return;
+  document.addEventListener('touchend', function(e){
+    if(!_sActive) return;
+    _sActive = false;
+
+    var hp = document.getElementById('hiddenPage');
+    if(!hp || !hp.classList.contains('active')) return;
+    if(document.activeElement &&
+       (document.activeElement.tagName === 'INPUT' ||
+        document.activeElement.tagName === 'TEXTAREA')) return;
+    var pm = document.getElementById('prankMenu');
+    if(pm && pm.classList.contains('show')) return;
 
     var dx = e.changedTouches[0].clientX - _sx;
     var dy = e.changedTouches[0].clientY - _sy;
-    if(Math.abs(dx) < 60 || Math.abs(dy) > 80) return;
 
-    var chatScreen = document.getElementById('dmChatScreen');
-    var homeScreen = document.getElementById('dmHomeScreen');
-    var chatVisible = chatScreen && chatScreen.style.display !== 'none';
-    var homeVisible = homeScreen && homeScreen.style.display !== 'none';
+    // Swipe horizontal : au moins 55px horizontal, et horizontal > vertical
+    if(Math.abs(dx) < 55) return;
+    if(Math.abs(dy) > Math.abs(dx) * 0.9) return; // trop diagonal
+
+    var screen = dmCurrentScreen();
+    if(!screen) return;
 
     if(dx < 0){
-      if(homeVisible){
-        var logo = document.getElementById('dmHomeLogo');
-        var conv = document.getElementById('dmHomeConv');
-        if(logo && logo.style.display !== 'none'){
-          if(window.dmShowConv){ haptic('light'); window.dmShowConv(); }
-        } else if(conv && conv.style.display !== 'none'){
-          if(window.dmOpenMessaging){ haptic('light'); window.dmOpenMessaging(); }
-        }
+      // Swipe gauche → avancer
+      if(screen === 'logo'){
+        if(window.dmShowConv){ haptic('light'); window.dmShowConv(); }
+      } else if(screen === 'conv'){
+        if(window.dmOpenMessaging){ haptic('light'); window.dmOpenMessaging(); }
       }
+      // 'chat' : pas d'écran suivant, on ignore
     } else {
-      if(chatVisible || homeVisible){
+      // Swipe droite → reculer
+      if(screen === 'chat' || screen === 'conv' || screen === 'logo'){
         if(window.dmHandleBack){ haptic('light'); window.dmHandleBack(); }
       }
     }
