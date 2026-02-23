@@ -10448,103 +10448,71 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     // Nouveau signal live de l'adversaire ?
     var isNewLive = curLive && (!prevLive || curLive.ts !== prevLive.ts);
 
+    // ── Pré-calcul des rects AVANT renderGrid (les éléments existent encore) ──
+    var _pendingLiveAnim = null;
     if(isNewLive && !isMyTurn && (!curLive.player || curLive.player === oppKey2)){
       var lv = curLive;
 
       if(lv.action === 'draw_deck' || lv.action === 'draw_discard'){
-        // ── L'adversaire pioche ──
-        // Animation : carte vole depuis pioche/défausse → zone opp held
-        if(oppHeldEl && (deckElLv || discardElLv)){
-          var srcEl = lv.action==='draw_deck' ? deckElLv : discardElLv;
-          if(srcEl){
-            var sR = srcEl.getBoundingClientRect();
-            // destination = oppHeldEl (peut être invisible, on prend son rect ou fallback)
-            var dR = oppHeldEl.getBoundingClientRect();
-            if(!dR || dR.width===0){
-              // fallback : décaler depuis la source
-              dR = {left:sR.left, top:sR.top - 70, width:sR.width, height:sR.height};
-            }
-            // val : connu pour draw_discard, inconnu pour draw_deck → on montre dos
-            var flyVal = lv.action==='draw_discard' ? lv.val : null;
-            sjAnimFly(sR, dR, flyVal, {duration:420, flip: lv.action==='draw_deck'});
+        // Animation pioche : vole depuis deck/défausse → oppHeldEl
+        var srcElPre = lv.action==='draw_deck' ? deckElLv : discardElLv;
+        if(srcElPre){
+          var sRpre = srcElPre.getBoundingClientRect();
+          var dRpre = oppHeldEl ? oppHeldEl.getBoundingClientRect() : null;
+          if(!dRpre || dRpre.width===0){
+            dRpre = {left:sRpre.left, top:sRpre.top - 70, width:sRpre.width, height:sRpre.height};
           }
-        }
-        // Préparer et afficher la carte en main adversaire
-        if(oppHeldWrap && oppHeldEl){
-          setTimeout(function(){
-            if(!_gameState) return;
-            var liveHeld = _gameState.held_card;
-            if(liveHeld && liveHeld.holder===oppKey2){
-              oppHeldEl.innerHTML='<div class="sj-pip-top">'+liveHeld.value+'</div><span class="sj-num">'+liveHeld.value+'</span><div class="sj-pip-bot">'+liveHeld.value+'</div>';
-              oppHeldEl.setAttribute('data-val', liveHeld.value);
-            }
-            oppHeldWrap.classList.add('sj-held-visible');
-            oppHeldEl.classList.remove('sj-held-appear');
-            void oppHeldEl.offsetWidth;
-            oppHeldEl.classList.add('sj-held-appear');
-            setTimeout(function(){ oppHeldEl.classList.remove('sj-held-appear'); }, 420);
-          }, 430);
+          var flyValPre = lv.action==='draw_discard' ? lv.val : null;
+          _pendingLiveAnim = { type:'draw', sR:sRpre, dR:dRpre, val:flyValPre, flip: lv.action==='draw_deck' };
         }
 
       } else if(lv.action === 'replace'){
-        // ── L'adversaire place sa carte en main sur sa grille ──
-        var targetOppEl = sjGetCardEl('skyjoOpponentGrid', lv.idx);
-        if(targetOppEl){
-          var sR2, usingFallback = false;
-
-          // Cas normal : oppHeldEl visible (on a vu le draw)
-          if(oppHeldEl && oppHeldWrap && oppHeldWrap.classList.contains('sj-held-visible')){
-            // S'assurer que la carte en main affiche la bonne valeur avant l'animation
-            oppHeldEl.innerHTML='<div class="sj-pip-top">'+lv.val+'</div><span class="sj-num">'+lv.val+'</span><div class="sj-pip-bot">'+lv.val+'</div>';
-            oppHeldEl.setAttribute('data-val', lv.val);
-            sR2 = oppHeldEl.getBoundingClientRect();
-          }
-
-          // Cas dégradé : poll a raté le draw_deck/draw_discard → fallback sur deck ou défausse
-          if(!sR2 || sR2.width === 0){
-            usingFallback = true;
-            var fallbackEl = deckElLv || discardElLv;
-            sR2 = fallbackEl ? fallbackEl.getBoundingClientRect() : null;
-          }
-
-          var dR2 = targetOppEl.getBoundingClientRect();
-          if(sR2 && sR2.width > 0 && dR2.width > 0){
-            if(!usingFallback) oppHeldEl.style.visibility='hidden';
-            sjAnimFly(sR2, dR2, lv.val, {duration:440, flip:false, onDone:function(){
-              if(!usingFallback && oppHeldEl) oppHeldEl.style.visibility='';
-            }});
-          }
+        // Source : oppHeldEl si visible, sinon fallback deck/défausse
+        var sR2pre, usingFallbackPre = false;
+        if(oppHeldEl && oppHeldWrap && oppHeldWrap.classList.contains('sj-held-visible')){
+          oppHeldEl.innerHTML='<div class="sj-pip-top">'+lv.val+'</div><span class="sj-num">'+lv.val+'</span><div class="sj-pip-bot">'+lv.val+'</div>';
+          oppHeldEl.setAttribute('data-val', lv.val);
+          sR2pre = oppHeldEl.getBoundingClientRect();
         }
-        // Cacher la carte en main opp
-        if(oppHeldWrap){
-          setTimeout(function(){ oppHeldWrap.classList.remove('sj-held-visible'); }, 380);
+        if(!sR2pre || sR2pre.width===0){
+          usingFallbackPre = true;
+          var fbEl = deckElLv || discardElLv;
+          sR2pre = fbEl ? fbEl.getBoundingClientRect() : null;
+        }
+        // Destination : rect envoyé dans le signal par le joueur (stable, capturé au clic)
+        // Exactement comme discard_held utilise le rect fixe de la défausse
+        var dR2pre = lv.destRect || null;
+        if(!dR2pre || dR2pre.width===0){
+          // dernier recours : lire depuis le DOM actuel (avant renderGrid)
+          var targetOppElPre = sjGetCardEl('skyjoOpponentGrid', lv.idx);
+          dR2pre = targetOppElPre ? targetOppElPre.getBoundingClientRect() : null;
+        }
+        if(sR2pre && dR2pre && sR2pre.width>0 && dR2pre.width>0){
+          _pendingLiveAnim = { type:'replace', idx:lv.idx, sR:sR2pre, dR:dR2pre, val:lv.val, usingFallback:usingFallbackPre };
         }
 
       } else if(lv.action === 'discard_held'){
-        // ── L'adversaire défausse sa carte en main ──
-        if(discardElLv){
-          var sR3, usingFallback3 = false;
-
-          if(oppHeldEl && oppHeldWrap && oppHeldWrap.classList.contains('sj-held-visible')){
-            sR3 = oppHeldEl.getBoundingClientRect();
-          }
-          if(!sR3 || sR3.width === 0){
-            usingFallback3 = true;
-            var fallbackEl3 = deckElLv || discardElLv;
-            sR3 = fallbackEl3 ? fallbackEl3.getBoundingClientRect() : null;
-          }
-
-          var dR3 = discardElLv.getBoundingClientRect();
-          if(sR3 && sR3.width > 0 && dR3.width > 0){
-            if(!usingFallback3) oppHeldEl.style.visibility='hidden';
-            sjAnimFly(sR3, dR3, lv.val, {duration:380, flip:false, onDone:function(){
-              if(!usingFallback3 && oppHeldEl) oppHeldEl.style.visibility='';
-            }});
-          }
+        var sR3pre, usingFallback3pre = false;
+        if(oppHeldEl && oppHeldWrap && oppHeldWrap.classList.contains('sj-held-visible')){
+          sR3pre = oppHeldEl.getBoundingClientRect();
         }
-        // Cacher la carte en main opp
+        if(!sR3pre || sR3pre.width===0){
+          usingFallback3pre = true;
+          var fbEl3 = deckElLv || discardElLv;
+          sR3pre = fbEl3 ? fbEl3.getBoundingClientRect() : null;
+        }
+        // La défausse est un élément fixe — son rect est toujours valide
+        var dR3pre = discardElLv ? discardElLv.getBoundingClientRect() : null;
+        if(sR3pre && dR3pre && sR3pre.width>0 && dR3pre.width>0){
+          _pendingLiveAnim = { type:'discard_held', sR:sR3pre, dR:dR3pre, val:lv.val, usingFallback:usingFallback3pre };
+        }
+      }
+
+      // Planifier le masquage de oppHeldWrap après l'animation
+      if(lv.action === 'replace' || lv.action === 'discard_held'){
         if(oppHeldWrap){
-          setTimeout(function(){ oppHeldWrap.classList.remove('sj-held-visible'); }, 320);
+          var _hideDelay = lv.action==='replace' ? 380 : 320;
+          setTimeout(function(){ oppHeldWrap.classList.remove('sj-held-visible'); }, _hideDelay);
         }
       }
     }
@@ -10564,6 +10532,49 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
     renderGrid('skyjoMyGrid',myCards,true,isMyTurn,state,iHoldCard);
     renderGrid('skyjoOpponentGrid',oppCards,false,false,state,false);
+
+    // ── Lancer les animations live APRÈS renderGrid (nouveaux éléments dans le DOM) ──
+    if(_pendingLiveAnim){
+      var pla = _pendingLiveAnim;
+
+      if(pla.type === 'draw'){
+        // Pioche → carte vole vers oppHeldEl
+        sjAnimFly(pla.sR, pla.dR, pla.val, {duration:420, flip: pla.flip});
+        // Afficher oppHeldWrap après l'animation
+        if(oppHeldWrap && oppHeldEl){
+          setTimeout(function(){
+            if(!_gameState) return;
+            var liveHeld = _gameState.held_card;
+            if(liveHeld && liveHeld.holder===oppKey2){
+              oppHeldEl.innerHTML='<div class="sj-pip-top">'+liveHeld.value+'</div><span class="sj-num">'+liveHeld.value+'</span><div class="sj-pip-bot">'+liveHeld.value+'</div>';
+              oppHeldEl.setAttribute('data-val', liveHeld.value);
+            }
+            oppHeldWrap.classList.add('sj-held-visible');
+            oppHeldEl.classList.remove('sj-held-appear');
+            void oppHeldEl.offsetWidth;
+            oppHeldEl.classList.add('sj-held-appear');
+            setTimeout(function(){ oppHeldEl.classList.remove('sj-held-appear'); }, 420);
+          }, 430);
+        }
+
+      } else if(pla.type === 'replace'){
+        // Même pattern que discard_held : le clone vole vers pla.dR (rect du signal)
+        // On masque la case cible dans le nouveau DOM pour éviter le flash
+        var newTargetOppEl = sjGetCardEl('skyjoOpponentGrid', pla.idx);
+        if(newTargetOppEl) newTargetOppEl.style.visibility = 'hidden';
+        if(!pla.usingFallback && oppHeldEl) oppHeldEl.style.visibility = 'hidden';
+        sjAnimFly(pla.sR, pla.dR, pla.val, {duration:440, flip:false, onDone:function(){
+          if(newTargetOppEl){ newTargetOppEl.style.visibility = ''; sjPlaceGlow(newTargetOppEl); }
+          if(!pla.usingFallback && oppHeldEl) oppHeldEl.style.visibility = '';
+        }});
+
+      } else if(pla.type === 'discard_held'){
+        if(!pla.usingFallback && oppHeldEl) oppHeldEl.style.visibility = 'hidden';
+        sjAnimFly(pla.sR, pla.dR, pla.val, {duration:380, flip:false, onDone:function(){
+          if(!pla.usingFallback && oppHeldEl) oppHeldEl.style.visibility = '';
+        }});
+      }
+    }
 
     // Carte en main
     var heldWrap   = document.getElementById('skyjoHeldCardWrap');
@@ -11205,8 +11216,12 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       });
     }
 
-    // Signal live : carte en main placée sur la grille (effacera la carte en main opp)
-    _writeLive({action:'replace', idx:idx, val:heldVal, player:_me, ts:Date.now()});
+    // Signal live : on inclut le rect de la case cible (capturé maintenant, DOM stable)
+    // → l'adversaire peut animer même après que renderGrid a reconstruit sa grille
+    var _liveDestRect = targetEl ? targetEl.getBoundingClientRect() : null;
+    _writeLive({action:'replace', idx:idx, val:heldVal, player:_me,
+      destRect: _liveDestRect ? {left:_liveDestRect.left, top:_liveDestRect.top, width:_liveDestRect.width, height:_liveDestRect.height} : null,
+      ts:Date.now()});
 
     setTimeout(function(){
       callRpc('skyjo_replace_card',{p_game_id:_gameId, p_player:_me, p_idx:idx});
@@ -14661,7 +14676,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.82 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8x - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
