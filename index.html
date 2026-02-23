@@ -13211,7 +13211,7 @@ function filterSongs(q){
     _busy = true;
     _cur  = idx;
     applyState(idx);
-    setTimeout(function(){ _busy = false; }, 150);
+    setTimeout(function(){ _busy = false; }, 400);
   });
 
   // ─── État initial ───────────────────────────────────────────────
@@ -15390,7 +15390,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - yam 3.5 </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - yam 3.8 </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -16027,11 +16027,10 @@ document.querySelectorAll('.album-image').forEach(function(el){
 })();
 
 /* ── 12b. SWIPE avant/arrière dans hiddenPage ── */
-/* Exécuté en setTimeout pour être APRÈS tous les patches du système d'historique */
 setTimeout(function(){
-  var _sx = 0, _sy = 0, _sActive = false;
+  var _sx = 0, _sy = 0, _sActive = false, _throttle = false;
 
-  /* Détecte l'écran DM actuellement visible en lisant le DOM */
+  /* Détecte l'écran DM actuellement visible */
   function dmScreen(){
     var hp = document.getElementById('hiddenPage');
     if(!hp || !hp.classList.contains('active')) return null;
@@ -16062,6 +16061,9 @@ setTimeout(function(){
   document.addEventListener('touchend', function(e){
     if(!_sActive) return;
     _sActive = false;
+    // Anti-double : ignore si une action vient d'être faite (300ms)
+    if(_throttle) return;
+
     var hp = document.getElementById('hiddenPage');
     if(!hp || !hp.classList.contains('active')) return;
     var ae = document.activeElement;
@@ -16069,35 +16071,42 @@ setTimeout(function(){
     var pm = document.getElementById('prankMenu');
     if(pm && pm.classList.contains('show')) return;
 
-    var dx = e.changedTouches[0].clientX - _sx;
-    var dy = e.changedTouches[0].clientY - _sy;
-    if(Math.abs(dx) < 50) return;
-    if(Math.abs(dy) > Math.abs(dx)) return; // trop vertical
+    var ex = e.changedTouches[0].clientX;
+    var ey = e.changedTouches[0].clientY;
+    var dx = ex - _sx;
+    var dy = ey - _sy;
+
+    // Seuils : au moins 55px horizontal, et dx > dy (vraiment horizontal)
+    if(Math.abs(dx) < 55) return;
+    if(Math.abs(dy) > Math.abs(dx) * 0.7) return;
+
+    // BLOQUER le swipe depuis le bord gauche (< 30px) → geste iOS natif, pas nous
+    // BLOQUER aussi depuis le bord droit (> innerWidth-30px)
+    if(_sx < 30 || _sx > window.innerWidth - 30) return;
 
     var sc = dmScreen();
     if(!sc) return;
 
+    // Throttle pour éviter double déclenchement
+    _throttle = true;
+    setTimeout(function(){ _throttle = false; }, 400);
+
+    haptic('light');
+
     if(dx < 0){
-      /* ── Swipe GAUCHE → écran suivant ── */
-      if(sc === 'logo'){
-        if(window.dmShowConv){ haptic('light'); window.dmShowConv(); }
-      } else if(sc === 'conv'){
-        if(window.dmOpenMessaging){ haptic('light'); window.dmOpenMessaging(); }
-      }
-      /* 'chat' : pas d'écran suivant */
+      // Swipe GAUCHE → avancer
+      if(sc === 'logo' && window.dmShowConv)       window.dmShowConv();
+      else if(sc === 'conv' && window.dmOpenMessaging) window.dmOpenMessaging();
     } else {
-      /* ── Swipe DROITE → retour via history (même chemin que le bouton retour iOS natif) ── */
+      // Swipe DROITE → reculer
       if(sc === 'logo'){
-        /* Sur logo → fermer hiddenPage */
-        if(window.closeHiddenPage){ haptic('light'); window.closeHiddenPage(); }
+        if(window.closeHiddenPage) window.closeHiddenPage();
       } else {
-        /* Sur conv ou chat → history.go(-1) → popstate → applyState ── */
-        haptic('light');
         history.go(-1);
       }
     }
   }, { passive: true });
-}, 200);
+}, 300);
 
 /* ── 13. AMÉLIORATION THÈME — sauvegarde en localStorage ── */
 (function(){
