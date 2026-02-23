@@ -139,6 +139,17 @@ html { scroll-behavior: smooth; overflow-x: hidden; -webkit-text-size-adjust: 10
   from { opacity: 1; transform: translateX(0); }
   to   { opacity: 0; transform: translateX(30px); }
 }
+/* ── Animations transition écrans InstaLove ── */
+@keyframes dmSlideInRight {
+  from { opacity: 0; transform: translateX(48px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes dmSlideInLeft {
+  from { opacity: 0; transform: translateX(-48px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.dm-slide-forward  { animation: dmSlideInRight 0.26s cubic-bezier(.4,0,.2,1) both; }
+.dm-slide-backward { animation: dmSlideInLeft  0.26s cubic-bezier(.4,0,.2,1) both; }
 
 /* ══ TOAST NOTIFICATION ══ */
 #uxToast {
@@ -5616,7 +5627,7 @@ body.light #counterBlock.glowing .c-num-big {
       <div id="dmHeaderAvatars" style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
         <!-- Avatar de l'autre -->
         <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;">
-          <div id="dmHeaderAvatarOther" style="width:34px;height:34px;border-radius:50%;background:var(--s2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px;opacity:0.85;">👤</div>
+          <div id="dmHeaderAvatarOther" style="width:30px;height:30px;border-radius:50%;background:var(--s2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;opacity:0.38;">👤</div>
           <div id="dmHeaderDotOther" style="width:7px;height:7px;border-radius:50%;background:#555;position:absolute;bottom:0;right:0;border:1.5px solid var(--bg);"></div>
         </div>
         <!-- Avatar de soi -->
@@ -13100,9 +13111,9 @@ function filterSongs(q){
       if(!hp2 || !hp2.classList.contains('active'))
         if(window._dmRawOpen) window._dmRawOpen();
       // Afficher le bon sous-écran (fonctions brutes, sans push)
-      if(s === 'home')      { if(window._dmRawShowHome) window._dmRawShowHome(); }
-      else if(s === 'conv') { if(window._dmRawShowHome) window._dmRawShowHome(); if(window._dmRawShowConv) window._dmRawShowConv(); }
-      else if(s === 'chat') { if(window._dmRawShowHome) window._dmRawShowHome(); if(window._dmRawShowChat) window._dmRawShowChat(); }
+      if(s === 'home')      { if(window._dmRawShowHome) window._dmRawShowHome('backward'); }
+      else if(s === 'conv') { if(window._dmRawShowHome) window._dmRawShowHome(); if(window._dmRawShowConv) window._dmRawShowConv('backward'); }
+      else if(s === 'chat') { if(window._dmRawShowHome) window._dmRawShowHome(); if(window._dmRawShowChat) window._dmRawShowChat('backward'); }
     }
   }
 
@@ -14062,37 +14073,21 @@ loadFavorites();
 
   /* ══ PROFIL PILL (haut droite) ══ */
   function updateProfilePill(screenName){
+    // Pill supprimée — on est toujours connecté à ce stade
     var pill = $('dmTopbarProfile');
-    if(!pill) return;
-
-    // Sur le chat, on cache la pill
-    if(screenName === 'chat'){
-      pill.style.display = 'none';
-      return;
-    }
-
-    // Sur l'accueil (ou par défaut) : toujours visible
-    if(identity){
-      var label = identity === 'girl' ? 'Zelda' : 'Link';
-      var emo   = identity === 'girl' ? '👧' : '👦';
-      pill.innerHTML =
-        '<div class="dm-tp-avatar ' + identity + '" style="font-size:18px;background:none;">' + emo + '</div>' +
-        '<span class="dm-tp-name">' + label + '</span>' +
-        '<svg class="dm-tp-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
-    } else {
-      pill.innerHTML =
-        '<div class="dm-tp-avatar" style="background:var(--s3);color:var(--muted);font-size:11px;">?</div>' +
-        '<span class="dm-tp-name" style="color:var(--muted)">Profil</span>' +
-        '<svg class="dm-tp-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
-    }
-    pill.style.display = 'flex';
-    pill.style.alignItems = 'center';
-    // Mettre à jour les avatars dans la topbar
+    if(pill) pill.style.display = 'none';
     if(window._dmUpdateHeaderAvatars) window._dmUpdateHeaderAvatars();
   }
 
   /* ══ NAVIGATION ══ */
-  function showScreen(name){
+  function _dmAnimateScreen(el, dir){
+    if(!dir) return;
+    el.classList.remove('dm-slide-forward','dm-slide-backward');
+    // forcer reflow
+    void el.offsetWidth;
+    el.classList.add(dir === 'forward' ? 'dm-slide-forward' : 'dm-slide-backward');
+  }
+  function showScreen(name, dir){
     ['dmHomeScreen','dmChatScreen'].forEach(function(id){
       var el = $(id); if(el) el.style.display = 'none';
     });
@@ -14104,7 +14099,7 @@ loadFavorites();
 
     if(name === 'home'){
       var el = $('dmHomeScreen');
-      if(el) el.style.display = 'flex';
+      if(el){ el.style.display = 'flex'; _dmAnimateScreen(el, dir); }
       if(center) center.innerHTML =
         '<div style="display:flex;flex-direction:column;line-height:1.2;">' +
         '<span style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--green);">You And Me</span>' +
@@ -14118,7 +14113,7 @@ loadFavorites();
       loadHomePreview();
     } else if(name === 'chat'){
       var el = $('dmChatScreen');
-      if(el) el.style.display = 'flex';
+      if(el){ el.style.display = 'flex'; _dmAnimateScreen(el, dir); }
       if(center) center.innerHTML =
         '<div class="dm-topbar-avatars">' +
           '<div class="dm-avatar dm-avatar-girl" style="font-size:14px;background:none;">👧</div>' +
@@ -14142,7 +14137,7 @@ loadFavorites();
     var logo = document.getElementById('dmHomeLogo');
     var conv = document.getElementById('dmHomeConv');
     if(logo) logo.style.display = 'none';
-    if(conv) conv.style.display = 'flex';
+    if(conv){ conv.style.display = 'flex'; conv.classList.remove('dm-slide-forward','dm-slide-backward'); void conv.offsetWidth; conv.classList.add('dm-slide-forward'); }
     var center = document.getElementById('dmTopbarCenter');
     if(center) center.innerHTML =
       '<div style="display:flex;flex-direction:column;line-height:1.2;">' +
@@ -14187,7 +14182,7 @@ loadFavorites();
     var saved = getProfile();
     if(saved === 'girl' || saved === 'boy'){
       identity = saved;
-      showScreen('chat');
+      showScreen('chat', 'forward');
       startChat();
     } else {
       // Afficher overlay choix identité par-dessus l'accueil, puis aller au chat
@@ -15246,23 +15241,26 @@ loadFavorites();
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
   };
-  window._dmRawShowHome = function(){ showScreen('home'); };
-  window._dmRawShowConv = function(){
+  window._dmRawShowHome = function(dir){ showScreen('home', dir); };
+  window._dmRawShowConv = function(dir){
     var logo = document.getElementById('dmHomeLogo');
     var conv = document.getElementById('dmHomeConv');
     if(logo) logo.style.display = 'none';
-    if(conv) conv.style.display = 'flex';
+    if(conv){
+      conv.style.display = 'flex';
+      if(dir){ conv.classList.remove('dm-slide-forward','dm-slide-backward'); void conv.offsetWidth; conv.classList.add(dir==='forward'?'dm-slide-forward':'dm-slide-backward'); }
+    }
     var btn = document.getElementById('dmTopbarBack');
     if(btn){ btn.dataset.dest = 'logo'; btn.style.visibility = 'visible'; }
     var lbl = document.getElementById('dmBackLabel');
     if(lbl) lbl.textContent = 'Retour';
     loadHomePreview();
   };
-  window._dmRawShowChat = function(){
+  window._dmRawShowChat = function(dir){
     var saved = getProfile();
     if(saved === 'girl' || saved === 'boy'){
       identity = saved;
-      showScreen('chat');
+      showScreen('chat', dir);
       startChat();
     }
   };
@@ -15392,7 +15390,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - yam 3.6 </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - yam 3.5 </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
