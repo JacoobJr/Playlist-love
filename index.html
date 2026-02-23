@@ -11157,11 +11157,10 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       sjAnimFly(sRect, dRect, null, { duration: 440, flip: false });
     }
 
-    // Signal live : l'adversaire verra la pioche depuis le deck
-    _writeLive({action:'draw_deck', player:_me, ts:Date.now()});
-
+    var _livePayloadDeck = {action:'draw_deck', player:_me, ts:Date.now()};
     setTimeout(function(){
-      callRpc('skyjo_draw_deck',{p_game_id:_gameId, p_player:_me});
+      callRpc('skyjo_draw_deck',{p_game_id:_gameId, p_player:_me})
+        .then(function(){ _writeLive(_livePayloadDeck); });
     }, 180);
   };
 
@@ -11188,11 +11187,10 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       sjAnimFly(sRect, dRect, topVal, { duration: 440, flip: false });
     }
 
-    // Signal live : l'adversaire verra la pioche depuis la défausse (valeur connue)
-    _writeLive({action:'draw_discard', val:topVal, player:_me, ts:Date.now()});
-
+    var _livePayloadDisc = {action:'draw_discard', val:topVal, player:_me, ts:Date.now()};
     setTimeout(function(){
-      callRpc('skyjo_draw_discard',{p_game_id:_gameId, p_player:_me});
+      callRpc('skyjo_draw_discard',{p_game_id:_gameId, p_player:_me})
+        .then(function(){ _writeLive(_livePayloadDisc); });
     }, 150);
   };
 
@@ -11231,15 +11229,19 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       });
     }
 
-    // Signal live : on inclut le rect de la case cible (capturé maintenant, DOM stable)
-    // → l'adversaire peut animer même après que renderGrid a reconstruit sa grille
+    // Signal live : capturé maintenant (DOM stable), écrit APRÈS la réponse du RPC
+    // pour survivre à l'écrasement du state par le RPC et rester visible 2s pour le poll adv.
     var _liveDestRect = targetEl ? targetEl.getBoundingClientRect() : null;
-    _writeLive({action:'replace', idx:idx, val:heldVal, player:_me,
+    var _livePayload = {action:'replace', idx:idx, val:heldVal, player:_me,
       destRect: _liveDestRect ? {left:_liveDestRect.left, top:_liveDestRect.top, width:_liveDestRect.width, height:_liveDestRect.height} : null,
-      ts:Date.now()});
+      ts:Date.now()};
 
     setTimeout(function(){
-      callRpc('skyjo_replace_card',{p_game_id:_gameId, p_player:_me, p_idx:idx});
+      callRpc('skyjo_replace_card',{p_game_id:_gameId, p_player:_me, p_idx:idx})
+        .then(function(){
+          // Ré-injecter le live dans le state post-RPC pour que l'adversaire le voie
+          _writeLive(_livePayload);
+        });
     }, 80);
   };
 
@@ -11256,11 +11258,11 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       sjAnimHeldToDiscard(heldEl, discardEl, heldVal, null);
     }
 
-    // Signal live : carte en main défaussée
-    _writeLive({action:'discard_held', val:heldVal, player:_me, ts:Date.now()});
+    var _livePayloadDiscard = {action:'discard_held', val:heldVal, player:_me, ts:Date.now()};
 
     setTimeout(function(){
-      callRpc('skyjo_discard_held',{p_game_id:_gameId, p_player:_me});
+      callRpc('skyjo_discard_held',{p_game_id:_gameId, p_player:_me})
+        .then(function(){ _writeLive(_livePayloadDiscard); });
     }, 100);
   };
 
@@ -14691,7 +14693,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.13 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.15 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
