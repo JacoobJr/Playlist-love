@@ -10649,11 +10649,14 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
         // ── Nouvellement révélée par l'adversaire (via poll) : flip animé ──
         if(prev.hidden && !isFirstRender && !isMe){
           // L'adversaire a retourné cette carte → on l'anime
-          el.style.visibility = 'hidden';
-          setTimeout(function(targetEl, val){
-            if(!targetEl || !targetEl.isConnected) return;
-            sjAnimFlipInPlace(targetEl, val, null);
-          }(el, card.value), idx * 55 + 80);
+          // Ne pas masquer la carte ici : sjAnimFlipInPlace s'en charge au bon moment
+          var _elRef = el;
+          var _val = card.value;
+          var _delay = idx * 55 + 80;
+          setTimeout(function(){
+            if(!_elRef || !_elRef.isConnected) return;
+            sjAnimFlipInPlace(_elRef, _val, null);
+          }, _delay);
         }
         // Révélation côté moi déjà animée dans l'action (skyjoFlipInit / skyjoFlipReveal)
 
