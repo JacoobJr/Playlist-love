@@ -9821,7 +9821,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   }
   function deletePresence(){
     if(!_me) return;
-    // keepalive:true → le navigateur termine la requête même si la page se ferme
+    // keepalive:true → survit à la fermeture de page (pagehide)
     fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE+'?profile=eq.'+_me,{
       method:'DELETE', headers:sbHeaders(), keepalive:true
     }).catch(function(){});
@@ -9885,18 +9885,18 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE+'?select=profile',{headers:sbHeaders()}).then(function(r){return r.json();})
     ])
     .then(function(results){
-      var rows         = results[0];
-      var presRows     = results[1];
+      var rows          = results[0];
+      var presRows      = results[1];
       var presenceEmpty = !Array.isArray(presRows) || presRows.length === 0;
 
       if(Array.isArray(rows) && rows[0]){
         if(presenceEmpty){
-          // Partie fantôme (plus personne) → supprimer + écran d'attente
+          // Partie fantôme (plus personne présent) → supprimer et aller en attente
           fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+rows[0].id,{
             method:'DELETE', headers:sbHeaders()
           }).catch(function(){});
         } else {
-          // Partie en cours ET joueur(s) présent(s) → rejoindre
+          // Partie valide ET joueur(s) présent(s) → rejoindre
           _gameId = rows[0].id;
           _launched = true;
           startPresence();
@@ -11670,12 +11670,13 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     _refreshPollRate();
     _refreshPresenceRate();
   };
+  // Supprime / remet la présence — appelé par pauseSkyjo/resumeSkyjo
+  window._skyjoDeletePresence = deletePresence;
+  window._skyjoUpsertPresence = upsertPresence;
   // Enregistre l'heure exacte de départ de la page
   window._skyjoMarkAbsence = function(){
     if(_launched && _absenceStart === 0) _absenceStart = Date.now();
   };
-  // Supprime la présence (keepalive) — appelé sur pagehide (fermeture réelle)
-  window._skyjoDeletePresence = deletePresence;
 
   window.closeSkyjoGame=function(){
     stopAll(); stopReconnectWait(); _waitingForReconnect=false;
@@ -11719,29 +11720,22 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   }
 
   function pauseSkyjo(){
-    // Classe CSS → pause toutes les animations Skyjo infinies
     document.body.classList.add('skyjo-bg-paused');
-    // Enregistrer l'heure de départ (utilisé pour bothAbsent côté local)
-    if(typeof window._skyjoMarkAbsence === 'function') window._skyjoMarkAbsence();
-
-    // Stoppe également les clones volants en cours (suppression propre)
     document.querySelectorAll('.sj-fly-clone, .sj-particle').forEach(function(el){
       el.style.animationPlayState = 'paused';
     });
-
-    // Ralentit les timers via les fonctions exposées par le module Skyjo
+    // Supprimer la présence → table vide si les deux sont absents
+    if(typeof window._skyjoDeletePresence === 'function') window._skyjoDeletePresence();
     if(typeof window._skyjoRefreshRates === 'function') window._skyjoRefreshRates();
   }
 
   function resumeSkyjo(){
     document.body.classList.remove('skyjo-bg-paused');
-
-    // Rétablit les clones si encore dans le DOM
     document.querySelectorAll('.sj-fly-clone, .sj-particle').forEach(function(el){
       el.style.animationPlayState = '';
     });
-
-    // Remet les timers à vitesse normale
+    // Remettre la présence immédiatement au retour
+    if(typeof window._skyjoUpsertPresence === 'function') window._skyjoUpsertPresence();
     if(typeof window._skyjoRefreshRates === 'function') window._skyjoRefreshRates();
   }
 
@@ -11755,11 +11749,9 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     }
   });
 
-  // pagehide : fermeture réelle du navigateur / onglet / navigation (BFCache iOS)
-  // → supprimer la présence avec keepalive pour que la requête survive à la fermeture
+  // pagehide : déclenché quand on quitte le navigateur, ou navigation BFCache (iOS Safari/Chrome)
   window.addEventListener('pagehide', function(){
     if(!isSkyjoActive()) return;
-    if(typeof window._skyjoDeletePresence === 'function') window._skyjoDeletePresence();
     pauseSkyjo();
   });
 
@@ -14640,7 +14632,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.34.8 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8x - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
