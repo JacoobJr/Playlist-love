@@ -10448,7 +10448,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     // Nouveau signal live de l'adversaire ?
     var isNewLive = curLive && (!prevLive || curLive.ts !== prevLive.ts);
 
-    if(isNewLive && !isMyTurn){
+    if(isNewLive && !isMyTurn && (!curLive.player || curLive.player === oppKey2)){
       var lv = curLive;
 
       if(lv.action === 'draw_deck' || lv.action === 'draw_discard'){
@@ -10489,13 +10489,29 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       } else if(lv.action === 'replace'){
         // ── L'adversaire place sa carte en main sur sa grille ──
         var targetOppEl = sjGetCardEl('skyjoOpponentGrid', lv.idx);
-        if(oppHeldEl && targetOppEl){
-          var sR2  = oppHeldEl.getBoundingClientRect();
-          var dR2  = targetOppEl.getBoundingClientRect();
-          if(sR2.width > 0 && dR2.width > 0){
-            oppHeldEl.style.visibility='hidden';
+        if(targetOppEl){
+          var sR2, usingFallback = false;
+
+          // Cas normal : oppHeldEl visible (on a vu le draw)
+          if(oppHeldEl && oppHeldWrap && oppHeldWrap.classList.contains('sj-held-visible')){
+            // S'assurer que la carte en main affiche la bonne valeur avant l'animation
+            oppHeldEl.innerHTML='<div class="sj-pip-top">'+lv.val+'</div><span class="sj-num">'+lv.val+'</span><div class="sj-pip-bot">'+lv.val+'</div>';
+            oppHeldEl.setAttribute('data-val', lv.val);
+            sR2 = oppHeldEl.getBoundingClientRect();
+          }
+
+          // Cas dégradé : poll a raté le draw_deck/draw_discard → fallback sur deck ou défausse
+          if(!sR2 || sR2.width === 0){
+            usingFallback = true;
+            var fallbackEl = deckElLv || discardElLv;
+            sR2 = fallbackEl ? fallbackEl.getBoundingClientRect() : null;
+          }
+
+          var dR2 = targetOppEl.getBoundingClientRect();
+          if(sR2 && sR2.width > 0 && dR2.width > 0){
+            if(!usingFallback) oppHeldEl.style.visibility='hidden';
             sjAnimFly(sR2, dR2, lv.val, {duration:440, flip:false, onDone:function(){
-              oppHeldEl.style.visibility='';
+              if(!usingFallback && oppHeldEl) oppHeldEl.style.visibility='';
             }});
           }
         }
@@ -10506,13 +10522,23 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
 
       } else if(lv.action === 'discard_held'){
         // ── L'adversaire défausse sa carte en main ──
-        if(oppHeldEl && discardElLv){
-          var sR3 = oppHeldEl.getBoundingClientRect();
+        if(discardElLv){
+          var sR3, usingFallback3 = false;
+
+          if(oppHeldEl && oppHeldWrap && oppHeldWrap.classList.contains('sj-held-visible')){
+            sR3 = oppHeldEl.getBoundingClientRect();
+          }
+          if(!sR3 || sR3.width === 0){
+            usingFallback3 = true;
+            var fallbackEl3 = deckElLv || discardElLv;
+            sR3 = fallbackEl3 ? fallbackEl3.getBoundingClientRect() : null;
+          }
+
           var dR3 = discardElLv.getBoundingClientRect();
-          if(sR3.width > 0 && dR3.width > 0){
-            oppHeldEl.style.visibility='hidden';
+          if(sR3 && sR3.width > 0 && dR3.width > 0){
+            if(!usingFallback3) oppHeldEl.style.visibility='hidden';
             sjAnimFly(sR3, dR3, lv.val, {duration:380, flip:false, onDone:function(){
-              oppHeldEl.style.visibility='';
+              if(!usingFallback3 && oppHeldEl) oppHeldEl.style.visibility='';
             }});
           }
         }
@@ -11106,7 +11132,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     }
 
     // Signal live : l'adversaire verra la pioche depuis le deck
-    _writeLive({action:'draw_deck', ts:Date.now()});
+    _writeLive({action:'draw_deck', player:_me, ts:Date.now()});
 
     setTimeout(function(){
       callRpc('skyjo_draw_deck',{p_game_id:_gameId, p_player:_me});
@@ -11137,7 +11163,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     }
 
     // Signal live : l'adversaire verra la pioche depuis la défausse (valeur connue)
-    _writeLive({action:'draw_discard', val:topVal, ts:Date.now()});
+    _writeLive({action:'draw_discard', val:topVal, player:_me, ts:Date.now()});
 
     setTimeout(function(){
       callRpc('skyjo_draw_discard',{p_game_id:_gameId, p_player:_me});
@@ -11180,7 +11206,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     }
 
     // Signal live : carte en main placée sur la grille (effacera la carte en main opp)
-    _writeLive({action:'replace', idx:idx, val:heldVal, ts:Date.now()});
+    _writeLive({action:'replace', idx:idx, val:heldVal, player:_me, ts:Date.now()});
 
     setTimeout(function(){
       callRpc('skyjo_replace_card',{p_game_id:_gameId, p_player:_me, p_idx:idx});
@@ -11201,7 +11227,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     }
 
     // Signal live : carte en main défaussée
-    _writeLive({action:'discard_held', val:heldVal, ts:Date.now()});
+    _writeLive({action:'discard_held', val:heldVal, player:_me, ts:Date.now()});
 
     setTimeout(function(){
       callRpc('skyjo_discard_held',{p_game_id:_gameId, p_player:_me});
@@ -14635,7 +14661,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8x - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.82 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
