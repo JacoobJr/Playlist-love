@@ -10164,75 +10164,29 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
           if(!_launched) return;
           if(_waitingForReconnect) return;
           if(document.getElementById('skyjoWaitModal') || document.getElementById('skyjoCountdownModal')) return;
-          // Avant stopPoll(), re-vérifier si les DEUX sont absents depuis +40s
-          // Car si page cachée, fetchState ne tourne plus et bothAbsent n'a pas pu être détecté
-          fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE+'?select=profile,updated_at',{headers:sbHeaders()})
-          .then(function(r){return r.json();})
-          .then(function(pres){
-            if(!_launched) return;
-            pres = Array.isArray(pres) ? pres : [];
-            var myP  = pres.filter(function(p){return p.profile===_me;})[0];
-            var oppP = pres.filter(function(p){return p.profile!==_me;})[0];
-            var now2 = Date.now();
-            var myAgo  = myP  ? now2 - new Date(myP.updated_at).getTime()  : 99999999;
-            var oppAgo = oppP ? now2 - new Date(oppP.updated_at).getTime() : 99999999;
-            if(myAgo > BOTH_ABSENT_TIMEOUT_MS && oppAgo > BOTH_ABSENT_TIMEOUT_MS && !_bothAbsentHandled){
-              // Les deux absents depuis +40s → clôture automatique
-              _bothAbsentHandled = true;
+          // On NE stoppe PAS le poll ici — il doit continuer à tourner
+          // pour que fetchState() puisse détecter bothAbsent à 40s.
+          // Le popup s'affiche à 20s mais le poll reste actif en arrière-plan.
+          var oppName = _me==='girl' ? 'Link' : 'Zelda';
+          showSkyjoChoice(
+            '😔',
+            oppName+' est déconnecté(e)',
+            'Connexion perdue. Tu peux attendre son retour ou quitter la partie.',
+            'Attendre',
+            function(){
+              _waitingForReconnect = true;
+              startPoll();
+              startReconnectWait();
+            },
+            'Quitter',
+            function(){
+              _waitingForReconnect = false;
               stopAll();
-              var gid2 = _gameId;
               resetState();
-              if(gid2) fetch(SB_URL+'/rest/v1/'+SKYJO_TABLE+'?id=eq.'+gid2,{method:'DELETE',headers:sbHeaders()}).catch(function(){});
-              fetch(SB_URL+'/rest/v1/'+SKYJO_PRESENCE,{method:'DELETE',headers:sbHeaders()}).catch(function(){});
-              showSkyjoAlert('⏱️','Partie expirée — les deux joueurs étaient absents',function(){ _bothAbsentHandled=false; enterLobby(); });
-              return;
+              document.getElementById('skyjoView').classList.remove('active');
+              document.querySelector('.bottom-nav').style.display='';
             }
-            // Un seul absent → popup déconnexion classique
-            stopPoll();
-            var oppName = _me==='girl' ? 'Link' : 'Zelda';
-            showSkyjoChoice(
-              '😔',
-              oppName+' est déconnecté(e)',
-              'Connexion perdue. Tu peux attendre son retour ou quitter la partie.',
-              'Attendre',
-              function(){
-                _waitingForReconnect = true;
-                startPoll();
-                startReconnectWait();
-              },
-              'Quitter',
-              function(){
-                _waitingForReconnect = false;
-                stopAll();
-                resetState();
-                document.getElementById('skyjoView').classList.remove('active');
-                document.querySelector('.bottom-nav').style.display='';
-              }
-            );
-          }).catch(function(){
-            // Fallback si fetch échoue : comportement original
-            stopPoll();
-            var oppName = _me==='girl' ? 'Link' : 'Zelda';
-            showSkyjoChoice(
-              '😔',
-              oppName+' est déconnecté(e)',
-              'Connexion perdue. Tu peux attendre son retour ou quitter la partie.',
-              'Attendre',
-              function(){
-                _waitingForReconnect = true;
-                startPoll();
-                startReconnectWait();
-              },
-              'Quitter',
-              function(){
-                _waitingForReconnect = false;
-                stopAll();
-                resetState();
-                document.getElementById('skyjoView').classList.remove('active');
-                document.querySelector('.bottom-nav').style.display='';
-              }
-            );
-          });
+          );
         }, OPP_GRACE_MS);
       }
 
@@ -14652,7 +14606,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.28 - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
