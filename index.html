@@ -5496,6 +5496,7 @@ body.light #counterBlock.glowing .c-num-big {
   }
 
   // Sync mood periodically
+  window.yamSyncMood = yamSyncMood;
   setTimeout(yamSyncMood, 1500);
   setInterval(yamSyncMood, 15000);
 
@@ -13504,6 +13505,8 @@ loadFavorites();
       el.classList.remove('visible', 'idle-glow');
       if(who === 'other' && bandeau) bandeau.classList.remove('visible');
     }
+    // Synchroniser immédiatement les badges météo humeur
+    if(window.yamSyncMood) window.yamSyncMood();
   }
 
   // ── Rendu des avatars ──
@@ -15204,7 +15207,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - yam 3.4 </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - yam 3.5 </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -15506,6 +15509,8 @@ loadFavorites();
     } else {
       _dot.classList.remove('visible');
     }
+    // Synchroniser immédiatement le badge météo humeur
+    if(window.yamSyncMood) window.yamSyncMood();
   }
 
   /* Démarrage */
