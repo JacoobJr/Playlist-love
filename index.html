@@ -10502,31 +10502,27 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
         }
 
       } else if(lv.action === 'replace'){
-        // Source : oppHeldEl si visible, sinon fallback deck/défausse
-        var sR2pre, usingFallbackPre = false;
+        // Source : oppHeldEl si visible, sinon deck/défausse
+        var sR2pre = null, usingFallbackPre = true;
         if(oppHeldEl && oppHeldWrap && oppHeldWrap.classList.contains('sj-held-visible')){
           oppHeldEl.innerHTML='<div class="sj-pip-top">'+lv.val+'</div><span class="sj-num">'+lv.val+'</span><div class="sj-pip-bot">'+lv.val+'</div>';
           oppHeldEl.setAttribute('data-val', lv.val);
           sR2pre = oppHeldEl.getBoundingClientRect();
+          if(sR2pre && sR2pre.width > 0) usingFallbackPre = false;
         }
         if(!sR2pre || sR2pre.width===0){
-          usingFallbackPre = true;
           var fbEl = deckElLv || discardElLv;
           sR2pre = fbEl ? fbEl.getBoundingClientRect() : null;
         }
-        // Destination : rect envoyé dans le signal par le joueur (stable, capturé au clic)
-        // Exactement comme discard_held utilise le rect fixe de la défausse
-        var dR2pre = lv.destRect || null;
-        if(!dR2pre || dR2pre.width===0){
-          // dernier recours : lire depuis le DOM actuel (avant renderGrid)
-          var targetOppElPre = sjGetCardEl('skyjoOpponentGrid', lv.idx);
-          dR2pre = targetOppElPre ? targetOppElPre.getBoundingClientRect() : null;
-        }
+        // Destination : toujours depuis le DOM local (coordonnées de cet écran)
+        var targetOppElPre = sjGetCardEl('skyjoOpponentGrid', lv.idx);
+        var dR2pre = targetOppElPre ? targetOppElPre.getBoundingClientRect() : null;
+        console.log('[SKYJO-LIVE] replace sR=',sR2pre,'dR=',dR2pre,'idx=',lv.idx,'targetEl=',targetOppElPre);
         if(sR2pre && dR2pre && sR2pre.width>0 && dR2pre.width>0){
           _pendingLiveAnim = { type:'replace', idx:lv.idx, sR:sR2pre, dR:dR2pre, val:lv.val, usingFallback:usingFallbackPre };
-          console.log('[SKYJO-LIVE] replace pendingAnim créé sR=',sR2pre,'dR=',dR2pre);
+          console.log('[SKYJO-LIVE] replace pendingAnim OK');
         } else {
-          console.warn('[SKYJO-LIVE] replace ABANDONNÉ sR2pre=',sR2pre,'dR2pre=',dR2pre);
+          console.warn('[SKYJO-LIVE] replace ABANDONNÉ sR=',sR2pre,'dR=',dR2pre);
         }
 
       } else if(lv.action === 'discard_held'){
@@ -14717,7 +14713,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8x - Perf v5.2 (secured) </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - Perf v5.2 (secured) </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
