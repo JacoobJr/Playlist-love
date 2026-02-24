@@ -77,7 +77,7 @@ body.light {
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; overflow-x: hidden; -webkit-text-size-adjust: 100%; overscroll-behavior-x: none; }
-body { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+body { overscroll-behavior-x: none; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 
 /* ══ SKELETON LOADING ══ */
 @keyframes skeletonShimmer {
@@ -893,8 +893,6 @@ body.light #loveBox .lb-label { color: rgba(200,24,94,0.65); }
 /* ══ YAM TAB PANELS ══ */
 .yam-tab-panel {
   display: none;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
 }
 .yam-tab-panel.active {
   display: block;
@@ -1303,7 +1301,7 @@ body.light #lockNavBtn.has-unread {
   transition: color 0.15s; flex-shrink: 0; line-height: 1;
 }
 .search-close-btn:hover { color: var(--text); }
-#searchResults { overflow-y: auto; flex: 1; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+#searchResults { overflow-y: auto; flex: 1; }
 #libraryPopup {
   position:fixed; bottom:72px; left:50%; transform:translateX(-50%);
   background:var(--s2); padding:6px; border-radius:14px; display:none; z-index:1500;
@@ -1866,7 +1864,7 @@ body:not(.prank-flip) > *:not(#prankFlipBanner):not(#prankGotcha):not(#prankLock
 
 #memoModal { position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:2500; display:none; align-items:center; justify-content:center; padding:24px 16px; backdrop-filter:blur(4px); }
 #memoModal.open { display:flex; }
-.memo-modal-inner { background:var(--s1); border:1px solid var(--border); border-radius:16px; padding:22px 20px; width:100%; max-width:420px; max-height:82vh; overflow-y:auto; position:relative; box-shadow:var(--shadow); overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.memo-modal-inner { background:var(--s1); border:1px solid var(--border); border-radius:16px; padding:22px 20px; width:100%; max-width:420px; max-height:82vh; overflow-y:auto; position:relative; box-shadow:var(--shadow); }
 .memo-modal-close { position:absolute; top:14px; right:14px; font-size:18px; color:var(--muted); cursor:pointer; transition:color 0.15s; }
 .memo-modal-close:hover { color:var(--text); }
 .memo-modal-label { font-size:9px; font-weight:700; color:var(--green); text-transform:uppercase; letter-spacing:2.5px; margin-bottom:8px; }
@@ -2465,7 +2463,6 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   flex: 1; display: none; flex-direction: column;
   align-items: center; justify-content: center;
   padding: 24px; overflow-y: auto; gap: 14px;
-  overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
 }
 
 /* Zone de jeu */
@@ -3875,7 +3872,6 @@ body.light .dm-id-overlay { background: transparent; }
   padding:12px 12px 6px;
   display:flex; flex-direction:column;
   overscroll-behavior:contain;
-  -webkit-overflow-scrolling:touch;
 }
 .dm-messages::-webkit-scrollbar { width:3px; }
 .dm-messages::-webkit-scrollbar-thumb { background:var(--s3); border-radius:3px; }
@@ -15897,7 +15893,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.03.07 - yam 1.0</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.03.02 - yam 1.0</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -17154,26 +17150,21 @@ console.log('✨ Jayana UX v.UX1 chargé');
       constructor(container, onRefresh, options = {}) {
         this.container = container;
         this.onRefresh = onRefresh;
-        
         this.threshold = options.threshold || 80;
         this.damping = options.damping || 0.3;
         this.refreshTime = options.refreshTime || 1500;
-        
         this.touchStartY = 0;
         this.currentDrag = 0;
         this.isRefreshing = false;
         this.indicator = options.indicator || null;
-        
         this.init();
       }
       
       init() {
-        // Ne pas appliquer les styles si c'est le document
         if (this.container !== document && this.container.style) {
           this.container.style.overscrollBehavior = 'none';
           this.container.style.touchAction = 'none';
         }
-        
         var self = this;
         this.container.addEventListener('touchstart', function(e) { self.onTouchStart(e); }, false);
         this.container.addEventListener('touchmove', function(e) { self.onTouchMove(e); }, false);
@@ -17198,11 +17189,9 @@ console.log('✨ Jayana UX v.UX1 chargé');
       onTouchMove(event) {
         if (this.getScrollTop() !== 0) return;
         if (this.isRefreshing) return;
-        
         var currentY = event.touches[0].clientY;
         var dragDistance = currentY - this.touchStartY;
         dragDistance = dragDistance * this.damping;
-        
         if (dragDistance > 0) {
           event.preventDefault();
           this.currentDrag = dragDistance;
@@ -17255,7 +17244,6 @@ console.log('✨ Jayana UX v.UX1 chargé');
         var self = this;
         self.isRefreshing = true;
         if (self.indicator) self.indicator.classList.add('refreshing');
-        
         Promise.resolve(self.onRefresh()).then(function() {
           setTimeout(function() {
             self.isRefreshing = false;
@@ -17269,73 +17257,18 @@ console.log('✨ Jayana UX v.UX1 chargé');
       }
     }
     
-    // Initialiser PTR sur tous les conteneurs
     window._initPTR = function() {
       var indicator = document.getElementById('pullRefreshIndicator');
       if (!indicator) return;
-      
-      // ══ DOCUMENT PRINCIPAL (body scroll) ══
-      // Pour accueil, nous, musique, jeux menu principal, messages
-      new PTRManager(
-        document,
-        function() { return Promise.resolve(); },
-        {
-          threshold: 80,
-          damping: 0.3,
-          refreshTime: 1500,
-          indicator: indicator
-        }
-      );
-      
-      // Vues de jeu spécifiques (fixed position)
-      var viewsConfig = [
-        {
-          selector: '#gamesView',
-          name: 'Games'
-        },
-        {
-          selector: '#quizView',
-          name: 'Quiz'
-        },
-        {
-          selector: '#memoryView',
-          name: 'Memory'
-        },
-        {
-          selector: '#penduView',
-          name: 'Pendu'
-        },
-        {
-          selector: '#puzzleView',
-          name: 'Puzzle'
-        },
-        {
-          selector: '#snakeView',
-          name: 'Snake'
-        },
-        {
-          selector: '#skyjoView',
-          name: 'Skyjo'
-        }
-      ];
-      
-      viewsConfig.forEach(function(config) {
-        var element = document.querySelector(config.selector);
+      new PTRManager(document, function() { return Promise.resolve(); }, { threshold: 80, damping: 0.3, refreshTime: 1500, indicator: indicator });
+      var viewsConfig = ['#gamesView', '#quizView', '#memoryView', '#penduView', '#puzzleView', '#snakeView', '#skyjoView'];
+      viewsConfig.forEach(function(selector) {
+        var element = document.querySelector(selector);
         if (element) {
-          new PTRManager(
-            element,
-            function() { return Promise.resolve(); },
-            {
-              threshold: 80,
-              damping: 0.3,
-              refreshTime: 1500,
-              indicator: indicator
-            }
-          );
+          new PTRManager(element, function() { return Promise.resolve(); }, { threshold: 80, damping: 0.3, refreshTime: 1500, indicator: indicator });
         }
       });
-      
-      console.log('✅ PTR Manager initialized on document and all game views');
+      console.log('✅ PTR initialized on all scrollable elements');
     };
   })();
 
@@ -17383,18 +17316,15 @@ console.log('✨ Jayana UX v.UX1 chargé');
   })();
 
   /* ══════════════════════════════════════════════════════
-     9. PULL-TO-REFRESH INIT
+     9. LOG
   ══════════════════════════════════════════════════════ */
   setTimeout(function(){
     if(window._initPTR) window._initPTR();
   }, 500);
 
-  /* ══════════════════════════════════════════════════════
-     10. LOG
-  ══════════════════════════════════════════════════════ */
   setTimeout(function(){
     console.log(
-      '⚡ Jayana Perf v3.7\n' +
+      '⚡ Jayana Perf v3.5\n' +
       '  ✓ animP original désactivé dès le départ (pas de double RAF)\n' +
       '  ✓ 250ms mini player → event-driven\n' +
       '  ✓ likes 12s visible / 0 si caché — nlPoll 8s / 25s\n' +
@@ -17415,8 +17345,7 @@ console.log('✨ Jayana UX v.UX1 chargé');
       '  ✓ [v3.5] abortActivePrank: _kbHintInterval/_kbHintTimer/_shakeMaxTimer nettoyés\n' +
       '  ✓ [v3.5] closeAllViews + visibilitychange → abortActivePrank systématique\n' +
       '  ✓ [v3.5] canvas anniv: RAF stoppe si page cachée\n' +
-      '  ✓ [v3.6] Skyjo bg-pause: anim pausées + poll/heartbeat ralentis (visibilitychange+pagehide+blur)\n' +
-      '  ✓ [v3.7] Pull-to-Refresh universel sur tous les jeux (gamesView, quizView, memoryView, etc)'
+      '  ✓ [v3.6] Skyjo bg-pause: anim pausées + poll/heartbeat ralentis (visibilitychange+pagehide+blur)'
     );
   }, 2000);
 
