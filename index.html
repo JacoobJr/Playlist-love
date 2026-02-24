@@ -9490,7 +9490,7 @@ var ALL_QUIZ_QUESTIONS=[
 
 var QUIZ_TOTAL=10,qzCurrent=0,qzScore=0,qzAnswered=false,qzSession=[];
 function _openQuiz(){resetZoom();isQuizOpen=true;_yamSlide(document.getElementById('quizView'),document.getElementById('yamJeuxTab'),'forward');particleActive=false;hideDance();document.getElementById('navSearch').style.display='none';_startQuiz();window.scrollTo(0,0);}
-function _closeQuiz(){isQuizOpen=false;_yamSlide(document.getElementById('yamJeuxTab'),document.getElementById('quizView'),'backward');document.getElementById('navSearch').style.display='';}
+function _closeQuiz(){isQuizOpen=false;_yamSlide(null,document.getElementById('quizView'),'backward');document.getElementById('yamJeuxTab').classList.add('active');document.getElementById('navSearch').style.display='';}
 function getHints(){try{return JSON.parse(localStorage.getItem('qz_hints')||'{}');}catch(e){return{};}}
 function saveHint(id,hint){var h=getHints();h[id]=hint;try{localStorage.setItem('qz_hints',JSON.stringify(h));}catch(e){}}
 function pickQuestions(){var pool=ALL_QUIZ_QUESTIONS.slice(),picked=[];while(picked.length<QUIZ_TOTAL&&pool.length>0){var i=Math.floor(Math.random()*pool.length);picked.push(pool.splice(i,1)[0]);}return picked;}
@@ -12612,7 +12612,8 @@ function openGames(){
   particleActive=false;hideDance();window.scrollTo(0,0);
 }
 function closeGames(){
-  _yamSlide(document.getElementById('yamJeuxTab'), document.getElementById('gamesView'), 'backward');
+  _yamSlide(null, document.getElementById('gamesView'), 'backward');
+  document.getElementById('yamJeuxTab').classList.add('active');
 }
 function openMemoryGame(){
   _loadGames();
@@ -15499,7 +15500,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.05 - yam 1.0</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.01 - yam 1.0</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
