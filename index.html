@@ -77,7 +77,7 @@ body.light {
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; overflow-x: hidden; -webkit-text-size-adjust: 100%; overscroll-behavior-x: none; }
-body { overscroll-behavior-x: none; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: manipulation; }
+body { overscroll-behavior-x: none; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
 
 /* ══ SKELETON LOADING ══ */
 @keyframes skeletonShimmer {
@@ -1327,7 +1327,7 @@ body.light #lockNavBtn.has-unread {
 #quizView {
   display: none; position: fixed; inset: 0; background: var(--bg); z-index: 500;
   overflow-y: auto; padding-bottom: 80px; transition: background 0.3s, color 0.3s;
-  overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
 }
 #quizView.active { display: block; }
 .qz-header { padding: 28px 16px 20px; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
@@ -2369,7 +2369,7 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 #gamesView {
   display: none; position: fixed; inset: 0; background: var(--bg); z-index: 500;
   overflow-y: auto; padding-bottom: 80px; transition: background 0.3s, color 0.3s;
-  overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
 }
 #gamesView.active { display: block; }
 .gv-header { padding: 14px 16px 10px; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
@@ -2402,7 +2402,7 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 #memoryView {
   display: none; position: fixed; inset: 0; background: var(--bg); z-index: 600;
   overflow-y: auto; padding-bottom: 80px; transition: background 0.3s;
-  overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
 }
 #memoryView.active { display: block; }
 .game-view-header { padding: 22px 16px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; }
@@ -15893,7 +15893,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.03.09 - yam 1.0</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.03.02 - yam 1.0</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -17143,136 +17143,6 @@ console.log('✨ Jayana UX v.UX1 chargé');
   })();
 
   /* ══════════════════════════════════════════════════════
-     7. PULL-TO-REFRESH MANAGER
-  ══════════════════════════════════════════════════════ */
-  (function(){
-    class PTRManager {
-      constructor(container, onRefresh, options = {}) {
-        this.container = container;
-        this.onRefresh = onRefresh;
-        this.threshold = options.threshold || 80;
-        this.damping = options.damping || 0.3;
-        this.refreshTime = options.refreshTime || 1500;
-        this.touchStartY = 0;
-        this.currentDrag = 0;
-        this.isRefreshing = false;
-        this.indicator = options.indicator || null;
-        this.init();
-      }
-      
-      init() {
-        if (this.container !== document && this.container.style) {
-          this.container.style.overscrollBehavior = 'none';
-          this.container.style.touchAction = 'none';
-        }
-        var self = this;
-        this.container.addEventListener('touchstart', function(e) { self.onTouchStart(e); }, false);
-        this.container.addEventListener('touchmove', function(e) { self.onTouchMove(e); }, false);
-        this.container.addEventListener('touchend', function(e) { self.onTouchEnd(e); }, false);
-        this.container.addEventListener('touchcancel', function(e) { self.onTouchCancel(e); }, false);
-      }
-      
-      getScrollTop() {
-        if (this.container === document || this.container === document.body || this.container === document.documentElement) {
-          return window.scrollY || window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
-        }
-        return this.container.scrollTop;
-      }
-      
-      onTouchStart(event) {
-        if (this.getScrollTop() !== 0) return;
-        if (this.isRefreshing) return;
-        this.touchStartY = event.touches[0].clientY;
-        this.currentDrag = 0;
-      }
-      
-      onTouchMove(event) {
-        if (this.getScrollTop() !== 0) return;
-        if (this.isRefreshing) return;
-        var currentY = event.touches[0].clientY;
-        var dragDistance = currentY - this.touchStartY;
-        dragDistance = dragDistance * this.damping;
-        if (dragDistance > 0) {
-          event.preventDefault();
-          this.currentDrag = dragDistance;
-          this.updateIndicator(dragDistance);
-        }
-      }
-      
-      onTouchEnd(event) {
-        if (this.isRefreshing) return;
-        if (this.currentDrag >= this.threshold) {
-          this.triggerRefresh();
-        } else {
-          this.resetIndicator();
-        }
-        this.currentDrag = 0;
-      }
-      
-      onTouchCancel(event) {
-        if (this.isRefreshing) return;
-        this.resetIndicator();
-        this.currentDrag = 0;
-      }
-      
-      updateIndicator(distance) {
-        if (!this.indicator) return;
-        this.indicator.classList.add('visible');
-        var rotation = Math.min(distance / 2, 180);
-        var arrow = this.indicator.querySelector('.ptr-arrow');
-        if (arrow) {
-          arrow.style.transform = 'rotate(' + rotation + 'deg)';
-          if (distance >= this.threshold) {
-            arrow.classList.add('ready');
-          } else {
-            arrow.classList.remove('ready');
-          }
-        }
-      }
-      
-      resetIndicator() {
-        if (!this.indicator) return;
-        this.indicator.classList.remove('visible');
-        var arrow = this.indicator.querySelector('.ptr-arrow');
-        if (arrow) {
-          arrow.classList.remove('ready');
-          arrow.style.transform = '';
-        }
-      }
-      
-      triggerRefresh() {
-        var self = this;
-        self.isRefreshing = true;
-        if (self.indicator) self.indicator.classList.add('refreshing');
-        Promise.resolve(self.onRefresh()).then(function() {
-          setTimeout(function() {
-            self.isRefreshing = false;
-            self.resetIndicator();
-            if (self.indicator) self.indicator.classList.remove('refreshing');
-          }, self.refreshTime);
-        }).catch(function(error) {
-          console.error('PTR Error:', error);
-          self.isRefreshing = false;
-        });
-      }
-    }
-    
-    window._initPTR = function() {
-      var indicator = document.getElementById('pullRefreshIndicator');
-      if (!indicator) return;
-      new PTRManager(document, function() { return Promise.resolve(); }, { threshold: 80, damping: 0.3, refreshTime: 1500, indicator: indicator });
-      var viewsConfig = ['#gamesView', '#quizView', '#memoryView', '#penduView', '#puzzleView', '#snakeView', '#skyjoView'];
-      viewsConfig.forEach(function(selector) {
-        var element = document.querySelector(selector);
-        if (element) {
-          new PTRManager(element, function() { return Promise.resolve(); }, { threshold: 80, damping: 0.3, refreshTime: 1500, indicator: indicator });
-        }
-      });
-      console.log('✅ PTR initialized on all scrollable elements');
-    };
-  })();
-
-  /* ══════════════════════════════════════════════════════
      8. CSS GLOBAL
   ══════════════════════════════════════════════════════ */
   (function(){
@@ -17318,10 +17188,6 @@ console.log('✨ Jayana UX v.UX1 chargé');
   /* ══════════════════════════════════════════════════════
      9. LOG
   ══════════════════════════════════════════════════════ */
-  setTimeout(function(){
-    if(window._initPTR) window._initPTR();
-  }, 500);
-
   setTimeout(function(){
     console.log(
       '⚡ Jayana Perf v3.5\n' +
