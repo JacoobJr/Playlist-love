@@ -14088,9 +14088,12 @@ loadFavorites();
   function _dmAnimateScreen(el, dir){
     if(!dir) return;
     el.classList.remove('dm-slide-forward','dm-slide-backward');
-    // forcer reflow
+    // Double reflow garanti + rAF pour que iOS calcule bien le layout avant l'animation
     void el.offsetWidth;
-    el.classList.add(dir === 'forward' ? 'dm-slide-forward' : 'dm-slide-backward');
+    void el.getBoundingClientRect();
+    requestAnimationFrame(function(){
+      el.classList.add(dir === 'forward' ? 'dm-slide-forward' : 'dm-slide-backward');
+    });
   }
   function showScreen(name, dir){
     ['dmHomeScreen','dmChatScreen'].forEach(function(id){
@@ -14142,7 +14145,10 @@ loadFavorites();
     var logo = document.getElementById('dmHomeLogo');
     var conv = document.getElementById('dmHomeConv');
     if(logo) logo.style.display = 'none';
-    if(conv){ conv.style.display = 'flex'; conv.classList.remove('dm-slide-forward','dm-slide-backward'); void conv.offsetWidth; conv.classList.add('dm-slide-forward'); }
+    if(conv) conv.style.display = 'flex';
+    // Animer dmHomeScreen (le conteneur plein écran)
+    var hs = document.getElementById('dmHomeScreen');
+    if(hs) _dmAnimateScreen(hs, 'forward');
     var center = document.getElementById('dmTopbarCenter');
     if(center) center.innerHTML =
       '<div style="display:flex;flex-direction:column;line-height:1.2;">' +
@@ -15251,10 +15257,10 @@ loadFavorites();
     var logo = document.getElementById('dmHomeLogo');
     var conv = document.getElementById('dmHomeConv');
     if(logo) logo.style.display = 'none';
-    if(conv){
-      conv.style.display = 'flex';
-      if(dir){ conv.classList.remove('dm-slide-forward','dm-slide-backward'); void conv.offsetWidth; conv.classList.add(dir==='forward'?'dm-slide-forward':'dm-slide-backward'); }
-    }
+    if(conv) conv.style.display = 'flex';
+    // Animer dmHomeScreen (le conteneur plein écran)
+    var hs = document.getElementById('dmHomeScreen');
+    if(hs && dir) _dmAnimateScreen(hs, dir);
     var btn = document.getElementById('dmTopbarBack');
     if(btn){ btn.dataset.dest = 'logo'; btn.style.visibility = 'visible'; }
     var lbl = document.getElementById('dmBackLabel');
