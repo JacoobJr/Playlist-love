@@ -3494,9 +3494,7 @@ body.light .pendu-theme {
   z-index: 1100;
   overflow: hidden; background: var(--bg);
   flex-direction: column; transition: background 0.3s;
-  /* Bloque le swipe-back/forward natif du navigateur (Chrome Android / Edge) */
-  overscroll-behavior-x: none;
-  touch-action: pan-y;
+  overscroll-behavior-x: none; touch-action: pan-y;
 }
 #hiddenPage.active { display: flex; animation: slideUp 0.3s ease; }
 
@@ -5650,7 +5648,7 @@ body.light #counterBlock.glowing .c-num-big {
   </div>
 
   <!-- WRAPPER DE TRANSITION — clip pour animations slide -->
-  <div id="dmTransitionWrap" style="flex:1;position:relative;overflow:hidden;width:100%;min-height:0;overscroll-behavior-x:none;touch-action:pan-y;">
+  <div id="dmTransitionWrap" style="flex:1;position:relative;overflow:hidden;width:100%;min-height:0;">
 
   <!-- ÉCRAN 1 : ACCUEIL -->
   <div class="dm-screen" id="dmHomeScreen" style="display:none">
@@ -13051,14 +13049,13 @@ function filterSongs(q){
   });
 })();
 
-// ══ NAVIGATION BROWSER — historique iOS (retour/avant) ══
+// ══ NAVIGATION BROWSER — retour uniquement, avant définitivement désactivé ══
+// Pattern sentinelle : un seul état pushé dans le navigateur, repoussé après
+// chaque retour → la flèche "avant" du navigateur reste toujours grisée.
 (function(){
   var _busy = false;
-  var _stack = [];
-  var _cur   = -1;
+  var _stack = [];  // pile JS interne, ne se reflète plus dans history
 
-  // ─── Définition des vues ───────────────────────────────────────
-  // jeux/quiz
   var GAME_VIEWS = {
     quiz:   { el:'quizView',   open:'openQuiz',       close:'closeQuiz'       },
     games:  { el:'gamesView',  open:'openGames',      close:'closeGames'      },
@@ -13067,31 +13064,25 @@ function filterSongs(q){
     puzzle: { el:'puzzleView', open:'openPuzzleGame', close:'closePuzzleGame' },
     snake:  { el:'snakeView',  open:'openSnakeGame',  close:'closeSnakeGame'  },
   };
-  // mode caché — 3 sous-écrans
-  var DM_SCREENS = {
-    home: { open:'_dmOpenHome', close:'_dmCloseHome' },
-    conv: { open:'_dmOpenConv', close:'_dmCloseConv' },
-    chat: { open:'_dmOpenChat', close:'_dmCloseChat' },
-  };
 
-  // ─── pile ──────────────────────────────────────────────────────
+  // ─── Pile JS uniquement (plus de history.pushState à chaque navigation) ──
   function push(entry){
-    _stack = _stack.slice(0, _cur + 1);
     _stack.push(entry);
-    _cur = _stack.length - 1;
-    history.pushState({ jy: _cur }, '');
   }
 
-  // ─── restaurer l'état visuel (appelé depuis popstate, _busy=true) ───
-  function applyState(idx){
-    if(idx < 0 || idx >= _stack.length) return;
-    var e = _stack[idx];
+  // ─── Affiche l'état en haut de pile (appelé après un goBack) ─────────────
+  function applyTop(){
+    if(!_stack.length) return;
+    var e = _stack[_stack.length - 1];
 
     if(e.type === 'closed'){
-      // Fermer tout ce qui est ouvert
+      // Fermer tout ce qui est ouvert — on appelle les fonctions visuelles brutes
+      // (pas les versions patchées, pour éviter de re-modifier la pile)
       var hp = document.getElementById('hiddenPage');
-      if(hp && hp.classList.contains('active') && window.closeHiddenPage)
-        window.closeHiddenPage();
+      if(hp && hp.classList.contains('active')){
+        if(window._dmRawClose) window._dmRawClose();
+        else hp.classList.remove('active');
+      }
       Object.keys(GAME_VIEWS).forEach(function(k){
         var el = document.getElementById(GAME_VIEWS[k].el);
         if(el && el.classList.contains('active') && window[GAME_VIEWS[k].close])
@@ -13113,22 +13104,36 @@ function filterSongs(q){
 
     } else if(e.type === 'dm'){
       var s = e.screen;
-      // Vérifier qu'un profil est connecté avant de restaurer le mode caché
       var _profCheck = localStorage.getItem('jayana_profile');
       if(_profCheck !== 'girl' && _profCheck !== 'boy') return;
-      // Ouvrir hiddenPage si fermé (version brute, sans push)
       var hp2 = document.getElementById('hiddenPage');
       if(!hp2 || !hp2.classList.contains('active'))
         if(window._dmRawOpen) window._dmRawOpen();
-      // Afficher le bon sous-écran (fonctions brutes, sans push)
       if(s === 'home')      { if(window._dmRawShowHome) window._dmRawShowHome('backward'); }
       else if(s === 'conv') { if(window._dmRawShowHome) window._dmRawShowHome(); if(window._dmRawShowConv) window._dmRawShowConv('backward'); }
       else if(s === 'chat') { if(window._dmRawShowHome) window._dmRawShowHome(); if(window._dmRawShowChat) window._dmRawShowChat('backward'); }
     }
   }
 
-  // ─── Patch jeux/quiz (identique à avant) ───────────────────────
-  // Capturer les versions finales AVANT notre re-patch
+  // ─── Retour d'un cran dans la pile JS ─────────────────────────────────────
+  function goBack(){
+    if(_stack.length <= 1) return; // déjà au fond, rien à fermer
+    _stack.pop();
+    applyTop();
+  }
+
+  // ─── popstate : intercepte TOUT retour navigateur ─────────────────────────
+  // Après chaque retour, on repousse immédiatement la sentinelle →
+  // il n'y a JAMAIS d'état "en avant" dans l'historique du navigateur.
+  window.addEventListener('popstate', function(){
+    if(_busy) return;
+    _busy = true;
+    goBack();
+    history.pushState({ jy:'sentinel' }, ''); // sentinelle repoussée
+    setTimeout(function(){ _busy = false; }, 400);
+  });
+
+  // ─── Patch jeux/quiz ──────────────────────────────────────────────────────
   var _rawGameOpen = {};
   Object.keys(GAME_VIEWS).forEach(function(k){
     _rawGameOpen[k] = window[GAME_VIEWS[k].open];
@@ -13142,33 +13147,27 @@ function filterSongs(q){
     };
   });
 
-  // Patch mode caché — setTimeout(0) pour exécuter après le DM IIFE
+  // ─── Patch mode caché — setTimeout(0) pour exécuter après le DM IIFE ─────
   setTimeout(function(){
 
-    // ── openHiddenPage → push dm:home ──
     var rawOpenHP = window.openHiddenPage;
     window.openHiddenPage = function(){
       if(rawOpenHP) rawOpenHP.apply(this, arguments);
       if(!_busy) push({ type:'dm', screen:'home' });
     };
 
-    // ── dmShowConv → push dm:conv ──
     var rawDmShowConv = window.dmShowConv;
     window.dmShowConv = function(){
       if(rawDmShowConv) rawDmShowConv.apply(this, arguments);
       if(!_busy) push({ type:'dm', screen:'conv' });
     };
 
-    // ── dmOpenMessaging (ouverture du chat) → push dm:conv si absent, puis dm:chat ──
     var rawDmOpenMessaging = window.dmOpenMessaging;
     window.dmOpenMessaging = function(){
       if(rawDmOpenMessaging) rawDmOpenMessaging.apply(this, arguments);
       if(!_busy){
-        // Si l'état courant est dm:home (pas encore dm:conv), pousser dm:conv d'abord
-        // pour que le retour depuis le chat revienne sur la carte "Nous" et non sur le logo
-        var prev = _stack[_cur];
+        var prev = _stack[_stack.length - 1];
         if(prev && prev.type === 'dm' && prev.screen === 'home'){
-          // Afficher visuellement la conv (sans animation car on enchaîne)
           if(window._dmRawShowConv) window._dmRawShowConv();
           push({ type:'dm', screen:'conv' });
         }
@@ -13176,68 +13175,24 @@ function filterSongs(q){
       }
     };
 
-    // closeHiddenPage → revenir à closed(0) pour bloquer la flèche avant
+    // closeHiddenPage : vide la pile JS côté DM, plus de history.go
     var rawCloseHP = window.closeHiddenPage;
     window.closeHiddenPage = function(){
       if(rawCloseHP) rawCloseHP.apply(this, arguments);
       if(_busy) return;
-      // Compter combien d'états DM ont été empilés depuis l'état closed de base
-      var dmCount = 0;
-      for(var i = _cur; i > 0; i--){
-        if(_stack[i] && _stack[i].type !== 'closed') dmCount++;
-        else break;
-      }
-      // Remettre la pile JS à l'état initial
-      _stack = [{ type:'closed' }];
-      _cur = 0;
-      if(dmCount > 0){
-        // Remonter dans l'historique navigateur puis replaceState
-        _busy = true;
-        history.go(-dmCount);
-        // replaceState après que history.go ait fini (popstate se déclenche)
-        // On intercepte le prochain popstate pour faire le replaceState
-        var _onPop = function(ev){
-          window.removeEventListener('popstate', _onPop, true);
-          ev.stopImmediatePropagation();
-          history.replaceState({ jy:0 }, '');
-          _busy = false;
-        };
-        window.addEventListener('popstate', _onPop, true);
-      } else {
-        history.replaceState({ jy:0 }, '');
+      // Dépiler jusqu'à retrouver 'closed'
+      while(_stack.length > 1 && _stack[_stack.length - 1].type !== 'closed'){
+        _stack.pop();
       }
     };
     window._dmRawClose = rawCloseHP;
 
   }, 0);
 
-  // ─── popstate ──────────────────────────────────────────────────
-  window.addEventListener('popstate', function(e){
-    if(_busy) return;
-    var state = e.state;
-    if(!state || state.jy === undefined) return;
-    var idx = state.jy;
-    if(idx === _cur) return;
-
-    // Navigation EN AVANT dans le navigateur (flèche → ou Alt+→) → annuler
-    if(idx > _cur){
-      _busy = true;
-      history.go(_cur - idx); // revenir à notre position
-      setTimeout(function(){ _busy = false; }, 200);
-      return;
-    }
-
-    // Navigation EN ARRIÈRE → appliquer normalement
-    _busy = true;
-    _cur  = idx;
-    applyState(idx);
-    setTimeout(function(){ _busy = false; }, 400);
-  });
-
-  // ─── État initial ───────────────────────────────────────────────
+  // ─── État initial ──────────────────────────────────────────────────────────
   _stack.push({ type:'closed' });
-  _cur = 0;
-  history.replaceState({ jy:0 }, '');
+  history.replaceState({ jy:'base' }, '');     // plancher (jamais navigable en avant)
+  history.pushState({ jy:'sentinel' }, '');    // sentinelle : toujours au-dessus
 
 })();
 (function(){
@@ -15471,7 +15426,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - yam 3.8 </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - yam 3.6 </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -16108,12 +16063,11 @@ document.querySelectorAll('.album-image').forEach(function(el){
 })();
 
 /* ── 12b. SWIPE retour dans hiddenPage (swipe droit uniquement) ── */
-/* Navigation EN AVANT (swipe gauche, flèche Chrome →) : désactivée volontairement.
-   Seul le retour est autorisé via swipe droit ou flèche Chrome ←.              */
+/* Swipe GAUCHE (avancer) désactivé volontairement — causait des bugs.
+   Swipe DROIT → history.go(-1) → popstate sentinelle → retour propre.      */
 setTimeout(function(){
   var _sx = 0, _sy = 0, _sActive = false, _throttle = false;
 
-  /* Détecte l'écran DM actuellement visible */
   function dmScreen(){
     var hp = document.getElementById('hiddenPage');
     if(!hp || !hp.classList.contains('active')) return null;
@@ -16156,10 +16110,9 @@ setTimeout(function(){
     var dx = e.changedTouches[0].clientX - _sx;
     var dy = e.changedTouches[0].clientY - _sy;
 
-    // Ignorer les swipes vers la GAUCHE (navigation en avant désactivée)
+    // Swipe GAUCHE → ignoré (navigation en avant désactivée)
     if(dx <= 0) return;
 
-    // Seuils : au moins 55px horizontal, vraiment horizontal
     if(Math.abs(dx) < 55) return;
     if(Math.abs(dy) > Math.abs(dx) * 0.7) return;
 
@@ -16170,31 +16123,19 @@ setTimeout(function(){
     setTimeout(function(){ _throttle = false; }, 400);
 
     haptic('light');
-
-    // Swipe DROITE → reculer uniquement
-    if(sc === 'logo'){
-      if(window.closeHiddenPage) window.closeHiddenPage();
-    } else {
-      history.go(-1);
-    }
+    // Swipe DROIT → history.go(-1) → popstate → sentinelle repoussée automatiquement
+    history.go(-1);
   }, { passive: true });
 
-  /* ── Bloquer les raccourcis clavier de navigation EN AVANT Chrome ── */
+  /* ── Bloquer Alt+→ Chrome (avancer) quand une vue est ouverte ── */
   document.addEventListener('keydown', function(e){
-    var hp = document.getElementById('hiddenPage');
-    if(!hp || !hp.classList.contains('active')) return;
-    // Alt+→ = avancer dans Chrome → bloqué
-    if(e.altKey && e.key === 'ArrowRight'){
-      e.preventDefault();
-      return;
-    }
-    // Backspace hors champ texte = retour arrière Chrome → bloqué (évite sortie accidentelle)
-    if(e.key === 'Backspace'){
-      var ae = document.activeElement;
-      if(!ae || (ae.tagName !== 'INPUT' && ae.tagName !== 'TEXTAREA' && !ae.isContentEditable)){
-        e.preventDefault();
-      }
-    }
+    if(!e.altKey || e.key !== 'ArrowRight') return;
+    var views = ['hiddenPage','gamesView','quizView','memoryView','penduView','puzzleView','snakeView','skyjoView'];
+    var open = views.some(function(id){
+      var el = document.getElementById(id);
+      return el && (el.classList.contains('active') || el.style.display === 'flex' || el.style.display === 'block');
+    });
+    if(open) e.preventDefault();
   }, true);
 
 }, 300);
