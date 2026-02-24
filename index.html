@@ -10777,7 +10777,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
     deletePresence();
     cleanMyOldGames(null);
     resetState();
-    document.getElementById('skyjoView').classList.remove('active');
+    _yamSlide(document.getElementById('gamesView'), document.getElementById('skyjoView'), 'backward');
     document.querySelector('.bottom-nav').style.display='';
   };
 
