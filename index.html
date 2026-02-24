@@ -3378,43 +3378,48 @@ body.skyjo-bg-paused #skyjoDiscardCard.sj-selectable {
   pointer-events: none;
 }
 
-/* ── Notif message dans le header ── */
+/* ── Notif message fixe — visible tous onglets ── */
 @keyframes msgPillIn {
-  0%   { opacity: 0; transform: translateY(-12px) scale(0.95); }
-  60%  { opacity: 1; transform: translateY(2px) scale(1.02); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+  0%   { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.92); }
+  65%  { opacity: 1; transform: translateX(-50%) translateY(4px) scale(1.03); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 }
 @keyframes msgPillOut {
-  0%   { opacity: 1; transform: translateY(0) scale(1); }
-  100% { opacity: 0; transform: translateY(-10px) scale(0.95); }
+  0%   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-16px) scale(0.93); }
 }
 @keyframes msgPillPulse {
-  0%,100% { box-shadow: 0 2px 16px rgba(0,201,167,0.15), 0 0 0 0 rgba(0,201,167,0.3); }
-  50%     { box-shadow: 0 4px 22px rgba(0,201,167,0.28), 0 0 0 5px rgba(0,201,167,0); }
+  0%,100% { box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 0 0 rgba(0,201,167,0.35); }
+  50%     { box-shadow: 0 4px 24px rgba(0,0,0,0.5), 0 0 0 6px rgba(0,201,167,0); }
 }
 #msgHeaderPill {
   display: none;
+  position: fixed;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4000;
   align-items: center;
   gap: 9px;
-  margin-top: 10px;
-  padding: 8px 14px 8px 10px;
+  padding: 9px 16px 9px 10px;
   background: var(--s1);
-  border: 1px solid rgba(0,201,167,0.25);
+  border: 1px solid rgba(0,201,167,0.35);
   border-radius: 50px;
   cursor: pointer;
-  max-width: calc(100% - 60px);
-  animation: msgPillIn 0.38s cubic-bezier(.34,1.56,.64,1) forwards,
-             msgPillPulse 1.6s ease-in-out 0.4s infinite;
-  transition: transform 0.15s;
+  max-width: min(340px, calc(100vw - 32px));
+  min-width: 200px;
+  animation: msgPillIn 0.42s cubic-bezier(.34,1.56,.64,1) forwards,
+             msgPillPulse 1.8s ease-in-out 0.45s infinite;
   -webkit-tap-highlight-color: transparent;
+  pointer-events: all;
 }
 #msgHeaderPill.hiding {
-  animation: msgPillOut 0.28s ease-in forwards;
+  animation: msgPillOut 0.28s ease-in forwards !important;
 }
-#msgHeaderPill:active { transform: scale(0.97); }
+#msgHeaderPill:active { filter: brightness(1.1); }
 .mhp-avatar {
   font-size: 18px;
-  width: 30px; height: 30px;
+  width: 32px; height: 32px;
   background: var(--s2);
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
@@ -3430,7 +3435,7 @@ body.skyjo-bg-paused #skyjoDiscardCard.sj-selectable {
   color: var(--green);
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  margin-bottom: 1px;
+  margin-bottom: 2px;
 }
 .mhp-text {
   font-size: 12px;
@@ -3439,22 +3444,21 @@ body.skyjo-bg-paused #skyjoDiscardCard.sj-selectable {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
 }
 .mhp-arrow {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--green);
   flex-shrink: 0;
-  opacity: 0.8;
+  font-weight: 700;
 }
 body.light #msgHeaderPill {
-  border-color: rgba(200,24,94,0.25);
-  animation: msgPillInLight 0.38s cubic-bezier(.34,1.56,.64,1) forwards,
-             msgPillPulseLight 1.6s ease-in-out 0.4s infinite;
+  border-color: rgba(200,24,94,0.35);
+  animation: msgPillIn 0.42s cubic-bezier(.34,1.56,.64,1) forwards,
+             msgPillPulseLight 1.8s ease-in-out 0.45s infinite;
 }
 @keyframes msgPillPulseLight {
-  0%,100% { box-shadow: 0 2px 16px rgba(200,24,94,0.12), 0 0 0 0 rgba(200,24,94,0.25); }
-  50%     { box-shadow: 0 4px 22px rgba(200,24,94,0.22), 0 0 0 5px rgba(200,24,94,0); }
+  0%,100% { box-shadow: 0 4px 20px rgba(180,20,80,0.15), 0 0 0 0 rgba(200,24,94,0.3); }
+  50%     { box-shadow: 0 4px 24px rgba(180,20,80,0.22), 0 0 0 6px rgba(200,24,94,0); }
 }
 @keyframes navMusicBounce {
   0%   { transform: translateY(0) rotate(0deg) scale(1); }
@@ -4345,16 +4349,6 @@ body.anniv-mode .counter-block-top {
   <div class="hdr-tag">You And Me</div>
   <div class="hdr-name">YAM</div>
   <div class="hdr-sub">Notre univers en musique</div>
-
-  <!-- Notif message nouveau dans le header -->
-  <div id="msgHeaderPill" onclick="window.yamSwitchTab&&yamSwitchTab('messages')">
-    <div class="mhp-avatar" id="mhpAvatar">👤</div>
-    <div class="mhp-content">
-      <div class="mhp-name" id="mhpName">Message</div>
-      <div class="mhp-text" id="mhpText">…</div>
-    </div>
-    <div class="mhp-arrow">›</div>
-  </div>
   <!-- Bouton thème — dans le header, disparaît au scroll comme les avatars -->
   <button id="themeToggleHome" onclick="applyThemeToggle()" title="Thème" style="
     position:absolute;
@@ -15845,7 +15839,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.05 - yam 1.0</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.08 - yam 1.0</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -17205,6 +17199,16 @@ console.log('✨ Jayana UX v.UX1 chargé');
     </div>
     <span onclick="skyjoAuthClose()" style="font-size:12px;color:var(--muted);cursor:pointer;">Annuler</span>
   </div>
+</div>
+
+<!-- Notif pilule message — fixed, visible sur tous les onglets -->
+<div id="msgHeaderPill" onclick="window.yamSwitchTab&&yamSwitchTab('messages')">
+  <div class="mhp-avatar" id="mhpAvatar">👤</div>
+  <div class="mhp-content">
+    <div class="mhp-name" id="mhpName">Message</div>
+    <div class="mhp-text" id="mhpText">…</div>
+  </div>
+  <div class="mhp-arrow">›</div>
 </div>
 
 </body>
