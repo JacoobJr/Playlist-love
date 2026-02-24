@@ -16349,7 +16349,9 @@ document.querySelectorAll('.bubbleBtn').forEach(function(el){
   }
 
   document.addEventListener('touchstart', function(e){
-    return;
+    if(window.scrollY > 10) return;
+    startY = e.touches[0].clientY;
+    pulling = true;
   }, { passive:true });
 
   document.addEventListener('touchmove', function(e){
