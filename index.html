@@ -4926,10 +4926,20 @@ body.light #counterBlock.glowing .c-num-big {
   }
 
   // Réévaluer toutes les 30 secondes pour détecter l'entrée/sortie de fenêtre
-  setInterval(applyState, 30000);
-  // Countdown seconde par seconde
-  setInterval(updateCountdown, 1000);
+  var _applyStateIv = setInterval(applyState, 30000);
+  // Countdown seconde par seconde — pausé si page cachée
+  var _countdownIv = setInterval(updateCountdown, 1000);
   updateCountdown();
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden){
+      clearInterval(_countdownIv); _countdownIv = null;
+      clearInterval(_applyStateIv); _applyStateIv = null;
+    } else {
+      updateCountdown(); applyState();
+      if(!_countdownIv)  _countdownIv  = setInterval(updateCountdown, 1000);
+      if(!_applyStateIv) _applyStateIv = setInterval(applyState, 30000);
+    }
+  });
 })();
 </script>
 
@@ -5546,10 +5556,14 @@ body.light #counterBlock.glowing .c-num-big {
     }
   }
 
-  // Sync mood periodically
+  // Sync mood periodically — pausé si page cachée
   window.yamSyncMood = yamSyncMood;
   setTimeout(yamSyncMood, 1500);
-  setInterval(yamSyncMood, 15000);
+  var _moodIv = setInterval(yamSyncMood, 15000);
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden){ clearInterval(_moodIv); _moodIv = null; }
+    else { yamSyncMood(); if(!_moodIv) _moodIv = setInterval(yamSyncMood, 15000); }
+  });
 
   // Sync theme toggle label in home tab
   var origApplyTheme = window.applyThemeToggle;
@@ -6646,7 +6660,13 @@ function updateCounter() {
   document.getElementById('cnt-mins').textContent  = String(Math.floor((d % 3600) / 60)).padStart(2,'0');
   document.getElementById('cnt-secs').textContent  = String(d % 60).padStart(2,'0');
 }
-updateCounter(); setInterval(updateCounter, 1000);
+var _counterIv = null;
+function _startCounter(){ if(!_counterIv){ updateCounter(); _counterIv = setInterval(updateCounter, 1000); } }
+function _stopCounter(){ if(_counterIv){ clearInterval(_counterIv); _counterIv = null; } }
+_startCounter();
+document.addEventListener('visibilitychange', function(){ document.hidden ? _stopCounter() : _startCounter(); });
+window.addEventListener('pagehide', _stopCounter);
+window.addEventListener('pageshow', function(){ if(!document.hidden) _startCounter(); });
 
 // ── THEME ──
 function applyThemeToggle() {
@@ -8957,7 +8977,11 @@ window._top50Iv = setInterval(updateTop50PlayBtn, 500);
       if(changed) updateTop50();
     }).catch(function(){});
   }
-  setInterval(refreshPlays, 30000);
+  var _playsIv = setInterval(refreshPlays, 30000);
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden){ clearInterval(_playsIv); _playsIv = null; }
+    else { if(!_playsIv) _playsIv = setInterval(refreshPlays, 30000); }
+  });
 })();
 
 // ── PARTICLES ──
@@ -16850,7 +16874,8 @@ console.log('✨ Jayana UX v.UX1 chargé');
       '  ✓ [v3.5] abortActivePrank: _kbHintInterval/_kbHintTimer/_shakeMaxTimer nettoyés\n' +
       '  ✓ [v3.5] closeAllViews + visibilitychange → abortActivePrank systématique\n' +
       '  ✓ [v3.5] canvas anniv: RAF stoppe si page cachée\n' +
-      '  ✓ [v3.6] Skyjo bg-pause: anim pausées + poll/heartbeat ralentis (visibilitychange+pagehide+blur)'
+      '  ✓ [v3.6] Skyjo bg-pause: anim pausées + poll/heartbeat ralentis (visibilitychange+pagehide+blur)\n' +
+      '  ✓ [v3.7] updateCounter/updateCountdown/yamSyncMood/refreshPlays/applyState pausés si page cachée'
     );
   }, 2000);
 
