@@ -76,7 +76,8 @@ body.light {
   --shadow: 0 8px 32px rgba(180,20,80,0.16);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; overflow-x: hidden; -webkit-text-size-adjust: 100%; }
+html { scroll-behavior: smooth; overflow-x: hidden; -webkit-text-size-adjust: 100%; overscroll-behavior-x: none; }
+body { overscroll-behavior-x: none; }
 
 /* ══ SKELETON LOADING ══ */
 @keyframes skeletonShimmer {
@@ -12538,8 +12539,7 @@ function openGames(){
 }
 function closeGames(){
   document.getElementById('gamesView').classList.remove('active');
-  // Navigate to Jeux tab
-  if(window.yamSwitchTab) window.yamSwitchTab('jeux');
+
 }
 function openMemoryGame(){
   _loadGames();
@@ -16015,6 +16015,16 @@ document.querySelectorAll('.album-image').forEach(function(el){
   };
 })();
 
+/* ── Bloquer le swipe natif Chrome/Safari sur les bords gauche et droit ── */
+(function(){
+  document.addEventListener('touchstart', function(e){
+    var x = e.touches[0].clientX;
+    if(x < 20 || x > window.innerWidth - 20){
+      e.preventDefault();
+    }
+  }, { passive: false });
+})();
+
 /* ── 12. SWIPE HORIZONTAL sur la bottom nav (smooth scroll sections) ── */
 (function(){
   var SECTIONS = ['counterSection', 'reasonSection', 'elleSection', 'luiSection',
@@ -16136,6 +16146,52 @@ setTimeout(function(){
     });
     if(open) e.preventDefault();
   }, true);
+
+}, 300);
+
+/* ── 12c. SWIPE retour dans les vues jeux/quiz (même pattern que messages) ── */
+setTimeout(function(){
+  var _gsx = 0, _gsy = 0, _gsActive = false, _gThrottle = false;
+  var GAME_IDS = ['gamesView','quizView','memoryView','penduView','puzzleView','snakeView','skyjoView'];
+
+  function anyGameViewOpen(){
+    return GAME_IDS.some(function(id){
+      var el = document.getElementById(id);
+      return el && el.classList.contains('active');
+    });
+  }
+
+  document.addEventListener('touchstart', function(e){
+    _gsActive = false;
+    if(!anyGameViewOpen()) return;
+    var ae = document.activeElement;
+    if(ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return;
+    _gsx = e.touches[0].clientX;
+    _gsy = e.touches[0].clientY;
+    _gsActive = true;
+  }, { passive: true });
+
+  document.addEventListener('touchend', function(e){
+    if(!_gsActive) return;
+    _gsActive = false;
+    if(_gThrottle) return;
+    if(!anyGameViewOpen()) return;
+    var ae = document.activeElement;
+    if(ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return;
+
+    var dx = e.changedTouches[0].clientX - _gsx;
+    var dy = e.changedTouches[0].clientY - _gsy;
+
+    if(dx <= 0) return;
+    if(Math.abs(dx) < 55) return;
+    if(Math.abs(dy) > Math.abs(dx) * 0.7) return;
+
+    _gThrottle = true;
+    setTimeout(function(){ _gThrottle = false; }, 400);
+
+    haptic('light');
+    history.go(-1);
+  }, { passive: true });
 
 }, 300);
 
