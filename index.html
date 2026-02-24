@@ -3407,7 +3407,38 @@ body.skyjo-bg-paused #skyjoDiscardCard.sj-selectable {
 #navNous.event-active {
   color: #f5c518;
 }
-.mp-inner {
+
+/* ── Badge non-lus sur l'icône Messages ── */
+@keyframes navMsgDotPulse {
+  0%,100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(255,68,68,0.5); }
+  50%     { transform: scale(1.15); box-shadow: 0 0 0 4px rgba(255,68,68,0); }
+}
+#navMessages {
+  position: relative;
+}
+#navMsgBadge {
+  display: none;
+  position: absolute;
+  top: -1px; right: 2px;
+  min-width: 16px; height: 16px;
+  background: #ff4444;
+  color: #fff;
+  font-size: 9px; font-weight: 800;
+  border-radius: 8px;
+  align-items: center; justify-content: center;
+  padding: 0 4px;
+  border: 1.5px solid var(--bg);
+  line-height: 1;
+  animation: navMsgDotPulse 1.4s ease-in-out infinite;
+  pointer-events: none;
+}
+#navMsgBadge.visible {
+  display: flex;
+}
+#navMessages.has-unread svg {
+  color: #ff6b6b;
+  filter: drop-shadow(0 0 3px rgba(255,68,68,0.5));
+}
   margin: 0 8px;
   background: rgba(18,18,18,0.98);
   border: 1px solid rgba(255,255,255,0.10);
@@ -4940,6 +4971,7 @@ body.light #counterBlock.glowing .c-num-big {
 
   // Appliquer immédiatement au chargement
   applyState();
+  window.isInVideoWindow = isInVideoWindow;
 
   // ── Compte à rebours ──────────────────────────────────────────────────────
   var countdownEl = document.getElementById('storyCountdownTxt');
@@ -5472,6 +5504,7 @@ body.light #counterBlock.glowing .c-num-big {
       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
       Messages
       <div id="lockUnreadBadge"></div>
+      <span id="navMsgBadge"></span>
     </div>
     <div class="nav-item" id="navJeux" onclick="yamSwitchTab('jeux')">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15 7.5V2H9v5.5l3 3 3-3zM7.5 9H2v6h5.5l3-3-3-3zM9 16.5V22h6v-5.5l-3-3-3 3zM16.5 9l-3 3 3 3H22V9h-5.5z"/></svg>
@@ -5549,6 +5582,19 @@ body.light #counterBlock.glowing .c-num-big {
     if(navMus){
       navMus.classList.toggle('music-playing', musicPlaying && tab !== 'musique');
     }
+
+    // Cœur doré : retiré quand on entre dans "nous", restauré si événement actif quand on en sort
+    var navNous2 = document.getElementById('navNous');
+    if(navNous2){
+      if(tab === 'nous'){
+        navNous2.classList.remove('event-active');
+      } else {
+        // Remettre si l'événement est toujours en cours
+        if(typeof isInVideoWindow === 'function' && isInVideoWindow()){
+          navNous2.classList.add('event-active');
+        }
+      }
+    }
   };
 
   // When hiddenPage closes, restore messages tab as active
@@ -5623,17 +5669,33 @@ body.light #counterBlock.glowing .c-num-big {
     }
   };
 
-  // Lock badge on Messages nav (same as old lockNavBtn)
+  // Badge non-lus sur l'icône Messages dans la nav
   var _origLockNavBtn = document.getElementById('lockNavBtn');
-  // Alias: pulse animation should apply to navMessages when there are unread msgs
-  var _lnbObs = new MutationObserver(function(muts) {
-    var navMsg = document.getElementById('navMessages');
+  function _syncNavMsgUnread(){
+    var navMsg   = document.getElementById('navMessages');
+    var navBadge = document.getElementById('navMsgBadge');
     if(!navMsg) return;
     var hasUnread = _origLockNavBtn && _origLockNavBtn.classList.contains('has-unread');
-    if(hasUnread) navMsg.style.color = '#a78bfa';
-    else navMsg.style.color = '';
-  });
+    navMsg.classList.toggle('has-unread', !!hasUnread);
+    if(navBadge){
+      if(hasUnread){
+        // Lire le chiffre depuis lockUnreadBadge (déjà calculé par checkUnread/fetchMsgs)
+        var lockBadge = document.getElementById('lockUnreadBadge');
+        var count = lockBadge ? lockBadge.textContent : '';
+        navBadge.textContent = count || '';
+        navBadge.classList.add('visible');
+      } else {
+        navBadge.classList.remove('visible');
+      }
+    }
+  }
+  // Observer aussi lockUnreadBadge pour capter les mises à jour du chiffre
+  var _lnbObs = new MutationObserver(_syncNavMsgUnread);
   if(_origLockNavBtn) _lnbObs.observe(_origLockNavBtn, {attributes:true,attributeFilter:['class']});
+  var _lockBadgeEl = document.getElementById('lockUnreadBadge');
+  if(_lockBadgeEl) _lnbObs.observe(_lockBadgeEl, {childList:true,characterData:true,subtree:true});
+  // Sync initial
+  _syncNavMsgUnread();
 
   // Intercept toggleLockPopup to set nav active state
   document.addEventListener('DOMContentLoaded', function(){
