@@ -914,9 +914,7 @@ body.light .nav-item.nav-active svg {
 }
 
 /* ══ YAM ACCUEIL ══ */
-#yamHomeTab {
-  padding-bottom: 16px;
-}
+#yamHomeTab { position: fixed; inset: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 .yam-mascotte-zone {
   margin: 12px 16px 0;
   background: linear-gradient(135deg, var(--s1) 0%, rgba(232,130,58,0.07) 100%);
@@ -1018,9 +1016,7 @@ body.light .nav-item.nav-active svg {
 }
 
 /* ══ JEUX TAB ══ */
-#yamJeuxTab {
-  padding: 0 0 16px;
-}
+#yamJeuxTab { position: fixed; inset: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 .yam-jeux-header {
   padding: 20px 16px 0;
   margin-bottom: 4px;
@@ -1064,18 +1060,10 @@ body.light .nav-item.nav-active svg {
 }
 
 /* ══ MUSIQUE TAB ══ */
-#yamMusiqueTab {
-  padding-bottom: 16px;
-}
-/* Espace pour le mini player quand il est affiché */
-body.mp-active #yamMusiqueTab {
-  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
-}
+#yamMusiqueTab { position: fixed; inset: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 
 /* ══ NOUS TAB ══ */
-#yamNousTab {
-  padding-bottom: 16px;
-}
+#yamNousTab { position: fixed; inset: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 /* ══════════════════════════════════════════
    MODE CLAIR — OVERRIDES COMPLETS
 ══════════════════════════════════════════ */
