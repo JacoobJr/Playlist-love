@@ -12538,6 +12538,8 @@ function openGames(){
 }
 function closeGames(){
   document.getElementById('gamesView').classList.remove('active');
+  // Navigate to Jeux tab
+  if(window.yamSwitchTab) window.yamSwitchTab('jeux');
 }
 function openMemoryGame(){
   _loadGames();
@@ -13061,7 +13063,6 @@ function filterSongs(q){
     pendu:  { el:'penduView',  open:'openPenduGame',  close:'closePenduGame'  },
     puzzle: { el:'puzzleView', open:'openPuzzleGame', close:'closePuzzleGame' },
     snake:  { el:'snakeView',  open:'openSnakeGame',  close:'closeSnakeGame'  },
-    skyjo:  { el:'skyjoView',  open:'openSkyjoLock',  close:'closeSkyjoGame'  },
   };
 
   // ─── Pile JS uniquement (plus de history.pushState à chaque navigation) ──
@@ -13108,34 +13109,9 @@ function filterSongs(q){
       var hp2 = document.getElementById('hiddenPage');
       if(!hp2 || !hp2.classList.contains('active'))
         if(window._dmRawOpen) window._dmRawOpen();
-      if(s === 'home'){
-        // Retour vers logo (depuis conv) : slide dmHomeScreen depuis gauche
-        var logo = document.getElementById('dmHomeLogo');
-        var conv = document.getElementById('dmHomeConv');
-        if(logo) logo.style.display = '';
-        if(conv) conv.style.display = 'none';
-        var hs = document.getElementById('dmHomeScreen');
-        if(hs){
-          hs.style.transition = 'none'; hs.style.transform = 'translateX(-100%)';
-          void hs.getBoundingClientRect();
-          requestAnimationFrame(function(){ requestAnimationFrame(function(){
-            hs.style.transition = 'transform 300ms cubic-bezier(.4,0,.2,1)';
-            hs.style.transform = 'translateX(0)';
-            setTimeout(function(){ hs.style.transition=''; }, 350);
-          }); });
-        }
-        var btn = document.getElementById('dmTopbarBack');
-        if(btn){ btn.dataset.dest = 'close'; btn.style.visibility = 'hidden'; }
-      } else if(s === 'conv'){
-        // Retour vers conv (depuis chat) : show homeScreen conv + slide depuis gauche
-        var logo2 = document.getElementById('dmHomeLogo');
-        var conv2 = document.getElementById('dmHomeConv');
-        if(logo2) logo2.style.display = 'none';
-        if(conv2) conv2.style.display = 'flex';
-        if(window._dmRawShowHome) window._dmRawShowHome('backward');
-      } else if(s === 'chat'){
-        if(window._dmRawShowChat) window._dmRawShowChat('backward');
-      }
+      if(s === 'home')      { if(window._dmRawShowHome) window._dmRawShowHome('backward'); }
+      else if(s === 'conv') { if(window._dmRawShowHome) window._dmRawShowHome(); if(window._dmRawShowConv) window._dmRawShowConv('backward'); }
+      else if(s === 'chat') { if(window._dmRawShowHome) window._dmRawShowHome(); if(window._dmRawShowChat) window._dmRawShowChat('backward'); }
     }
   }
 
@@ -15450,7 +15426,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - yam 3.7 </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - yam 3.4 </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -16067,7 +16043,6 @@ document.querySelectorAll('.album-image').forEach(function(el){
     var dy = e.changedTouches[0].clientY - swipeStartY;
     /* Uniquement si swipe horizontal fort et peu de vertical */
     if(Math.abs(dx) < 80 || Math.abs(dy) > 60) return;
-    /* Swipe depuis n'importe où sur l'écran */
 
     /* Trouver la section visible actuellement */
     var current = -1;
@@ -16091,16 +16066,6 @@ document.querySelectorAll('.album-image').forEach(function(el){
 setTimeout(function(){
   var _sx = 0, _sy = 0, _sActive = false, _throttle = false;
 
-  // Liste de toutes les sous-vues qui supportent le retour par swipe
-  var ALL_SUBVIEWS = ['gamesView','memoryView','penduView','puzzleView','snakeView','skyjoView','quizView','hiddenPage'];
-
-  function anySubviewActive(){
-    return ALL_SUBVIEWS.some(function(id){
-      var el = document.getElementById(id);
-      return el && (el.classList.contains('active') || el.style.display === 'block' || el.style.display === 'flex');
-    });
-  }
-
   function dmScreen(){
     var hp = document.getElementById('hiddenPage');
     if(!hp || !hp.classList.contains('active')) return null;
@@ -16117,7 +16082,8 @@ setTimeout(function(){
 
   document.addEventListener('touchstart', function(e){
     _sActive = false;
-    if(!anySubviewActive()) return;
+    var hp = document.getElementById('hiddenPage');
+    if(!hp || !hp.classList.contains('active')) return;
     var ae = document.activeElement;
     if(ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return;
     var pm = document.getElementById('prankMenu');
@@ -16132,7 +16098,8 @@ setTimeout(function(){
     _sActive = false;
     if(_throttle) return;
 
-    if(!anySubviewActive()) return;
+    var hp = document.getElementById('hiddenPage');
+    if(!hp || !hp.classList.contains('active')) return;
     var ae = document.activeElement;
     if(ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return;
     var pm = document.getElementById('prankMenu');
@@ -16147,12 +16114,8 @@ setTimeout(function(){
     if(Math.abs(dx) < 55) return;
     if(Math.abs(dy) > Math.abs(dx) * 0.7) return;
 
-    // Pour hiddenPage : vérifier qu'il y a bien un écran DM actif
-    var hp = document.getElementById('hiddenPage');
-    if(hp && hp.classList.contains('active')){
-      var sc = dmScreen();
-      if(!sc) return;
-    }
+    var sc = dmScreen();
+    if(!sc) return;
 
     _throttle = true;
     setTimeout(function(){ _throttle = false; }, 400);
@@ -16162,18 +16125,65 @@ setTimeout(function(){
     history.go(-1);
   }, { passive: true });
 
-  /* ── Bloquer Alt+→ Chrome (avancer) quand une vue est ouverte ── */
-  document.addEventListener('keydown', function(e){
-    if(!e.altKey || e.key !== 'ArrowRight') return;
-    var views = ['hiddenPage','gamesView','quizView','memoryView','penduView','puzzleView','snakeView','skyjoView'];
-    var open = views.some(function(id){
+}, 300);
+
+/* ── 12c. SWIPE retour dans les vues jeux/quiz (même pattern que messages) ── */
+setTimeout(function(){
+  var _gsx = 0, _gsy = 0, _gsActive = false, _gThrottle = false;
+  var GAME_IDS = ['gamesView','quizView','memoryView','penduView','puzzleView','snakeView','skyjoView'];
+
+  function anyGameViewOpen(){
+    return GAME_IDS.some(function(id){
       var el = document.getElementById(id);
-      return el && (el.classList.contains('active') || el.style.display === 'flex' || el.style.display === 'block');
+      return el && el.classList.contains('active');
     });
-    if(open) e.preventDefault();
-  }, true);
+  }
+
+  document.addEventListener('touchstart', function(e){
+    _gsActive = false;
+    if(!anyGameViewOpen()) return;
+    var ae = document.activeElement;
+    if(ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return;
+    _gsx = e.touches[0].clientX;
+    _gsy = e.touches[0].clientY;
+    _gsActive = true;
+  }, { passive: true });
+
+  document.addEventListener('touchend', function(e){
+    if(!_gsActive) return;
+    _gsActive = false;
+    if(_gThrottle) return;
+    if(!anyGameViewOpen()) return;
+    var ae = document.activeElement;
+    if(ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return;
+
+    var dx = e.changedTouches[0].clientX - _gsx;
+    var dy = e.changedTouches[0].clientY - _gsy;
+
+    // Swipe GAUCHE → ignoré
+    if(dx <= 0) return;
+    if(Math.abs(dx) < 55) return;
+    if(Math.abs(dy) > Math.abs(dx) * 0.7) return;
+
+    _gThrottle = true;
+    setTimeout(function(){ _gThrottle = false; }, 400);
+
+    haptic('light');
+    history.go(-1);
+  }, { passive: true });
 
 }, 300);
+
+/* ── Bloquer Alt+→ Chrome (avancer) quand une vue est ouverte ── */
+document.addEventListener('keydown', function(e){
+  if(!e.altKey || e.key !== 'ArrowRight') return;
+  var views = ['hiddenPage','gamesView','quizView','memoryView','penduView','puzzleView','snakeView','skyjoView'];
+  var open = views.some(function(id){
+    var el = document.getElementById(id);
+    return el && (el.classList.contains('active') || el.style.display === 'flex' || el.style.display === 'block');
+  });
+  if(open) e.preventDefault();
+}, true);
 
 /* ── 13. AMÉLIORATION THÈME — sauvegarde en localStorage ── */
 (function(){
