@@ -15427,7 +15427,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.4 - yam 1.0</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.05 - yam 1.0</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -16208,10 +16208,11 @@ setTimeout(function(){
 
     haptic('light');
 
-    // Animation slide-out avant le retour
+    // Prendre la vue active au z-index le plus élevé (sous-jeu > gamesView)
+    var PRIORITY = ['skyjoView','memoryView','penduView','puzzleView','snakeView','quizView','gamesView'];
     var activeView = null;
-    for(var i = 0; i < GAME_IDS.length; i++){
-      var el = document.getElementById(GAME_IDS[i]);
+    for(var i = 0; i < PRIORITY.length; i++){
+      var el = document.getElementById(PRIORITY[i]);
       if(el && el.classList.contains('active')){ activeView = el; break; }
     }
     if(activeView){
