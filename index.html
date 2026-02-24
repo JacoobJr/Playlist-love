@@ -1269,6 +1269,7 @@ body.light #lockNavBtn.has-unread {
 }
 
 @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:none;opacity:1} }
+@keyframes slideOutDown { from{transform:translateY(0);opacity:1} to{transform:translateY(40px);opacity:0} }
 #searchOverlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: none;
   align-items: flex-end; justify-content: center;
@@ -6801,7 +6802,13 @@ document.getElementById('betisesBtn').addEventListener('click', function() {
     menu.addEventListener('touchend', function(e){
       var dx = e.changedTouches[0].clientX - startX;
       var dy = Math.abs(e.changedTouches[0].clientY - startY);
-      if(dx > 80 && dy < 60){ closePrankMenu(); }
+      if(dx > 80 && dy < 60){
+        menu.style.animation = 'slideOutDown 0.25s cubic-bezier(.4,0,.2,1) forwards';
+        setTimeout(function(){
+          menu.style.animation = '';
+          closePrankMenu();
+        }, 240);
+      }
     }, { passive: true });
   })();
 
@@ -15426,7 +15433,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.1 - yam 1.0</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.2 - yam 1.0 </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -16126,7 +16133,7 @@ setTimeout(function(){
     if(Math.abs(dy) > Math.abs(dx) * 0.7) return;
 
     var sc = dmScreen();
-    if(!sc) return;
+    if(!sc || sc === 'logo') return;
 
     _throttle = true;
     setTimeout(function(){ _throttle = false; }, 500);
@@ -16214,7 +16221,7 @@ setTimeout(function(){
       if(el && el.classList.contains('active')){ activeView = el; break; }
     }
     if(activeView){
-      activeView.style.animation = 'viewSlideOut 0.25s cubic-bezier(.4,0,.2,1) forwards';
+      activeView.style.animation = 'slideOutDown 0.25s cubic-bezier(.4,0,.2,1) forwards';
       setTimeout(function(){
         if(activeView) activeView.style.animation = '';
         history.go(-1);
