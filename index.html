@@ -1325,7 +1325,7 @@ body.light #lockNavBtn.has-unread {
   overflow-y: auto; padding-bottom: 80px; transition: background 0.3s, color 0.3s;
   overscroll-behavior-x: none; touch-action: pan-y;
 }
-#quizView.active { display: block; animation: slideUp 0.3s ease; }
+#quizView.active { display: block; }
 .qz-header { padding: 28px 16px 20px; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
 .qz-back { display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:600; color:var(--sub); background:var(--s2); border:1px solid var(--border); border-radius:20px; padding:7px 14px; cursor:pointer; margin-bottom:10px; transition:background 0.15s, color 0.15s, transform 0.12s; }
 .qz-back:hover { background:var(--s3); color:var(--text); transform:translateX(-2px); }
@@ -2355,7 +2355,7 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   overflow-y: auto; padding-bottom: 80px; transition: background 0.3s, color 0.3s;
   overscroll-behavior-x: none; touch-action: pan-y;
 }
-#gamesView.active { display: block; animation: slideUp 0.3s ease; }
+#gamesView.active { display: block; }
 .gv-header { padding: 14px 16px 10px; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
 .gv-header::before { content:''; position:absolute; inset:0; background:radial-gradient(circle at 80% 20%, rgba(61,155,212,0.07) 0%, transparent 60%); pointer-events:none; }
 .gv-back { display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:600; color:var(--sub); background:var(--s2); border:1px solid var(--border); border-radius:20px; padding:7px 14px; cursor:pointer; margin-bottom:10px; transition:background 0.15s, color 0.15s, transform 0.12s; }
@@ -2388,7 +2388,7 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   overflow-y: auto; padding-bottom: 80px; transition: background 0.3s;
   overscroll-behavior-x: none; touch-action: pan-y;
 }
-#memoryView.active { display: block; animation: slideUp 0.25s ease; }
+#memoryView.active { display: block; }
 .game-view-header { padding: 22px 16px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; }
 .game-view-back { display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:600; color:var(--sub); background:var(--s2); border:1px solid var(--border); border-radius:20px; padding:7px 14px; cursor:pointer; margin-bottom:8px; transition:background 0.15s, color 0.15s, transform 0.12s; }
 .game-view-back:hover { background:var(--s3); color:var(--text); transform:translateX(-2px); }
@@ -2397,7 +2397,7 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 
 /* ════ PENDU ════ */
 #penduView,#puzzleView,#snakeView{display:none;position:fixed;inset:0;background:var(--bg);z-index:600;overflow-y:auto;overflow-x:hidden;padding-bottom:80px;transition:background 0.3s;overscroll-behavior-x:none;touch-action:pan-y;}
-#penduView.active,#puzzleView.active,#snakeView.active{display:block;animation:slideUp 0.25s ease;}
+#penduView.active,#puzzleView.active,#snakeView.active{display:block;}
 
 /* ══ SKYJO STYLES ══ */
 /* ══ SKYJO CARDS & GRID ══ */
@@ -2419,7 +2419,7 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
   touch-action: none;
   overscroll-behavior: none;
 }
-#skyjoView.active { display: flex !important; animation: sjViewEnter 0.32s cubic-bezier(.17,.89,.32,1.1); }
+#skyjoView.active { display: flex !important; }
 @keyframes sjViewEnter {
   from { opacity:0; transform: scale(0.97) translateY(12px); }
   to   { opacity:1; transform: scale(1) translateY(0); }
@@ -9484,8 +9484,8 @@ var ALL_QUIZ_QUESTIONS=[
 ];
 
 var QUIZ_TOTAL=10,qzCurrent=0,qzScore=0,qzAnswered=false,qzSession=[];
-function _openQuiz(){resetZoom();isQuizOpen=true;document.getElementById('quizView').classList.add('active');particleActive=false;hideDance();document.getElementById('navSearch').style.display='none';_startQuiz();window.scrollTo(0,0);}
-function _closeQuiz(){isQuizOpen=false;document.getElementById('quizView').classList.remove('active');document.getElementById('navSearch').style.display='';}
+function _openQuiz(){resetZoom();isQuizOpen=true;_yamSlide(document.getElementById('quizView'),null,'forward');particleActive=false;hideDance();document.getElementById('navSearch').style.display='none';_startQuiz();window.scrollTo(0,0);}
+function _closeQuiz(){isQuizOpen=false;_yamSlide(null,document.getElementById('quizView'),'backward');document.getElementById('navSearch').style.display='';}
 function getHints(){try{return JSON.parse(localStorage.getItem('qz_hints')||'{}');}catch(e){return{};}}
 function saveHint(id,hint){var h=getHints();h[id]=hint;try{localStorage.setItem('qz_hints',JSON.stringify(h));}catch(e){}}
 function pickQuestions(){var pool=ALL_QUIZ_QUESTIONS.slice(),picked=[];while(picked.length<QUIZ_TOTAL&&pool.length>0){var i=Math.floor(Math.random()*pool.length);picked.push(pool.splice(i,1)[0]);}return picked;}
@@ -9591,13 +9591,13 @@ var PENDU_PARTS=['ph-head','ph-body','ph-arm1','ph-arm2','ph-leg1','ph-leg2'];
 
 function _openPenduGame(){
   resetZoom();
-  document.getElementById('penduView').classList.add('active');
+  _yamSlide(document.getElementById('penduView'), document.getElementById('gamesView'), 'forward');
   particleActive=false; hideDance();
   window.scrollTo(0,0);
   plbLoad();
 }
 function _closePenduGame(){
-  document.getElementById('penduView').classList.remove('active');
+  _yamSlide(document.getElementById('gamesView'), document.getElementById('penduView'), 'backward');
   penduPlayer=null;
   document.getElementById('penduGenderScreen').style.display='flex';
   document.getElementById('penduGameArea').style.display='none';
@@ -9876,13 +9876,13 @@ var puzzlePlayer=null, puzzleSize=3, puzzleOrder=[], puzzleSelected=null, puzzle
 
 function _openPuzzleGame(){
   resetZoom();
-  document.getElementById('puzzleView').classList.add('active');
+  _yamSlide(document.getElementById('puzzleView'), document.getElementById('gamesView'), 'forward');
   particleActive=false; hideDance();
   window.scrollTo(0,0);
   zplbLoad();
 }
 function _closePuzzleGame(){
-  document.getElementById('puzzleView').classList.remove('active');
+  _yamSlide(document.getElementById('gamesView'), document.getElementById('puzzleView'), 'backward');
   puzzlePlayer=null;
   document.getElementById('puzzleGenderScreen').style.display='flex';
   document.getElementById('puzzleGameArea').style.display='none';
@@ -10044,7 +10044,7 @@ var snakeBaseMs=180; // vitesse progressive de base (jamais affectée par les bo
 
 function _openSnakeGame(){
   resetZoom();
-  document.getElementById('snakeView').classList.add('active');
+  _yamSlide(document.getElementById('snakeView'), document.getElementById('gamesView'), 'forward');
   particleActive=false; hideDance();
   window.scrollTo(0,0);
   slbLoad();
@@ -10057,7 +10057,7 @@ function _openSnakeGame(){
 }
 function _closeSnakeGame(){
   clearInterval(snakeInterval); snakeRunning=false;
-  document.getElementById('snakeView').classList.remove('active');
+  _yamSlide(document.getElementById('gamesView'), document.getElementById('snakeView'), 'backward');
   snakePlayer=null;
   document.getElementById('snakeGenderScreen').style.display='flex';
   document.getElementById('snakeGameArea').style.display='none';
@@ -10533,7 +10533,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
   };
 
   function _openSkyjoWithProfile(profile){
-    document.getElementById('skyjoView').classList.add('active');
+    _yamSlide(document.getElementById('skyjoView'), document.getElementById('gamesView'), 'forward');
     document.querySelector('.bottom-nav').style.display='none';
     enterLobby();
   }
@@ -12435,7 +12435,7 @@ function closeSnakeGame()  { _loadGames(); _closeSnakeGame(); }
       }).catch(function(){});
     }
     resetState();
-    document.getElementById('skyjoView').classList.remove('active');
+    _yamSlide(document.getElementById('gamesView'), document.getElementById('skyjoView'), 'backward');
     document.querySelector('.bottom-nav').style.display='';
   };
 
@@ -12533,25 +12533,70 @@ function resetZoom(){
     m.setAttribute('content', 'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5');
   }, 30);
 }
+/* ── _yamSlide : transition carrousel identique aux messages ── */
+function _yamSlide(incoming, outgoing, dir){
+  var DUR = 300;
+  var TR  = 'transform '+DUR+'ms cubic-bezier(.4,0,.2,1), opacity '+DUR+'ms ease';
+
+  // Préparer incoming : hors écran à droite (forward) ou à gauche (backward)
+  if(incoming){
+    incoming.style.transition = 'none';
+    incoming.style.transform  = dir==='forward' ? 'translateX(100%)' : 'translateX(-100%)';
+    incoming.style.opacity    = '1';
+    incoming.classList.add('active');
+  }
+  // Préparer outgoing : au centre
+  if(outgoing){
+    outgoing.style.transition = 'none';
+    outgoing.style.transform  = 'translateX(0)';
+    outgoing.style.opacity    = '1';
+  }
+
+  // Double rAF pour forcer le reflow — même technique que _dmSlide
+  void (incoming || outgoing).getBoundingClientRect();
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){
+    if(incoming){
+      incoming.style.transition = TR;
+      incoming.style.transform  = 'translateX(0)';
+    }
+    if(outgoing){
+      outgoing.style.transition = TR;
+      outgoing.style.transform  = dir==='forward' ? 'translateX(-100%)' : 'translateX(100%)';
+      outgoing.style.opacity    = '0';
+    }
+    setTimeout(function(){
+      if(outgoing){
+        outgoing.classList.remove('active');
+        outgoing.style.transform  = '';
+        outgoing.style.transition = '';
+        outgoing.style.opacity    = '';
+      }
+      if(incoming){
+        incoming.style.transition = '';
+        incoming.style.transform  = '';
+      }
+    }, DUR + 50);
+  }); });
+}
+
 function openGames(){
   resetZoom();
-  document.getElementById('gamesView').classList.add('active');
+  _yamSlide(document.getElementById('gamesView'), null, 'forward');
   particleActive=false;hideDance();window.scrollTo(0,0);
 }
 function closeGames(){
-  document.getElementById('gamesView').classList.remove('active');
-
+  _yamSlide(null, document.getElementById('gamesView'), 'backward');
 }
 function openMemoryGame(){
   _loadGames();
   resetZoom();
-  document.getElementById('memoryView').classList.add('active');
+  _yamSlide(document.getElementById('memoryView'), document.getElementById('gamesView'), 'forward');
   particleActive=false; hideDance();
   window.scrollTo(0,0);
   _lbLoad();
 }
 function closeMemoryGame(){
-  document.getElementById('memoryView').classList.remove('active');
+  _yamSlide(document.getElementById('gamesView'), document.getElementById('memoryView'), 'backward');
   clearInterval(memTimerInt);
   document.getElementById('memoryGameArea').style.display='none';
   document.getElementById('memoryStartScreen').style.display='none';
@@ -12562,15 +12607,13 @@ function closeMemoryGame(){
   document.getElementById('memGenderBoy').className='gender-select-btn';
 }
 function closeAllViews(){
-  if(isQuizOpen) closeQuiz();
-  if(document.getElementById('memoryView').classList.contains('active')) closeMemoryGame();
-  if(document.getElementById('penduView').classList.contains('active'))  closePenduGame();
-  if(document.getElementById('puzzleView').classList.contains('active')) closePuzzleGame();
-  if(document.getElementById('snakeView').classList.contains('active'))  closeSnakeGame();
-  if(document.getElementById('skyjoView') && document.getElementById('skyjoView').classList.contains('active'))  closeSkyjoGame();
-  if(document.getElementById('gamesView').classList.contains('active'))  document.getElementById('gamesView').classList.remove('active');
+  var ids=['gamesView','quizView','memoryView','penduView','puzzleView','snakeView','skyjoView'];
+  ids.forEach(function(id){
+    var el=document.getElementById(id);
+    if(el){ el.classList.remove('active'); el.style.transform=''; el.style.transition=''; el.style.opacity=''; }
+  });
+  if(isQuizOpen){ isQuizOpen=false; document.getElementById('navSearch').style.display=''; }
   if(document.getElementById('hiddenPage').classList.contains('active')){ closeHiddenPage(); }
-  // Nettoie toutes les bêtises actives si une navigation force la sortie
   if(typeof abortActivePrank==='function') abortActivePrank();
 }
 function scrollToTop(){resetZoom();closeAllViews();if(window.yamSwitchTab)window.yamSwitchTab('home');window.scrollTo({top:0,behavior:'smooth'});}
@@ -13129,7 +13172,9 @@ function filterSongs(q){
   window.addEventListener('popstate', function(){
     if(_busy) return;
     _busy = true;
-    goBack();
+    // Si le swipe a déjà déclenché la fermeture avec animation, juste sync la pile
+    if(!window._yamSwipeInProgress) goBack();
+    else _stack.pop(); // dépiler sans ré-animer
     history.pushState({ jy:'sentinel' }, ''); // sentinelle repoussée
     setTimeout(function(){ _busy = false; }, 400);
   });
@@ -15427,7 +15472,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.05 - yam 1.0</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.06 - yam 1.0</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -16208,29 +16253,29 @@ setTimeout(function(){
 
     haptic('light');
 
-    // Prendre la vue active au z-index le plus élevé (sous-jeu > gamesView)
+    // Appeler la fonction close de la vue active — elle utilise déjà _yamSlide
+    var CLOSE_MAP = {
+      'skyjoView':  function(){ if(window.closeSkyjoGame) closeSkyjoGame(); },
+      'memoryView': function(){ closeMemoryGame(); },
+      'penduView':  function(){ closePenduGame(); },
+      'puzzleView': function(){ closePuzzleGame(); },
+      'snakeView':  function(){ closeSnakeGame(); },
+      'quizView':   function(){ closeQuiz(); },
+      'gamesView':  function(){ closeGames(); }
+    };
     var PRIORITY = ['skyjoView','memoryView','penduView','puzzleView','snakeView','quizView','gamesView'];
-    var activeView = null;
     for(var i = 0; i < PRIORITY.length; i++){
       var el = document.getElementById(PRIORITY[i]);
-      if(el && el.classList.contains('active')){ activeView = el; break; }
-    }
-    if(activeView){
-      // Annuler l'animation CSS d'entrée, puis slide vers la droite
-      activeView.style.animation  = 'none';
-      void activeView.getBoundingClientRect(); // force reflow
-      activeView.style.transition = 'transform 0.25s cubic-bezier(.4,0,.2,1), opacity 0.25s ease';
-      activeView.style.transform  = 'translateX(100%)';
-      activeView.style.opacity    = '0';
-      setTimeout(function(){
-        activeView.style.animation  = '';
-        activeView.style.transition = '';
-        activeView.style.transform  = '';
-        activeView.style.opacity    = '';
-        history.go(-1);
-      }, 260);
-    } else {
-      history.go(-1);
+      if(el && el.classList.contains('active')){
+        CLOSE_MAP[PRIORITY[i]]();
+        // Sync la pile de navigation après l'animation — flag pour éviter double fermeture
+        window._yamSwipeInProgress = true;
+        setTimeout(function(){
+          history.go(-1);
+          setTimeout(function(){ window._yamSwipeInProgress = false; }, 100);
+        }, 360);
+        break;
+      }
     }
   }, { passive: true });
 
