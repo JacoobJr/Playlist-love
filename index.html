@@ -128,8 +128,10 @@ html { scroll-behavior: smooth; overflow-x: hidden; -webkit-text-size-adjust: 10
 #gamesView, #quizView, #hiddenPage, #memoryView, #penduView, #puzzleView, #snakeView, #skyjoView {
   will-change: transform, opacity;
 }
-#gamesView.active, #quizView.active {
-  animation: viewSlideIn 0.28s cubic-bezier(.4,0,.2,1) !important;
+/* Entrée : fade+slide léger vers le haut uniquement à l'ouverture (pas à la fermeture) */
+#gamesView.active, #quizView.active, #memoryView.active,
+#penduView.active, #puzzleView.active, #snakeView.active {
+  animation: viewSlideIn 0.28s cubic-bezier(.4,0,.2,1);
 }
 @keyframes viewSlideIn {
   from { opacity: 0; transform: translateX(30px); }
@@ -5648,7 +5650,7 @@ body.light #counterBlock.glowing .c-num-big {
   </div>
 
   <!-- WRAPPER DE TRANSITION — clip pour animations slide -->
-  <div id="dmTransitionWrap" style="flex:1;position:relative;overflow:hidden;width:100%;min-height:0;">
+  <div id="dmTransitionWrap" style="flex:1;position:relative;overflow:hidden;width:100%;min-height:0;background:var(--bg);overscroll-behavior-x:none;touch-action:pan-y;">
 
   <!-- ÉCRAN 1 : ACCUEIL -->
   <div class="dm-screen" id="dmHomeScreen" style="display:none">
@@ -13054,7 +13056,7 @@ function filterSongs(q){
 // chaque retour → la flèche "avant" du navigateur reste toujours grisée.
 (function(){
   var _busy = false;
-  var _stack = [];  // pile JS interne, ne se reflète plus dans history
+  var _stack = [];
 
   var GAME_VIEWS = {
     quiz:   { el:'quizView',   open:'openQuiz',       close:'closeQuiz'       },
@@ -13065,38 +13067,79 @@ function filterSongs(q){
     snake:  { el:'snakeView',  open:'openSnakeGame',  close:'closeSnakeGame'  },
   };
 
-  // ─── Pile JS uniquement (plus de history.pushState à chaque navigation) ──
-  function push(entry){
-    _stack.push(entry);
+  // ─── Animation de sortie vers la droite, PUIS fermeture ──────────────────
+  // Évite le flash blanc : la vue slide out avant d'être cachée.
+  function slideOutThenClose(el, closeFn){
+    if(!el || !el.classList.contains('active')){ closeFn(); return; }
+    // Figer la position courante (sans animation CSS active)
+    el.style.transition = 'none';
+    el.style.transform  = 'translateX(0)';
+    el.style.opacity    = '1';
+    // Forcer reflow
+    void el.getBoundingClientRect();
+    // Slide vers la droite
+    el.style.transition = 'transform 0.28s cubic-bezier(.4,0,.2,1), opacity 0.28s ease';
+    el.style.transform  = 'translateX(100%)';
+    el.style.opacity    = '0';
+    setTimeout(function(){
+      // Nettoyer les styles inline avant que closeFn retire .active
+      el.style.transition = '';
+      el.style.transform  = '';
+      el.style.opacity    = '';
+      closeFn();
+    }, 290);
   }
 
-  // ─── Affiche l'état en haut de pile (appelé après un goBack) ─────────────
+  // ─── Trouver la vue ouverte en ce moment ─────────────────────────────────
+  function findOpenGameEl(){
+    var keys = Object.keys(GAME_VIEWS);
+    for(var i = 0; i < keys.length; i++){
+      var el = document.getElementById(GAME_VIEWS[keys[i]].el);
+      if(el && el.classList.contains('active')) return el;
+    }
+    return null;
+  }
+
+  // ─── Pile JS ─────────────────────────────────────────────────────────────
+  function push(entry){ _stack.push(entry); }
+
+  // ─── Appliquer l'état en haut de pile ────────────────────────────────────
   function applyTop(){
     if(!_stack.length) return;
     var e = _stack[_stack.length - 1];
 
     if(e.type === 'closed'){
-      // Fermer tout ce qui est ouvert — on appelle les fonctions visuelles brutes
-      // (pas les versions patchées, pour éviter de re-modifier la pile)
+      // Fermer jeux si ouvert
+      var openEl = findOpenGameEl();
+      if(openEl){
+        var closeKey = Object.keys(GAME_VIEWS).filter(function(k){
+          return document.getElementById(GAME_VIEWS[k].el) === openEl;
+        })[0];
+        slideOutThenClose(openEl, function(){
+          if(window[GAME_VIEWS[closeKey].close]) window[GAME_VIEWS[closeKey].close]();
+        });
+        return;
+      }
+      // Fermer hiddenPage si ouvert
       var hp = document.getElementById('hiddenPage');
       if(hp && hp.classList.contains('active')){
-        if(window._dmRawClose) window._dmRawClose();
-        else hp.classList.remove('active');
+        slideOutThenClose(hp, function(){
+          if(window._dmRawClose) window._dmRawClose();
+          else hp.classList.remove('active');
+        });
+        return;
       }
-      Object.keys(GAME_VIEWS).forEach(function(k){
-        var el = document.getElementById(GAME_VIEWS[k].el);
-        if(el && el.classList.contains('active') && window[GAME_VIEWS[k].close])
-          window[GAME_VIEWS[k].close]();
-      });
 
     } else if(e.type === 'game'){
       var v = e.view;
+      // Fermer les vues qui ne devraient pas être ouvertes
       Object.keys(GAME_VIEWS).forEach(function(k){
         if(k === v) return;
         if(k === 'games' && ['memory','pendu','puzzle','snake'].indexOf(v) !== -1) return;
         var el = document.getElementById(GAME_VIEWS[k].el);
-        if(el && el.classList.contains('active') && window[GAME_VIEWS[k].close])
-          window[GAME_VIEWS[k].close]();
+        if(el && el.classList.contains('active')){
+          slideOutThenClose(el, function(){ if(window[GAME_VIEWS[k].close]) window[GAME_VIEWS[k].close](); });
+        }
       });
       var tel = document.getElementById(GAME_VIEWS[v].el);
       if(!tel || !tel.classList.contains('active'))
@@ -13110,34 +13153,30 @@ function filterSongs(q){
       if(!hp2 || !hp2.classList.contains('active'))
         if(window._dmRawOpen) window._dmRawOpen();
       if(s === 'home')      { if(window._dmRawShowHome) window._dmRawShowHome('backward'); }
-      else if(s === 'conv') { if(window._dmRawShowHome) window._dmRawShowHome(); if(window._dmRawShowConv) window._dmRawShowConv('backward'); }
-      else if(s === 'chat') { if(window._dmRawShowHome) window._dmRawShowHome(); if(window._dmRawShowChat) window._dmRawShowChat('backward'); }
+      else if(s === 'conv') { if(window._dmRawShowConv) window._dmRawShowConv('backward'); }
+      else if(s === 'chat') { if(window._dmRawShowChat) window._dmRawShowChat('backward'); }
     }
   }
 
-  // ─── Retour d'un cran dans la pile JS ─────────────────────────────────────
+  // ─── Retour d'un cran ────────────────────────────────────────────────────
   function goBack(){
-    if(_stack.length <= 1) return; // déjà au fond, rien à fermer
+    if(_stack.length <= 1) return;
     _stack.pop();
     applyTop();
   }
 
-  // ─── popstate : intercepte TOUT retour navigateur ─────────────────────────
-  // Après chaque retour, on repousse immédiatement la sentinelle →
-  // il n'y a JAMAIS d'état "en avant" dans l'historique du navigateur.
+  // ─── popstate ────────────────────────────────────────────────────────────
   window.addEventListener('popstate', function(){
     if(_busy) return;
     _busy = true;
     goBack();
-    history.pushState({ jy:'sentinel' }, ''); // sentinelle repoussée
-    setTimeout(function(){ _busy = false; }, 400);
+    history.pushState({ jy:'sentinel' }, '');
+    setTimeout(function(){ _busy = false; }, 500);
   });
 
-  // ─── Patch jeux/quiz ──────────────────────────────────────────────────────
+  // ─── Patch jeux/quiz ─────────────────────────────────────────────────────
   var _rawGameOpen = {};
-  Object.keys(GAME_VIEWS).forEach(function(k){
-    _rawGameOpen[k] = window[GAME_VIEWS[k].open];
-  });
+  Object.keys(GAME_VIEWS).forEach(function(k){ _rawGameOpen[k] = window[GAME_VIEWS[k].open]; });
   Object.keys(GAME_VIEWS).forEach(function(k){
     var raw = _rawGameOpen[k];
     var fn  = GAME_VIEWS[k].open;
@@ -13147,7 +13186,7 @@ function filterSongs(q){
     };
   });
 
-  // ─── Patch mode caché — setTimeout(0) pour exécuter après le DM IIFE ─────
+  // ─── Patch mode caché ────────────────────────────────────────────────────
   setTimeout(function(){
 
     var rawOpenHP = window.openHiddenPage;
@@ -13175,24 +13214,20 @@ function filterSongs(q){
       }
     };
 
-    // closeHiddenPage : vide la pile JS côté DM, plus de history.go
     var rawCloseHP = window.closeHiddenPage;
     window.closeHiddenPage = function(){
       if(rawCloseHP) rawCloseHP.apply(this, arguments);
       if(_busy) return;
-      // Dépiler jusqu'à retrouver 'closed'
-      while(_stack.length > 1 && _stack[_stack.length - 1].type !== 'closed'){
-        _stack.pop();
-      }
+      while(_stack.length > 1 && _stack[_stack.length - 1].type !== 'closed') _stack.pop();
     };
     window._dmRawClose = rawCloseHP;
 
   }, 0);
 
-  // ─── État initial ──────────────────────────────────────────────────────────
+  // ─── État initial ─────────────────────────────────────────────────────────
   _stack.push({ type:'closed' });
-  history.replaceState({ jy:'base' }, '');     // plancher (jamais navigable en avant)
-  history.pushState({ jy:'sentinel' }, '');    // sentinelle : toujours au-dessus
+  history.replaceState({ jy:'base' }, '');
+  history.pushState({ jy:'sentinel' }, '');
 
 })();
 (function(){
@@ -15426,7 +15461,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - yam 3.6 </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - yam 3.8 </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -15922,31 +15957,8 @@ document.querySelectorAll('.bubbleBtn').forEach(function(el){
   }, { passive:true });
 })();
 
-/* ── 5. TRANSITIONS SOUS-VUES AMÉLIORÉES ── */
-(function(){
-  /* Surcharge openGames / closeGames pour ajouter slide */
-  var _origOpenGames  = window.openGames;
-  var _origCloseGames = window.closeGames;
-  var _origOpenQuiz   = window.openQuiz;
-  var _origCloseQuiz  = window.closeQuiz;
-
-  function addSlideIn(id){
-    var el = document.getElementById(id);
-    if(!el) return;
-    el.style.animation = 'none';
-    el.offsetHeight; /* reflow */
-    el.style.animation = '';
-  }
-
-  if(_origOpenGames) window.openGames = function(){
-    _origOpenGames.apply(this, arguments);
-    setTimeout(function(){ addSlideIn('gamesView'); }, 10);
-  };
-  if(_origOpenQuiz) window.openQuiz = function(){
-    _origOpenQuiz.apply(this, arguments);
-    setTimeout(function(){ addSlideIn('quizView'); }, 10);
-  };
-})();
+/* ── 5. TRANSITIONS SOUS-VUES — gérées par animation CSS .active ── */
+/* (le reset forcé d'animation a été supprimé : il conflictait avec l'animation de sortie JS) */
 
 /* ── 6. ACTIVE STATE TACTILE SUR CARTES ALBUM ── */
 document.querySelectorAll('.album-image').forEach(function(el){
@@ -16064,7 +16076,9 @@ document.querySelectorAll('.album-image').forEach(function(el){
 
 /* ── 12b. SWIPE retour dans hiddenPage (swipe droit uniquement) ── */
 /* Swipe GAUCHE (avancer) désactivé volontairement — causait des bugs.
-   Swipe DROIT → history.go(-1) → popstate sentinelle → retour propre.      */
+   Swipe DROIT :
+   - Sur écran logo → ferme hiddenPage (retour accueil)
+   - Sur conv ou chat → history.go(-1) → popstate sentinelle → retour propre. */
 setTimeout(function(){
   var _sx = 0, _sy = 0, _sActive = false, _throttle = false;
 
@@ -16110,9 +16124,8 @@ setTimeout(function(){
     var dx = e.changedTouches[0].clientX - _sx;
     var dy = e.changedTouches[0].clientY - _sy;
 
-    // Swipe GAUCHE → ignoré (navigation en avant désactivée)
+    // Swipe GAUCHE → ignoré
     if(dx <= 0) return;
-
     if(Math.abs(dx) < 55) return;
     if(Math.abs(dy) > Math.abs(dx) * 0.7) return;
 
@@ -16120,11 +16133,17 @@ setTimeout(function(){
     if(!sc) return;
 
     _throttle = true;
-    setTimeout(function(){ _throttle = false; }, 400);
+    setTimeout(function(){ _throttle = false; }, 500);
 
     haptic('light');
-    // Swipe DROIT → history.go(-1) → popstate → sentinelle repoussée automatiquement
-    history.go(-1);
+
+    if(sc === 'logo'){
+      // Fermer hiddenPage → retour accueil
+      if(window.closeHiddenPage) window.closeHiddenPage();
+    } else {
+      // conv ou chat → retour via sentinelle
+      history.go(-1);
+    }
   }, { passive: true });
 
   /* ── Bloquer Alt+→ Chrome (avancer) quand une vue est ouverte ── */
