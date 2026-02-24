@@ -3417,16 +3417,21 @@ body.skyjo-bg-paused #skyjoDiscardCard.sj-selectable {
   animation: msgPillOut 0.28s ease-in forwards !important;
 }
 #msgHeaderPill:active { filter: brightness(1.1); }
-/* Opacification du header pendant la notif */
+/* Opacification plein écran pendant la notif */
+#msgPillOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0);
+  z-index: 3999;
+  pointer-events: none;
+  transition: background 0.35s ease;
+}
+#msgPillOverlay.active {
+  display: block;
+  background: rgba(0,0,0,0.55);
+}
 body.msg-pill-active header {
-  opacity: 0.35;
-  transition: opacity 0.3s ease;
-}
-body.msg-pill-active header + div {
-  opacity: 0.35;
-  transition: opacity 0.3s ease;
-}
-header {
   transition: opacity 0.4s ease;
 }
 header + div {
@@ -15713,10 +15718,13 @@ loadFavorites();
     pill.style.display = 'flex';
     void pill.offsetWidth; // reflow pour relancer l'animation
     document.body.classList.add('msg-pill-active');
+    var ov = document.getElementById('msgPillOverlay');
+    if(ov){ ov.style.display='block'; void ov.offsetWidth; ov.classList.add('active'); }
 
     _pillTimer = setTimeout(function(){
       pill.classList.add('hiding');
       document.body.classList.remove('msg-pill-active');
+      if(ov){ ov.classList.remove('active'); setTimeout(function(){ ov.style.display='none'; }, 350); }
       setTimeout(function(){
         pill.style.display = 'none';
         pill.classList.remove('hiding');
@@ -15734,6 +15742,8 @@ loadFavorites();
     if(!pill || pill.style.display === 'none') return;
     if(_pillTimer){ clearTimeout(_pillTimer); _pillTimer = null; }
     document.body.classList.remove('msg-pill-active');
+    var ov = document.getElementById('msgPillOverlay');
+    if(ov){ ov.classList.remove('active'); setTimeout(function(){ ov.style.display='none'; }, 350); }
     pill.classList.add('hiding');
     setTimeout(function(){ pill.style.display='none'; pill.classList.remove('hiding'); }, 280);
   }
@@ -17229,6 +17239,9 @@ console.log('✨ Jayana UX v.UX1 chargé');
     <span onclick="skyjoAuthClose()" style="font-size:12px;color:var(--muted);cursor:pointer;">Annuler</span>
   </div>
 </div>
+
+<!-- Overlay sombre pendant notif message -->
+<div id="msgPillOverlay"></div>
 
 <!-- Notif pilule message — fixed, visible sur tous les onglets -->
 <div id="msgHeaderPill" onclick="window.yamSwitchTab&&yamSwitchTab('messages')">
