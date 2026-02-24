@@ -3368,6 +3368,45 @@ body.skyjo-bg-paused #skyjoDiscardCard.sj-selectable {
   opacity: 0;
   pointer-events: none;
 }
+#miniPlayer.tab-hidden {
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Icône musique dansante dans la nav ── */
+@keyframes navMusicBounce {
+  0%   { transform: translateY(0) rotate(0deg) scale(1); }
+  20%  { transform: translateY(-3px) rotate(-8deg) scale(1.12); }
+  40%  { transform: translateY(1px) rotate(6deg) scale(1.06); }
+  60%  { transform: translateY(-2px) rotate(-5deg) scale(1.1); }
+  80%  { transform: translateY(1px) rotate(4deg) scale(1.05); }
+  100% { transform: translateY(0) rotate(0deg) scale(1); }
+}
+#navMusique.music-playing svg {
+  animation: navMusicBounce 0.85s ease-in-out infinite;
+  color: #f5c518;
+  filter: drop-shadow(0 0 4px #f5c518);
+}
+#navMusique.music-playing {
+  color: #f5c518;
+}
+
+/* ── Cœur doré pulsant sur navNous pendant l'événement temporaire ── */
+@keyframes navNousPulse {
+  0%   { transform: scale(1);    filter: drop-shadow(0 0 2px #f5c518); }
+  30%  { transform: scale(1.28); filter: drop-shadow(0 0 7px #f5c518) drop-shadow(0 0 14px rgba(245,197,24,0.5)); }
+  50%  { transform: scale(1.10); filter: drop-shadow(0 0 4px #f5c518); }
+  70%  { transform: scale(1.22); filter: drop-shadow(0 0 6px #f5c518) drop-shadow(0 0 10px rgba(245,197,24,0.4)); }
+  100% { transform: scale(1);    filter: drop-shadow(0 0 2px #f5c518); }
+}
+#navNous.event-active svg {
+  animation: navNousPulse 1.2s ease-in-out infinite;
+  color: #f5c518;
+}
+#navNous.event-active {
+  color: #f5c518;
+}
 .mp-inner {
   margin: 0 8px;
   background: rgba(18,18,18,0.98);
@@ -4871,6 +4910,7 @@ body.light #counterBlock.glowing .c-num-big {
   var storyHeart   = document.getElementById('storyHeart');
 
   function applyState() {
+    var navNous = document.getElementById('navNous');
     if (isInVideoWindow()) {
       // Cacher la timeline, montrer la vidéo en boucle
       tlContent.style.display  = 'none';
@@ -4882,6 +4922,8 @@ body.light #counterBlock.glowing .c-num-big {
       if (counterBlock) counterBlock.classList.add('glowing');
       // Afficher le coeur battant
       if (storyHeart) storyHeart.style.display = 'block';
+      // Cœur doré pulsant sur l'icône Nous
+      if (navNous) navNous.classList.add('event-active');
     } else {
       // Montrer la timeline, cacher la vidéo
       videoWrap.style.display = 'none';
@@ -4891,6 +4933,8 @@ body.light #counterBlock.glowing .c-num-big {
       if (counterBlock) counterBlock.classList.remove('glowing');
       // Cacher le coeur
       if (storyHeart) storyHeart.style.display = 'none';
+      // Retirer le cœur doré
+      if (navNous) navNous.classList.remove('event-active');
     }
   }
 
@@ -4926,20 +4970,10 @@ body.light #counterBlock.glowing .c-num-big {
   }
 
   // Réévaluer toutes les 30 secondes pour détecter l'entrée/sortie de fenêtre
-  var _applyStateIv = setInterval(applyState, 30000);
-  // Countdown seconde par seconde — pausé si page cachée
-  var _countdownIv = setInterval(updateCountdown, 1000);
+  setInterval(applyState, 30000);
+  // Countdown seconde par seconde
+  setInterval(updateCountdown, 1000);
   updateCountdown();
-  document.addEventListener('visibilitychange', function(){
-    if(document.hidden){
-      clearInterval(_countdownIv); _countdownIv = null;
-      clearInterval(_applyStateIv); _applyStateIv = null;
-    } else {
-      updateCountdown(); applyState();
-      if(!_countdownIv)  _countdownIv  = setInterval(updateCountdown, 1000);
-      if(!_applyStateIv) _applyStateIv = setInterval(applyState, 30000);
-    }
-  });
 })();
 </script>
 
@@ -5498,6 +5532,23 @@ body.light #counterBlock.glowing .c-num-big {
       window.particleActive = false;
       if(window.hideDance) window.hideDance();
     }
+
+    // MiniPlayer : visible seulement sur onglet musique
+    var mp2 = document.getElementById('miniPlayer');
+    if(mp2){
+      if(tab === 'musique'){
+        mp2.classList.remove('tab-hidden');
+        if(window.mpUpdate) window.mpUpdate();
+      } else {
+        mp2.classList.add('tab-hidden');
+      }
+    }
+
+    // Icône musique dansante : active si musique joue + pas sur onglet musique
+    var navMus = document.getElementById('navMusique');
+    if(navMus){
+      navMus.classList.toggle('music-playing', musicPlaying && tab !== 'musique');
+    }
   };
 
   // When hiddenPage closes, restore messages tab as active
@@ -5556,14 +5607,10 @@ body.light #counterBlock.glowing .c-num-big {
     }
   }
 
-  // Sync mood periodically — pausé si page cachée
+  // Sync mood periodically
   window.yamSyncMood = yamSyncMood;
   setTimeout(yamSyncMood, 1500);
-  var _moodIv = setInterval(yamSyncMood, 15000);
-  document.addEventListener('visibilitychange', function(){
-    if(document.hidden){ clearInterval(_moodIv); _moodIv = null; }
-    else { yamSyncMood(); if(!_moodIv) _moodIv = setInterval(yamSyncMood, 15000); }
-  });
+  setInterval(yamSyncMood, 15000);
 
   // Sync theme toggle label in home tab
   var origApplyTheme = window.applyThemeToggle;
@@ -6660,13 +6707,7 @@ function updateCounter() {
   document.getElementById('cnt-mins').textContent  = String(Math.floor((d % 3600) / 60)).padStart(2,'0');
   document.getElementById('cnt-secs').textContent  = String(d % 60).padStart(2,'0');
 }
-var _counterIv = null;
-function _startCounter(){ if(!_counterIv){ updateCounter(); _counterIv = setInterval(updateCounter, 1000); } }
-function _stopCounter(){ if(_counterIv){ clearInterval(_counterIv); _counterIv = null; } }
-_startCounter();
-document.addEventListener('visibilitychange', function(){ document.hidden ? _stopCounter() : _startCounter(); });
-window.addEventListener('pagehide', _stopCounter);
-window.addEventListener('pageshow', function(){ if(!document.hidden) _startCounter(); });
+updateCounter(); setInterval(updateCounter, 1000);
 
 // ── THEME ──
 function applyThemeToggle() {
@@ -8977,11 +9018,7 @@ window._top50Iv = setInterval(updateTop50PlayBtn, 500);
       if(changed) updateTop50();
     }).catch(function(){});
   }
-  var _playsIv = setInterval(refreshPlays, 30000);
-  document.addEventListener('visibilitychange', function(){
-    if(document.hidden){ clearInterval(_playsIv); _playsIv = null; }
-    else { if(!_playsIv) _playsIv = setInterval(refreshPlays, 30000); }
-  });
+  setInterval(refreshPlays, 30000);
 })();
 
 // ── PARTICLES ──
@@ -12988,7 +13025,14 @@ function filterSongs(q){
 
   function mpShow(){
     if(isGameActive()){ mp.classList.add('game-hidden'); return; }
+    // Cacher hors onglet musique
+    if(window._currentTab && window._currentTab !== 'musique'){
+      mp.classList.remove('game-hidden');
+      mp.classList.add('tab-hidden');
+      return;
+    }
     mp.classList.remove('game-hidden');
+    mp.classList.remove('tab-hidden');
     mp.classList.add('visible');
   }
   function mpHide(){
@@ -13000,6 +13044,9 @@ function filterSongs(q){
     if(!currentAudio || !currentRow){
       // If no current audio, check if paused (still has info)
       mpUpdateIcons();
+      // Retire l'icône dansante si plus de musique
+      var navMus = document.getElementById('navMusique');
+      if(navMus) navMus.classList.remove('music-playing');
       return;
     }
     // Find song info (decode URL to handle special chars like é, ï, apostrophes)
@@ -13012,6 +13059,12 @@ function filterSongs(q){
     }
     mpUpdateIcons();
     mpShow();
+    // Icône dansante : si musique joue et pas sur onglet musique
+    var navMus2 = document.getElementById('navMusique');
+    if(navMus2){
+      var playing2 = currentAudio && !currentAudio.paused;
+      navMus2.classList.toggle('music-playing', playing2 && window._currentTab !== 'musique');
+    }
   };
 
   function mpUpdateIcons(){
@@ -13100,11 +13153,19 @@ function filterSongs(q){
       particleActive=false; hideDance();
     }
     mpUpdateIcons();
+    // Icône dansante
+    var navMus = document.getElementById('navMusique');
+    if(navMus){
+      var playing = currentAudio && !currentAudio.paused;
+      navMus.classList.toggle('music-playing', playing && window._currentTab !== 'musique');
+    }
   };
 
   window.mpStop = function(){
     stopCurrent();
     mpHide();
+    var navMus = document.getElementById('navMusique');
+    if(navMus) navMus.classList.remove('music-playing');
   };
 
   window.mpNext = function(){
@@ -16874,8 +16935,7 @@ console.log('✨ Jayana UX v.UX1 chargé');
       '  ✓ [v3.5] abortActivePrank: _kbHintInterval/_kbHintTimer/_shakeMaxTimer nettoyés\n' +
       '  ✓ [v3.5] closeAllViews + visibilitychange → abortActivePrank systématique\n' +
       '  ✓ [v3.5] canvas anniv: RAF stoppe si page cachée\n' +
-      '  ✓ [v3.6] Skyjo bg-pause: anim pausées + poll/heartbeat ralentis (visibilitychange+pagehide+blur)\n' +
-      '  ✓ [v3.7] updateCounter/updateCountdown/yamSyncMood/refreshPlays/applyState pausés si page cachée'
+      '  ✓ [v3.6] Skyjo bg-pause: anim pausées + poll/heartbeat ralentis (visibilitychange+pagehide+blur)'
     );
   }, 2000);
 
