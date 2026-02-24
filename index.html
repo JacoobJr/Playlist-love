@@ -5474,8 +5474,20 @@ body.light #counterBlock.glowing .c-num-big {
     });
 
     _currentTab = tab;
+    window._currentTab = tab;
     window.scrollTo(0, 0);
     if(window.updateFloatingThemeBtn) window.updateFloatingThemeBtn();
+
+    // Particules et danse : actives seulement sur musique/nous, et si musique en cours
+    var musicPlaying = window.currentAudio && !window.currentAudio.paused;
+    var allowFx = (tab === 'musique' || tab === 'nous');
+    if(allowFx && musicPlaying){
+      window.particleActive = true;
+      if(window.showDance) window.showDance();
+    } else {
+      window.particleActive = false;
+      if(window.hideDance) window.hideDance();
+    }
   };
 
   // When hiddenPage closes, restore messages tab as active
@@ -9034,9 +9046,10 @@ var dZ=document.getElementById('danceZone'),dG=document.getElementById('dancerGi
 var isQuizOpen=false;
 var _danceAutoStop=null;
 function showDance(){
-  if(isQuizOpen)return;
+  if(isQuizOpen) return;
+  var tab = window._currentTab || '';
+  if(tab !== 'musique' && tab !== 'nous') return;
   dZ.style.opacity='1';dG.classList.add('animate');dB.classList.add('animate');
-  // Auto-stop après 45s — évite de chauffer si musique en fond longtemps
   if(_danceAutoStop) clearTimeout(_danceAutoStop);
   _danceAutoStop=setTimeout(function(){ dG.classList.remove('animate'); dB.classList.remove('animate'); _danceAutoStop=null; },45000);
 }
@@ -13054,7 +13067,8 @@ function filterSongs(q){
       currentAudio.play();
       if(currentBtn){ currentBtn.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'; currentBtn.classList.add('active'); }
       if(currentRow){ currentRow.classList.add('playing'); }
-      particleActive=true; showDance();
+      particleActive = (window._currentTab === 'musique' || window._currentTab === 'nous');
+      showDance();
     } else {
       currentAudio.pause();
       if(currentBtn){ currentBtn.innerHTML='&#9654;'; currentBtn.classList.remove('active'); }
@@ -15518,7 +15532,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.01 - yam 1.0</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.02 - yam 1.0</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
