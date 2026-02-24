@@ -3378,7 +3378,84 @@ body.skyjo-bg-paused #skyjoDiscardCard.sj-selectable {
   pointer-events: none;
 }
 
-/* ── Icône musique dansante dans la nav ── */
+/* ── Notif message dans le header ── */
+@keyframes msgPillIn {
+  0%   { opacity: 0; transform: translateY(-12px) scale(0.95); }
+  60%  { opacity: 1; transform: translateY(2px) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes msgPillOut {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-10px) scale(0.95); }
+}
+@keyframes msgPillPulse {
+  0%,100% { box-shadow: 0 2px 16px rgba(0,201,167,0.15), 0 0 0 0 rgba(0,201,167,0.3); }
+  50%     { box-shadow: 0 4px 22px rgba(0,201,167,0.28), 0 0 0 5px rgba(0,201,167,0); }
+}
+#msgHeaderPill {
+  display: none;
+  align-items: center;
+  gap: 9px;
+  margin-top: 10px;
+  padding: 8px 14px 8px 10px;
+  background: var(--s1);
+  border: 1px solid rgba(0,201,167,0.25);
+  border-radius: 50px;
+  cursor: pointer;
+  max-width: calc(100% - 60px);
+  animation: msgPillIn 0.38s cubic-bezier(.34,1.56,.64,1) forwards,
+             msgPillPulse 1.6s ease-in-out 0.4s infinite;
+  transition: transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+#msgHeaderPill.hiding {
+  animation: msgPillOut 0.28s ease-in forwards;
+}
+#msgHeaderPill:active { transform: scale(0.97); }
+.mhp-avatar {
+  font-size: 18px;
+  width: 30px; height: 30px;
+  background: var(--s2);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(0,201,167,0.3);
+}
+.mhp-content {
+  flex: 1; min-width: 0;
+}
+.mhp-name {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 1px;
+}
+.mhp-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+.mhp-arrow {
+  font-size: 14px;
+  color: var(--green);
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+body.light #msgHeaderPill {
+  border-color: rgba(200,24,94,0.25);
+  animation: msgPillInLight 0.38s cubic-bezier(.34,1.56,.64,1) forwards,
+             msgPillPulseLight 1.6s ease-in-out 0.4s infinite;
+}
+@keyframes msgPillPulseLight {
+  0%,100% { box-shadow: 0 2px 16px rgba(200,24,94,0.12), 0 0 0 0 rgba(200,24,94,0.25); }
+  50%     { box-shadow: 0 4px 22px rgba(200,24,94,0.22), 0 0 0 5px rgba(200,24,94,0); }
+}
 @keyframes navMusicBounce {
   0%   { transform: translateY(0) rotate(0deg) scale(1); }
   20%  { transform: translateY(-3px) rotate(-8deg) scale(1.12); }
@@ -4268,6 +4345,16 @@ body.anniv-mode .counter-block-top {
   <div class="hdr-tag">You And Me</div>
   <div class="hdr-name">YAM</div>
   <div class="hdr-sub">Notre univers en musique</div>
+
+  <!-- Notif message nouveau dans le header -->
+  <div id="msgHeaderPill" onclick="window.yamSwitchTab&&yamSwitchTab('messages')">
+    <div class="mhp-avatar" id="mhpAvatar">👤</div>
+    <div class="mhp-content">
+      <div class="mhp-name" id="mhpName">Message</div>
+      <div class="mhp-text" id="mhpText">…</div>
+    </div>
+    <div class="mhp-arrow">›</div>
+  </div>
   <!-- Bouton thème — dans le header, disparaît au scroll comme les avatars -->
   <button id="themeToggleHome" onclick="applyThemeToggle()" title="Thème" style="
     position:absolute;
@@ -14843,6 +14930,12 @@ loadFavorites();
           if(msg.sender !== identity){
             if(navigator.vibrate) navigator.vibrate([40, 30, 40]);
             flashNewMsg();
+            // Pilule notif dans le header (seulement si pas sur onglet messages)
+            if(window._currentTab !== 'messages'){
+              var senderName = msg.sender === 'girl' ? 'Zelda 👧' : 'Link 👦';
+              var senderEmoji = msg.sender === 'girl' ? '👧' : '👦';
+              showMsgHeaderPill(senderEmoji, senderName, msg.text || '💬');
+            }
           }
         }
       });
@@ -15574,6 +15667,60 @@ loadFavorites();
   };
 
 })();
+
+/* ══════════════════════════════════════════
+   NOTIF PILULE HEADER — nouveau message
+══════════════════════════════════════════ */
+(function(){
+  var _pillTimer = null;
+
+  window.showMsgHeaderPill = function(emoji, name, text){
+    var pill = document.getElementById('msgHeaderPill');
+    var av   = document.getElementById('mhpAvatar');
+    var nm   = document.getElementById('mhpName');
+    var tx   = document.getElementById('mhpText');
+    if(!pill) return;
+
+    if(_pillTimer){ clearTimeout(_pillTimer); _pillTimer = null; }
+
+    if(av) av.textContent = emoji || '💬';
+    if(nm) nm.textContent = name  || 'Nouveau message';
+    var display = (text || '…').toString();
+    if(display.length > 40) display = display.slice(0, 40) + '…';
+    if(tx) tx.textContent = display;
+
+    pill.classList.remove('hiding');
+    pill.style.display = 'flex';
+    void pill.offsetWidth; // reflow pour relancer l'animation
+
+    _pillTimer = setTimeout(function(){
+      pill.classList.add('hiding');
+      setTimeout(function(){
+        pill.style.display = 'none';
+        pill.classList.remove('hiding');
+      }, 300);
+      _pillTimer = null;
+    }, 4000);
+  };
+
+  // Cacher la pilule quand on passe sur l'onglet messages
+  document.addEventListener('yamTabChange', function(e){
+    if(e.detail === 'messages') _hidePill();
+  });
+  function _hidePill(){
+    var pill = document.getElementById('msgHeaderPill');
+    if(!pill || pill.style.display === 'none') return;
+    if(_pillTimer){ clearTimeout(_pillTimer); _pillTimer = null; }
+    pill.classList.add('hiding');
+    setTimeout(function(){ pill.style.display='none'; pill.classList.remove('hiding'); }, 280);
+  }
+  // Hook sur yamSwitchTab
+  var _origSwitchPill = window.yamSwitchTab;
+  window.yamSwitchTab = function(tab){
+    if(_origSwitchPill) _origSwitchPill.apply(this, arguments);
+    if(tab === 'messages') _hidePill();
+  };
+})();
 </script>
 
 
@@ -15698,7 +15845,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.02 - yam 1.0</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.05 - yam 1.0</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
