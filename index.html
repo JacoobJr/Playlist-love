@@ -5447,35 +5447,23 @@ body.light #counterBlock.glowing .c-num-big {
   };
   var _currentTab = 'home';
 
-  var _TAB_ORDER = ['home','messages','jeux','musique','nous'];
-
   window.yamSwitchTab = function(tab) {
     if(window.closeAllViews) window.closeAllViews();
 
-    var fromTab = _currentTab;
-    var fromPanel = TAB_MAP[fromTab] ? document.getElementById(TAB_MAP[fromTab].panel) : null;
-    var toPanel   = TAB_MAP[tab]     ? document.getElementById(TAB_MAP[tab].panel)     : null;
-
-    // Déterminer la direction selon l'ordre des tabs
-    var fromIdx = _TAB_ORDER.indexOf(fromTab);
-    var toIdx   = _TAB_ORDER.indexOf(tab);
-    var dir = toIdx > fromIdx ? 'forward' : 'backward';
-
-    // Mettre à jour nav
+    // Cacher tous les panels, montrer le bon — sans animation
     Object.keys(TAB_MAP).forEach(function(key) {
-      var nav = document.getElementById(TAB_MAP[key].nav);
+      var t = TAB_MAP[key];
+      if(t.panel) {
+        var el = document.getElementById(t.panel);
+        if(el) el.classList.toggle('active', key === tab);
+      }
+      var nav = document.getElementById(t.nav);
       if(nav) nav.classList.toggle('nav-active', key === tab);
     });
 
     _currentTab = tab;
     window.scrollTo(0, 0);
     if(window.updateFloatingThemeBtn) window.updateFloatingThemeBtn();
-
-    if(fromPanel && toPanel && fromPanel !== toPanel){
-      _yamSlide(toPanel, fromPanel, dir);
-    } else if(toPanel){
-      toPanel.classList.add('active');
-    }
   };
 
   // When hiddenPage closes, restore messages tab as active
@@ -15511,7 +15499,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8 - yam 3.6 </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.05 - yam 1.0</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
