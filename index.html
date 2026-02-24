@@ -8851,7 +8851,7 @@ buildStack();
 // ── POLLING badge non-lus (page principale) ──
 // Vérifie les messages non-lus toutes les 30s pour mettre à jour le cadenas
 (function startLockBadgePolling(){
-  var _prevUnreadCount = 0;
+  var _prevUnreadCount = -1; // -1 = pas encore initialisé, évite la notif au premier check
 
   function checkUnread(){
     // Ne pas vérifier si InstaLove est ouvert (il gère lui-même)
@@ -8875,7 +8875,7 @@ buildStack();
         lockBadge.classList.add('visible');
         lockBtn.classList.add('has-unread');
         // Pilule notif si nouveaux messages apparus ET pas sur onglet messages
-        if(unread > _prevUnreadCount && window._currentTab !== 'messages'){
+        if(_prevUnreadCount >= 0 && unread > _prevUnreadCount && window._currentTab !== 'messages'){
           var last = rows[0]; // le plus récent (order desc)
           var emoji = other === 'girl' ? '👧' : '👦';
           var name  = other === 'girl' ? 'Zelda' : 'Link';
@@ -15733,6 +15733,16 @@ loadFavorites();
     }, 4000);
   };
 
+  // Cacher la pilule et ouvrir directement le chat
+  window._hidePillAndOpenChat = function(){
+    _hidePill();
+    // Aller sur l'onglet messages puis ouvrir InstaLove
+    if(window.yamSwitchTab) window.yamSwitchTab('messages');
+    setTimeout(function(){
+      if(window.openHiddenPage) window.openHiddenPage();
+    }, 80);
+  };
+
   // Cacher la pilule quand on passe sur l'onglet messages
   document.addEventListener('yamTabChange', function(e){
     if(e.detail === 'messages') _hidePill();
@@ -17244,7 +17254,7 @@ console.log('✨ Jayana UX v.UX1 chargé');
 <div id="msgPillOverlay"></div>
 
 <!-- Notif pilule message — fixed, visible sur tous les onglets -->
-<div id="msgHeaderPill" onclick="window.yamSwitchTab&&yamSwitchTab('messages')">
+<div id="msgHeaderPill" onclick="_hidePillAndOpenChat()">
   <div class="mhp-avatar" id="mhpAvatar">👤</div>
   <div class="mhp-content">
     <div class="mhp-name" id="mhpName">Message</div>
