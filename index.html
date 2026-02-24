@@ -3395,7 +3395,7 @@ body.skyjo-bg-paused #skyjoDiscardCard.sj-selectable {
 #msgHeaderPill {
   display: none;
   position: fixed;
-  top: calc(14px + env(safe-area-inset-top, 0px));
+  top: calc(env(safe-area-inset-top, 0px) + 110px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 4000;
@@ -3406,7 +3406,7 @@ body.skyjo-bg-paused #skyjoDiscardCard.sj-selectable {
   border: 1px solid rgba(0,201,167,0.35);
   border-radius: 50px;
   cursor: pointer;
-  max-width: min(340px, calc(100vw - 32px));
+  max-width: min(300px, calc(100vw - 32px));
   min-width: 200px;
   animation: msgPillIn 0.42s cubic-bezier(.34,1.56,.64,1) forwards,
              msgPillPulse 1.8s ease-in-out 0.45s infinite;
@@ -3417,6 +3417,21 @@ body.skyjo-bg-paused #skyjoDiscardCard.sj-selectable {
   animation: msgPillOut 0.28s ease-in forwards !important;
 }
 #msgHeaderPill:active { filter: brightness(1.1); }
+/* Opacification du header pendant la notif */
+body.msg-pill-active header {
+  opacity: 0.35;
+  transition: opacity 0.3s ease;
+}
+body.msg-pill-active header + div {
+  opacity: 0.35;
+  transition: opacity 0.3s ease;
+}
+header {
+  transition: opacity 0.4s ease;
+}
+header + div {
+  transition: opacity 0.4s ease;
+}
 .mhp-avatar {
   font-size: 18px;
   width: 32px; height: 32px;
@@ -15697,9 +15712,11 @@ loadFavorites();
     pill.classList.remove('hiding');
     pill.style.display = 'flex';
     void pill.offsetWidth; // reflow pour relancer l'animation
+    document.body.classList.add('msg-pill-active');
 
     _pillTimer = setTimeout(function(){
       pill.classList.add('hiding');
+      document.body.classList.remove('msg-pill-active');
       setTimeout(function(){
         pill.style.display = 'none';
         pill.classList.remove('hiding');
@@ -15716,6 +15733,7 @@ loadFavorites();
     var pill = document.getElementById('msgHeaderPill');
     if(!pill || pill.style.display === 'none') return;
     if(_pillTimer){ clearTimeout(_pillTimer); _pillTimer = null; }
+    document.body.classList.remove('msg-pill-active');
     pill.classList.add('hiding');
     setTimeout(function(){ pill.style.display='none'; pill.classList.remove('hiding'); }, 280);
   }
@@ -15850,7 +15868,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.02.01 - yam 1.0</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.02 - yam 1.0</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
