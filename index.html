@@ -1321,6 +1321,7 @@ body.light #lockNavBtn.has-unread {
 #quizView {
   display: none; position: fixed; inset: 0; background: var(--bg); z-index: 500;
   overflow-y: auto; padding-bottom: 80px; transition: background 0.3s, color 0.3s;
+  overscroll-behavior-x: none; touch-action: pan-y;
 }
 #quizView.active { display: block; animation: slideUp 0.3s ease; }
 .qz-header { padding: 28px 16px 20px; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
@@ -2350,6 +2351,7 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 #gamesView {
   display: none; position: fixed; inset: 0; background: var(--bg); z-index: 500;
   overflow-y: auto; padding-bottom: 80px; transition: background 0.3s, color 0.3s;
+  overscroll-behavior-x: none; touch-action: pan-y;
 }
 #gamesView.active { display: block; animation: slideUp 0.3s ease; }
 .gv-header { padding: 14px 16px 10px; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
@@ -2382,6 +2384,7 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 #memoryView {
   display: none; position: fixed; inset: 0; background: var(--bg); z-index: 600;
   overflow-y: auto; padding-bottom: 80px; transition: background 0.3s;
+  overscroll-behavior-x: none; touch-action: pan-y;
 }
 #memoryView.active { display: block; animation: slideUp 0.25s ease; }
 .game-view-header { padding: 22px 16px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; }
@@ -2391,7 +2394,7 @@ body.light .sg-song:hover { background: rgba(200,24,94,0.05); }
 .game-view-body { padding: 16px 16px 0; }
 
 /* ════ PENDU ════ */
-#penduView,#puzzleView,#snakeView{display:none;position:fixed;inset:0;background:var(--bg);z-index:600;overflow-y:auto;overflow-x:hidden;padding-bottom:80px;transition:background 0.3s;}
+#penduView,#puzzleView,#snakeView{display:none;position:fixed;inset:0;background:var(--bg);z-index:600;overflow-y:auto;overflow-x:hidden;padding-bottom:80px;transition:background 0.3s;overscroll-behavior-x:none;touch-action:pan-y;}
 #penduView.active,#puzzleView.active,#snakeView.active{display:block;animation:slideUp 0.25s ease;}
 
 /* ══ SKYJO STYLES ══ */
@@ -3491,6 +3494,9 @@ body.light .pendu-theme {
   z-index: 1100;
   overflow: hidden; background: var(--bg);
   flex-direction: column; transition: background 0.3s;
+  /* Bloque le swipe-back/forward natif du navigateur (Chrome Android / Edge) */
+  overscroll-behavior-x: none;
+  touch-action: pan-y;
 }
 #hiddenPage.active { display: flex; animation: slideUp 0.3s ease; }
 
@@ -5644,7 +5650,7 @@ body.light #counterBlock.glowing .c-num-big {
   </div>
 
   <!-- WRAPPER DE TRANSITION — clip pour animations slide -->
-  <div id="dmTransitionWrap" style="flex:1;position:relative;overflow:hidden;width:100%;min-height:0;">
+  <div id="dmTransitionWrap" style="flex:1;position:relative;overflow:hidden;width:100%;min-height:0;overscroll-behavior-x:none;touch-action:pan-y;">
 
   <!-- ÉCRAN 1 : ACCUEIL -->
   <div class="dm-screen" id="dmHomeScreen" style="display:none">
@@ -13212,6 +13218,16 @@ function filterSongs(q){
     if(!state || state.jy === undefined) return;
     var idx = state.jy;
     if(idx === _cur) return;
+
+    // Navigation EN AVANT dans le navigateur (flèche → ou Alt+→) → annuler
+    if(idx > _cur){
+      _busy = true;
+      history.go(_cur - idx); // revenir à notre position
+      setTimeout(function(){ _busy = false; }, 200);
+      return;
+    }
+
+    // Navigation EN ARRIÈRE → appliquer normalement
     _busy = true;
     _cur  = idx;
     applyState(idx);
@@ -15455,7 +15471,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - yam 3.6 </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - yam 3.8 </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
@@ -16091,7 +16107,9 @@ document.querySelectorAll('.album-image').forEach(function(el){
   }, { passive:true });
 })();
 
-/* ── 12b. SWIPE avant/arrière dans hiddenPage ── */
+/* ── 12b. SWIPE retour dans hiddenPage (swipe droit uniquement) ── */
+/* Navigation EN AVANT (swipe gauche, flèche Chrome →) : désactivée volontairement.
+   Seul le retour est autorisé via swipe droit ou flèche Chrome ←.              */
 setTimeout(function(){
   var _sx = 0, _sy = 0, _sActive = false, _throttle = false;
 
@@ -16126,7 +16144,6 @@ setTimeout(function(){
   document.addEventListener('touchend', function(e){
     if(!_sActive) return;
     _sActive = false;
-    // Anti-double : ignore si une action vient d'être faite (300ms)
     if(_throttle) return;
 
     var hp = document.getElementById('hiddenPage');
@@ -16136,41 +16153,50 @@ setTimeout(function(){
     var pm = document.getElementById('prankMenu');
     if(pm && pm.classList.contains('show')) return;
 
-    var ex = e.changedTouches[0].clientX;
-    var ey = e.changedTouches[0].clientY;
-    var dx = ex - _sx;
-    var dy = ey - _sy;
+    var dx = e.changedTouches[0].clientX - _sx;
+    var dy = e.changedTouches[0].clientY - _sy;
 
-    // Seuils : au moins 55px horizontal, et dx > dy (vraiment horizontal)
+    // Ignorer les swipes vers la GAUCHE (navigation en avant désactivée)
+    if(dx <= 0) return;
+
+    // Seuils : au moins 55px horizontal, vraiment horizontal
     if(Math.abs(dx) < 55) return;
     if(Math.abs(dy) > Math.abs(dx) * 0.7) return;
-
-    // BLOQUER le swipe depuis le bord gauche (< 30px) → geste iOS natif, pas nous
-    // BLOQUER aussi depuis le bord droit (> innerWidth-30px)
-    if(_sx < 30 || _sx > window.innerWidth - 30) return;
 
     var sc = dmScreen();
     if(!sc) return;
 
-    // Throttle pour éviter double déclenchement
     _throttle = true;
     setTimeout(function(){ _throttle = false; }, 400);
 
     haptic('light');
 
-    if(dx < 0){
-      // Swipe GAUCHE → avancer
-      if(sc === 'logo' && window.dmShowConv)       window.dmShowConv();
-      else if(sc === 'conv' && window.dmOpenMessaging) window.dmOpenMessaging();
+    // Swipe DROITE → reculer uniquement
+    if(sc === 'logo'){
+      if(window.closeHiddenPage) window.closeHiddenPage();
     } else {
-      // Swipe DROITE → reculer
-      if(sc === 'logo'){
-        if(window.closeHiddenPage) window.closeHiddenPage();
-      } else {
-        history.go(-1);
-      }
+      history.go(-1);
     }
   }, { passive: true });
+
+  /* ── Bloquer les raccourcis clavier de navigation EN AVANT Chrome ── */
+  document.addEventListener('keydown', function(e){
+    var hp = document.getElementById('hiddenPage');
+    if(!hp || !hp.classList.contains('active')) return;
+    // Alt+→ = avancer dans Chrome → bloqué
+    if(e.altKey && e.key === 'ArrowRight'){
+      e.preventDefault();
+      return;
+    }
+    // Backspace hors champ texte = retour arrière Chrome → bloqué (évite sortie accidentelle)
+    if(e.key === 'Backspace'){
+      var ae = document.activeElement;
+      if(!ae || (ae.tagName !== 'INPUT' && ae.tagName !== 'TEXTAREA' && !ae.isContentEditable)){
+        e.preventDefault();
+      }
+    }
+  }, true);
+
 }, 300);
 
 /* ── 13. AMÉLIORATION THÈME — sauvegarde en localStorage ── */
