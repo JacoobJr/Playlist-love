@@ -8831,6 +8831,8 @@ buildStack();
 // ── POLLING badge non-lus (page principale) ──
 // Vérifie les messages non-lus toutes les 30s pour mettre à jour le cadenas
 (function startLockBadgePolling(){
+  var _prevUnreadCount = 0;
+
   function checkUnread(){
     // Ne pas vérifier si InstaLove est ouvert (il gère lui-même)
     if(document.getElementById('hiddenPage').classList.contains('active')) return;
@@ -8852,16 +8854,25 @@ buildStack();
         lockBadge.textContent = unread > 99 ? '99+' : unread;
         lockBadge.classList.add('visible');
         lockBtn.classList.add('has-unread');
+        // Pilule notif si nouveaux messages apparus ET pas sur onglet messages
+        if(unread > _prevUnreadCount && window._currentTab !== 'messages'){
+          var last = rows[0]; // le plus récent (order desc)
+          var emoji = other === 'girl' ? '👧' : '👦';
+          var name  = other === 'girl' ? 'Zelda' : 'Link';
+          var txt   = (last && last.text) ? last.text : '💬 Nouveau message';
+          if(window.showMsgHeaderPill) window.showMsgHeaderPill(emoji, name, txt);
+        }
       } else {
         lockBadge.classList.remove('visible');
         lockBtn.classList.remove('has-unread');
       }
+      _prevUnreadCount = unread;
     })
     .catch(function(){});
   }
   window._checkUnread = checkUnread;
   checkUnread(); // Vérification immédiate au chargement
-  setInterval(checkUnread, 30000); // Puis toutes les 30 secondes
+  setInterval(checkUnread, 8000); // Toutes les 8 secondes
 })();
 var songsLove = [
   {title:"Perfect",            artist:"Ed Sheeran",     file:"perfect.mp3",                yt:"https://www.youtube.com/watch?v=2Vv-BfVoq4g"},
@@ -15839,7 +15850,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.08 - yam 1.0</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.02.01 - yam 1.0</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
