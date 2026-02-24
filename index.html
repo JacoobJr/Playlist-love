@@ -1067,6 +1067,10 @@ body.light .nav-item.nav-active svg {
 #yamMusiqueTab {
   padding-bottom: 16px;
 }
+/* Espace pour le mini player quand il est affiché */
+body.mp-active #yamMusiqueTab {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+}
 
 /* ══ NOUS TAB ══ */
 #yamNousTab {
@@ -3439,6 +3443,7 @@ body.skyjo-bg-paused #skyjoDiscardCard.sj-selectable {
   color: #ff6b6b;
   filter: drop-shadow(0 0 3px rgba(255,68,68,0.5));
 }
+.mp-inner {
   margin: 0 8px;
   background: rgba(18,18,18,0.98);
   border: 1px solid rgba(255,255,255,0.10);
@@ -5571,9 +5576,13 @@ body.light #counterBlock.glowing .c-num-big {
     if(mp2){
       if(tab === 'musique'){
         mp2.classList.remove('tab-hidden');
+        mp2.classList.remove('game-hidden');
         if(window.mpUpdate) window.mpUpdate();
+        // padding géré par mpShow via mp-active
       } else {
         mp2.classList.add('tab-hidden');
+        mp2.classList.remove('visible');
+        document.body.classList.remove('mp-active');
       }
     }
 
@@ -13086,19 +13095,23 @@ function filterSongs(q){
   }
 
   function mpShow(){
-    if(isGameActive()){ mp.classList.add('game-hidden'); return; }
-    // Cacher hors onglet musique
+    if(isGameActive()){ mp.classList.add('game-hidden'); mp.classList.remove('visible'); document.body.classList.remove('mp-active'); return; }
+    mp.classList.remove('game-hidden');
+    // Cacher hors onglet musique (si tab connu et différent de musique)
     if(window._currentTab && window._currentTab !== 'musique'){
-      mp.classList.remove('game-hidden');
       mp.classList.add('tab-hidden');
+      mp.classList.remove('visible');
+      document.body.classList.remove('mp-active');
       return;
     }
-    mp.classList.remove('game-hidden');
     mp.classList.remove('tab-hidden');
     mp.classList.add('visible');
+    document.body.classList.add('mp-active');
   }
   function mpHide(){
     mp.classList.remove('visible');
+    mp.classList.remove('tab-hidden');
+    document.body.classList.remove('mp-active');
   }
 
   // Update mini player state from currentAudio
@@ -13265,12 +13278,18 @@ function filterSongs(q){
     if(currentAudio && !currentAudio.paused){
       if(isGameActive()){
         mp.classList.add('game-hidden');
+        mp.classList.remove('visible');
       } else {
         mp.classList.remove('game-hidden');
-        mp.classList.add('visible');
+        // Respecter la restriction d'onglet
+        if(window._currentTab && window._currentTab !== 'musique'){
+          mp.classList.add('tab-hidden');
+          mp.classList.remove('visible');
+        } else {
+          mp.classList.remove('tab-hidden');
+          mp.classList.add('visible');
+        }
       }
-    } else if(!currentAudio || currentAudio.paused){
-      // Do nothing — keep hidden unless playing
     }
   };
 
