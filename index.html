@@ -15736,10 +15736,15 @@ loadFavorites();
   // Cacher la pilule et ouvrir directement le chat
   window._hidePillAndOpenChat = function(){
     _hidePill();
-    // Aller sur l'onglet messages puis ouvrir InstaLove
-    if(window.yamSwitchTab) window.yamSwitchTab('messages');
+    // 1. Ouvrir InstaLove (hiddenPage)
+    if(window.openHiddenPage) window.openHiddenPage();
+    // 2. Afficher la liste des convs
     setTimeout(function(){
-      if(window.openHiddenPage) window.openHiddenPage();
+      if(window.dmShowConv) window.dmShowConv();
+      // 3. Ouvrir directement le chat
+      setTimeout(function(){
+        if(window.dmOpenMessaging) window.dmOpenMessaging();
+      }, 120);
     }, 80);
   };
 
@@ -15888,7 +15893,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.01.02 - yam 1.0</span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.27.02.02 - yam 1.0</span>
 </div>
 
 <div id="dmKeyboardBg"></div>
