@@ -148,8 +148,7 @@ html { scroll-behavior: smooth; overflow-x: hidden; -webkit-text-size-adjust: 10
   from { opacity: 0; transform: translateX(-100%); }
   to   { opacity: 1; transform: translateX(0); }
 }
-.dm-slide-forward  { animation: dmSlideInRight 0.28s cubic-bezier(.4,0,.2,1) both; }
-.dm-slide-backward { animation: dmSlideInLeft  0.28s cubic-bezier(.4,0,.2,1) both; }
+/* dm-slide-forward/backward — remplacés par transitions inline JS */
 
 /* ══ TOAST NOTIFICATION ══ */
 #uxToast {
@@ -14085,29 +14084,67 @@ loadFavorites();
   }
 
   /* ══ NAVIGATION ══ */
-  function _dmAnimateScreen(el, dir){
-    if(!dir) return;
-    el.classList.remove('dm-slide-forward','dm-slide-backward');
-    // Double reflow garanti + rAF pour que iOS calcule bien le layout avant l'animation
-    void el.offsetWidth;
-    void el.getBoundingClientRect();
-    requestAnimationFrame(function(){
-      el.classList.add(dir === 'forward' ? 'dm-slide-forward' : 'dm-slide-backward');
-    });
+  var _dmDur = 300;
+
+  /* Carrousel : incoming entre depuis un côté, outgoing sort de l'autre */
+  function _dmSlide(incoming, outgoing, dir){
+    if(!dir){
+      // Pas d'animation : afficher direct
+      ['dmHomeScreen','dmChatScreen'].forEach(function(id){
+        var s = document.getElementById(id);
+        if(!s) return;
+        if(s === incoming){ s.style.display='flex'; s.style.transform=''; s.style.transition=''; }
+        else { s.style.display='none'; s.style.transform=''; s.style.transition=''; }
+      });
+      return;
+    }
+    var inStart  = dir==='forward' ? 'translateX(100%)'  : 'translateX(-100%)';
+    var outEnd   = dir==='forward' ? 'translateX(-100%)' : 'translateX(100%)';
+    var TR = 'transform '+_dmDur+'ms cubic-bezier(.4,0,.2,1)';
+
+    // Mettre incoming hors écran SANS transition
+    if(incoming){
+      incoming.style.transition = 'none';
+      incoming.style.transform  = inStart;
+      incoming.style.display    = 'flex';
+    }
+    // S'assurer que outgoing est au centre SANS transition
+    if(outgoing && outgoing !== incoming){
+      outgoing.style.transition = 'none';
+      outgoing.style.transform  = 'translateX(0)';
+      outgoing.style.display    = 'flex';
+    }
+    // Forcer deux frames pour que le navigateur calcule les positions initiales
+    void (incoming || outgoing).getBoundingClientRect();
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){
+      if(incoming){ incoming.style.transition = TR; incoming.style.transform = 'translateX(0)'; }
+      if(outgoing && outgoing !== incoming){ outgoing.style.transition = TR; outgoing.style.transform = outEnd; }
+      setTimeout(function(){
+        if(outgoing && outgoing !== incoming){ outgoing.style.display='none'; outgoing.style.transform=''; outgoing.style.transition=''; }
+        if(incoming){ incoming.style.transition=''; }
+      }, _dmDur + 50);
+    }); });
   }
+
+  function _dmGetVisible(){
+    var ids = ['dmHomeScreen','dmChatScreen'];
+    for(var i=0;i<ids.length;i++){
+      var el = document.getElementById(ids[i]);
+      if(el && el.style.display !== 'none') return el;
+    }
+    return null;
+  }
+
   function showScreen(name, dir){
-    ['dmHomeScreen','dmChatScreen'].forEach(function(id){
-      var el = $(id); if(el) el.style.display = 'none';
-    });
     var ov = $('dmIdentityScreen');
     if(ov) ov.style.display = 'none';
-
     var center  = $('dmTopbarCenter');
     var backBtn = $('dmTopbarBack');
+    var outgoing = dir ? _dmGetVisible() : null;
 
     if(name === 'home'){
       var el = $('dmHomeScreen');
-      if(el){ el.style.display = 'flex'; _dmAnimateScreen(el, dir); }
+      _dmSlide(el, outgoing !== el ? outgoing : null, dir);
       if(center) center.innerHTML =
         '<div style="display:flex;flex-direction:column;line-height:1.2;">' +
         '<span style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--green);">You And Me</span>' +
@@ -14121,7 +14158,7 @@ loadFavorites();
       loadHomePreview();
     } else if(name === 'chat'){
       var el = $('dmChatScreen');
-      if(el){ el.style.display = 'flex'; _dmAnimateScreen(el, dir); }
+      _dmSlide(el, outgoing !== el ? outgoing : null, dir);
       if(center) center.innerHTML =
         '<div class="dm-topbar-avatars">' +
           '<div class="dm-avatar dm-avatar-girl" style="font-size:14px;background:none;">👧</div>' +
@@ -14146,9 +14183,17 @@ loadFavorites();
     var conv = document.getElementById('dmHomeConv');
     if(logo) logo.style.display = 'none';
     if(conv) conv.style.display = 'flex';
-    // Animer dmHomeScreen (le conteneur plein écran)
+    // Slide forward sur dmHomeScreen lui-même (logo→conv, même conteneur)
     var hs = document.getElementById('dmHomeScreen');
-    if(hs) _dmAnimateScreen(hs, 'forward');
+    if(hs){
+      hs.style.transition = 'none'; hs.style.transform = 'translateX(100%)';
+      void hs.getBoundingClientRect();
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){
+        hs.style.transition = 'transform '+_dmDur+'ms cubic-bezier(.4,0,.2,1)';
+        hs.style.transform = 'translateX(0)';
+        setTimeout(function(){ hs.style.transition=''; }, _dmDur+50);
+      }); });
+    }
     var center = document.getElementById('dmTopbarCenter');
     if(center) center.innerHTML =
       '<div style="display:flex;flex-direction:column;line-height:1.2;">' +
@@ -15258,9 +15303,18 @@ loadFavorites();
     var conv = document.getElementById('dmHomeConv');
     if(logo) logo.style.display = 'none';
     if(conv) conv.style.display = 'flex';
-    // Animer dmHomeScreen (le conteneur plein écran)
+    // Slide sur dmHomeScreen (logo→conv ou retour conv→logo)
     var hs = document.getElementById('dmHomeScreen');
-    if(hs && dir) _dmAnimateScreen(hs, dir);
+    if(hs && dir){
+      var st = dir==='forward' ? 'translateX(100%)' : 'translateX(-100%)';
+      hs.style.transition='none'; hs.style.transform=st;
+      void hs.getBoundingClientRect();
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){
+        hs.style.transition='transform 300ms cubic-bezier(.4,0,.2,1)';
+        hs.style.transform='translateX(0)';
+        setTimeout(function(){ hs.style.transition=''; },350);
+      }); });
+    }
     var btn = document.getElementById('dmTopbarBack');
     if(btn){ btn.dataset.dest = 'logo'; btn.style.visibility = 'visible'; }
     var lbl = document.getElementById('dmBackLabel');
@@ -15401,7 +15455,7 @@ loadFavorites();
 </script>
 
 <div style="padding:0 16px 20px;margin-top:0px;">
-  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - yam 3.5 </span>
+  <span style="font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1.5px;opacity:0.45;font-family:'DM Sans',sans-serif;">v.26.06.8o - yam 3.6 </span>
 </div>
 
 <div id="dmKeyboardBg"></div>
